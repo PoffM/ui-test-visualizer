@@ -1,0 +1,20 @@
+{
+  "name": "@vitest/test-react",
+  "private": true,
+  "scripts": {
+    "coverage": "vitest run --coverage",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^14.1.2",
+    "@types/react": "^17.0.41",
+    "@vitejs/plugin-react": "1.2.0",
+    "happy-dom": "^13.0.2",
+    "vite": "^5.0.11",
+    "vitest": "^1.1.3"
+  }
+}
