@@ -1,4 +1,3 @@
-import { startApp } from "../app/app";
 import { importVitestDep } from "./import-utils";
 
 // Inject this code into the vitest-explorer's test worker process using the NodeJS "--require" arg.
@@ -18,7 +17,6 @@ function updateHtml(newHtml: string) {
   const origReport = MutationListener.prototype.report;
   MutationListener.prototype.report = function (...args: unknown[]) {
     updateHtml(testWindow.document.documentElement.outerHTML);
-    console.log("mutation", ...args);
     origReport.call(this, ...args);
   };
 
@@ -29,7 +27,7 @@ function updateHtml(newHtml: string) {
     },
     set(newWindow: Window) {
       if (!testWindow) {
-        startApp();
+        // TODO initial setup from the test process
       }
       if (newWindow !== testWindow) {
         new MutationObserver((mutations) => {
