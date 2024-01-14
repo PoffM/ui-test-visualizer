@@ -1,8 +1,7 @@
 import path from "path";
 import child_process, { type ForkOptions } from "child_process";
 
-console.log("injected into vitest cli");
-
+// Inject this code the vitest-explorer's CLI process using the NodeJS "--require" arg.
 (async () => {
   const origFork = child_process.fork;
   child_process.fork = function (modulePath: string, ...args) {
@@ -12,7 +11,7 @@ console.log("injected into vitest cli");
       options.execArgv = [
         ...(options.execArgv ?? []),
         "--require",
-        path.resolve(__dirname, "test-inject.js"),
+        path.resolve(__dirname, "inject-test.js"),
       ];
     }
 

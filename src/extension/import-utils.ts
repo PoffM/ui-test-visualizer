@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 
+/** Get the user's Vitest module path. (Not the one in this repo) */
 export async function vitestPath() {
   const vitestPath = (() => {
     let dir = process.cwd();
@@ -14,11 +15,7 @@ export async function vitestPath() {
   return vitestPathNoLinks;
 }
 
-export async function importVitest(): Promise<typeof import("vitest")> {
-  const vPath = `${await vitestPath()}/dist/index.js`;
-  return await import(vPath);
-}
-
+/** Import a dependency of the user's project's Vitest module. */
 export async function importVitestDep(dep: string, depFile: string) {
   const vPath = await vitestPath();
 

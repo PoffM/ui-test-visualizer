@@ -27,8 +27,8 @@
   "main": "./dist/extension.js",
   "scripts": {
     "prepare": "./prepare.sh",
-    "compile": "tsup ./src/extension.ts ./src/cli-inject.ts ./src/test-inject.ts --external vscode --external vitest --target esnext --minify",
-    "watch": "tsup ./src/extension.ts ./src/cli-inject.ts ./src/test-inject.ts --external vscode --external vitest --target esnext --watch --sourcemap",
+    "compile": "tsup --minify",
+    "watch": "tsup --watch --sourcemap",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "poffm",

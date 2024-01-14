@@ -1,8 +1,7 @@
-// import { importVitestDep } from './import-utils'
-
+import { startApp } from "../app/app";
 import { importVitestDep } from "./import-utils";
 
-console.log("test worker entry point");
+// Inject this code into the vitest-explorer's test worker process using the NodeJS "--require" arg.
 
 let html: string | null = null;
 function updateHtml(newHtml: string) {
@@ -29,6 +28,9 @@ function updateHtml(newHtml: string) {
       return testWindow;
     },
     set(newWindow: Window) {
+      if (!testWindow) {
+        startApp();
+      }
       if (newWindow !== testWindow) {
         new MutationObserver((mutations) => {
           mutations.forEach(() => {});
