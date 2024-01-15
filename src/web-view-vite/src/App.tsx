@@ -1,3 +1,3 @@
 export function App() {
-  return <div>Welcome to the web view</div>;
+  return <div class="text-green-400">Welcome to the web view</div>;
 }
