@@ -6,16 +6,22 @@ settings:
 
 patchedDependencies:
   vitest-explorer@0.2.43:
-    hash: v5k6ki5j7nnb42ehaqug7pup4a
+    hash: bdw7xp32gfw6fpsqafewxokaki
     path: patches/vitest-explorer@0.2.43.patch
 
 dependencies:
+  '@tanstack/solid-query':
+    specifier: ^5.17.10
+    version: 5.17.10(solid-js@1.8.11)
+  get-port:
+    specifier: ^7.0.0
+    version: 7.0.0
   solid-js:
     specifier: ^1.8.7
     version: 1.8.11
   vitest-explorer:
     specifier: github:vitest-dev/vscode
-    version: github.com/vitest-dev/vscode/2b6c1ae7661aa51d3e3a0c0992a2997314ffec2c(patch_hash=v5k6ki5j7nnb42ehaqug7pup4a)
+    version: github.com/vitest-dev/vscode/2b6c1ae7661aa51d3e3a0c0992a2997314ffec2c(patch_hash=bdw7xp32gfw6fpsqafewxokaki)
 
 devDependencies:
   '@types/node':
@@ -776,6 +782,19 @@ packages:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
     dev: true
 
+  /@tanstack/query-core@5.17.10:
+    resolution: {integrity: sha512-bJ2oQUDBftvHcEkLS3gyzzShSeZpJyzNNRu8oHK13iNdsofyaDXtNO/c1Zy/PZYVX+PhqOXwoT42gMiEMRSSfQ==}
+    dev: false
+
+  /@tanstack/solid-query@5.17.10(solid-js@1.8.11):
+    resolution: {integrity: sha512-2eo2qVVlavV7msgDhDquaKebTdYjCXGnwVGlZof0TziFdC89ENr5XaUT16x5ey9WLGHrY/XAa9yyA8EO5R5rUg==}
+    peerDependencies:
+      solid-js: ^1.6.0
+    dependencies:
+      '@tanstack/query-core': 5.17.10
+      solid-js: 1.8.11
+    dev: false
+
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
     dependencies:
@@ -1302,6 +1321,11 @@ packages:
   /get-func-name@2.0.2:
     resolution: {integrity: sha512-8vXOvuE167CtIc3OyItco7N/dpRtBbYOsPsXCz7X/PMnlGjYjSGuZJgM1Y7mmew7BKf9BqvLX2tnOVy1BBUsxQ==}
     dev: true
+
+  /get-port@7.0.0:
+    resolution: {integrity: sha512-mDHFgApoQd+azgMdwylJrv2DX47ywGq1i5VFJE7fZ0dttNq3iQMfsU4IvEgBHojA3KqEudyu7Vq+oN8kNaNkWw==}
+    engines: {node: '>=16'}
+    dev: false
 
   /get-stream@6.0.1:
     resolution: {integrity: sha512-ts6Wi+2j3jQjqi70w5AlN8DFnkSwC+MqmxEzdEALB2qXZYV3X/b1CTfgPLGJNMeAWxdPfU8FO1ms3NUfaHCPYg==}
@@ -2409,7 +2433,7 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  github.com/vitest-dev/vscode/2b6c1ae7661aa51d3e3a0c0992a2997314ffec2c(patch_hash=v5k6ki5j7nnb42ehaqug7pup4a):
+  github.com/vitest-dev/vscode/2b6c1ae7661aa51d3e3a0c0992a2997314ffec2c(patch_hash=bdw7xp32gfw6fpsqafewxokaki):
     resolution: {tarball: https://codeload.github.com/vitest-dev/vscode/tar.gz/2b6c1ae7661aa51d3e3a0c0992a2997314ffec2c}
     id: github.com/vitest-dev/vscode/2b6c1ae7661aa51d3e3a0c0992a2997314ffec2c
     name: vitest-explorer

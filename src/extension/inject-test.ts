@@ -2,9 +2,18 @@ import { importVitestDep } from "./import-utils";
 
 // Inject this code into the vitest-explorer's test worker process using the NodeJS "--require" arg.
 
-let html: string | null = null;
-function updateHtml(newHtml: string) {
-  html = newHtml;
+async function updateHtml(newHtml: string) {
+  try {
+    await fetch(`http://localhost:${process.env.HTML_UPDATER_PORT}`, {
+      method: "POST",
+      body: newHtml,
+      headers: {
+        "Content-Type": "text/html",
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 (async () => {
@@ -16,7 +25,7 @@ function updateHtml(newHtml: string) {
 
   const origReport = MutationListener.prototype.report;
   MutationListener.prototype.report = function (...args: unknown[]) {
-    updateHtml(testWindow.document.documentElement.outerHTML);
+    void updateHtml(testWindow.document.documentElement.outerHTML);
     origReport.call(this, ...args);
   };
 

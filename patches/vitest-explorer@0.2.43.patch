@@ -30,19 +30,28 @@ diff --git a/samples/multi-root-workspace/rust-project/.gitignore b/samples/mult
 deleted file mode 100644
 index 2f7896d1d1365eafb0da03d9fe456fac81408487..0000000000000000000000000000000000000000
 diff --git a/src/runHandler.ts b/src/runHandler.ts
-index 6c751feac2b582c45be8198ba74ba899fa220668..89759233a098c47b280f7ae3366aea434103b4d5 100644
+index 6c751feac2b582c45be8198ba74ba899fa220668..dd51d4c1406cd2bf1bcd6efb4c2b69ba04fa1708 100644
 --- a/src/runHandler.ts
 +++ b/src/runHandler.ts
-@@ -280,7 +280,7 @@ async function runTest(
+@@ -246,6 +246,8 @@ async function runTest(
+     }
+   }
+ 
++  const visualTestingBackend = await globalThis.startVisualTestingBackend()
++
+   const startDebugProcess
+     = async ({ args, cfg, log, onProcessEnd: onFinished, registerOnTestFinished }: StartConfig) => {
+       let thisSession: vscode.DebugSession | undefined
+@@ -280,7 +282,7 @@ async function runTest(
        registerOnTestFinished(() => {
          vscode.debug.stopDebugging(thisSession)
        })
 -      vscode.debug.startDebugging(workspaceFolder, {
-+      vscode.debug.startDebugging(workspaceFolder, globalThis.wrapDebugConfig({
++      vscode.debug.startDebugging(workspaceFolder, visualTestingBackend.wrapDebugConfig({
          type: 'pwa-node',
          request: 'launch',
          name: 'Debug Current Test File',
-@@ -290,7 +290,7 @@ async function runTest(
+@@ -290,7 +292,7 @@ async function runTest(
          args,
          smartStep: true,
          env: cfg.env,
@@ -51,6 +60,15 @@ index 6c751feac2b582c45be8198ba74ba899fa220668..89759233a098c47b280f7ae3366aea43
          log('Debugging started')
        }, (err) => {
          log('Start debugging failed')
+@@ -324,6 +326,8 @@ async function runTest(
+     cancellation,
+   )
+ 
++  visualTestingBackend.cleanupVisualTestingBackEnd()
++
+   syncFilesTestStatus(testResultFiles, discover, ctrl, run, true, false, finishedTests)
+   if (mode !== 'debug' && !cancellation?.isCancellationRequested) {
+     for (const item of testCaseSet) {
 diff --git a/yarn.lock b/yarn.lock
 deleted file mode 100644
 index 0ef8652963185dbeaed529fb779498d9e1e3dab7..0000000000000000000000000000000000000000
