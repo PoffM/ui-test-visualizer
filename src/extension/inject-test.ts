@@ -1,10 +1,12 @@
 import { importVitestDep } from "./import-utils";
+import syncFetch from "sync-fetch";
 
 // Inject this code into the vitest-explorer's test worker process using the NodeJS "--require" arg.
 
-async function updateHtml(newHtml: string) {
+function updateHtml(newHtml: string) {
   try {
-    await fetch(`http://localhost:${process.env.HTML_UPDATER_PORT}`, {
+    // TODO find a less hacky way to do this than sync-fetch? This is a possible performance issue.
+    syncFetch(`http://localhost:${process.env.HTML_UPDATER_PORT}`, {
       method: "POST",
       body: newHtml,
       headers: {

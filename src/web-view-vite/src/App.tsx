@@ -1,4 +1,6 @@
+import { createEventListener } from "@solid-primitives/event-listener";
 import * as webviewToolkit from "@vscode/webview-ui-toolkit";
+import { Show, createEffect, createMemo, createSignal } from "solid-js";
 
 // In order to use the Webview UI Toolkit web components they
 // must be registered with the browser (i.e. webview) using the
@@ -8,10 +10,40 @@ webviewToolkit
   .register(webviewToolkit.vsCodeButton());
 
 export function App() {
+  // Receive the test DOM's HTML from the extension's back-end.
+  const [html, setHtml] = createSignal("");
+
+  createEventListener(window, "message", (event) => {
+    setHtml(String(event.data.newHtml));
+  });
+
+  const [shadowHost, setShadowHost] = createSignal<HTMLElement>(
+    (<div />) as HTMLElement
+  );
+
+  const shadow = createMemo(() => shadowHost().attachShadow({ mode: "open" }));
+
+  createEffect(() => {
+    shadow().innerHTML = html();
+  });
+
   return (
     <div class="fixed inset-0 flex justify-center items-center">
       <div class="flex flex-col gap-4">
-        <div class="h-[500px] w-[500px] bg-gray-500 bg-opacity-20">hello</div>
+        <div class="h-[500px] w-[500px] bg-gray-500 bg-opacity-20">
+          <Show
+            when={html()}
+            fallback={
+              <div class="h-full w-full flex justify-center items-center">
+                Waiting for HTML in the test DOM...
+              </div>
+            }
+          >
+            <div class="h-full w-full">
+              <div ref={setShadowHost} />
+            </div>
+          </Show>
+        </div>
         <vscode-button appearance="primary">Button Text</vscode-button>
       </div>
     </div>

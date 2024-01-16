@@ -1,10 +1,14 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
-import Link from '../components/Link'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { Counter } from '../components/Counter'
+import { expect } from 'vitest'
 
 test('simple react testing library test', () => {
-  render(<Link page="http://google.ca">Mat P</Link>)
+  render(<Counter />)
 
-  const linkElement = screen.getByText('Mat P')
-  expect(linkElement.innerText).toBe('Mat P')
+  fireEvent.click(screen.getByText('Increment'));
+  fireEvent.click(screen.getByText('Increment'));
+  fireEvent.click(screen.getByText('Decrement'));
+  
+  expect(screen.getByText('Count: 1')).toBeTruthy();
 })

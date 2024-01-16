@@ -154,6 +154,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "@types/sync-fetch": "^0.4.3",
     "@types/vscode": "^1.85.0",
     "@types/vscode-webview": "^1.57.4",
     "autoprefixer": "^10.4.16",
@@ -166,10 +167,12 @@
     "vitest": "^1.2.0"
   },
   "dependencies": {
+    "@solid-primitives/event-listener": "^2.3.0",
     "@tanstack/solid-query": "^5.17.10",
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "get-port": "^7.0.0",
     "solid-js": "^1.8.7",
+    "sync-fetch": "^0.5.2",
     "vitest-explorer": "github:vitest-dev/vscode"
   },
   "pnpm": {
