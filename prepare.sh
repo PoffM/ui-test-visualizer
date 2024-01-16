@@ -1,15 +1,10 @@
 set -e
 
-# Install example app dependencies
-(
-  cd examples/react
-  pnpm install
-)
-
+# Install vitest-explorer's dependencies
 (
   cd node_modules/vitest-explorer
-  # Install vitest-explorer dependencies using NPM because it directly imports transitive dependencies
-  npm install
+  # Use yarn to install with its yarn lockfile
+  pnpm exec yarn install
   # Compile vitest-explorer so this extension can import it
-  npm run compile
+  pnpm run compile
 )

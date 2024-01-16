@@ -69,6 +69,3 @@ index 6c751feac2b582c45be8198ba74ba899fa220668..dd51d4c1406cd2bf1bcd6efb4c2b69ba
    syncFilesTestStatus(testResultFiles, discover, ctrl, run, true, false, finishedTests)
    if (mode !== 'debug' && !cancellation?.isCancellationRequested) {
      for (const item of testCaseSet) {
-diff --git a/yarn.lock b/yarn.lock
-deleted file mode 100644
-index 0ef8652963185dbeaed529fb779498d9e1e3dab7..0000000000000000000000000000000000000000
