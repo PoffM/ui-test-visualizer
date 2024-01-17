@@ -36,26 +36,6 @@
   "author": "poffm",
   "license": "ISC",
   "contributes": {
-    "commands": [
-      {
-        "title": "Update Snapshot",
-        "command": "vitest-visual.updateSnapshot",
-        "category": "Vitest"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "vitest-visual.updateSnapshot",
-          "when": "false"
-        }
-      ],
-      "testing/item/context": [
-        {
-          "command": "vitest-visual.updateSnapshot"
-        }
-      ]
-    },
     "configuration": {
       "title": "Vitest Visual",
       "properties": {
