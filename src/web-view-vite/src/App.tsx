@@ -11,10 +11,10 @@ webviewToolkit
 
 export function App() {
   // Receive the test DOM's HTML from the extension's back-end.
-  const [html, setHtml] = createSignal("");
+  const [testHtml, setTestHtml] = createSignal("");
 
   createEventListener(window, "message", (event) => {
-    setHtml(String(event.data.newHtml));
+    setTestHtml(String(event.data.newHtml));
   });
 
   const [shadowHost, setShadowHost] = createSignal<HTMLElement>(
@@ -24,18 +24,18 @@ export function App() {
   const shadow = createMemo(() => shadowHost().attachShadow({ mode: "open" }));
 
   createEffect(() => {
-    shadow().innerHTML = html();
+    shadow().innerHTML = testHtml();
   });
 
   return (
     <div class="fixed inset-0 flex justify-center items-center">
-      <div class="flex flex-col gap-4">
-        <div class="h-[500px] w-[500px] bg-gray-500 bg-opacity-20">
+      <div class="flex flex-col gap-4 w-[500px] max-w-[100vw]">
+        <div class="h-[500px] bg-gray-500 bg-opacity-20">
           <Show
-            when={html()}
+            when={testHtml()}
             fallback={
               <div class="h-full w-full flex justify-center items-center">
-                Waiting for HTML in the test DOM...
+                Waiting for HTML to be set into the test DOM...
               </div>
             }
           >
