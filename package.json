@@ -1,7 +1,7 @@
 {
   "name": "visual-ui-test-vscode",
   "version": "0.0.0",
-  "description": "Run and debug Vitest test cases",
+  "description": "Debug Vitest test cases while seeing the UI",
   "displayName": "Vitest Visual",
   "preview": true,
   "keywords": [
@@ -41,35 +41,12 @@
         "title": "Update Snapshot",
         "command": "vitest-visual.updateSnapshot",
         "category": "Vitest"
-      },
-      {
-        "title": "Start Watch Mode",
-        "command": "vitest-visual.startWatching",
-        "category": "Vitest"
-      },
-      {
-        "title": "Stop Watch Mode",
-        "command": "vitest-visual.stopWatching",
-        "category": "Vitest"
-      },
-      {
-        "title": "Toggle Watch Mode",
-        "command": "vitest-visual.toggleWatching",
-        "category": "Vitest"
       }
     ],
     "menus": {
       "commandPalette": [
         {
           "command": "vitest-visual.updateSnapshot",
-          "when": "false"
-        },
-        {
-          "command": "vitest-visual.startWatching",
-          "when": "false"
-        },
-        {
-          "command": "vitest-visual.stopWatching",
           "when": "false"
         }
       ],
@@ -87,12 +64,6 @@
           "type": "boolean",
           "scope": "resource",
           "default": false
-        },
-        "vitest-visual.commandLine": {
-          "markdownDescription": "The command line to start vitest tests. **It should have with the ability to append extra arguments**. For example `npx vitest` or `yarn test --`\n\nThis is a workspace setting. Do not change it in the user setting directly, which will affect all the projects you open",
-          "type": "string",
-          "scope": "resource",
-          "default": ""
         },
         "vitest-visual.include": {
           "markdownDescription": "Include glob for test files. Default: `[\"**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}\"]`",
