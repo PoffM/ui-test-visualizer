@@ -1,6 +1,6 @@
-import { createEventListener } from "@solid-primitives/event-listener";
+import { createEventSignal } from "@solid-primitives/event-listener";
 import * as webviewToolkit from "@vscode/webview-ui-toolkit";
-import { Show, createEffect, createMemo, createSignal } from "solid-js";
+import { Show, createEffect, createMemo } from "solid-js";
 
 // In order to use the Webview UI Toolkit web components they
 // must be registered with the browser (i.e. webview) using the
@@ -11,21 +11,13 @@ webviewToolkit
 
 export function App() {
   // Receive the test DOM's HTML from the extension's back-end.
-  const [testHtml, setTestHtml] = createSignal("");
+  const lastMessage = createEventSignal(window, "message");
+  const testHtml = createMemo(() => String(lastMessage()?.data?.newHtml));
 
-  createEventListener(window, "message", (event) => {
-    setTestHtml(String(event.data.newHtml));
-  });
-
-  const [shadowHost, setShadowHost] = createSignal<HTMLElement>(
-    (<div />) as HTMLElement
-  );
-
-  const shadow = createMemo(() => shadowHost().attachShadow({ mode: "open" }));
-
-  createEffect(() => {
-    shadow().innerHTML = testHtml();
-  });
+  function shadowHostRef(el: HTMLElement) {
+    const shadow = el.attachShadow({ mode: "open" });
+    createEffect(() => (shadow.innerHTML = testHtml()));
+  }
 
   return (
     <div class="fixed inset-0 flex justify-center items-center">
@@ -40,7 +32,7 @@ export function App() {
             }
           >
             <div class="h-full w-full">
-              <div ref={setShadowHost} />
+              <div ref={shadowHostRef} />
             </div>
           </Show>
         </div>
