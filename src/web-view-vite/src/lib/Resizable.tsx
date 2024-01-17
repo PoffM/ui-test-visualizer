@@ -5,12 +5,13 @@ export interface ResizableProps extends ParentProps {
   initialWidth: number;
 }
 
+/**
+ * Horizontally resizable div with drag handles.
+ * Both sides increase and decrease in width together to keep the div centered.
+ */
 export function Resizable(props: ResizableProps) {
+  // The change in width.
   const [offset, setOffset] = createSignal(0);
-
-  createEffect(() => {
-    console.log(offset());
-  });
 
   function initDragHandle(handle: HTMLDivElement, direction: 1 | -1) {
     makeEventListener(handle, "mousedown", (startEvent) => {
