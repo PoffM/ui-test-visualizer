@@ -20,6 +20,11 @@ export async function startVisualTestingBackEnd() {
     }
   );
 
+  // TODO use the right icon in production
+  panel.iconPath = vscode.Uri.file(
+    path.resolve(__dirname, "../src/web-view-vite/public/vite.svg")
+  );
+
   // Listen for html updates from the test worker process
   const htmlUpdaterServer = createServer((req, res) => {
     if (req.method !== "POST") {
@@ -32,7 +37,7 @@ export async function startVisualTestingBackEnd() {
       newHtml += chunk.toString();
     });
     req.on("end", () => {
-      panel.webview.postMessage({ newHtml })
+      panel.webview.postMessage({ newHtml });
       res.writeHead(200);
       res.end("HTML received");
     });
