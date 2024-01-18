@@ -120,6 +120,7 @@
   "dependencies": {
     "@solid-primitives/event-listener": "^2.3.0",
     "@tanstack/solid-query": "^5.17.10",
+    "@vscode/codicons": "^0.0.35",
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "get-port": "^7.0.0",
     "solid-js": "^1.8.7",

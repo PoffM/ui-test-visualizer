@@ -21,9 +21,7 @@ export async function startVisualTestingBackEnd() {
   );
 
   // TODO use the right icon in production
-  panel.iconPath = vscode.Uri.file(
-    path.resolve(__dirname, "../src/web-view-vite/public/vite.svg")
-  );
+  panel.iconPath = vscode.Uri.file(path.resolve(__dirname, "./debug.svg"));
 
   // Listen for html updates from the test worker process
   const htmlUpdaterServer = createServer((req, res) => {
