@@ -1,71 +1,12 @@
-diff --git a/.gitignore b/.gitignore
-deleted file mode 100644
-index 5f8d342ae18536b5a5c7381a321240d28b864328..0000000000000000000000000000000000000000
 diff --git a/package.json b/package.json
-index 1c6ddaf83ba02f29b2b02c4be195c13e285a5cac..c345757cdbaa17c75e9debc768c50e25d24b211b 100644
+index 1c6ddaf83ba02f29b2b02c4be195c13e285a5cac..3e322bfa9eed733ae587b9cd1b4339d79b34936a 100644
 --- a/package.json
 +++ b/package.json
-@@ -155,7 +155,7 @@
+@@ -154,7 +154,6 @@
+     }
    },
    "scripts": {
-     "vscode:prepublish": "yarn run compile",
--    "compile": "tsup ./src/extension.ts --external vscode --minify",
-+    "compile": "tsup ./src/extension.ts --external vscode",
+-    "vscode:prepublish": "yarn run compile",
+     "compile": "tsup ./src/extension.ts --external vscode --minify",
      "watch": "tsup ./src/extension.ts --external vscode --watch --sourcemap",
      "test": "vitest run",
-     "lint": "eslint .",
-@@ -193,7 +193,7 @@
-     "tsup": "^5.12.7",
-     "typescript": "^4.9.5",
-     "vite": "^2.8.6",
--    "vitest": "latest",
-+    "vitest": "0.12.6",
-     "ws": "^8.6.0"
-   },
-   "lint-staged": {
-diff --git a/samples/basic/test/.gitignore b/samples/basic/test/.gitignore
-deleted file mode 100644
-index b05c2dfa7007b8d5aa3c10db9df63fb2e1a82c67..0000000000000000000000000000000000000000
-diff --git a/samples/multi-root-workspace/rust-project/.gitignore b/samples/multi-root-workspace/rust-project/.gitignore
-deleted file mode 100644
-index 2f7896d1d1365eafb0da03d9fe456fac81408487..0000000000000000000000000000000000000000
-diff --git a/src/runHandler.ts b/src/runHandler.ts
-index 6c751feac2b582c45be8198ba74ba899fa220668..dd51d4c1406cd2bf1bcd6efb4c2b69ba04fa1708 100644
---- a/src/runHandler.ts
-+++ b/src/runHandler.ts
-@@ -246,6 +246,8 @@ async function runTest(
-     }
-   }
- 
-+  const visualTestingBackend = await globalThis.startVisualTestingBackend()
-+
-   const startDebugProcess
-     = async ({ args, cfg, log, onProcessEnd: onFinished, registerOnTestFinished }: StartConfig) => {
-       let thisSession: vscode.DebugSession | undefined
-@@ -280,7 +282,7 @@ async function runTest(
-       registerOnTestFinished(() => {
-         vscode.debug.stopDebugging(thisSession)
-       })
--      vscode.debug.startDebugging(workspaceFolder, {
-+      vscode.debug.startDebugging(workspaceFolder, visualTestingBackend.wrapDebugConfig({
-         type: 'pwa-node',
-         request: 'launch',
-         name: 'Debug Current Test File',
-@@ -290,7 +292,7 @@ async function runTest(
-         args,
-         smartStep: true,
-         env: cfg.env,
--      }).then(() => {
-+      })).then(() => {
-         log('Debugging started')
-       }, (err) => {
-         log('Start debugging failed')
-@@ -324,6 +326,8 @@ async function runTest(
-     cancellation,
-   )
- 
-+  visualTestingBackend.cleanupVisualTestingBackEnd()
-+
-   syncFilesTestStatus(testResultFiles, discover, ctrl, run, true, false, finishedTests)
-   if (mode !== 'debug' && !cancellation?.isCancellationRequested) {
-     for (const item of testCaseSet) {

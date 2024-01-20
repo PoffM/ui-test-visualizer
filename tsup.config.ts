@@ -1,4 +1,5 @@
-import fs from "fs";
+import fs from "fs/promises";
+import fsSync from "fs";
 import path from "path";
 import { defineConfig } from "tsup";
 
@@ -16,7 +17,7 @@ export default defineConfig({
     {
       // TODO simpler way to make an svg green
       name: "prepare-green-icon",
-      buildStart() {
+      async buildStart() {
         console.log("Preparing green debug icon");
         const src = path.resolve(
           __dirname,
@@ -26,9 +27,9 @@ export default defineConfig({
 
         // Only generate if the source is newer than the destination
         {
-          const srcTimestamp = fs.statSync(src).mtimeMs;
-          const destTimestamp = fs.existsSync(dest)
-            ? fs.statSync(dest).mtimeMs
+          const srcTimestamp = (await fs.stat(src)).mtimeMs;
+          const destTimestamp = fsSync.existsSync(dest)
+            ? (await fs.stat(dest)).mtimeMs
             : 0;
 
           if (destTimestamp >= srcTimestamp) {
@@ -37,11 +38,12 @@ export default defineConfig({
         }
 
         const color = "#89D185";
-        const newSvg = fs.readFileSync(src, "utf-8").replace(
+        const newSvg = (await fs.readFile(src, "utf-8")).replace(
           'fill="currentColor"',
           `fill="${color}"`
         );
-        fs.writeFileSync(dest, newSvg);
+        await fs.mkdir(path.resolve(__dirname, "./dist/"), { recursive: true });
+        await fs.writeFile(dest, newSvg);
         console.log("Green debug icon prepared");
       },
     },

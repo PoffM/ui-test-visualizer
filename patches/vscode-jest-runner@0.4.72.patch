@@ -1,0 +1,11 @@
+--- a/src/JestRunnerCodeLensProvider.ts
++++ b/src/JestRunnerCodeLensProvider.ts
+@@ -5,7 +5,7 @@ import { findFullTestName, escapeRegExp, CodeLensOption } from './util';
+ function getCodeLensForOption(range: Range, codeLensOption: CodeLensOption, fullTestName: string): CodeLens {
+   const titleMap: Record<CodeLensOption, string> = {
+     run: 'Run',
+-    debug: 'Debug',
++    debug: 'Visually Debug UI',
+     watch: 'Run --watch',
+     coverage: 'Run --coverage',
+   };
