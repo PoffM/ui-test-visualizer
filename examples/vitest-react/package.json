@@ -1,5 +1,5 @@
 {
-  "name": "@vitest/test-react",
+  "name": "vitest-react-example",
   "private": true,
   "scripts": {
     "coverage": "vitest run --coverage",

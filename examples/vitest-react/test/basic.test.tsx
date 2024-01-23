@@ -1,7 +1,6 @@
 import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { Counter } from '../components/Counter'
-import { expect } from 'vitest'
 
 test('simple react testing library test', () => {
   render(<Counter />)

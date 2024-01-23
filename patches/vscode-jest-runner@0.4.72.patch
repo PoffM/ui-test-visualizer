@@ -1,6 +1,8 @@
+diff --git a/src/JestRunnerCodeLensProvider.ts b/src/JestRunnerCodeLensProvider.ts
+index 5ba1ea3c05ee16108b82acca8c041061f4fc77e4..2fe76a5d1c131e80126608e7eb8559e0452f3a17 100644
 --- a/src/JestRunnerCodeLensProvider.ts
 +++ b/src/JestRunnerCodeLensProvider.ts
-@@ -5,7 +5,7 @@ import { findFullTestName, escapeRegExp, CodeLensOption } from './util';
+@@ -5,13 +5,13 @@ import { findFullTestName, escapeRegExp, CodeLensOption } from './util';
  function getCodeLensForOption(range: Range, codeLensOption: CodeLensOption, fullTestName: string): CodeLens {
    const titleMap: Record<CodeLensOption, string> = {
      run: 'Run',
@@ -8,4 +10,11 @@
 +    debug: 'Visually Debug UI',
      watch: 'Run --watch',
      coverage: 'Run --coverage',
+   };
+   const commandMap: Record<CodeLensOption, string> = {
+     run: 'extension.runJest',
+-    debug: 'extension.debugJest',
++    debug: 'visual-ui-test-debugger.debugJest',
+     watch: 'extension.watchJest',
+     coverage: 'extension.runJestCoverage',
    };

@@ -35,7 +35,7 @@ export function App() {
             when={testHtml()}
             fallback={
               <div class="h-full w-full flex justify-center items-center">
-                Waiting for HTML to be set into the test DOM...
+                Listening for test DOM mutations...
               </div>
             }
           >

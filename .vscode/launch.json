@@ -6,12 +6,26 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Extension React Sample",
+      "name": "Vitest+React Example",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "${workspaceFolder}/examples/react"
+        "${workspaceFolder}/examples/vitest-react"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js",
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "sourceMaps": true
+    },
+    {
+      "name": "Jest+React Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "${workspaceFolder}/examples/jest-react"
       ],
       "outFiles": [
         "${workspaceFolder}/out/**/*.js",

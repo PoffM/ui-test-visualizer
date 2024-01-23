@@ -133,6 +133,31 @@
           "scope": "window"
         }
       }
+    },
+    "commands": [
+      {
+        "command": "visual-ui-test-debugger.debugJest",
+        "title": "Debug Jest"
+      },
+      {
+        "command": "visual-ui-test-debugger.debugJestPath",
+        "title": "Debug Jest on Path"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "visual-ui-test-debugger.debugJest",
+          "group": "02_jest"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "visual-ui-test-debugger.debugJestPath",
+          "when": "explorerResourceIsFolder || resourceFilename =~ /.*\\.(spec|test)\\.(js|jsx|ts|tsx)$/",
+          "group": "02_jest@2"
+        }
+      ]
     }
   },
   "devDependencies": {
@@ -154,15 +179,15 @@
     "@tanstack/solid-query": "^5.17.10",
     "@vscode/codicons": "^0.0.35",
     "@vscode/webview-ui-toolkit": "^1.4.0",
+    "find-up": "^7.0.0",
     "get-port": "^7.0.0",
     "solid-js": "^1.8.7",
     "sync-fetch": "^0.5.2",
-    "vitest-explorer": "github:vitest-dev/vscode",
+    "tinyspy": "^2.2.0",
     "vscode-jest-runner": "github:firsttris/vscode-jest-runner"
   },
   "pnpm": {
     "patchedDependencies": {
-      "vitest-explorer@0.2.43": "patches/vitest-explorer@0.2.43.patch",
       "vscode-jest-runner@0.4.72": "patches/vscode-jest-runner@0.4.72.patch"
     }
   }
