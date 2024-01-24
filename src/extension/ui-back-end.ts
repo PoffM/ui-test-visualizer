@@ -49,7 +49,7 @@ export async function startVisualTestingBackEnd() {
       const html = await viteResponse.text();
       panel.webview.html = html;
     },
-    cleanupVisualTestingBackEnd() {
+    dispose() {
       htmlUpdaterServer.close();
       panel?.dispose();
     },

@@ -1,103 +1,95 @@
-import { findUp } from "find-up";
-import path from "path";
 import * as vscode from "vscode";
-import { JestRunnerCodeLensProvider } from "../../node_modules/vscode-jest-runner/src/JestRunnerCodeLensProvider";
-import { JestRunner } from "../../node_modules/vscode-jest-runner/src/jestRunner";
-import { JestRunnerConfig } from "../../node_modules/vscode-jest-runner/src/jestRunnerConfig";
-import { prepareJestRunner } from "./prepare-jest-runner";
-import { vitestConfigFiles, vitestDebugConfig } from "./vitest-support";
+import { detectTestFramework } from "../framework-support/detect";
+import { jestDebugConfig } from "../framework-support/jest-support";
+import { vitestDebugConfig } from "../framework-support/vitest-support";
+import { codeLensProvider } from "./code-lens-provider";
+import { startVisualTestingBackEnd } from "./ui-back-end";
 
 export async function activate(context: vscode.ExtensionContext) {
-  const jestRunnerConfig = new JestRunnerConfig();
-  const jestRunner = new JestRunner(jestRunnerConfig);
-  const codeLensProvider = new JestRunnerCodeLensProvider(
-    jestRunnerConfig.codeLensOptions
-  );
-
-  async function getTestFrameworkConfigInfo(testFilePath: string) {
-    const vitestFile = await findUp(vitestConfigFiles, { cwd: testFilePath });
-    const jestFile = await findUp(
-      [
-        "jest.config.js",
-        "jest.config.ts",
-        "jest.config.cjs",
-        "jest.config.mjs",
-        "jest.config.json",
-      ],
-      { cwd: testFilePath }
-    );
-
-    if (!vitestFile && !jestFile) {
-      throw new Error("No Vitest or Jest config found");
-    }
-
-    const vitestCfgPathLength = vitestFile?.split(path.sep).length ?? 0;
-    const jestConfigPathLength = jestFile?.split(path.sep).length ?? 0;
-
-    if (jestConfigPathLength > vitestCfgPathLength) {
-      return { framework: "jest" as const, configPath: jestFile };
-    } else {
-      return { framework: "vitest" as const, configPath: vitestFile };
-    }
-  }
-
-  prepareJestRunner(jestRunner, async (documentUri, config) => {
-    const fwInfo = await getTestFrameworkConfigInfo(documentUri.path);
-
-    const updatedConfig = {
-      ...config,
-
-      ...(fwInfo.framework === "vitest" &&
-        (await vitestDebugConfig(documentUri, config))),
-
-      ...(fwInfo.framework === "jest" && {
-        args: [
-          ...(config.args ?? []),
-          "--setupFiles",
-          path.resolve(__dirname, "inject-test.js"),
-        ],
-      }),
-
-      env: {
-        ...config.env,
-        TEST_FILE: documentUri.fsPath,
-        TEST_FRAMEWORK: fwInfo.framework,
-      },
-    };
-
-    return updatedConfig;
-  });
-
   const debugTest = vscode.commands.registerCommand(
     "visual-ui-test-debugger.debugJest",
-    async (argument: Record<string, unknown> | string) => {
-      if (typeof argument === "string") {
-        return jestRunner.debugCurrentTest(argument);
-      } else {
-        return jestRunner.debugCurrentTest();
+    async (testName: unknown) => {
+      if (typeof testName !== "string") {
+        throw new Error("Expected a string argument");
       }
+
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+
+      await editor.document.save();
+
+      const backEnd = await startVisualTestingBackEnd();
+
+      let thisSession: vscode.DebugSession | undefined;
+      const dispose1 = vscode.debug.onDidStartDebugSession((session) => {
+        backEnd.openPanel();
+
+        thisSession = session;
+        dispose1.dispose();
+      });
+      const dispose2 = vscode.debug.onDidTerminateDebugSession((session) => {
+        if (thisSession !== session) return;
+
+        let timeout = false;
+        let restarted = false;
+        const newDispose = vscode.debug.onDidStartDebugSession((session) => {
+          newDispose.dispose();
+          if (timeout) return;
+
+          restarted = true;
+          thisSession = session;
+        });
+
+        setTimeout(() => {
+          if (!restarted) {
+            timeout = true;
+            dispose2.dispose();
+            newDispose.dispose();
+          }
+        }, 200);
+        backEnd.dispose();
+      });
+
+      const filePath = editor.document.fileName;
+
+      const fwInfo = await detectTestFramework(filePath);
+
+      const debugConfig: vscode.DebugConfiguration =
+        fwInfo.framework === "jest"
+          ? await jestDebugConfig(filePath, testName)
+          : await vitestDebugConfig(filePath, testName);
+
+      debugConfig.env = {
+        ...debugConfig.env,
+        TEST_FRAMEWORK: fwInfo.framework,
+        TEST_FILE_PATH: filePath,
+        HTML_UPDATER_PORT: String(backEnd.htmlUpdaterPort),
+      };
+
+      vscode.debug.startDebugging(undefined, debugConfig);
     }
   );
-  const debugTestPath = vscode.commands.registerCommand(
-    "visual-ui-test-debugger.debugJestPath",
-    async (argument: vscode.Uri) => jestRunner.debugTestsOnPath(argument.path)
-  );
 
-  if (!jestRunnerConfig.isCodeLensDisabled) {
+  if (
+    !vscode.workspace
+      .getConfiguration()
+      .get("visual-ui-test-debugger.disableCodeLens")
+  ) {
     const docSelectors: vscode.DocumentFilter[] = [
       {
         pattern: vscode.workspace
           .getConfiguration()
-          .get("jestrunner.codeLensSelector"),
+          .get("visual-ui-test-debugger.codeLensSelector"),
       },
     ];
-    const codeLensProviderDisposable =
-      vscode.languages.registerCodeLensProvider(docSelectors, codeLensProvider);
-    context.subscriptions.push(codeLensProviderDisposable);
+    context.subscriptions.push(
+      vscode.languages.registerCodeLensProvider(docSelectors, codeLensProvider)
+    );
   }
 
   context.subscriptions.push(debugTest);
-  context.subscriptions.push(debugTestPath);
 }
 
 export function deactivate() {}

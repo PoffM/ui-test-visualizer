@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  vscode-jest-runner@0.4.72:
-    hash: ihrkjlkuiozhwzry4ohxxoqigu
-    path: patches/vscode-jest-runner@0.4.72.patch
-
 importers:
 
   .:
@@ -31,6 +26,9 @@ importers:
       get-port:
         specifier: ^7.0.0
         version: 7.0.0
+      jest-editor-support:
+        specifier: ^31.1.2
+        version: 31.1.2
       solid-js:
         specifier: ^1.8.7
         version: 1.8.11
@@ -40,9 +38,6 @@ importers:
       tinyspy:
         specifier: ^2.2.0
         version: 2.2.0
-      vscode-jest-runner:
-        specifier: github:firsttris/vscode-jest-runner
-        version: github.com/firsttris/vscode-jest-runner/81b797c77eb23fbc5c07a8a953a57b15edf0685a(patch_hash=ihrkjlkuiozhwzry4ohxxoqigu)
     devDependencies:
       '@types/node':
         specifier: ^20.11.0
@@ -6278,16 +6273,3 @@ packages:
   /yocto-queue@1.0.0:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
-
-  github.com/firsttris/vscode-jest-runner/81b797c77eb23fbc5c07a8a953a57b15edf0685a(patch_hash=ihrkjlkuiozhwzry4ohxxoqigu):
-    resolution: {tarball: https://codeload.github.com/firsttris/vscode-jest-runner/tar.gz/81b797c77eb23fbc5c07a8a953a57b15edf0685a}
-    id: github.com/firsttris/vscode-jest-runner/81b797c77eb23fbc5c07a8a953a57b15edf0685a
-    name: vscode-jest-runner
-    version: 0.4.72
-    engines: {vscode: ^1.83.0}
-    dependencies:
-      jest-editor-support: 31.1.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-    patched: true
