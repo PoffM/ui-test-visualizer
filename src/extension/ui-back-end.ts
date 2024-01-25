@@ -1,5 +1,6 @@
 import getPort from "get-port";
-import { createServer } from "http";
+import { debounce } from "lodash";
+import { createServer } from "net";
 import path from "path";
 import * as vscode from "vscode";
 
@@ -9,21 +10,15 @@ export async function startVisualTestingBackEnd() {
 
   let panel: vscode.WebviewPanel | undefined;
 
-  // Listen for html updates from the test worker process
-  const htmlUpdaterServer = createServer((req, res) => {
-    if (req.method !== "POST") {
-      res.writeHead(400);
-      res.end(`${req.method} not supported`);
-    }
+  const updateHtml = debounce((newHtml: string) => {
+    panel?.webview.postMessage({ newHtml });
+  }, 100);
 
-    let newHtml = "";
-    req.on("data", (chunk) => {
-      newHtml += chunk.toString();
-    });
-    req.on("end", () => {
-      panel?.webview.postMessage({ newHtml });
-      res.writeHead(200);
-      res.end("HTML received");
+  // Listen for html updates from the test worker process
+  const htmlUpdaterServer = createServer((socket) => {
+    socket.on("data", (buffer) => {
+      const newHtml = buffer.toString();
+      updateHtml(newHtml);
     });
   }).listen(htmlUpdaterPort);
 
@@ -45,7 +40,9 @@ export async function startVisualTestingBackEnd() {
 
       // Load the html from the Vite app.
       // TODO get the static html file in production
-      const viteResponse = await fetch(`http://localhost:${viteDevServerPort}/`);
+      const viteResponse = await fetch(
+        `http://localhost:${viteDevServerPort}/`
+      );
       const html = await viteResponse.text();
       panel.webview.html = html;
     },

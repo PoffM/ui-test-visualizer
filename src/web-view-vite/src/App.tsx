@@ -1,5 +1,6 @@
 import { createEventSignal } from "@solid-primitives/event-listener";
 import * as webviewToolkit from "@vscode/webview-ui-toolkit";
+import morphdom from "morphdom";
 import { Show, createEffect, createSignal } from "solid-js";
 import { Resizable } from "./lib/Resizable";
 
@@ -24,7 +25,9 @@ export function App() {
   /** Display the test's HTML with isolated CSS. */
   function initShadowDom(el: HTMLDivElement) {
     const shadow = el.attachShadow({ mode: "open" });
-    createEffect(() => (shadow.innerHTML = testHtml()));
+    createEffect(() => {
+      morphdom(shadow, testHtml());
+    });
   }
 
   return (

@@ -58,8 +58,8 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.0",
-    "@types/sync-fetch": "^0.4.3",
     "@types/vscode": "^1.85.0",
     "@types/vscode-webview": "^1.57.4",
     "autoprefixer": "^10.4.16",
@@ -79,8 +79,9 @@
     "find-up": "^7.0.0",
     "get-port": "^7.0.0",
     "jest-editor-support": "^31.1.2",
+    "lodash": "^4.17.21",
+    "morphdom": "^2.7.2",
     "solid-js": "^1.8.7",
-    "sync-fetch": "^0.5.2",
     "tinyspy": "^2.2.0"
   }
 }

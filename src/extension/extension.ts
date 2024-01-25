@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { detectTestFramework } from "../framework-support/detect";
-import { jestDebugConfig } from "../framework-support/jest-support";
-import { vitestDebugConfig } from "../framework-support/vitest-support";
+import { detectTestFramework } from "./framework-support/detect";
+import { jestDebugConfig } from "./framework-support/jest-support";
+import { vitestDebugConfig } from "./framework-support/vitest-support";
 import { codeLensProvider } from "./code-lens-provider";
 import { startVisualTestingBackEnd } from "./ui-back-end";
 
