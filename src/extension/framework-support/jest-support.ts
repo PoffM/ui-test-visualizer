@@ -13,7 +13,7 @@ export async function jestDebugConfig(
   return {
     console: "integratedTerminal",
     internalConsoleOptions: "neverOpen",
-    name: "Debug Jest Tests",
+    name: "Visually Debug UI",
     program: fw.binPath,
     request: "launch",
     type: "node",

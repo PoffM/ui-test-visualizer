@@ -41,6 +41,9 @@ importers:
       tinyspy:
         specifier: ^2.2.0
         version: 2.2.0
+      ws:
+        specifier: ^8.16.0
+        version: 8.16.0
     devDependencies:
       '@types/lodash':
         specifier: ^4.14.202
@@ -54,6 +57,9 @@ importers:
       '@types/vscode-webview':
         specifier: ^1.57.4
         version: 1.57.4
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       autoprefixer:
         specifier: ^10.4.16
         version: 10.4.16(postcss@8.4.33)
@@ -2362,6 +2368,12 @@ packages:
 
   /@types/vscode@1.85.0:
     resolution: {integrity: sha512-CF/RBon/GXwdfmnjZj0WTUMZN5H6YITOfBCP4iEZlOtVQXuzw6t7Le7+cR+7JzdMrnlm7Mfp49Oj2TuSXIWo3g==}
+    dev: true
+
+  /@types/ws@8.5.10:
+    resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
+    dependencies:
+      '@types/node': 20.11.0
     dev: true
 
   /@types/yargs-parser@21.0.3:
@@ -6124,7 +6136,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: true
 
   /xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}

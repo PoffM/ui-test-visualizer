@@ -1,8 +1,15 @@
 import getPort from "get-port";
 import { debounce } from "lodash";
-import { createServer } from "net";
 import path from "path";
 import * as vscode from "vscode";
+import { RawData, Server } from "ws";
+import { DomNodePath, SerializedDomNode } from "../dom-transport-utils";
+
+export interface HTMLPatch {
+  targetNodePath: DomNodePath;
+  prop: string | string[];
+  args: (DomNodePath | SerializedDomNode)[];
+}
 
 export async function startVisualTestingBackEnd() {
   const htmlUpdaterPort = await getPort();
@@ -10,17 +17,27 @@ export async function startVisualTestingBackEnd() {
 
   let panel: vscode.WebviewPanel | undefined;
 
-  const updateHtml = debounce((newHtml: string) => {
+  const updateWholeHtml = debounce((buffer: RawData) => {
+    const newHtml = buffer.toString();
     panel?.webview.postMessage({ newHtml });
   }, 100);
 
+  const isExperimentalFastMode = vscode.workspace
+    .getConfiguration()
+    .get("visual-ui-test-debugger.experimentalFastMode");
+
   // Listen for html updates from the test worker process
-  const htmlUpdaterServer = createServer((socket) => {
-    socket.on("data", (buffer) => {
-      const newHtml = buffer.toString();
-      updateHtml(newHtml);
+  const htmlUpdaterServer = new Server({ port: htmlUpdaterPort });
+  htmlUpdaterServer.on("connection", function connection(socket) {
+    socket.on("message", function incoming(buffer) {
+      if (isExperimentalFastMode) {
+        const htmlPatch: HTMLPatch = JSON.parse(buffer.toString());
+        panel?.webview.postMessage({ htmlPatch });
+      } else {
+        updateWholeHtml(buffer);
+      }
     });
-  }).listen(htmlUpdaterPort);
+  });
 
   return {
     htmlUpdaterPort,

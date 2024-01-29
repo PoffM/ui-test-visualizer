@@ -9,7 +9,7 @@ export async function vitestDebugConfig(
   testName: string
 ): Promise<vscode.DebugConfiguration> {
   return {
-    name: "Debug Jest Tests",
+    name: "Visually Debug UI",
     request: "launch",
     type: "pwa-node",
     program: await getVitestBinPath(filePath),
