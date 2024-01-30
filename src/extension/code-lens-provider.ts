@@ -23,7 +23,7 @@ export const codeLensProvider: vscode.CodeLensProvider = {
             new CodeLens(range, {
               arguments: [node.name],
               title: "Visually Debug UI",
-              command: "visual-ui-test-debugger.debugJest",
+              command: "visual-ui-test-debugger.visuallyDebugUI",
             })
           );
         }

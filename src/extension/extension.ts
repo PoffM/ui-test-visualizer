@@ -7,7 +7,7 @@ import { startVisualTestingBackEnd } from "./ui-back-end";
 
 export async function activate(context: vscode.ExtensionContext) {
   const debugTest = vscode.commands.registerCommand(
-    "visual-ui-test-debugger.debugJest",
+    "visual-ui-test-debugger.visuallyDebugUI",
     async (testName: unknown) => {
       if (typeof testName !== "string") {
         throw new Error("Expected a string argument");

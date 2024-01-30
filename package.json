@@ -57,7 +57,7 @@
     },
     "commands": [
       {
-        "command": "visual-ui-test-debugger.debugJest",
+        "command": "visual-ui-test-debugger.visuallyDebugUI",
         "title": "Debug Jest"
       }
     ]
