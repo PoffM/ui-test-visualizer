@@ -22,34 +22,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
       const backEnd = await startVisualTestingBackEnd();
 
-      let thisSession: vscode.DebugSession | undefined;
-      const dispose1 = vscode.debug.onDidStartDebugSession((session) => {
+      const dispose1 = vscode.debug.onDidStartDebugSession(() => {
         backEnd.openPanel();
-
-        thisSession = session;
         dispose1.dispose();
-      });
-      const dispose2 = vscode.debug.onDidTerminateDebugSession((session) => {
-        if (thisSession !== session) return;
 
-        let timeout = false;
-        let restarted = false;
-        const newDispose = vscode.debug.onDidStartDebugSession((session) => {
-          newDispose.dispose();
-          if (timeout) return;
-
-          restarted = true;
-          thisSession = session;
+        const dispose2 = vscode.debug.onDidTerminateDebugSession(() => {
+          backEnd.dispose();
+          dispose2.dispose();
         });
-
-        setTimeout(() => {
-          if (!restarted) {
-            timeout = true;
-            dispose2.dispose();
-            newDispose.dispose();
-          }
-        }, 200);
-        backEnd.dispose();
       });
 
       const filePath = editor.document.fileName;
