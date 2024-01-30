@@ -1,14 +1,9 @@
 import { castArray } from "lodash";
-import {
-  DomNodePath,
-  SerializedDomNode,
-  getNodeByPath,
-  parseDomNode,
-} from "../../../dom-transport-utils";
-import { HTMLPatch } from "../../../extension/ui-back-end";
+import { DomNodePath, HTMLPatch, SerializedDomNode } from "../types";
+import { getNodeByPath, parseDomNode } from "./parse-mutations";
 
-export function applyHtmlPatch(shadow: ShadowRoot, htmlPatch: HTMLPatch) {
-  let targetNode = getNodeByPath(shadow, htmlPatch.targetNodePath);
+export function applyDomPatch(root: ParentNode, htmlPatch: HTMLPatch) {
+  let targetNode = getNodeByPath(root, htmlPatch.targetNodePath);
   if (!targetNode) {
     throw new Error("Node not found: " + String(htmlPatch.targetNodePath));
   }
@@ -38,7 +33,7 @@ export function applyHtmlPatch(shadow: ShadowRoot, htmlPatch: HTMLPatch) {
         }
         // If the first element is a number, it's a path to an existing node
         if (typeof arg[0] === "number") {
-          return getNodeByPath(shadow, arg as DomNodePath);
+          return getNodeByPath(root, arg as DomNodePath);
         }
       }
 

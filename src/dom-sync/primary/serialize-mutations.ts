@@ -1,22 +1,4 @@
-// Utils for serializing and deserializing DOM nodes for transport over the wire.
-// including references to nodes that exist in the receiver's DOM.
-
-export type DomNodePath = number[];
-
-export type SerializedDomTextNode = string | null;
-
-export type SerializedDomElement = [
-  string,
-  Record<string, string>,
-  SerializedDomNode[]
-];
-
-export type SerializedTextNode = ["Text", string | null];
-
-export type SerializedDomNode =
-  | SerializedDomTextNode
-  | SerializedDomElement
-  | SerializedTextNode;
+import { SerializedDomNode } from "../types";
 
 export function getNodePath(node: Node, root: Node) {
   const indices = [];
@@ -46,19 +28,6 @@ export function getNodePath(node: Node, root: Node) {
   }
 
   return indices;
-}
-
-export function getNodeByPath(root: ParentNode, path: number[]) {
-  let currentElement: ParentNode | ChildNode | undefined = root;
-
-  for (const index of path) {
-    currentElement = currentElement?.childNodes?.[index];
-    if (!currentElement) {
-      return null;
-    }
-  }
-
-  return currentElement;
 }
 
 export function serializeDomMutationArg(
@@ -100,25 +69,4 @@ function serializeDomNode(node: Node): SerializedDomNode {
     return [node.tagName.toLowerCase(), attributes, children];
   }
   throw new Error("Unhandled node type: " + node.nodeType);
-}
-
-export function parseDomNode(node: SerializedDomNode, win: Window): Node {
-  if (typeof node === "string" || node === null) {
-    return win.document.createTextNode(node ?? "");
-  }
-  if (Array.isArray(node) && node[0] === "Text") {
-    const [, text] = node as SerializedTextNode;
-    return win.document.createTextNode(text ?? "");
-  }
-  if (Array.isArray(node)) {
-    const [tag, attributes, children] = node as SerializedDomElement;
-    const element = win.document.createElement(tag);
-    for (const [name, value] of Object.entries(attributes)) {
-      element.setAttribute(name, value);
-    }
-    const parsedChildren = children.map((child) => parseDomNode(child, win));
-    element.append(...parsedChildren);
-    return element;
-  }
-  throw new Error("Unhandled node type: " + node);
 }

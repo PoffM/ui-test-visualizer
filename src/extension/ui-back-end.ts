@@ -3,13 +3,7 @@ import { debounce } from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { RawData, Server } from "ws";
-import { DomNodePath, SerializedDomNode } from "../dom-transport-utils";
-
-export interface HTMLPatch {
-  targetNodePath: DomNodePath;
-  prop: string | string[];
-  args: (DomNodePath | SerializedDomNode)[];
-}
+import { HTMLPatch } from "../dom-sync/types";
 
 export async function startVisualTestingBackEnd() {
   const htmlUpdaterPort = await getPort();

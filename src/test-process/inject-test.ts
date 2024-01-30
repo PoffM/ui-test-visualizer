@@ -1,8 +1,6 @@
 // Inject this code into the test process
 
-import { getNodePath, serializeDomMutationArg } from "../dom-transport-utils";
-import { HTMLPatch } from "../extension/ui-back-end";
-import { MutationCallback, spyOnDomNodes } from "./dom-spies";
+import { initPrimaryDom } from "../dom-sync/primary/init-primary-dom";
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
@@ -20,52 +18,25 @@ async function preTest() {
     client.addEventListener("open", () => res());
   });
 
-  let lastHtml = "";
-  const updateHtml: MutationCallback = (node, prop, args) => {
-    if (process.env.EXPERIMENTAL_FAST_MODE === "false") {
-      const newHtml = testWindow.document.documentElement.outerHTML;
-
-      if (newHtml === lastHtml) {
-        return;
-      }
-      lastHtml = newHtml;
-
-      try {
-        client.send(newHtml);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    if (process.env.EXPERIMENTAL_FAST_MODE === "true") {
-      const nodePath = getNodePath(node, window.document);
-
-      if (!nodePath) {
-        throw new Error("Could not find node path for node");
-      }
-
-      const serializedArgs = args.map((it) =>
-        serializeDomMutationArg(it, window)
-      );
-
-      const htmlPatch: HTMLPatch = {
-        targetNodePath: nodePath,
-        prop,
-        args: serializedArgs,
-      };
-
-      try {
-        client.send(JSON.stringify(htmlPatch));
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
-
   let testWindow: Window = globalThis.window;
 
+  function initDom() {
+    initPrimaryDom({
+      root: testWindow,
+      ...(process.env.EXPERIMENTAL_FAST_MODE === "true"
+        ? {
+            patchMode: true,
+            onMutation: (htmlPatch) => client.send(JSON.stringify(htmlPatch)),
+          }
+        : {
+            patchMode: false,
+            onMutation: (newHtml) => client.send(newHtml),
+          }),
+    });
+  }
+
   if (testWindow) {
-    spyOnDomNodes(updateHtml);
+    initDom();
   }
 
   // Hook into the window which is set by happy-dom or jsdom
@@ -76,7 +47,7 @@ async function preTest() {
     set(newWindow: Window) {
       if (newWindow !== testWindow) {
         testWindow = newWindow;
-        spyOnDomNodes(updateHtml);
+        initDom();
       }
     },
     configurable: true,
