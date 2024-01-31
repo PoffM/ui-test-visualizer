@@ -13,11 +13,15 @@ export async function loadCss(file: string) {
     }
   })();
 
-  if (!cfg) {
-    return css;
-  }
-
-  const result = await postcss(cfg.plugins).process(css, {
+  const result = await postcss([
+    ...(cfg?.plugins ?? []),
+    {
+      postcssPlugin: "replace-root",
+      Rule(rule) {
+        rule.selector = rule.selector.replace(/:root/, ":root,:host");
+      },
+    },
+  ]).process(css, {
     map: false,
   });
 
