@@ -7,12 +7,48 @@ export type MutationCallback = (
   args: (Node | null | string)[]
 ) => void;
 
+/** Get all keys where their value matches the given Matcher. */
+type KeysWithVal<T, Matcher> = {
+  [K in keyof T]: T[K] extends Matcher ? K : never;
+}[keyof T] &
+  string;
+
+/** Get only the object keys that match the given matcher type.  */
+type FilterKeys<T, Matcher, IfMatch, IfNotMatch> = keyof {
+  [K in keyof T]: T[K] extends Matcher ? IfMatch : IfNotMatch;
+};
+
+/** Configures which methods and properties should be spied on. */
+type DOMNodeSpyConfig<T> = {
+  cls: new () => T;
+  methods: Extract<FilterKeys<T, Function, string, never>, string>[];
+  props: Extract<FilterKeys<T, Function, never, string>, string>[];
+};
+
 /** Run a callback function when a DOM node is mutated. */
 export function spyOnDomNodes(callback: MutationCallback) {
   for (const cfg of NODE_SPY_CONFIGS()) {
     initDomSpies(cfg, callback);
   }
-  initCSSStyleDeclarationSpies(callback);
+  spyOnNestedProperty(
+    HTMLElement.prototype,
+    "style",
+    ["setProperty"],
+    callback
+  );
+  spyOnNestedProperty(
+    HTMLElement.prototype,
+    "classList",
+    ["add", "remove", "replace", "toggle"],
+    callback
+  );
+  spyOnNestedProperty(HTMLElement.prototype, "dataset", [], callback);
+  spyOnNestedProperty(
+    HTMLElement.prototype,
+    "attributes",
+    ["setNamedItem", "removeNamedItem"],
+    callback
+  );
 }
 
 function initDomSpies<T extends Node>(
@@ -63,54 +99,58 @@ function initDomSpies<T extends Node>(
   }
 }
 
-/** Listens to the CSSStyleDeclaration's "setProperty" method and setters: Both ways you can change styles. */
-function initCSSStyleDeclarationSpies(callback: MutationCallback) {
-  // Spy on HTMLElement's "style" getter
-  const styleSpy = spyOn(
-    HTMLElement.prototype,
-    { getter: "style" },
-    function () {
-      // @ts-expect-error The "this" context corresponds to the first spyOn argument
-      const element = this as HTMLElement;
-      const styleObj: CSSStyleDeclaration = styleSpy
-        .getOriginal()
-        .call(element);
+/**
+ * Listens to setters and methods on a nested object.
+ * e.g. HTMLElement.style: Listen to "setProperty" and all setter properties.
+ */
+function spyOnNestedProperty<
+  T extends Node,
+  G extends KeysWithVal<T, object>,
+  S extends KeysWithVal<T[G], (...args: any) => any>
+>(cls: T, getter: G, spiedMethods: S[], callback: MutationCallback) {
+  // Spy on the getter property.
+  // @ts-expect-error
+  const spy = spyOn(cls, { getter }, function () {
+    // @ts-expect-error The "this" context corresponds to the first spyOn argument
+    const root = this as T;
+    // @ts-expect-error
+    const nestedObj: T[G] & object = spy.getOriginal().call(root);
 
-      // Wrap the CSSStyleDeclaration in a Proxy so we can listen to property changes:
-      return new Proxy(styleObj, {
-        // Listen to the CSSStyleDeclaration's "setProperty" method
-        get: (_, styleProp: string) => {
-          if (styleProp === "setProperty") {
-            // @ts-expect-error
-            return (...setPropertyArgs) => {
-              return reportAndApplyMutations({
-                callOriginalFn: () =>
-                  Reflect.apply(
-                    styleObj.setProperty,
-                    styleObj,
-                    setPropertyArgs
-                  ),
-                report: () =>
-                  callback(element, ["style", "setProperty"], setPropertyArgs),
-              });
-            };
-          }
-          return Reflect.get(styleObj, styleProp);
-        },
-        // Listen to the CSSStyleDeclaration's setter properties
-        set: (_, prop, value) => {
-          return reportAndApplyMutations({
-            callOriginalFn: () => Reflect.set(styleObj, prop, value),
-            report: () => {
-              if (typeof prop === "string") {
-                callback(element, prop, [value]);
-              }
-            },
-          });
-        },
-      });
-    }
-  );
+    // Wrap the CSSStyleDeclaration in a Proxy so we can listen to property changes:
+    return new Proxy(nestedObj, {
+      // Listen to the specified method on the nested object
+      get: (_, accessedProp: string) => {
+        if ((spiedMethods as string[]).includes(accessedProp)) {
+          // @ts-expect-error
+          return (...spiedMethodArgs) => {
+            return reportAndApplyMutations({
+              callOriginalFn: () =>
+                Reflect.apply(
+                  // @ts-expect-error
+                  nestedObj[accessedProp],
+                  nestedObj,
+                  spiedMethodArgs
+                ),
+              report: () =>
+                callback(root, [getter, accessedProp], spiedMethodArgs),
+            });
+          };
+        }
+        return Reflect.get(nestedObj, accessedProp);
+      },
+      // Listen to the CSSStyleDeclaration's setter properties
+      set: (_, prop, value) => {
+        return reportAndApplyMutations({
+          callOriginalFn: () => Reflect.set(nestedObj, prop, value),
+          report: () => {
+            if (typeof prop === "string") {
+              callback(root, [getter, prop], [value]);
+            }
+          },
+        });
+      },
+    });
+  });
 }
 
 function reportAndApplyMutations<T>({
@@ -128,18 +168,6 @@ function reportAndApplyMutations<T>({
   report();
   return result;
 }
-
-/** Get only the object keys that match the given matcher type.  */
-type FilterKeys<T, Matcher, IfMatch, IfNotMatch> = keyof {
-  [K in keyof T]: T[K] extends Matcher ? IfMatch : IfNotMatch;
-};
-
-/** Configures which methods and properties should be spied on. */
-type DOMNodeSpyConfig<T> = {
-  cls: new () => T;
-  methods: Extract<FilterKeys<T, Function, string, never>, string>[];
-  props: Extract<FilterKeys<T, Function, never, string>, string>[];
-};
 
 // All methods and setters that modify the DOM
 function NODE_SPY_CONFIGS(): DOMNodeSpyConfig<any>[] {
