@@ -182,7 +182,13 @@ function NODE_SPY_CONFIGS(): DOMNodeSpyConfig<any>[] {
         "removeChild",
         "setAttribute",
       ],
-      props: ["innerHTML", "textContent", "nodeValue"],
+      props: [
+        "innerHTML",
+        "textContent",
+        "nodeValue",
+        "className",
+        "classList",
+      ],
     } satisfies DOMNodeSpyConfig<Element>,
     {
       cls: Text,
