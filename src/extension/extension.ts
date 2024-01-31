@@ -5,6 +5,10 @@ import { vitestDebugConfig } from "./framework-support/vitest-support";
 import { codeLensProvider } from "./code-lens-provider";
 import { startVisualTestingBackEnd } from "./ui-back-end";
 
+function vscodeCfg() {
+  return vscode.workspace.getConfiguration();
+}
+
 export async function activate(context: vscode.ExtensionContext) {
   const debugTest = vscode.commands.registerCommand(
     "visual-ui-test-debugger.visuallyDebugUI",
@@ -47,9 +51,10 @@ export async function activate(context: vscode.ExtensionContext) {
         TEST_FILE_PATH: filePath,
         HTML_UPDATER_PORT: String(backEnd.htmlUpdaterPort),
         EXPERIMENTAL_FAST_MODE: String(
-          vscode.workspace
-            .getConfiguration()
-            .get("visual-ui-test-debugger.experimentalFastMode")
+          vscodeCfg().get("visual-ui-test-debugger.experimentalFastMode")
+        ),
+        TEST_CSS_FILES: JSON.stringify(
+          vscodeCfg().get("visual-ui-test-debugger.cssFiles")
         ),
       };
 
@@ -57,16 +62,10 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  if (
-    !vscode.workspace
-      .getConfiguration()
-      .get("visual-ui-test-debugger.disableCodeLens")
-  ) {
+  if (!vscodeCfg().get("visual-ui-test-debugger.disableCodeLens")) {
     const docSelectors: vscode.DocumentFilter[] = [
       {
-        pattern: vscode.workspace
-          .getConfiguration()
-          .get("visual-ui-test-debugger.codeLensSelector"),
+        pattern: vscodeCfg().get("visual-ui-test-debugger.codeLensSelector"),
       },
     ];
     context.subscriptions.push(

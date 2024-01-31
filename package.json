@@ -48,9 +48,17 @@
           "default": "**/*.{test,spec}.{js,jsx,ts,tsx}",
           "description": "Show the in-editor Visual UI Debugger buttons on files matching this pattern"
         },
+        "visual-ui-test-debugger.cssFiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Extra CSS files to load into the tested UI. Supports PostCSS."
+        },
         "visual-ui-test-debugger.experimentalFastMode": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Incrementally update the mirrored DOM instead of re-rendering it entirely on every change. This feature needs more testing."
         }
       }
@@ -87,6 +95,7 @@
     "jest-editor-support": "^31.1.2",
     "lodash": "^4.17.21",
     "morphdom": "^2.7.2",
+    "postcss-load-config": "^5.0.2",
     "solid-js": "^1.8.7",
     "tinyspy": "^2.2.0",
     "ws": "^8.16.0"
