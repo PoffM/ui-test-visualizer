@@ -3,7 +3,6 @@ import * as webviewToolkit from "@vscode/webview-ui-toolkit";
 import { createSignal } from "solid-js";
 import { updateDomReplica } from "../../dom-sync/replica/update-replica-dom";
 import type { HTMLPatch } from "../../dom-sync/types";
-import { Resizable } from "./lib/Resizable";
 
 // In order to use the Webview UI Toolkit web components they
 // must be registered with the browser (i.e. webview) using the
@@ -34,25 +33,22 @@ export function App() {
   }
 
   return (
-    <div class="fixed inset-0 flex flex-col gap-4 justify-center items-center">
-      <Resizable initialWidth={500}>
-        <div class="relative h-[500px] bg-gray-500 bg-opacity-20 p-2">
-          <div
-            style={{ visibility: firstPatchReceived() ? "hidden" : "visible" }}
-            class="absolute h-full w-full flex justify-center items-center"
-          >
-            Listening for test DOM mutations...
-          </div>
-          <div
-            style={{ visibility: firstPatchReceived() ? "visible" : "hidden" }}
-            class="absolute h-full w-full"
-          >
-            <div ref={initShadow} />
-          </div>
+    <div class="fixed inset-0 p-2 pt-[30px]">
+      <div class="relative h-full w-full">
+        <div
+          style={{ visibility: firstPatchReceived() ? "hidden" : "visible" }}
+          class="absolute h-full w-full flex justify-center items-center"
+        >
+          Listening for test DOM mutations...
         </div>
-      </Resizable>
+        <div
+          style={{ visibility: firstPatchReceived() ? "visible" : "hidden" }}
+          class="absolute h-full w-full"
+        >
+          <div ref={initShadow} class="h-full w-full" />
+        </div>
+      </div>
       {/* TODO additional controls */}
-      <div class="w-[500px]"></div>
     </div>
   );
 }
