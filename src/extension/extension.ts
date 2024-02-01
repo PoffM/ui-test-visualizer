@@ -26,11 +26,15 @@ export async function activate(context: vscode.ExtensionContext) {
 
       const backEnd = await startVisualTestingBackEnd();
 
-      const dispose1 = vscode.debug.onDidStartDebugSession(() => {
+      const dispose1 = vscode.debug.onDidStartDebugSession((currentSession) => {
         backEnd.openPanel();
         dispose1.dispose();
 
-        const dispose2 = vscode.debug.onDidTerminateDebugSession(() => {
+        const dispose2 = vscode.debug.onDidTerminateDebugSession((endedSession) => {
+          if (currentSession !== endedSession) {
+            return;
+          }
+          
           backEnd.dispose();
           dispose2.dispose();
         });

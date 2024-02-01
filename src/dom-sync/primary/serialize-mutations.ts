@@ -8,8 +8,13 @@ export function getNodePath(node: Node, root: Node) {
   while (currentNode && currentNode !== root) {
     let parent = currentNode.parentNode;
 
+    if (!parent) {
+      // If the parent is null, the node is not in the DOM
+      return null;
+    }
+
     // When the parent is the root, use "children" instead of "childNodes" to ignore the "<!DOCTYPE html>" node.
-    const siblings = parent === root ? parent.children : parent!.childNodes;
+    const siblings = parent === root ? parent.children : parent.childNodes;
 
     let index = Array.prototype.indexOf.call(siblings, currentNode);
 
@@ -19,7 +24,7 @@ export function getNodePath(node: Node, root: Node) {
     }
 
     indices.unshift(index); // Add the index to the beginning of the array
-    currentNode = parent!;
+    currentNode = parent;
   }
 
   // If the root node is not an ancestor of the node, return null

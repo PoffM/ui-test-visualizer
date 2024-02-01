@@ -35,7 +35,7 @@ export function initPrimaryDom(cfg: PrimaryDomConfig) {
       const nodePath = getNodePath(node, window.document);
 
       if (!nodePath) {
-        throw new Error("Could not find node path for node");
+        return;
       }
 
       const serializedArgs = args.map((it) =>

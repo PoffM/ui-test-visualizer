@@ -16,7 +16,7 @@ export async function jestDebugConfig(
     name: "Visually Debug UI",
     program: fw.binPath,
     request: "launch",
-    type: "node",
+    type: "pwa-node",
     args: [
       filePath,
       "-c",
@@ -24,6 +24,7 @@ export async function jestDebugConfig(
       "-t",
       cleanTestNameForTerminal(testName),
       "--runInBand",
+      "--testTimeout=1000000000",
       "--setupFiles",
       path.resolve(__dirname, "inject-test.js"),
     ],
