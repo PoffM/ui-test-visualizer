@@ -42,6 +42,7 @@ export async function startVisualTestingBackEnd() {
         "Tested UI",
         vscode.ViewColumn.Beside,
         {
+          enableFindWidget: true,
           enableScripts: true,
         }
       );
