@@ -1,5 +1,6 @@
 // Inject this code into the test process
 
+import { findUpSync } from "find-up";
 import { initPrimaryDom } from "../dom-sync/primary/init-primary-dom";
 import { loadCss } from "./load-css";
 
@@ -96,6 +97,36 @@ async function loadStylesIntoHead(win: Window) {
 // For when this file is "--require"d before the Vitest tests: Run immediately.
 if (process.env.TEST_FRAMEWORK === "vitest") {
   preTest();
+}
+
+if (process.env.TEST_FRAMEWORK === "jest") {
+  // Require Jest version 28+
+  (() => {
+    const pkg = findUpSync("node_modules/jest/package.json", {
+      cwd: process.env.TEST_FILE_PATH,
+    });
+    if (!pkg) {
+      return;
+    }
+    const jestPkg = require(pkg);
+    const version = jestPkg.version;
+
+    if (!version) {
+      return;
+    }
+
+    const [major] = jestPkg.version.split(".");
+
+    const majorNum = Number(major);
+
+    if (majorNum < 28) {
+      throw new Error(
+        `Jest version must be 28 or higher, found ${jestPkg.version}.
+When using Jest, this extension relies on support for "setupFiles" to export an async function, introduced in Jest 28.
+https://github.com/jestjs/jest/releases/tag/v28.0.0-alpha.6`
+      );
+    }
+  })();
 }
 
 // Jest runs the default async function in the setupFiles.
