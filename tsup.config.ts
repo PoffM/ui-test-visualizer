@@ -10,7 +10,13 @@ export default defineConfig({
     "inject-test": "./src/test-process/inject-test.ts",
   },
   external: ["vscode", "vitest"],
-  noExternal: ["get-port", "find-up", "postcss-load-config"],
+  noExternal: [
+    "get-port",
+    "find-up",
+    "postcss-load-config",
+    "lodash",
+    "tinyspy",
+  ],
   target: "esnext",
 
   plugins: [
