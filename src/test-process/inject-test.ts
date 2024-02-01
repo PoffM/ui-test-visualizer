@@ -14,6 +14,50 @@ async function preTest() {
     `ws://localhost:${process.env.HTML_UPDATER_PORT}`
   );
 
+  // Wait for the WebSocket to connect before continuing the test setup.
+  await new Promise<void>((res) => {
+    client.addEventListener("open", () => res());
+  });
+
+  let testWindow: Window = globalThis.window;
+
+  function initDom() {
+    initPrimaryDom({
+      root: testWindow,
+      ...(process.env.EXPERIMENTAL_FAST_MODE === "true"
+        ? {
+            patchMode: true,
+            onMutation: (htmlPatch) => client.send(JSON.stringify(htmlPatch)),
+          }
+        : {
+            patchMode: false,
+            onMutation: (newHtml) => client.send(newHtml),
+          }),
+    });
+
+    void loadStylesIntoHead(testWindow);
+  }
+
+  // Hook into the window which is set by happy-dom or jsdom
+  Object.defineProperty(globalThis, "window", {
+    get() {
+      return testWindow;
+    },
+    set(newWindow: Window) {
+      if (newWindow !== testWindow) {
+        testWindow = newWindow;
+        initDom();
+      }
+    },
+    configurable: true,
+  });
+
+  if (testWindow) {
+    initDom();
+  }
+}
+
+async function loadStylesIntoHead(win: Window) {
   const cssSheets = await (async () => {
     const files = JSON.parse(process.env.TEST_CSS_FILES ?? "[]") as string[];
     if (!files) {
@@ -41,55 +85,15 @@ async function preTest() {
     return sheets;
   })();
 
-  // Wait for the WebSocket to connect before continuing the test setup.
-  await new Promise<void>((res) => {
-    client.addEventListener("open", () => res());
-  });
-
-  let testWindow: Window = globalThis.window;
-
-  function initDom() {
-    initPrimaryDom({
-      root: testWindow,
-      ...(process.env.EXPERIMENTAL_FAST_MODE === "true"
-        ? {
-            patchMode: true,
-            onMutation: (htmlPatch) => client.send(JSON.stringify(htmlPatch)),
-          }
-        : {
-            patchMode: false,
-            onMutation: (newHtml) => client.send(newHtml),
-          }),
-    });
-
-    for (const sheet of cssSheets) {
-      const style = testWindow.document.createElement("style");
-      style.type = "text/css";
-      style.innerHTML = sheet;
-      testWindow.document.head.appendChild(style);
-    }
+  for (const sheet of cssSheets) {
+    const style = win.document.createElement("style");
+    style.type = "text/css";
+    style.innerHTML = sheet;
+    win.document.head.appendChild(style);
   }
-
-  if (testWindow) {
-    initDom();
-  }
-
-  // Hook into the window which is set by happy-dom or jsdom
-  Object.defineProperty(globalThis, "window", {
-    get() {
-      return testWindow;
-    },
-    set(newWindow: Window) {
-      if (newWindow !== testWindow) {
-        testWindow = newWindow;
-        initDom();
-      }
-    },
-    configurable: true,
-  });
 }
 
-// For when this file is "--require"d before the Vitest tests: Run immediatetely.
+// For when this file is "--require"d before the Vitest tests: Run immediately.
 if (process.env.TEST_FRAMEWORK === "vitest") {
   preTest();
 }

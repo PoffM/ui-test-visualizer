@@ -33,6 +33,10 @@ export async function startVisualTestingBackEnd() {
     });
   });
 
+  await new Promise((res) => {
+    htmlUpdaterServer.on("listening", res);
+  });
+
   return {
     htmlUpdaterPort,
     async openPanel() {
