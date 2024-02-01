@@ -18,7 +18,7 @@ export function App() {
     const shadow = host.attachShadow({ mode: "open" });
     shadow.appendChild(
       new DOMParser().parseFromString(
-        "<html><head></head><body></body></html>",
+        `<html style="height: 100%; overflow-y: scroll;"><head></head><body></body></html>`,
         "text/html"
       ).children[0]!
     );
