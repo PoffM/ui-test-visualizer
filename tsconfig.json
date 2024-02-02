@@ -2,13 +2,15 @@
   "compilerOptions": {
     "module": "commonJS",
     "target": "ES2020",
-    "outDir": "out",
+    "noEmit": true,
     "lib": ["ES2020", "DOM"],
     "sourceMap": true,
     "rootDir": "src",
     "esModuleInterop": true,
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["examples/**/*"]

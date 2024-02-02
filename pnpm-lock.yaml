@@ -32,6 +32,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      lucide-solid:
+        specifier: ^0.321.0
+        version: 0.321.0(solid-js@1.8.11)
       morphdom:
         specifier: ^2.7.2
         version: 2.7.2
@@ -4659,6 +4662,14 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       yallist: 4.0.0
+
+  /lucide-solid@0.321.0(solid-js@1.8.11):
+    resolution: {integrity: sha512-fmAPVUXsxPoM0oXyWTIWu6UR3vZGx4m4ww7lMP+cr7kcDZy1BSH9mjPMUobLbpESj1ZQ6aveHMoFCslx7lB+cA==}
+    peerDependencies:
+      solid-js: ^1.4.7
+    dependencies:
+      solid-js: 1.8.11
+    dev: false
 
   /lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}

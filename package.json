@@ -94,6 +94,7 @@
     "get-port": "^7.0.0",
     "jest-editor-support": "^31.1.2",
     "lodash": "^4.17.21",
+    "lucide-solid": "^0.321.0",
     "morphdom": "^2.7.2",
     "postcss-load-config": "^5.0.2",
     "solid-js": "^1.8.7",

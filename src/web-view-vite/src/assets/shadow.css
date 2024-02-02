@@ -1,0 +1,26 @@
+/*
+  Default color modes inside the mirror DOM.
+  Should be overridden by the tested UI.
+*/
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --background: #1e1e1e;
+    --color: #fff;
+  }
+}
+
+[data-theme="dark"] {
+  --background: #1e1e1e;
+  --color: #fff;
+}
+
+[data-theme="light"] {
+  --background: #fff;
+  --color: #000;
+}
+
+html {
+  background-color: var(--background);
+  color: var(--color);
+}
