@@ -1,8 +1,7 @@
 import { makeEventListener } from "@solid-primitives/event-listener";
 import * as webviewToolkit from "@vscode/webview-ui-toolkit";
 import { createSignal } from "solid-js";
-import { updateDomReplica } from "../../dom-sync/replica/update-replica-dom";
-import type { HTMLPatch } from "../../dom-sync/types";
+import { updateDomReplica, type HTMLPatch } from "../../replicate-dom";
 
 // In order to use the Webview UI Toolkit web components they
 // must be registered with the browser (i.e. webview) using the

@@ -1,7 +1,7 @@
 // Inject this code into the test process
 
 import { findUpSync } from "find-up";
-import { initPrimaryDom } from "../dom-sync/primary/init-primary-dom";
+import { initPrimaryDom } from "../replicate-dom";
 import { loadCss } from "./load-css";
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
