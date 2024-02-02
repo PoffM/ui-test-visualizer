@@ -27,6 +27,7 @@ export async function jestDebugConfig(
       "--testTimeout=1000000000",
       "--setupFiles",
       path.resolve(__dirname, "inject-test.js"),
+      ...(fw.setupFiles ?? []),
     ],
   };
 }

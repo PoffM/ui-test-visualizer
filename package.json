@@ -92,6 +92,7 @@
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "find-up": "^7.0.0",
     "get-port": "^7.0.0",
+    "jest-config": "^29.7.0",
     "jest-editor-support": "^31.1.2",
     "lodash": "^4.17.21",
     "lucide-solid": "^0.321.0",

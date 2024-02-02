@@ -2,11 +2,13 @@ import { findUp } from "find-up";
 import path from "path";
 import { getJestBinPath } from "./jest-support";
 import { getVitestBinPath } from "./vitest-support";
+import { readInitialOptions } from "jest-config";
 
 export interface TestFrameworkInfo {
   framework: "jest" | "vitest";
   configPath: string;
   binPath: string;
+  setupFiles?: string[];
 }
 
 export async function detectTestFramework(
@@ -24,6 +26,15 @@ export async function detectTestFramework(
     { cwd: testFilePath }
   );
 
+  const setupFiles = await (async () => {
+    if (jestFile) {
+      const jestOptions = await readInitialOptions(jestFile);
+      const setupFiles = jestOptions.config.setupFiles ?? [];
+      return setupFiles;
+    }
+    return [];
+  })();
+
   const configPath = vitestFile ?? jestFile;
 
   if (!configPath) {
@@ -37,6 +48,7 @@ export async function detectTestFramework(
     return {
       framework: "jest" as const,
       configPath,
+      setupFiles,
       binPath: await getJestBinPath(testFilePath),
     };
   } else {
