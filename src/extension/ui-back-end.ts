@@ -48,6 +48,7 @@ export async function startVisualTestingBackEnd() {
         {
           enableFindWidget: true,
           enableScripts: true,
+          retainContextWhenHidden: true,
         }
       );
 
