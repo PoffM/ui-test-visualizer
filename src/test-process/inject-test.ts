@@ -2,7 +2,7 @@
 
 import { findUpSync } from "find-up";
 import { initPrimaryDom } from "../replicate-dom";
-import { loadCss } from "./load-css";
+import { loadStyles } from "./load-styles";
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
@@ -66,7 +66,7 @@ async function loadStylesIntoHead(win: Window) {
     }
 
     const results = await Promise.allSettled(
-      files.map((file) => loadCss(file))
+      files.map((file) => loadStyles(file))
     );
 
     const sheets: string[] = [];
