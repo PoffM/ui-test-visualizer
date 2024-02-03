@@ -94,6 +94,7 @@
     "get-port": "^7.0.0",
     "jest-config": "^29.7.0",
     "jest-editor-support": "^31.1.2",
+    "lightningcss": "^1.23.0",
     "lodash": "^4.17.21",
     "lucide-solid": "^0.321.0",
     "morphdom": "^2.7.2",
