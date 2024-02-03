@@ -18,7 +18,6 @@ export function getNodePath(node: Node, root: Node) {
 
     let index = Array.prototype.indexOf.call(siblings, currentNode);
 
-    // TODO handle text nodes properly
     if (index === -1) {
       index = 0;
     }

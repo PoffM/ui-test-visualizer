@@ -3,7 +3,7 @@ import fsSync from "fs";
 import path from "path";
 import { defineConfig } from "tsup";
 
-export default defineConfig({
+export default defineConfig((options) => ({
   entry: {
     extension: "./src/extension/extension.ts",
     "inject-cli": "./src/extension/inject-cli.ts",
@@ -18,7 +18,9 @@ export default defineConfig({
     "tinyspy",
   ],
   target: "esnext",
-
+  env: {
+    NODE_ENV: options.watch ? "development" : "production",
+  },
   plugins: [
     {
       // TODO simpler way to make an svg green
@@ -54,4 +56,4 @@ export default defineConfig({
       },
     },
   ],
-});
+}));

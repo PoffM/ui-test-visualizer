@@ -9,7 +9,7 @@ function vscodeCfg() {
   return vscode.workspace.getConfiguration();
 }
 
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(extensionContext: vscode.ExtensionContext) {
   const debugTest = vscode.commands.registerCommand(
     "visual-ui-test-debugger.visuallyDebugUI",
     async (testName: unknown) => {
@@ -27,7 +27,7 @@ export async function activate(context: vscode.ExtensionContext) {
       const backEnd = await startVisualTestingBackEnd();
 
       const dispose1 = vscode.debug.onDidStartDebugSession((currentSession) => {
-        backEnd.openPanel();
+        backEnd.openPanel(extensionContext);
         dispose1.dispose();
 
         const dispose2 = vscode.debug.onDidTerminateDebugSession((endedSession) => {
@@ -72,12 +72,12 @@ export async function activate(context: vscode.ExtensionContext) {
         pattern: vscodeCfg().get("visual-ui-test-debugger.codeLensSelector"),
       },
     ];
-    context.subscriptions.push(
+    extensionContext.subscriptions.push(
       vscode.languages.registerCodeLensProvider(docSelectors, codeLensProvider)
     );
   }
 
-  context.subscriptions.push(debugTest);
+  extensionContext.subscriptions.push(debugTest);
 }
 
 export function deactivate() {}

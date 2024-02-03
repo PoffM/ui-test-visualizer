@@ -25,10 +25,10 @@
   ],
   "main": "./dist/extension.js",
   "scripts": {
-    "compile": "tsup --minify && vite build ./src/web-view-vite",
-    "watch": "pnpm run \"/^watch:.*/\"",
-    "watch:extension": "tsup --watch --sourcemap",
-    "watch:vite": "vite ./src/web-view-vite",
+    "build": "tsup --minify && vite build ./src/web-view-vite",
+    "dev": "pnpm run \"/^dev:.*/\"",
+    "dev:extension": "tsup --watch --sourcemap",
+    "dev:vite": "vite ./src/web-view-vite",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "poffm",

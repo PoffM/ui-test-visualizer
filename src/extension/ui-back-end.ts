@@ -39,7 +39,7 @@ export async function startVisualTestingBackEnd() {
 
   return {
     htmlUpdaterPort,
-    async openPanel() {
+    async openPanel(extensionContext: vscode.ExtensionContext) {
       // Create the webview panel
       panel = vscode.window.createWebviewPanel(
         "visualTest",
@@ -51,15 +51,50 @@ export async function startVisualTestingBackEnd() {
         }
       );
 
-      // TODO use the right icon in production
       panel.iconPath = vscode.Uri.file(path.resolve(__dirname, "./debug.svg"));
 
-      // Load the html from the Vite app.
-      // TODO get the static html file in production
-      const viteResponse = await fetch(
-        `http://localhost:${viteDevServerPort}/`
-      );
-      const html = await viteResponse.text();
+      const html = await (async () => {
+        // In dev mode, load the html from the live Vite app.
+        if (process.env.NODE_ENV === "development") {
+          const viteResponse = await fetch(
+            `http://localhost:${viteDevServerPort}/`
+          );
+          const devHtml = await viteResponse.text();
+          return devHtml;
+        }
+
+        // In production, load the built static front-end files.
+        if (process.env.NODE_ENV === "production") {
+          function getUri(path: string) {
+            return panel?.webview.asWebviewUri(
+              vscode.Uri.joinPath(extensionContext.extensionUri, path)
+            );
+          }
+
+          const appCss = getUri("dist/web-view-vite/assets/app.css");
+          const appJs = getUri("dist/web-view-vite/assets/app.js");
+          const icon = getUri("dist/debug.svg");
+
+          const prodHtml = `
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <link rel="icon" type="image/svg+xml" href="${icon}" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <script type="module" crossorigin src="${appJs}"></script>
+                <link rel="stylesheet" crossorigin href="${appCss}">
+              </head>
+              <body>
+                <div id="root"></div>
+              </body>
+            </html>`;
+
+          return prodHtml;
+        }
+
+        throw new Error("Unknown NODE_ENV");
+      })();
+
       panel.webview.html = html;
     },
     dispose() {
