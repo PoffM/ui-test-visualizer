@@ -1,5 +1,6 @@
 import { castArray } from "lodash";
 import { spyOn } from "tinyspy";
+import { DOMNodeSpyConfig, MUTABLE_DOM_PROPS } from "./mutable-dom-props";
 
 export type MutationCallback = (
   node: Node,
@@ -13,49 +14,18 @@ type KeysWithVal<T, Matcher> = {
 }[keyof T] &
   string;
 
-/** Get only the object keys that match the given matcher type.  */
-type FilterKeys<T, Matcher, IfMatch, IfNotMatch> = keyof {
-  [K in keyof T]: T[K] extends Matcher ? IfMatch : IfNotMatch;
-};
-
-/** Configures which methods and properties should be spied on. */
-type DOMNodeSpyConfig<T> = {
-  cls: new () => T;
-  methods: Extract<FilterKeys<T, Function, string, never>, string>[];
-  props: Extract<FilterKeys<T, Function, never, string>, string>[];
-};
-
 /** Run a callback function when a DOM node is mutated. */
 export function spyOnDomNodes(callback: MutationCallback) {
-  for (const cfg of NODE_SPY_CONFIGS()) {
+  for (const cfg of MUTABLE_DOM_PROPS()) {
     initDomSpies(cfg, callback);
   }
-  spyOnNestedProperty(
-    HTMLElement.prototype,
-    "style",
-    ["setProperty"],
-    callback
-  );
-  spyOnNestedProperty(
-    HTMLElement.prototype,
-    "classList",
-    ["add", "remove", "replace", "toggle"],
-    callback
-  );
-  spyOnNestedProperty(HTMLElement.prototype, "dataset", [], callback);
-  spyOnNestedProperty(
-    HTMLElement.prototype,
-    "attributes",
-    ["setNamedItem", "removeNamedItem"],
-    callback
-  );
 }
 
 function initDomSpies<T extends Node>(
-  { cls, methods, props }: DOMNodeSpyConfig<T>,
+  { cls, methods, props, nestedProps }: DOMNodeSpyConfig<T>,
   callback: MutationCallback
 ) {
-  for (const method of methods) {
+  for (const method of methods ?? []) {
     const methodSpy = spyOn(
       cls.prototype,
       method,
@@ -74,7 +44,7 @@ function initDomSpies<T extends Node>(
       }
     );
   }
-  for (const prop of props) {
+  for (const prop of props ?? []) {
     // Store a reference to the original setter
     const originalSetter = Object.getOwnPropertyDescriptor(
       cls.prototype,
@@ -96,6 +66,9 @@ function initDomSpies<T extends Node>(
         });
       });
     }
+  }
+  for (const [key, props] of Object.entries(nestedProps ?? {})) {
+    spyOnNestedProperty(cls.prototype, key, props, callback);
   }
 }
 
@@ -167,69 +140,4 @@ function reportAndApplyMutations<T>({
   const result = callOriginalFn();
   report();
   return result;
-}
-
-// All methods and setters that modify the DOM
-function NODE_SPY_CONFIGS(): DOMNodeSpyConfig<any>[] {
-  return [
-    {
-      cls: Element,
-      methods: [
-        "normalize",
-        "insertBefore",
-        "appendChild",
-        "replaceChild",
-        "removeChild",
-        "setAttribute",
-      ],
-      props: [
-        "innerHTML",
-        "textContent",
-        "nodeValue",
-        "className",
-        "classList",
-      ],
-    } satisfies DOMNodeSpyConfig<Element>,
-    {
-      cls: Text,
-      methods: [
-        "normalize",
-        "appendData",
-        "insertData",
-        "deleteData",
-        "replaceData",
-      ],
-      props: ["textContent", "nodeValue"],
-    } satisfies DOMNodeSpyConfig<Text>,
-    {
-      cls: Node,
-      methods: [
-        "normalize",
-        "insertBefore",
-        "appendChild",
-        "replaceChild",
-        "removeChild",
-      ],
-      props: ["textContent", "nodeValue"],
-    } satisfies DOMNodeSpyConfig<Node>,
-    {
-      cls: CharacterData,
-      methods: [
-        "normalize",
-        "insertBefore",
-        "appendChild",
-        "appendData",
-        "deleteData",
-        "insertData",
-        "replaceData",
-        "replaceChild",
-        "replaceWith",
-        "removeChild",
-        "remove",
-        "before",
-        "after",
-      ],
-      props: ["textContent", "nodeValue", "data"],
-    } satisfies DOMNodeSpyConfig<CharacterData>,
-  ];
 }
