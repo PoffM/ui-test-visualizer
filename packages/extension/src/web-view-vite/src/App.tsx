@@ -3,7 +3,7 @@ import * as webviewToolkit from "@vscode/webview-ui-toolkit";
 import { Moon, Sun } from "lucide-solid";
 import { createSignal } from "solid-js";
 import { render } from "solid-js/web";
-import { updateDomReplica, type HTMLPatch } from "../../../../replicate-dom";
+import { updateDomReplica, type HTMLPatch } from "replicate-dom";
 import shadowCSSText from "./assets/shadow.css?raw";
 import { createColorTheme } from "./lib/color-theme";
 

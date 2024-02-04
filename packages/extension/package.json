@@ -29,6 +29,7 @@
     "lodash": "^4.17.21",
     "lucide-solid": "^0.321.0",
     "postcss-load-config": "^5.0.2",
+    "replicate-dom": "*",
     "solid-js": "^1.8.12",
     "synckit": "^0.9.0",
     "vite": "^5.0.12",
