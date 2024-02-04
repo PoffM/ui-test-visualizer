@@ -72,9 +72,13 @@ export async function startVisualTestingBackEnd() {
             );
           }
 
-          const appCss = getUri("dist/web-view-vite/assets/app.css");
-          const appJs = getUri("dist/web-view-vite/assets/app.js");
-          const icon = getUri("dist/debug.svg");
+          const appCss = getUri(
+            "packages/extension/dist/web-view-vite/assets/index.css"
+          );
+          const appJs = getUri(
+            "packages/extension/dist/web-view-vite/assets/index.js"
+          );
+          const icon = getUri("packages/extension/dist/debug.svg");
 
           const prodHtml = `
             <!doctype html>
