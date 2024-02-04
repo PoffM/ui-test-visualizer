@@ -3,13 +3,13 @@
  * https://jestjs.io/docs/configuration
  */
 
-import type { Config } from "jest";
+import type { Config } from 'jest'
 
 const config: Config = {
-  testEnvironment: "jsdom",
+  testEnvironment: 'jsdom',
   transform: {
-    "^.+\\.(ts|tsx)$": "babel-jest",
+    '^.+\\.(ts|tsx)$': 'babel-jest',
   },
-};
+}
 
-export default config;
+export default config

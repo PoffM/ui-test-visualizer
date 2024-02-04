@@ -1,47 +1,47 @@
-import { findUp } from "find-up";
-import path from "path";
-import * as vscode from "vscode";
-import { detectTestFramework } from "./detect";
-import { cleanTestNameForTerminal } from "./util";
+import path from 'node:path'
+import { findUp } from 'find-up'
+import type * as vscode from 'vscode'
+import { detectTestFramework } from './detect'
+import { cleanTestNameForTerminal } from './util'
 
 export async function jestDebugConfig(
   filePath: string,
-  testName: string
+  testName: string,
 ): Promise<vscode.DebugConfiguration> {
-  const fw = await detectTestFramework(filePath);
+  const fw = await detectTestFramework(filePath)
 
   return {
-    console: "integratedTerminal",
-    internalConsoleOptions: "neverOpen",
-    name: "Visually Debug UI",
+    console: 'integratedTerminal',
+    internalConsoleOptions: 'neverOpen',
+    name: 'Visually Debug UI',
     program: fw.binPath,
-    request: "launch",
-    type: "pwa-node",
+    request: 'launch',
+    type: 'pwa-node',
     args: [
       filePath,
-      "-c",
+      '-c',
       fw.configPath,
-      "-t",
+      '-t',
       cleanTestNameForTerminal(testName),
-      "--runInBand",
-      "--testTimeout=1000000000",
-      "--setupFiles",
-      path.resolve(__dirname, "inject-test.js"),
+      '--runInBand',
+      '--testTimeout=1000000000',
+      '--setupFiles',
+      path.resolve(__dirname, 'inject-test.js'),
       ...(fw.setupFiles ?? []),
     ],
-  };
+  }
 }
 
-const lookupPaths = ["node_modules/jest/bin/jest.js", "node_modules/.bin/jest"];
+const lookupPaths = ['node_modules/jest/bin/jest.js', 'node_modules/.bin/jest']
 
 export async function getJestBinPath(filepath: string) {
-  let jestPath: string | undefined;
+  let jestPath: string | undefined
   for (const lookupPath of lookupPaths) {
-    jestPath = await findUp(lookupPath, { cwd: filepath });
+    jestPath = await findUp(lookupPath, { cwd: filepath })
     if (jestPath) {
-      return jestPath;
+      return jestPath
     }
   }
 
-  throw new Error(`Could not find Jest bin file in ${lookupPaths}`);
+  throw new Error(`Could not find Jest bin file in ${lookupPaths}`)
 }

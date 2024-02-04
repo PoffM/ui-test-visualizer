@@ -1,53 +1,52 @@
-import { castArray } from "lodash";
-import { DomNodePath, HTMLPatch, SerializedDomNode } from "../types";
-import { getNodeByPath, parseDomNode } from "./parse-mutations";
+import { castArray } from 'lodash'
+import type { DomNodePath, HTMLPatch, SerializedDomNode } from '../types'
+import { getNodeByPath, parseDomNode } from './parse-mutations'
 
 export function applyDomPatch(root: ParentNode, htmlPatch: HTMLPatch) {
-  let targetNode = getNodeByPath(root, htmlPatch.targetNodePath);
+  let targetNode = getNodeByPath(root, htmlPatch.targetNodePath)
   if (!targetNode) {
-    throw new Error("Node not found: " + String(htmlPatch.targetNodePath));
+    throw new Error(`Node not found: ${String(htmlPatch.targetNodePath)}`)
   }
 
-  const propPath = castArray(htmlPatch.prop);
+  const propPath = castArray(htmlPatch.prop)
 
-  const prop = propPath.at(-1);
+  const prop = propPath.at(-1) as (keyof typeof targetNode) | undefined
   if (!prop) {
-    throw new Error("No property found in path: " + propPath);
+    throw new Error(`No property found in path: ${propPath}`)
   }
 
-  const pathBeforeProp = propPath.slice(0, -1);
+  const pathBeforeProp = propPath.slice(0, -1)
   for (const key of pathBeforeProp) {
-    // @ts-expect-error The key should exist on this node because it comes from the same node on the server.
-    targetNode = targetNode[key];
+    // @ts-expect-error The key should exist on this node because the key comes from the same node in the primary DOM.
+    targetNode = targetNode?.[key]
   }
 
   // Check if the property is a function
-  // @ts-expect-error
-  const targetFn = targetNode[prop];
-  if (typeof targetFn === "function") {
+  const targetFn = targetNode?.[prop]
+  if (typeof targetFn === 'function') {
     const parsedArgs = htmlPatch.args.map((arg) => {
       if (Array.isArray(arg)) {
         // If the first element is a string (the tag), it's a serialized dom node
-        if (typeof arg[0] === "string") {
-          return parseDomNode(arg as SerializedDomNode, window);
+        if (typeof arg[0] === 'string') {
+          return parseDomNode(arg as SerializedDomNode, window)
         }
         // If the first element is a number, it's a path to an existing node
-        if (typeof arg[0] === "number") {
-          return getNodeByPath(root, arg as DomNodePath);
+        if (typeof arg[0] === 'number') {
+          return getNodeByPath(root, arg as DomNodePath)
         }
       }
 
       // If the property is a path array or the arg is a string or null, the arg is plain text
-      if (propPath.length > 1 || arg === null || typeof arg === "string") {
-        return arg;
+      if (propPath.length > 1 || arg === null || typeof arg === 'string') {
+        return arg
       }
 
-      throw new Error("Unknown mutation arg type: " + arg);
-    });
+      throw new Error(`Unknown mutation arg type: ${arg}`)
+    })
 
-    // @ts-expect-error
-    targetNode[prop](...parsedArgs);
-    return;
+    // @ts-expect-error The key should exist on this node because the key comes from the same node in the primary DOM.
+    targetNode[prop](...parsedArgs)
+    return
   }
 
   // Check if the property is a setter
@@ -57,16 +56,16 @@ export function applyDomPatch(root: ParentNode, htmlPatch: HTMLPatch) {
       proto !== null;
       proto = Object.getPrototypeOf(proto)
     ) {
-      const descriptor = Object.getOwnPropertyDescriptor(proto, prop);
+      const descriptor = Object.getOwnPropertyDescriptor(proto, prop)
       if (descriptor) {
-        return descriptor;
+        return descriptor
       }
     }
-  })();
-  if (typeof propDescriptor?.set === "function") {
-    propDescriptor.set.call(targetNode, htmlPatch.args[0]);
-    return;
+  })()
+  if (typeof propDescriptor?.set === 'function') {
+    propDescriptor.set.call(targetNode, htmlPatch.args[0])
+    return
   }
 
-  throw new Error("Unknown node property type: " + htmlPatch.prop);
+  throw new Error(`Unknown node property type: ${htmlPatch.prop}`)
 }

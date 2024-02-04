@@ -1,21 +1,24 @@
 {
   "name": "visual-ui-test-debugger",
+  "displayName": "Visual UI Test Debugger",
   "version": "0.0.0",
   "description": "Debug UI tests while seeing the UI",
-  "displayName": "Visual UI Test Debugger",
   "preview": true,
+  "author": "poffm",
+  "license": "ISC",
   "keywords": [
     "vitest",
     "test",
     "typescript",
     "javascript"
   ],
-  "engines": {
-    "vscode": "^1.77.0"
-  },
   "categories": [
     "Testing"
   ],
+  "main": "./packages/extension/dist/extension.js",
+  "engines": {
+    "vscode": "^1.77.0"
+  },
   "activationEvents": [
     "onCommand:visual-ui-test-debugger.configureTest",
     "workspaceContains:**/vitest.config.*",
@@ -23,14 +26,6 @@
     "workspaceContains:**/jest.config.*",
     "workspaceContains:**/package.json"
   ],
-  "main": "./packages/extension/dist/extension.js",
-  "scripts": {
-    "build": "pnpm run -r \"/^build:.*/\"",
-    "dev": "pnpm run -r \"/^dev:.*/\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "poffm",
-  "license": "ISC",
   "contributes": {
     "configuration": {
       "title": "Visual UI Test Debugger",
@@ -68,9 +63,15 @@
       }
     ]
   },
+  "scripts": {
+    "build": "pnpm run -r \"/^build:.*/\"",
+    "dev": "pnpm run -r \"/^dev:.*/\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "devDependencies": {
+    "@antfu/eslint-config": "^2.6.4",
+    "eslint": "^8.56.0",
     "tsup": "^8.0.1",
     "typescript": "^5.3.3"
-  },
-  "dependencies": {}
+  }
 }

@@ -1,55 +1,55 @@
-import * as vscode from "vscode";
-import { detectTestFramework } from "./framework-support/detect";
-import { jestDebugConfig } from "./framework-support/jest-support";
-import { vitestDebugConfig } from "./framework-support/vitest-support";
-import { codeLensProvider } from "./code-lens-provider";
-import { startPanelController } from "./panel-controller";
+import * as vscode from 'vscode'
+import { detectTestFramework } from './framework-support/detect'
+import { jestDebugConfig } from './framework-support/jest-support'
+import { vitestDebugConfig } from './framework-support/vitest-support'
+import { codeLensProvider } from './code-lens-provider'
+import { startPanelController } from './panel-controller'
 
 function vscodeCfg() {
-  return vscode.workspace.getConfiguration();
+  return vscode.workspace.getConfiguration()
 }
 
 export async function activate(extensionContext: vscode.ExtensionContext) {
   const debugTest = vscode.commands.registerCommand(
-    "visual-ui-test-debugger.visuallyDebugUI",
+    'visual-ui-test-debugger.visuallyDebugUI',
     async (testName: unknown) => {
-      if (typeof testName !== "string") {
-        throw new Error("Expected a string argument");
+      if (typeof testName !== 'string') {
+        throw new TypeError('Expected a string argument')
       }
 
-      const editor = vscode.window.activeTextEditor;
+      const editor = vscode.window.activeTextEditor
       if (!editor) {
-        return;
+        return
       }
 
-      await editor.document.save();
+      await editor.document.save()
 
-      const panelController = await startPanelController();
+      const panelController = await startPanelController()
 
       const dispose1 = vscode.debug.onDidStartDebugSession((currentSession) => {
-        panelController.openPanel(extensionContext);
-        dispose1.dispose();
+        panelController.openPanel(extensionContext)
+        dispose1.dispose()
 
         const dispose2 = vscode.debug.onDidTerminateDebugSession(
           (endedSession) => {
             if (currentSession !== endedSession) {
-              return;
+              return
             }
 
-            panelController.dispose();
-            dispose2.dispose();
-          }
-        );
-      });
+            panelController.dispose()
+            dispose2.dispose()
+          },
+        )
+      })
 
-      const filePath = editor.document.fileName;
+      const filePath = editor.document.fileName
 
-      const fwInfo = await detectTestFramework(filePath);
+      const fwInfo = await detectTestFramework(filePath)
 
-      const debugConfig: vscode.DebugConfiguration =
-        fwInfo.framework === "jest"
+      const debugConfig: vscode.DebugConfiguration
+        = fwInfo.framework === 'jest'
           ? await jestDebugConfig(filePath, testName)
-          : await vitestDebugConfig(filePath, testName);
+          : await vitestDebugConfig(filePath, testName)
 
       debugConfig.env = {
         ...debugConfig.env,
@@ -57,29 +57,29 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
         TEST_FILE_PATH: filePath,
         HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
         EXPERIMENTAL_FAST_MODE: String(
-          vscodeCfg().get("visual-ui-test-debugger.experimentalFastMode")
+          vscodeCfg().get('visual-ui-test-debugger.experimentalFastMode'),
         ),
         TEST_CSS_FILES: JSON.stringify(
-          vscodeCfg().get("visual-ui-test-debugger.cssFiles")
+          vscodeCfg().get('visual-ui-test-debugger.cssFiles'),
         ),
-      };
+      }
 
-      vscode.debug.startDebugging(undefined, debugConfig);
-    }
-  );
+      vscode.debug.startDebugging(undefined, debugConfig)
+    },
+  )
 
-  if (!vscodeCfg().get("visual-ui-test-debugger.disableCodeLens")) {
+  if (!vscodeCfg().get('visual-ui-test-debugger.disableCodeLens')) {
     const docSelectors: vscode.DocumentFilter[] = [
       {
-        pattern: vscodeCfg().get("visual-ui-test-debugger.codeLensSelector"),
+        pattern: vscodeCfg().get('visual-ui-test-debugger.codeLensSelector'),
       },
-    ];
+    ]
     extensionContext.subscriptions.push(
-      vscode.languages.registerCodeLensProvider(docSelectors, codeLensProvider)
-    );
+      vscode.languages.registerCodeLensProvider(docSelectors, codeLensProvider),
+    )
   }
 
-  extensionContext.subscriptions.push(debugTest);
+  extensionContext.subscriptions.push(debugTest)
 }
 
 export function deactivate() {}

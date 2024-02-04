@@ -1,59 +1,59 @@
-import { findUp } from "find-up";
-import path from "path";
-import * as vscode from "vscode";
-import { cleanTestNameForTerminal } from "./util";
+import path from 'node:path'
+import { findUp } from 'find-up'
+import type * as vscode from 'vscode'
+import { cleanTestNameForTerminal } from './util'
 
 /** Extra debug config to pass into the VSCode debug process when using Vitest. */
 export async function vitestDebugConfig(
   filePath: string,
-  testName: string
+  testName: string,
 ): Promise<vscode.DebugConfiguration> {
   return {
-    name: "Visually Debug UI",
-    request: "launch",
-    type: "pwa-node",
+    name: 'Visually Debug UI',
+    request: 'launch',
+    type: 'pwa-node',
     program: await getVitestBinPath(filePath),
-    runtimeArgs: ["--require", path.resolve(__dirname, "inject-cli.js")],
+    runtimeArgs: ['--require', path.resolve(__dirname, 'inject-cli.js')],
     args: [
       // The Vitest "run" command
-      "run",
+      'run',
       filePath,
-      "-t",
+      '-t',
       cleanTestNameForTerminal(testName),
       // Use child process instead of the default threads.
-      "--pool",
-      "forks",
-      "--poolOptions.forks.minForks",
+      '--pool',
+      'forks',
+      '--poolOptions.forks.minForks',
       1,
-      "--poolOptions.forks.maxForks",
+      '--poolOptions.forks.maxForks',
       1,
     ],
     autoAttachChildProcesses: true,
     // TODO use the config
     skipFiles: [
-      "**/node_modules/**",
-      "**/dist/**",
-      "**/cypress/**",
-      "**/.{idea,git,cache,output,temp}/**",
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**',
     ],
     smartStep: true,
-  };
+  }
 }
 
 const lookupPaths = [
-  "node_modules/vitest/vitest.mjs",
-  "node_modules/.bin/vitest.js",
-  "node_modules/.bin/vitest.cmd",
-];
+  'node_modules/vitest/vitest.mjs',
+  'node_modules/.bin/vitest.js',
+  'node_modules/.bin/vitest.cmd',
+]
 
 export async function getVitestBinPath(filepath: string) {
-  let vitestPath: string | undefined;
+  let vitestPath: string | undefined
   for (const lookupPath of lookupPaths) {
-    vitestPath = await findUp(lookupPath, { cwd: filepath });
+    vitestPath = await findUp(lookupPath, { cwd: filepath })
     if (vitestPath) {
-      return vitestPath;
+      return vitestPath
     }
   }
 
-  throw new Error(`Could not find Vitest bin file in ${lookupPaths}`);
+  throw new Error(`Could not find Vitest bin file in ${lookupPaths}`)
 }

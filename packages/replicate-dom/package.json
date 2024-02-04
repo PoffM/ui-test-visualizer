@@ -1,12 +1,12 @@
 {
   "name": "replicate-dom",
   "main": "./src/index.ts",
-  "devDependencies": {
-    "@types/lodash": "^4.14.202"
-  },
   "dependencies": {
     "lodash": "^4.17.21",
     "morphdom": "^2.7.2",
     "tinyspy": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202"
   }
 }
