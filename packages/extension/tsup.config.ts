@@ -1,5 +1,5 @@
-import fs from "fs/promises";
 import fsSync from "fs";
+import fs from "fs/promises";
 import path from "path";
 import { defineConfig } from "tsup";
 
@@ -8,9 +8,9 @@ export default defineConfig((options) => ({
     extension: "./src/extension/extension.ts",
     "inject-cli": "./src/extension/inject-cli.ts",
     "inject-test": "./src/test-process/inject-test.ts",
-    "load-styles": "./src/worker/load-styles.ts",
+    "load-styles": "./src/test-process/load-styles-worker.ts",
   },
-  external: ["vscode", "vitest"],
+  external: ["vscode", "./load-styles"],
   noExternal: [
     "get-port",
     "find-up",

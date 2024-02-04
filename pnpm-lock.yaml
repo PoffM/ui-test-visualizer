@@ -7,92 +7,13 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@solid-primitives/event-listener':
-        specifier: ^2.3.0
-        version: 2.3.0(solid-js@1.8.11)
-      '@vscode/codicons':
-        specifier: ^0.0.35
-        version: 0.0.35
-      '@vscode/webview-ui-toolkit':
-        specifier: ^1.4.0
-        version: 1.4.0(react@18.2.0)
-      find-up:
-        specifier: ^7.0.0
-        version: 7.0.0
-      get-port:
-        specifier: ^7.0.0
-        version: 7.0.0
-      jest-config:
-        specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.11.0)(ts-node@10.9.2)
-      jest-editor-support:
-        specifier: ^31.1.2
-        version: 31.1.2
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
-      lucide-solid:
-        specifier: ^0.321.0
-        version: 0.321.0(solid-js@1.8.11)
-      morphdom:
-        specifier: ^2.7.2
-        version: 2.7.2
-      postcss-load-config:
-        specifier: ^5.0.2
-        version: 5.0.2(postcss@8.4.33)
-      solid-js:
-        specifier: ^1.8.7
-        version: 1.8.11
-      synckit:
-        specifier: ^0.9.0
-        version: 0.9.0
-      tinyspy:
-        specifier: ^2.2.0
-        version: 2.2.0
-      vite:
-        specifier: ^5.0.11
-        version: 5.0.11(@types/node@20.11.0)
-      ws:
-        specifier: ^8.16.0
-        version: 8.16.0
     devDependencies:
-      '@types/lodash':
-        specifier: ^4.14.202
-        version: 4.14.202
-      '@types/node':
-        specifier: ^20.11.0
-        version: 20.11.0
-      '@types/vscode':
-        specifier: ^1.85.0
-        version: 1.85.0
-      '@types/vscode-webview':
-        specifier: ^1.57.4
-        version: 1.57.4
-      '@types/ws':
-        specifier: ^8.5.10
-        version: 8.5.10
-      autoprefixer:
-        specifier: ^10.4.16
-        version: 10.4.16(postcss@8.4.33)
-      postcss:
-        specifier: ^8.4.33
-        version: 8.4.33
-      tailwindcss:
-        specifier: ^3.4.1
-        version: 3.4.1
       tsup:
         specifier: ^8.0.1
-        version: 8.0.1(postcss@8.4.33)(typescript@5.3.3)
+        version: 8.0.1(typescript@5.3.3)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
-      vite-plugin-solid:
-        specifier: ^2.8.0
-        version: 2.8.0(solid-js@1.8.11)(vite@5.0.11)
-      vitest:
-        specifier: ^1.2.0
-        version: 1.2.0(@types/node@20.11.0)(happy-dom@13.1.4)
 
   examples/jest-react:
     dependencies:
@@ -151,7 +72,96 @@ importers:
         version: 5.0.11(@types/node@20.11.0)
       vitest:
         specifier: ^1.1.3
-        version: 1.2.0(@types/node@20.11.0)(happy-dom@13.1.4)
+        version: 1.2.0(happy-dom@13.1.4)
+
+  packages/extension:
+    dependencies:
+      '@solid-primitives/event-listener':
+        specifier: ^2.3.0
+        version: 2.3.0(solid-js@1.8.11)
+      '@vscode/codicons':
+        specifier: ^0.0.35
+        version: 0.0.35
+      '@vscode/webview-ui-toolkit':
+        specifier: ^1.4.0
+        version: 1.4.0(react@18.2.0)
+      find-up:
+        specifier: ^7.0.0
+        version: 7.0.0
+      get-port:
+        specifier: ^7.0.0
+        version: 7.0.0
+      jest-config:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@20.11.0)(ts-node@10.9.2)
+      jest-editor-support:
+        specifier: ^31.1.2
+        version: 31.1.2
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      lucide-solid:
+        specifier: ^0.321.0
+        version: 0.321.0(solid-js@1.8.11)
+      postcss-load-config:
+        specifier: ^5.0.2
+        version: 5.0.2(postcss@8.4.33)
+      solid-js:
+        specifier: ^1.8.7
+        version: 1.8.11
+      synckit:
+        specifier: ^0.9.0
+        version: 0.9.0
+      vite:
+        specifier: ^5.0.11
+        version: 5.0.11(@types/node@20.11.0)
+      ws:
+        specifier: ^8.16.0
+        version: 8.16.0
+    devDependencies:
+      '@types/lodash':
+        specifier: ^4.14.202
+        version: 4.14.202
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.11.0
+      '@types/vscode':
+        specifier: ^1.85.0
+        version: 1.85.0
+      '@types/vscode-webview':
+        specifier: ^1.57.4
+        version: 1.57.4
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
+      autoprefixer:
+        specifier: ^10.4.16
+        version: 10.4.16(postcss@8.4.33)
+      postcss:
+        specifier: ^8.4.33
+        version: 8.4.33
+      tailwindcss:
+        specifier: ^3.4.1
+        version: 3.4.1
+      vite-plugin-solid:
+        specifier: ^2.8.0
+        version: 2.8.0(solid-js@1.8.11)(vite@5.0.11)
+
+  packages/replicate-dom:
+    dependencies:
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      morphdom:
+        specifier: ^2.7.2
+        version: 2.7.2
+      tinyspy:
+        specifier: ^2.2.0
+        version: 2.2.0
+    devDependencies:
+      '@types/lodash':
+        specifier: ^4.14.202
+        version: 4.14.202
 
 packages:
 
@@ -5602,7 +5612,7 @@ packages:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
     dev: false
 
-  /tsup@8.0.1(postcss@8.4.33)(typescript@5.3.3):
+  /tsup@8.0.1(typescript@5.3.3):
     resolution: {integrity: sha512-hvW7gUSG96j53ZTSlT4j/KL0q1Q2l6TqGBFc6/mu/L46IoNWqLLUzLRLP1R8Q7xrJTmkDxxDoojV5uCVs1sVOg==}
     engines: {node: '>=18'}
     hasBin: true
@@ -5629,7 +5639,6 @@ packages:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss: 8.4.33
       postcss-load-config: 4.0.2(postcss@8.4.33)
       resolve-from: 5.0.0
       rollup: 4.9.5
@@ -5738,7 +5747,7 @@ packages:
     resolution: {integrity: sha512-hGdgQozCsQJMyfK5urgFcWEqsSSrK63Awe0t/IMR0bZ0QMtnuaiHzThW81guu3qx9abLi99NEuiaN6P9gVYsNg==}
     dev: true
 
-  /vite-node@1.2.0(@types/node@20.11.0):
+  /vite-node@1.2.0:
     resolution: {integrity: sha512-ETnQTHeAbbOxl7/pyBck9oAPZZZo+kYnFt1uQDD+hPReOc+wCjXw4r4jHriBRuVDB5isHmPXxrfc1yJnfBERqg==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -5824,7 +5833,7 @@ packages:
       vite: 5.0.11(@types/node@20.11.0)
     dev: true
 
-  /vitest@1.2.0(@types/node@20.11.0)(happy-dom@13.1.4):
+  /vitest@1.2.0(happy-dom@13.1.4):
     resolution: {integrity: sha512-Ixs5m7BjqvLHXcibkzKRQUvD/XLw0E3rvqaCMlrm/0LMsA0309ZqYvTlPzkhh81VlEyVZXFlwWnkhb6/UMtcaQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -5849,7 +5858,6 @@ packages:
       jsdom:
         optional: true
     dependencies:
-      '@types/node': 20.11.0
       '@vitest/expect': 1.2.0
       '@vitest/runner': 1.2.0
       '@vitest/snapshot': 1.2.0
@@ -5870,7 +5878,7 @@ packages:
       tinybench: 2.5.1
       tinypool: 0.8.1
       vite: 5.0.11(@types/node@20.11.0)
-      vite-node: 1.2.0(@types/node@20.11.0)
+      vite-node: 1.2.0
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less

@@ -5,13 +5,13 @@
     "noEmit": true,
     "lib": ["ES2020", "DOM"],
     "sourceMap": true,
-    "rootDir": "src",
+    "rootDir": ".",
     "esModuleInterop": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["./**/*.ts"],
   "exclude": ["examples/**/*"]
 }

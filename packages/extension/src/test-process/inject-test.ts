@@ -2,7 +2,7 @@
 
 import { findUpSync } from "find-up";
 import { createSyncFn } from "synckit";
-import { initPrimaryDom } from "../replicate-dom";
+import { initPrimaryDom } from "../../../replicate-dom";
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
