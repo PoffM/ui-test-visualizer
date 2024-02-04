@@ -1,7 +1,10 @@
 import fs from "fs/promises";
 import postcss from "postcss";
 import postcssrc from "postcss-load-config";
+import { runAsWorker } from "synckit";
 import { preprocessCSS, resolveConfig } from "vite";
+
+runAsWorker(loadStyles);
 
 /**
  * Loads and processes a CSS file.
@@ -9,7 +12,7 @@ import { preprocessCSS, resolveConfig } from "vite";
  * and PostCSS (Tailwind, ).
  * Replaces `:root` with `:root,:host` because the processed styles end up in the shadow DOM.
  */
-export async function loadStyles(filePath: string) {
+async function loadStyles(filePath: string) {
   const sourceCode = await fs.readFile(filePath, "utf8");
 
   /** The parsed PostCSS config. */

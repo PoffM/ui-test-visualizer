@@ -1,8 +1,8 @@
 // Inject this code into the test process
 
 import { findUpSync } from "find-up";
+import { createSyncFn } from "synckit";
 import { initPrimaryDom } from "../replicate-dom";
-import { loadStyles } from "./load-styles";
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
@@ -36,7 +36,7 @@ async function preTest() {
           }),
     });
 
-    void loadStylesIntoHead(testWindow);
+    loadStylesIntoHead(testWindow);
   }
 
   // Hook into the window which is set by happy-dom or jsdom
@@ -58,16 +58,24 @@ async function preTest() {
   }
 }
 
-async function loadStylesIntoHead(win: Window) {
-  const cssSheets = await (async () => {
+function loadStylesIntoHead(win: Window) {
+  const cssSheets = (() => {
     const files = JSON.parse(process.env.TEST_CSS_FILES ?? "[]") as string[];
     if (!files) {
       return [];
     }
 
-    const results = await Promise.allSettled(
-      files.map((file) => loadStyles(file))
-    );
+    const results: (
+      | { status: "fulfilled"; value: string }
+      | { status: "rejected"; reason: unknown }
+    )[] = files.map((file) => {
+      try {
+        const style = loadStylesInWorker(file);
+        return { status: "fulfilled", value: String(style) };
+      } catch (error) {
+        return { status: "rejected", reason: error };
+      }
+    });
 
     const sheets: string[] = [];
     for (const [idx, result] of Object.entries(results)) {
@@ -93,6 +101,8 @@ async function loadStylesIntoHead(win: Window) {
     win.document.head.appendChild(style);
   }
 }
+
+const loadStylesInWorker = createSyncFn(require.resolve("./load-styles"));
 
 // For when this file is "--require"d before the Vitest tests: Run immediately.
 if (process.env.TEST_FRAMEWORK === "vitest") {

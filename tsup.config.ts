@@ -8,6 +8,7 @@ export default defineConfig((options) => ({
     extension: "./src/extension/extension.ts",
     "inject-cli": "./src/extension/inject-cli.ts",
     "inject-test": "./src/test-process/inject-test.ts",
+    "load-styles": "./src/worker/load-styles.ts",
   },
   external: ["vscode", "vitest"],
   noExternal: [
