@@ -3,7 +3,7 @@ import { detectTestFramework } from "./framework-support/detect";
 import { jestDebugConfig } from "./framework-support/jest-support";
 import { vitestDebugConfig } from "./framework-support/vitest-support";
 import { codeLensProvider } from "./code-lens-provider";
-import { startVisualTestingBackEnd } from "./ui-back-end";
+import { startPanelController } from "./panel-controller";
 
 function vscodeCfg() {
   return vscode.workspace.getConfiguration();
@@ -24,20 +24,22 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
       await editor.document.save();
 
-      const backEnd = await startVisualTestingBackEnd();
+      const panelController = await startPanelController();
 
       const dispose1 = vscode.debug.onDidStartDebugSession((currentSession) => {
-        backEnd.openPanel(extensionContext);
+        panelController.openPanel(extensionContext);
         dispose1.dispose();
 
-        const dispose2 = vscode.debug.onDidTerminateDebugSession((endedSession) => {
-          if (currentSession !== endedSession) {
-            return;
+        const dispose2 = vscode.debug.onDidTerminateDebugSession(
+          (endedSession) => {
+            if (currentSession !== endedSession) {
+              return;
+            }
+
+            panelController.dispose();
+            dispose2.dispose();
           }
-          
-          backEnd.dispose();
-          dispose2.dispose();
-        });
+        );
       });
 
       const filePath = editor.document.fileName;
@@ -53,7 +55,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
         ...debugConfig.env,
         TEST_FRAMEWORK: fwInfo.framework,
         TEST_FILE_PATH: filePath,
-        HTML_UPDATER_PORT: String(backEnd.htmlUpdaterPort),
+        HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
         EXPERIMENTAL_FAST_MODE: String(
           vscodeCfg().get("visual-ui-test-debugger.experimentalFastMode")
         ),

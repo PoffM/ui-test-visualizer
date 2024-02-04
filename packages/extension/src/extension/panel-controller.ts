@@ -3,9 +3,9 @@ import { debounce } from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { RawData, Server } from "ws";
-import { HTMLPatch } from "../../../replicate-dom";
+import { HTMLPatch } from "replicate-dom";
 
-export async function startVisualTestingBackEnd() {
+export async function startPanelController() {
   const htmlUpdaterPort = await getPort();
   const viteDevServerPort = 5173;
 
