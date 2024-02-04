@@ -106,6 +106,9 @@ importers:
       postcss-load-config:
         specifier: ^5.0.2
         version: 5.0.2(postcss@8.4.33)
+      replicate-dom:
+        specifier: link:../replicate-dom
+        version: link:../replicate-dom
       solid-js:
         specifier: ^1.8.12
         version: 1.8.12

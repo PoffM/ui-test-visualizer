@@ -17,6 +17,7 @@ export default defineConfig((options) => ({
     "postcss-load-config",
     "lodash",
     "tinyspy",
+    "replicate-dom"
   ],
   target: "esnext",
   env: {
