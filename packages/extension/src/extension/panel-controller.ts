@@ -2,9 +2,11 @@ import path from 'node:path'
 import getPort from 'get-port'
 import { debounce } from 'lodash'
 import * as vscode from 'vscode'
-import type { RawData } from 'ws'
-import { Server } from 'ws'
+import type { RawData, Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
+
+// Avoids import errorrs when importing in Vitest
+const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
 export async function startPanelController() {
   const htmlUpdaterPort = await getPort()
@@ -67,7 +69,10 @@ export async function startPanelController() {
         }
 
         // In production, load the built static front-end files.
-        if (process.env.NODE_ENV === 'production') {
+        if (
+          process.env.NODE_ENV === 'test'
+          || process.env.NODE_ENV === 'production'
+        ) {
           function getUri(path: string) {
             return panel?.webview.asWebviewUri(
               vscode.Uri.joinPath(extensionContext.extensionUri, path),
