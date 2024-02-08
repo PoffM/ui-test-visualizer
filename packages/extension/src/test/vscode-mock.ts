@@ -1,32 +1,36 @@
-import { exec } from 'node:child_process'
 import path from 'node:path'
-import { findUp } from 'find-up'
-import { Node, Window } from 'happy-dom'
-import { updateDomReplica } from 'replicate-dom'
-import type { DeepMockProxy } from 'vitest-mock-extended'
-import { mockDeep } from 'vitest-mock-extended'
+import { exec } from 'node:child_process'
 import type * as vscode from 'vscode'
+import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended'
+import { findUp } from 'find-up'
+import { updateDomReplica } from 'replicate-dom'
+import { Node, Window } from 'happy-dom'
+
+const testConfig: Record<string, unknown> = {
+  'visual-ui-test-debugger.experimentalFastMode': true,
+  'visual-ui-test-debugger.cssFiles': [],
+  'visual-ui-test-debugger.disableCodeLens': false,
+  'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
+}
 
 export interface VscodeMockParams {
+  testFile?: string
   onReplicaDomUpdate: (doc: Document) => void
   onDebugSessionFinish: (session: vscode.DebugSession) => void
 }
 export async function initVscodeMock({
+  testFile,
   onReplicaDomUpdate,
   onDebugSessionFinish,
 }: VscodeMockParams) {
+  // @ts-expect-error The vscode module is mocked by 'vi' and 'vitest-mock-extended'.
   const vscode = await import('vscode') as DeepMockProxy<typeof import('vscode')>
-
-  const testFile = await findUp(
-    'examples/vitest-react/test/basic.test.tsx',
-    { cwd: __filename },
-  )
 
   if (!testFile) {
     throw new Error('Test file not found')
   }
 
-  vscode.window = mockDeep<typeof vscode.window>({
+  vscode.window = mockDeep<typeof import('vscode').window>({
     activeTextEditor: {
       document: {
         fileName: path.resolve(__dirname, testFile),
@@ -68,15 +72,18 @@ export async function initVscodeMock({
     if (typeof debugConfig === 'string') {
       throw new TypeError('Expected a DebugConfiguration object')
     }
-    const { program, args, env, runtimeArgs } = debugConfig
+    const { program, args, env, runtimeArgs = [] } = debugConfig
 
     const cmd = `${process.execPath} ${runtimeArgs.join(' ')} ${program} ${args.join(' ')}`
-    const cwd = await findUp(
-      'examples/vitest-react',
-      { cwd: __filename, type: 'directory' },
-    )
 
-    const testProcess = exec(cmd, { env, cwd })
+    const pkgPath = await findUp('package.json', { cwd: testFile })
+    if (!pkgPath) {
+      throw new Error(`Could not find package root for ${testFile}`)
+    }
+
+    const packageRoot = await path.resolve(pkgPath, '..')
+
+    const testProcess = exec(cmd, { env, cwd: packageRoot })
 
     testProcess.stdout?.on('data', console.log)
     testProcess.stderr?.on('data', console.error)
@@ -140,11 +147,4 @@ export async function initVscodeMock({
   )
 
   return vscode
-}
-
-export const testConfig: Record<string, unknown> = {
-  'visual-ui-test-debugger.experimentalFastMode': true,
-  'visual-ui-test-debugger.cssFiles': [],
-  'visual-ui-test-debugger.disableCodeLens': false,
-  'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
 }
