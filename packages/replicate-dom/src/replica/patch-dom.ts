@@ -2,7 +2,15 @@ import { castArray } from 'lodash'
 import type { DomNodePath, HTMLPatch, SerializedDomNode } from '../types'
 import { getNodeByPath, parseDomNode } from './parse-mutations'
 
-export function applyDomPatch(root: ParentNode, htmlPatch: HTMLPatch) {
+export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
+  const doc = root.nodeType === 9 // Check if the root node is Node.DOCUMENT_NODE
+    ? root as Document
+    : root.ownerDocument
+
+  if (!doc) {
+    throw new Error('Root node must be a Document type or have an owner document')
+  }
+
   let targetNode = getNodeByPath(root, htmlPatch.targetNodePath)
   if (!targetNode) {
     throw new Error(`Node not found: ${String(htmlPatch.targetNodePath)}`)
@@ -28,7 +36,7 @@ export function applyDomPatch(root: ParentNode, htmlPatch: HTMLPatch) {
       if (Array.isArray(arg)) {
         // If the first element is a string (the tag), it's a serialized dom node
         if (typeof arg[0] === 'string') {
-          return parseDomNode(arg as SerializedDomNode, window)
+          return parseDomNode(arg as SerializedDomNode, doc)
         }
         // If the first element is a number, it's a path to an existing node
         if (typeof arg[0] === 'number') {
