@@ -10,7 +10,8 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "sourceMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": ["./**/*.ts"],
   "exclude": ["examples/**/*"]
