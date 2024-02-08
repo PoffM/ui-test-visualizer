@@ -1,11 +1,11 @@
 import { exec } from 'node:child_process'
+import path from 'node:path'
 import { findUp } from 'find-up'
 import { Node, Window } from 'happy-dom'
 import { updateDomReplica } from 'replicate-dom'
 import type { DeepMockProxy } from 'vitest-mock-extended'
 import { mockDeep } from 'vitest-mock-extended'
 import type * as vscode from 'vscode'
-import { testConfig } from './extension.test'
 
 export interface VscodeMockParams {
   onReplicaDomUpdate: (doc: Document) => void
@@ -15,8 +15,24 @@ export async function initVscodeMock({
   onReplicaDomUpdate,
   onDebugSessionFinish,
 }: VscodeMockParams) {
-  // @ts-expect-error should work
   const vscode = await import('vscode') as DeepMockProxy<typeof import('vscode')>
+
+  const testFile = await findUp(
+    'examples/vitest-react/test/basic.test.tsx',
+    { cwd: __filename },
+  )
+
+  if (!testFile) {
+    throw new Error('Test file not found')
+  }
+
+  vscode.window = mockDeep<typeof vscode.window>({
+    activeTextEditor: {
+      document: {
+        fileName: path.resolve(__dirname, testFile),
+      },
+    },
+  })
 
   vscode.workspace.getConfiguration.mockReturnValue({
     get: (section) => {
@@ -124,4 +140,11 @@ export async function initVscodeMock({
   )
 
   return vscode
+}
+
+export const testConfig: Record<string, unknown> = {
+  'visual-ui-test-debugger.experimentalFastMode': true,
+  'visual-ui-test-debugger.cssFiles': [],
+  'visual-ui-test-debugger.disableCodeLens': false,
+  'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
 }

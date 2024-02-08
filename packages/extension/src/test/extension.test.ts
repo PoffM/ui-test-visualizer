@@ -1,4 +1,3 @@
-import path from 'node:path'
 import { expect, it, vi } from 'vitest'
 import { mockDeep } from 'vitest-mock-extended'
 import type * as vscode from 'vscode'
@@ -7,31 +6,9 @@ import { activate } from '../extension/extension'
 import { initVscodeMock } from './vscode-mock'
 
 vi.mock('vscode', () => {
-  const vscode = mockDeep<typeof import('vscode')>({
-    workspace: {},
-    commands: {},
-    window: {
-      activeTextEditor: {
-        document: {
-          fileName: path.resolve(
-            __dirname,
-            '../../../../examples/vitest-react/test/basic.test.tsx',
-          ),
-        },
-      },
-    },
-    debug: {},
-  })
-
+  const vscode = mockDeep<typeof import('vscode')>({})
   return vscode
 })
-
-export const testConfig: Record<string, unknown> = {
-  'visual-ui-test-debugger.experimentalFastMode': true,
-  'visual-ui-test-debugger.cssFiles': [],
-  'visual-ui-test-debugger.disableCodeLens': false,
-  'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
-}
 
 it('replicates the test DOM into the webview', async () => {
   const counts: number[] = []
@@ -64,5 +41,6 @@ it('replicates the test DOM into the webview', async () => {
     )
   })
 
+  // The counter is incremented, then decremented
   expect(counts).toEqual([0, 1, 2, 1])
 })
