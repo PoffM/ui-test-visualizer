@@ -40,7 +40,7 @@ it('replicates the test DOM into the webview', async () => {
   await new Promise<void>(async (resolve) => {
     const vscode = await initVscodeMock({
       onReplicaDomUpdate(doc) {
-        const count = queryByText(doc.body, 'Count')
+        const count = queryByText(doc.body, /^Count:/)
         if (!count) {
           return
         }
