@@ -5,7 +5,8 @@
     "build:extension": "tsup --minify",
     "build:vite": "vite build ./src/web-view-vite",
     "dev:extension": "tsup --watch --sourcemap",
-    "dev:vite": "vite ./src/web-view-vite"
+    "dev:vite": "vite ./src/web-view-vite",
+    "test": "vitest --run"
   },
   "dependencies": {
     "@solid-primitives/event-listener": "^2.3.1",
