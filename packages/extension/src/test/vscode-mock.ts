@@ -92,10 +92,15 @@ export async function initVscodeMock({
 
     const packageRoot = await path.resolve(pkgPath, '..')
 
-    const testProcess = exec(cmd, { env, cwd: packageRoot })
-
-    testProcess.stdout?.on('data', console.log)
-    testProcess.stderr?.on('data', console.error)
+    const testProcess = exec(
+      cmd,
+      { env, cwd: packageRoot },
+      (error, stdout, stderr) => {
+        if (error) { console.error(error) }
+        if (stdout) { console.log(stdout) }
+        if (stderr) { console.error(stderr) }
+      },
+    )
 
     const mockSession = mockDeep<vscode.DebugSession>()
 
