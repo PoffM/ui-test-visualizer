@@ -6,6 +6,7 @@
     "lib": ["ES2020", "DOM"],
     "rootDir": ".",
     "module": "commonJS",
+    "resolveJsonModule": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,

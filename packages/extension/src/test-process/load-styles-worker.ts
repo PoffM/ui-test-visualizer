@@ -21,6 +21,7 @@ async function loadStyles(filePath: string) {
       return await postcssrc()
     }
     catch (error) {
+      console.log('No PostCSS config found')
       return null
     }
   })()

@@ -5,10 +5,11 @@ import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { findUp } from 'find-up'
 import { updateDomReplica } from 'replicate-dom'
 import { Node, Window } from 'happy-dom'
+import type { ExtensionSettingsKey } from '../extension/extension-setting'
 
-const testConfig: Record<string, unknown> = {
+export const defaultTestSettings: Record<ExtensionSettingsKey, unknown> = {
   'visual-ui-test-debugger.experimentalFastMode': true,
-  'visual-ui-test-debugger.cssFiles': [],
+  'visual-ui-test-debugger.cssFiles': [] as string[],
   'visual-ui-test-debugger.disableCodeLens': false,
   'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
 }
@@ -17,11 +18,13 @@ export interface VscodeMockParams {
   testFile?: string
   onReplicaDomUpdate: (doc: Document) => void
   onDebugSessionFinish: (session: vscode.DebugSession) => void
+  settings?: Partial<typeof defaultTestSettings>
 }
 export async function initVscodeMock({
   testFile,
   onReplicaDomUpdate,
   onDebugSessionFinish,
+  settings,
 }: VscodeMockParams) {
   // @ts-expect-error The vscode module is mocked by 'vi' and 'vitest-mock-extended'.
   const vscode = await import('vscode') as DeepMockProxy<typeof import('vscode')>
@@ -38,9 +41,15 @@ export async function initVscodeMock({
     },
   })
 
+  const resolvedSettings = {
+    ...defaultTestSettings,
+    ...settings,
+  }
+
   vscode.workspace.getConfiguration.mockReturnValue({
     get: (section) => {
-      const value = testConfig[section]
+      // @ts-expect-error should work
+      const value = resolvedSettings[section]
       if (value === undefined) {
         throw new Error(`Config prop not implemented: ${section}`)
       }
@@ -117,12 +126,12 @@ export async function initVscodeMock({
     return { dispose: () => endDebugCallbacks.delete(cb) }
   })
 
-  const win = new Window() as unknown as typeof globalThis.window
+  const replicaWindow = new Window() as unknown as typeof globalThis.window
 
   // Remove the <!DOCTYPE> node.
-  for (const node of Array.from(win.document.childNodes)) {
+  for (const node of Array.from(replicaWindow.document.childNodes)) {
     if (node.nodeType === Node.DOCUMENT_TYPE_NODE) {
-      win.document.removeChild(node)
+      replicaWindow.document.removeChild(node)
     }
   }
 
@@ -134,8 +143,8 @@ export async function initVscodeMock({
         webview: {
           postMessage: async (msg) => {
             if (msg.htmlPatch) {
-              updateDomReplica(win.document, msg.htmlPatch)
-              onReplicaDomUpdate(win.document)
+              updateDomReplica(replicaWindow.document, msg.htmlPatch)
+              onReplicaDomUpdate(replicaWindow.document)
             }
             return true
           },
@@ -146,5 +155,5 @@ export async function initVscodeMock({
     },
   )
 
-  return vscode
+  return { vscode, replicaWindow }
 }
