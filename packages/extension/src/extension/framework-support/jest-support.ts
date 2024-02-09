@@ -1,4 +1,3 @@
-import path from 'node:path'
 import { findUp } from 'find-up'
 import type * as vscode from 'vscode'
 import { detectTestFramework } from './detect'
@@ -11,23 +10,24 @@ export async function jestDebugConfig(
   const fw = await detectTestFramework(filePath)
 
   return {
-    console: 'integratedTerminal',
-    internalConsoleOptions: 'neverOpen',
     name: 'Visually Debug UI',
-    program: fw.binPath,
     request: 'launch',
     type: 'pwa-node',
+    program: fw.binPath,
+    autoAttachChildProcesses: true,
     args: [
       filePath,
-      '-c',
+      '--config',
       fw.configPath,
-      '-t',
+      '--testNamePattern',
       cleanTestNameForTerminal(testName),
       '--runInBand',
       '--testTimeout=1000000000',
       '--setupFiles',
-      path.resolve(__dirname, 'inject-test.js'),
+      await findUp('dist/inject-test.js', { cwd: __filename }),
       ...(fw.setupFiles ?? []),
+      '--detectOpenHandles',
+      '--forceExit',
     ],
   }
 }

@@ -66,12 +66,13 @@
   "scripts": {
     "build": "pnpm run -r \"/^build:.*/\"",
     "dev": "pnpm run -r \"/^dev:.*/\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsc && pnpm run --filter {./packages/*} test"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
     "eslint": "^8.56.0",
     "tsup": "^8.0.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2"
   }
 }

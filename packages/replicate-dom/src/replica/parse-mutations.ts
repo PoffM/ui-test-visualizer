@@ -4,8 +4,8 @@ import type {
   SerializedTextNode,
 } from '../types'
 
-export function getNodeByPath(root: ParentNode, path: number[]) {
-  let currentElement: ParentNode | ChildNode | undefined = root
+export function getNodeByPath(root: Node, path: number[]) {
+  let currentElement: Node | undefined = root
 
   for (const index of path) {
     currentElement = currentElement?.childNodes?.[index]
@@ -17,21 +17,21 @@ export function getNodeByPath(root: ParentNode, path: number[]) {
   return currentElement
 }
 
-export function parseDomNode(node: SerializedDomNode, win: Window): Node {
+export function parseDomNode(node: SerializedDomNode, doc: Document): Node {
   if (typeof node === 'string' || node === null) {
-    return win.document.createTextNode(node ?? '')
+    return doc.createTextNode(node ?? '')
   }
   if (Array.isArray(node) && node[0] === 'Text') {
     const [, text] = node as SerializedTextNode
-    return win.document.createTextNode(text ?? '')
+    return doc.createTextNode(text ?? '')
   }
   if (Array.isArray(node)) {
     const [tag, attributes, children] = node as SerializedDomElement
-    const element = win.document.createElement(tag)
+    const element = doc.createElement(tag)
     for (const [name, value] of Object.entries(attributes)) {
       element.setAttribute(name, value)
     }
-    const parsedChildren = children.map(child => parseDomNode(child, win))
+    const parsedChildren = children.map(child => parseDomNode(child, doc))
     element.append(...parsedChildren)
     return element
   }
