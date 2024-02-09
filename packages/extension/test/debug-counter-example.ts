@@ -1,7 +1,7 @@
 import { queryByText } from '@testing-library/dom'
 import { mockDeep } from 'vitest-mock-extended'
 import type * as vscode from 'vscode'
-import { activate } from '../extension/extension'
+import { activate } from '../src/extension/extension'
 import type { defaultTestSettings } from './vscode-mock'
 import { initVscodeMock } from './vscode-mock'
 

@@ -5,7 +5,7 @@ import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { findUp } from 'find-up'
 import { updateDomReplica } from 'replicate-dom'
 import { Node, Window } from 'happy-dom'
-import type { ExtensionSettingsKey } from '../extension/extension-setting'
+import type { ExtensionSettingsKey } from '../src/extension/extension-setting'
 
 export const defaultTestSettings: Record<ExtensionSettingsKey, unknown> = {
   'visual-ui-test-debugger.experimentalFastMode': true,
