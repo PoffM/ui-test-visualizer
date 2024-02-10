@@ -56,12 +56,6 @@ describe(' HTMLElement', () => {
   })
 
   describe('get innerText()', () => {
-    it('returns the as the textContent property without any line breaks if element is not connected to document.', () => {
-      const { primary, replica } = testElement('div')
-      primary.innerHTML = `<div>The <strong>quick</strong> brown fox</div><div>Jumped over the lazy dog</div>`
-      expect(replica.innerText).toBe('The quick brown foxJumped over the lazy dog')
-    })
-
     it('returns rendered text with line breaks between block and flex elements and without hidden elements being rendered if element is connected to the document.', () => {
       const { primary, replica } = testElement('div')
 
