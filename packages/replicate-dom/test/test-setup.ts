@@ -1,11 +1,11 @@
-import type { HTMLElement, IDocument, IWindow } from 'happy-dom'
+import type { HTMLElement, IDocument, INode, IWindow } from 'happy-dom'
 import { applyDomPatch, initPrimaryDom } from '../src'
 import { getNodePath } from '../src/primary/serialize-mutations'
 import { getNodeByPath } from '../src/replica/parse-mutations'
 
 export function initTestReplicaDom(
-  primaryWindow: IWindow,
-  replicaDocument: IDocument,
+  primaryWindow: IWindow | Window,
+  replicaDocument: IDocument | Document,
 ) {
   initPrimaryDom({
     onMutation(htmlPatch) {
@@ -16,13 +16,16 @@ export function initTestReplicaDom(
   })
 }
 
-export function addTestElement(
-  primaryDocument: Document,
-  replicaDocument: Node,
-  type: string,
+export function addTestElement<
+  M extends 'createElement' | 'createTextNode',
+>(
+  primaryDocument: IDocument,
+  replicaDocument: INode,
+  arg: string,
+  method: M = 'createElement' as M,
 ) {
   const primary = primaryDocument.body.appendChild(
-    primaryDocument.createElement(type),
+    primaryDocument[method](arg),
   )
   const path = getNodePath(
     primary as unknown as Node,
@@ -31,13 +34,20 @@ export function addTestElement(
   if (!path) {
     throw new Error('Node not found in original document')
   }
-  const replica = getNodeByPath(replicaDocument, path)
+  const replica = getNodeByPath(
+    replicaDocument as unknown as Node,
+    path,
+  )
   if (!replica) {
     throw new Error(`Node not found in replica document at ${path}`)
   }
 
+  type Return = M extends 'createElement'
+    ? HTMLElement
+    : M extends 'createTextNode' ? Text : never
+
   return {
-    primary: primary as unknown as HTMLElement,
-    replica: replica as unknown as HTMLElement,
+    primary: primary as unknown as Return,
+    replica: replica as unknown as Return,
   }
 }

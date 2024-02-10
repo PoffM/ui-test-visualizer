@@ -22,9 +22,10 @@ describe(' HTMLElement', () => {
 
   function testElement(type: string) {
     return addTestElement(
-      document as unknown as Document,
-      replicaDocument as unknown as Node,
+      document,
+      replicaDocument,
       type,
+      'createElement',
     )
   }
 
