@@ -10,23 +10,34 @@ export interface PrimaryDomConfig {
 }
 
 export function initPrimaryDom(cfg: PrimaryDomConfig) {
-  spyOnDomNodes(cfg.classes, cfg.root, (node, prop, args) => {
-    const nodePath = getNodePath(node, cfg.root)
+  spyOnDomNodes(
+    cfg.classes,
+    cfg.root,
+    function emitHtmlPatch(node, prop, args, spyDepth) {
+      // Don't emit patches for nested mutations.
+      // e.g. a Node's "remove()" might call "removeChild()" internally,
+      // so we only want to replicate the top-level remove() call.
+      if (spyDepth > 1) {
+        return
+      }
 
-    if (!nodePath) {
-      return
-    }
+      const nodePath = getNodePath(node, cfg.root)
 
-    const serializedArgs = args.map(it =>
-      serializeDomMutationArg(it, cfg.root, cfg.classes),
-    )
+      if (!nodePath) {
+        return
+      }
 
-    const htmlPatch: HTMLPatch = {
-      targetNodePath: nodePath,
-      prop,
-      args: serializedArgs,
-    }
+      const serializedArgs = args.map(it =>
+        serializeDomMutationArg(it, cfg.root, cfg.classes),
+      )
 
-    cfg.onMutation(htmlPatch)
-  })
+      const htmlPatch: HTMLPatch = {
+        targetNodePath: nodePath,
+        prop,
+        args: serializedArgs,
+      }
+
+      cfg.onMutation(htmlPatch)
+    },
+  )
 }

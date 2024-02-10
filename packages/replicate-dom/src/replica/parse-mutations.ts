@@ -15,7 +15,7 @@ export function getNodeByPath(root: Node, path: number[]) {
 
     currentElement = children?.[index]
     if (!currentElement) {
-      return null
+      throw new Error(`Node not found: ${path.join('.')}`)
     }
   }
 

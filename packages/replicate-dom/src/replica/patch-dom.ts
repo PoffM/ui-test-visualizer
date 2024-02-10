@@ -18,7 +18,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
 
   const propPath = castArray(htmlPatch.prop)
 
-  const prop = propPath.at(-1) as (keyof typeof targetNode) | undefined
+  const prop = propPath.at(-1)
   if (!prop) {
     throw new Error(`No property found in path: ${propPath}`)
   }
@@ -35,7 +35,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
   }
 
   // Check if the property is a function
-  const targetFn = targetNode?.[prop]
+  const targetFn = Reflect.get(targetNode, prop)
   if (typeof targetFn === 'function') {
     const parsedArgs = htmlPatch.args.map((arg) => {
       if (Array.isArray(arg)) {
