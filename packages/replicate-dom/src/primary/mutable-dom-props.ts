@@ -17,6 +17,7 @@ export interface DomClasses {
   Text: new () => Text
   Node: new () => Node
   CharacterData: new () => CharacterData
+  Comment: new () => Comment
 }
 
 /** All methods and setters that mutate the DOM */

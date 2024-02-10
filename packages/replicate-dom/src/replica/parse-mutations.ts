@@ -1,4 +1,5 @@
 import type {
+  SerializedCommentNode,
   SerializedDomElement,
   SerializedDomNode,
   SerializedTextNode,
@@ -28,6 +29,10 @@ export function parseDomNode(node: SerializedDomNode, doc: Document): Node {
   if (Array.isArray(node) && node[0] === 'Text') {
     const [, text] = node as SerializedTextNode
     return doc.createTextNode(text ?? '')
+  }
+  if (Array.isArray(node) && node[0] === 'Comment') {
+    const [, text] = node as SerializedCommentNode
+    return doc.createComment(text ?? '')
   }
   if (Array.isArray(node)) {
     const [tag, attributes, children] = node as SerializedDomElement

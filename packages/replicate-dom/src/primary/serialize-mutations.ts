@@ -55,7 +55,11 @@ export function serializeDomMutationArg(
   if (arg instanceof classes.Node && root.contains(arg)) {
     return getNodePath(arg, root)
   }
-  if (arg instanceof classes.Element || arg instanceof classes.Text) {
+  if (
+    arg instanceof classes.Element
+    || arg instanceof classes.Text
+    || arg instanceof classes.Comment
+  ) {
     return serializeDomNode(arg, classes)
   }
   throw new Error(`Unknown node type: ${arg}`)
@@ -64,6 +68,9 @@ export function serializeDomMutationArg(
 function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
   if (node instanceof classes.Text) {
     return ['Text', node.textContent]
+  }
+  if (node instanceof classes.Comment) {
+    return ['Comment', node.data]
   }
   else if (node instanceof classes.Element) {
     const attributes: Record<string, string> = {}
