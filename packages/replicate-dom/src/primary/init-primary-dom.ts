@@ -6,7 +6,7 @@ import type { DomClasses } from './mutable-dom-props'
 export interface PrimaryDomConfig {
   root: Node
   classes: DomClasses
-  onMutation: (message: HTMLPatch) => void
+  onMutation: (patch: HTMLPatch) => void
 }
 
 export function initPrimaryDom(cfg: PrimaryDomConfig) {

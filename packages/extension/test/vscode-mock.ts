@@ -101,9 +101,6 @@ export async function initVscodeMock({
       },
     )
 
-    testProcess.stdout?.pipe(process.stdout)
-    testProcess.stderr?.pipe(process.stderr)
-
     const mockSession = mockDeep<vscode.DebugSession>()
 
     testProcess.on('exit', (code) => {
