@@ -28,6 +28,11 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
     // @ts-expect-error The key should exist on this node because the key comes from the same node in the primary DOM.
     targetNode = targetNode?.[key]
   }
+  if (!targetNode) {
+    throw new Error(
+      `Node not found: ${String(htmlPatch.targetNodePath)}.${pathBeforeProp.join('.')}`,
+    )
+  }
 
   // Check if the property is a function
   const targetFn = targetNode?.[prop]
@@ -70,10 +75,18 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
       }
     }
   })()
+
+  // If it's a defined setter
   if (typeof propDescriptor?.set === 'function') {
     propDescriptor.set.call(targetNode, htmlPatch.args[0])
-    return
   }
-
-  throw new Error(`Unknown node property type: ${htmlPatch.prop}`)
+  // If it's a regular property
+  else {
+    if (!htmlPatch.args.length) {
+      Reflect.deleteProperty(targetNode, prop)
+    }
+    else {
+      Reflect.set(targetNode, prop, htmlPatch.args[0])
+    }
+  }
 }

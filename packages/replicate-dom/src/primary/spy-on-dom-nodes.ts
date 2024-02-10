@@ -80,7 +80,7 @@ function spyOnNestedProperty<
     // @ts-expect-error asserted types here should be correct
     const nestedObj = spy.getOriginal().call(this) as T[G] & object
 
-    // Wrap the CSSStyleDeclaration in a Proxy so we can listen to property changes:
+    // Wrap the nested object in a Proxy so we can listen to property changes:
     return new Proxy(nestedObj, {
       // Listen to the specified method on the nested object
       get: (_, accessedProp: string) => {
@@ -97,7 +97,7 @@ function spyOnNestedProperty<
         }
         return Reflect.get(nestedObj, accessedProp)
       },
-      // Listen to the CSSStyleDeclaration's setter properties
+      // Listen to the nested object's setter properties
       set: (_, setter, value) => {
         // Report the mutation
         if (typeof setter === 'string') {
@@ -105,6 +105,13 @@ function spyOnNestedProperty<
         }
         // Apply the original mutation
         return Reflect.set(nestedObj, setter, value)
+      },
+      deleteProperty: (_, prop) => {
+        // Report the mutation
+        if (typeof prop === 'string') {
+          callback(this, [getter, prop], [])
+        }
+        return Reflect.deleteProperty(nestedObj, prop)
       },
     })
   })
