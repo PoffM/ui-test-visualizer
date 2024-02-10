@@ -95,9 +95,15 @@ export async function initVscodeMock({
       cmd,
       { env, cwd: packageRoot },
       (error, stdout, stderr) => {
-        if (error) { console.error(error) }
-        if (stdout) { console.log(stdout) }
-        if (stderr) { console.error(stderr) }
+        if (error) {
+          console.error(error)
+        }
+        if (stdout) {
+          console.log(stdout)
+        }
+        if (stderr) {
+          console.error(stderr)
+        }
       },
     )
 

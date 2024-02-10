@@ -8,6 +8,7 @@ import { initPrimaryDom } from 'replicate-dom'
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
 // directly instead to bypass that check.
 const WebSocket
+  // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
   = require('../../node_modules/ws/index.js') as typeof globalThis.WebSocket
 
 async function preTest() {
@@ -112,6 +113,7 @@ if (process.env.TEST_FRAMEWORK === 'jest') {
     if (!pkg) {
       return
     }
+    // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
     const jestPkg = require(pkg)
     const version = jestPkg.version
 

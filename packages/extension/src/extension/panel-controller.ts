@@ -5,6 +5,7 @@ import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
 
 // Avoids import errors when importing in Vitest
+// eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
 const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
 export async function startPanelController() {

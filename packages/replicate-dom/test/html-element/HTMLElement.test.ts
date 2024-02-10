@@ -1,3 +1,5 @@
+/* eslint-disable unicorn/prefer-dom-node-text-content */
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
 import type { IDocument, IHTMLElement, IWindow } from 'happy-dom'
