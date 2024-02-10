@@ -78,7 +78,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
 
   // If it's a defined setter
   if (typeof propDescriptor?.set === 'function') {
-    propDescriptor.set.call(targetNode, htmlPatch.args[0])
+    Reflect.set(targetNode, prop, htmlPatch.args[0])
   }
   // If it's a regular property
   else {
