@@ -1,4 +1,5 @@
 import type { HTMLElement, IDocument, INode, IWindow } from 'happy-dom'
+import type CharacterData from 'happy-dom/lib/nodes/character-data/CharacterData'
 import { applyDomPatch, initPrimaryDom } from '../src'
 import { getNodePath } from '../src/primary/serialize-mutations'
 import { getNodeByPath } from '../src/replica/parse-mutations'
@@ -16,8 +17,16 @@ export function initTestReplicaDom(
   })
 }
 
+type NodeCreateMethod = keyof {
+  [
+  P in keyof IDocument as IDocument[P] extends ((arg: string) => any)
+    ? P
+    : never
+  ]: IDocument[P]
+}
+
 export function addTestElement<
-  M extends 'createElement' | 'createTextNode',
+  M extends NodeCreateMethod,
 >(
   primaryDocument: IDocument,
   replicaDocument: INode,
@@ -25,6 +34,7 @@ export function addTestElement<
   method: M = 'createElement' as M,
 ) {
   const primary = primaryDocument.body.appendChild(
+    // @ts-expect-error The methods call should be valid
     primaryDocument[method](arg),
   )
   const path = getNodePath(
@@ -42,9 +52,11 @@ export function addTestElement<
     throw new Error(`Node not found in replica document at ${path}`)
   }
 
-  type Return = M extends 'createElement'
-    ? HTMLElement
-    : M extends 'createTextNode' ? Text : never
+  type Return =
+     M extends 'createElement' ? HTMLElement
+       : M extends 'createTextNode' ? Text
+         : M extends 'createComment' ? CharacterData
+           : never
 
   return {
     primary: primary as unknown as Return,
