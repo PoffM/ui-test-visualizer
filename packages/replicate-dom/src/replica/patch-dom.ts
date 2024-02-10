@@ -50,7 +50,12 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
       }
 
       // If the property is a path array or the arg is a string or null, the arg is plain text
-      if (propPath.length > 1 || arg === null || typeof arg === 'string') {
+      if (
+        propPath.length > 1
+        || arg === null
+        || typeof arg === 'string'
+        || typeof arg === 'number'
+        || typeof arg === 'boolean') {
         return arg
       }
 

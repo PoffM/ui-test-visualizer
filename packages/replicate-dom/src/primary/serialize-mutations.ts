@@ -45,7 +45,7 @@ export function serializeDomMutationArg(
     || typeof arg === 'number'
     || typeof arg === 'boolean'
   ) {
-    return String(arg)
+    return arg
   }
   if (arg === null) {
     return arg
