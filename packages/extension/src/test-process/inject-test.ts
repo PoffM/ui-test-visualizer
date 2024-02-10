@@ -24,16 +24,9 @@ async function preTest() {
 
   function initDom() {
     initPrimaryDom({
-      root: testWindow,
-      ...(process.env.EXPERIMENTAL_FAST_MODE === 'true'
-        ? {
-            patchMode: true,
-            onMutation: htmlPatch => client.send(JSON.stringify(htmlPatch)),
-          }
-        : {
-            patchMode: false,
-            onMutation: newHtml => client.send(newHtml),
-          }),
+      root: testWindow.document,
+      onMutation: htmlPatch => client.send(JSON.stringify(htmlPatch)),
+      classes: globalThis.window,
     })
 
     loadStylesIntoHead(testWindow)

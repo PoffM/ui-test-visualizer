@@ -1,4 +1,5 @@
 import type { SerializedDomNode } from '../types'
+import type { DomClasses } from './mutable-dom-props'
 
 export function getNodePath(node: Node, root: Node) {
   const indices = []
@@ -36,7 +37,8 @@ export function getNodePath(node: Node, root: Node) {
 
 export function serializeDomMutationArg(
   arg: string | Node | null,
-  win: Window,
+  root: Node,
+  classes: DomClasses,
 ) {
   if (
     typeof arg === 'string'
@@ -50,26 +52,27 @@ export function serializeDomMutationArg(
   }
   // Existing nodes are referenced by their numeric path,
   // so the receiver can look them up in its DOM
-  if (arg instanceof Node && win.document.contains(arg)) {
-    return getNodePath(arg, win.document)
+  if (arg instanceof classes.Node && root.contains(arg)) {
+    return getNodePath(arg, root)
   }
-  if (arg instanceof Element || arg instanceof Text) {
-    return serializeDomNode(arg)
+  if (arg instanceof classes.Element || arg instanceof classes.Text) {
+    return serializeDomNode(arg, classes)
   }
   throw new Error(`Unknown node type: ${arg}`)
 }
 
-function serializeDomNode(node: Node): SerializedDomNode {
-  if (node instanceof Text) {
+function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
+  if (node instanceof classes.Text) {
     return ['Text', node.textContent]
   }
-  else if (node instanceof Element) {
+  else if (node instanceof classes.Element) {
     const attributes: Record<string, string> = {}
     for (const attr of Array.from(node.attributes)) {
       attributes[attr.name] = attr.value
     }
 
-    const children = Array.from(node.childNodes).map(serializeDomNode)
+    const children = Array.from(node.childNodes)
+      .map(node => serializeDomNode(node, classes))
 
     return [node.tagName.toLowerCase(), attributes, children]
   }

@@ -8,7 +8,11 @@ export function getNodeByPath(root: Node, path: number[]) {
   let currentElement: Node | undefined = root
 
   for (const index of path) {
-    currentElement = currentElement?.childNodes?.[index]
+    const children: ArrayLike<Node> = currentElement.nodeType === 9 // Check if the root node is Node.DOCUMENT_NODE
+      ? (currentElement as Document).children
+      : currentElement.childNodes
+
+    currentElement = children?.[index]
     if (!currentElement) {
       return null
     }

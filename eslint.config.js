@@ -12,5 +12,6 @@ module.exports = config({
     'style/yield-star-spacing': ['error', 'after'],
     'ts/no-require-imports': 'off',
     'ts/no-var-requires': 'off',
+    'unicorn/prefer-dom-node-text-content': 'off',
   },
 })

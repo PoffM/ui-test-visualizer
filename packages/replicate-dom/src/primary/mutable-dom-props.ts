@@ -7,15 +7,23 @@ type FilterKeys<T, Matcher, IfMatch, IfNotMatch> = keyof {
 export interface DOMNodeSpyConfig<T> {
   cls: new () => T
   methods?: Extract<FilterKeys<T, Function, string, never>, string>[]
-  props?: Extract<FilterKeys<T, Function, never, string>, string>[]
-  nestedProps?: { [P in keyof T]?: (keyof T[P])[] }
+  setters?: Extract<FilterKeys<T, Function, never, string>, string>[]
+  nestedMethods?: { [P in keyof T]?: (keyof T[P])[] }
+}
+
+export interface DomClasses {
+  Element: new () => Element
+  HTMLElement: new () => HTMLElement
+  Text: new () => Text
+  Node: new () => Node
+  CharacterData: new () => CharacterData
 }
 
 /** All methods and setters that mutate the DOM */
-export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
+export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] {
   return [
     {
-      cls: Element,
+      cls: classes.Element,
       methods: [
         'normalize',
         'insertBefore',
@@ -24,7 +32,7 @@ export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
         'removeChild',
         'setAttribute',
       ],
-      props: [
+      setters: [
         'innerHTML',
         'textContent',
         'nodeValue',
@@ -33,8 +41,8 @@ export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
       ],
     } satisfies DOMNodeSpyConfig<Element>,
     {
-      cls: HTMLElement,
-      nestedProps: {
+      cls: classes.HTMLElement,
+      nestedMethods: {
         style: ['setProperty'],
         classList: ['add', 'remove', 'replace', 'toggle'],
         dataset: [],
@@ -42,7 +50,7 @@ export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
       },
     } satisfies DOMNodeSpyConfig<HTMLElement>,
     {
-      cls: Text,
+      cls: classes.Text,
       methods: [
         'normalize',
         'appendData',
@@ -50,10 +58,10 @@ export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
         'deleteData',
         'replaceData',
       ],
-      props: ['textContent', 'nodeValue'],
+      setters: ['textContent', 'nodeValue'],
     } satisfies DOMNodeSpyConfig<Text>,
     {
-      cls: Node,
+      cls: classes.Node,
       methods: [
         'normalize',
         'insertBefore',
@@ -61,10 +69,10 @@ export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
         'replaceChild',
         'removeChild',
       ],
-      props: ['textContent', 'nodeValue'],
+      setters: ['textContent', 'nodeValue'],
     } satisfies DOMNodeSpyConfig<Node>,
     {
-      cls: CharacterData,
+      cls: classes.CharacterData,
       methods: [
         'normalize',
         'insertBefore',
@@ -80,7 +88,7 @@ export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
         'before',
         'after',
       ],
-      props: ['textContent', 'nodeValue', 'data'],
+      setters: ['textContent', 'nodeValue', 'data'],
     } satisfies DOMNodeSpyConfig<CharacterData>,
   ]
 }

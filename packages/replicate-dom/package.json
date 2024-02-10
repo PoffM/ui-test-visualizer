@@ -1,12 +1,16 @@
 {
   "name": "replicate-dom",
   "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest --run"
+  },
   "dependencies": {
     "lodash": "^4.17.21",
     "morphdom": "^2.7.2",
     "tinyspy": "^2.2.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.202"
+    "@types/lodash": "^4.14.202",
+    "happy-dom": "^13.3.8"
   }
 }

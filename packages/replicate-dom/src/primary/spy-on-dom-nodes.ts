@@ -1,7 +1,7 @@
 import { castArray } from 'lodash'
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
-import type { DOMNodeSpyConfig } from './mutable-dom-props'
+import type { DOMNodeSpyConfig, DomClasses } from './mutable-dom-props'
 import { MUTABLE_DOM_PROPS } from './mutable-dom-props'
 
 export type MutationCallback = (
@@ -17,54 +17,51 @@ type KeysWithVal<T, Matcher> = {
 string
 
 /** Run a callback function when a DOM node is mutated. */
-export function spyOnDomNodes(callback: MutationCallback) {
-  for (const cfg of MUTABLE_DOM_PROPS()) {
-    initDomSpies(cfg, callback)
+export function spyOnDomNodes(
+  classes: DomClasses,
+  root: Node,
+  callback: MutationCallback,
+) {
+  for (const cfg of MUTABLE_DOM_PROPS(classes)) {
+    initDomSpies(cfg, callback, root)
   }
 }
 
 function initDomSpies<T extends Node>(
-  { cls, methods, props, nestedProps }: DOMNodeSpyConfig<T>,
+  { cls, methods, setters, nestedMethods }: DOMNodeSpyConfig<T>,
   callback: MutationCallback,
+  root: Node,
 ) {
   for (const method of methods ?? []) {
     const methodSpy: SpyImpl<unknown[], unknown> = spyOn(
       cls.prototype,
       method,
       function (this: T, ...args: any[]) {
-        return reportAndApplyMutations({
-          callOriginalFn: () => methodSpy.getOriginal().call(this, ...args),
-          report: () => {
-            if (window.document.contains(this)) {
-              callback(this, method, args)
-            }
-          },
-        })
+        if (root.contains(this)) {
+          callback(this, method, args)
+        }
+        return methodSpy.getOriginal().call(this, ...args)
       },
     )
   }
-  for (const prop of props ?? []) {
+  for (const setter of setters ?? []) {
     // Store a reference to the original setter
     const originalSetter = Object.getOwnPropertyDescriptor(
       cls.prototype,
-      prop,
+      setter,
     )?.set
 
     if (originalSetter) {
-      spyOn(cls.prototype, { setter: prop }, function (this: T, value) {
-        reportAndApplyMutations({
-          callOriginalFn: () => originalSetter.call(this, value),
-          report: () => {
-            if (window.document.contains(this)) {
-              callback(this, prop, castArray(value))
-            }
-          },
-        })
+      spyOn(cls.prototype, { setter }, function (this: T, value) {
+        originalSetter.call(this, value)
+        if (root.contains(this)) {
+          callback(this, setter, castArray(value))
+        }
       })
     }
   }
-  for (const [key, props] of Object.entries(nestedProps ?? {})) {
-    spyOnNestedProperty(cls.prototype, key, props, callback)
+  for (const [key, methods] of Object.entries(nestedMethods ?? {})) {
+    spyOnNestedProperty(cls.prototype, key, methods, callback)
   }
 }
 
@@ -89,48 +86,26 @@ function spyOnNestedProperty<
       get: (_, accessedProp: string) => {
         if ((spiedMethods as string[]).includes(accessedProp)) {
           return (...spiedMethodArgs: any[]) => {
-            return reportAndApplyMutations({
-              callOriginalFn: () =>
-                Reflect.apply(
-                  // @ts-expect-error "accessedProp" should exist on the nested object
-                  nestedObj[accessedProp],
-                  nestedObj,
-                  spiedMethodArgs,
-                ),
-              report: () =>
-                callback(this, [getter, accessedProp], spiedMethodArgs),
-            })
+            callback(this, [getter, accessedProp], spiedMethodArgs)
+            return Reflect.apply(
+              // @ts-expect-error "accessedProp" should exist on the nested object
+              nestedObj[accessedProp],
+              nestedObj,
+              spiedMethodArgs,
+            )
           }
         }
         return Reflect.get(nestedObj, accessedProp)
       },
       // Listen to the CSSStyleDeclaration's setter properties
-      set: (_, prop, value) => {
-        return reportAndApplyMutations({
-          callOriginalFn: () => Reflect.set(nestedObj, prop, value),
-          report: () => {
-            if (typeof prop === 'string') {
-              callback(this, [getter, prop], [value])
-            }
-          },
-        })
+      set: (_, setter, value) => {
+        // Report the mutation
+        if (typeof setter === 'string') {
+          callback(this, [getter, setter], [value])
+        }
+        // Apply the original mutation
+        return Reflect.set(nestedObj, setter, value)
       },
     })
   })
-}
-
-function reportAndApplyMutations<T>({
-  report,
-  callOriginalFn,
-}: {
-  report: () => void
-  callOriginalFn: () => T
-}): T {
-  if (process.env.EXPERIMENTAL_FAST_MODE === 'true') {
-    report()
-    return callOriginalFn()
-  }
-  const result = callOriginalFn()
-  report()
-  return result
 }

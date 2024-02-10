@@ -48,11 +48,6 @@
           },
           "default": [],
           "description": "Extra CSS files to load into the tested UI. Supports PostCSS."
-        },
-        "visual-ui-test-debugger.experimentalFastMode": {
-          "type": "boolean",
-          "default": true,
-          "description": "Incrementally update the mirrored DOM instead of re-rendering it entirely on every change. This feature needs more testing."
         }
       }
     },

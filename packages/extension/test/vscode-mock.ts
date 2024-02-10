@@ -3,12 +3,11 @@ import { exec } from 'node:child_process'
 import type * as vscode from 'vscode'
 import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { findUp } from 'find-up'
-import { updateDomReplica } from 'replicate-dom'
+import { applyDomPatch } from 'replicate-dom'
 import { Node, Window } from 'happy-dom'
 import type { ExtensionSettingsKey } from '../src/extension/extension-setting'
 
 export const defaultTestSettings: Record<ExtensionSettingsKey, unknown> = {
-  'visual-ui-test-debugger.experimentalFastMode': true,
   'visual-ui-test-debugger.cssFiles': [] as string[],
   'visual-ui-test-debugger.disableCodeLens': false,
   'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
@@ -102,6 +101,9 @@ export async function initVscodeMock({
       },
     )
 
+    testProcess.stdout?.pipe(process.stdout)
+    testProcess.stderr?.pipe(process.stderr)
+
     const mockSession = mockDeep<vscode.DebugSession>()
 
     testProcess.on('exit', (code) => {
@@ -148,7 +150,7 @@ export async function initVscodeMock({
         webview: {
           postMessage: async (msg) => {
             if (msg.htmlPatch) {
-              updateDomReplica(replicaWindow.document, msg.htmlPatch)
+              applyDomPatch(replicaWindow.document, msg.htmlPatch)
               onReplicaDomUpdate(replicaWindow.document)
             }
             return true
