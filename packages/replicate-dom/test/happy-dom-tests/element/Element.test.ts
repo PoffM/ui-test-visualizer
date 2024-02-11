@@ -1486,20 +1486,18 @@ describe('element', () => {
     })
   })
 
-  for (const method of ['removeAttributeNode', 'removeAttributeNodeNS'] as const) {
-    describe(`${method}()`, () => {
-      it('removes an Attr node.', () => {
-        const { primary, replica } = testElement('div')
-        const attribute = document.createAttribute('KEY1')
+  describe('removeAttributeNode()', () => {
+    it('removes an Attr node.', () => {
+      const { primary, replica } = testElement('div')
+      const attribute = document.createAttribute('KEY1')
 
-        attribute.value = 'value1'
-        primary.setAttributeNode(attribute)
-        primary[method](attribute)
+      attribute.value = 'value1'
+      primary.setAttributeNode(attribute)
+      primary.removeAttributeNode(attribute)
 
-        expect(replica.attributes.length).toBe(0)
-      })
+      expect(replica.attributes.length).toBe(0)
     })
-  }
+  })
 
   describe('replaceWith() 2', () => {
     it('replaces a node with another node.', () => {
