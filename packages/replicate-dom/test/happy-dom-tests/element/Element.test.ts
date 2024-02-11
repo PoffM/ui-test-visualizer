@@ -1432,7 +1432,7 @@ describe('element', () => {
       const { primary, replica } = testElement('div')
       const svg = primary.appendChild(
         document.createElementNS(NamespaceURI.svg, 'svg'),
-      )
+      ) as Element
       const replicaSvg = replica.children[0]!
 
       const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
@@ -1471,7 +1471,7 @@ describe('element', () => {
       const { primary, replica } = testElement('div')
       const svg = primary.appendChild(
         document.createElementNS(NamespaceURI.svg, 'svg'),
-      )
+      ) as Element
       const replicaSvg = replica.children[0]!
 
       const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
