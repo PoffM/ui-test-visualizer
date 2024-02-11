@@ -1,0 +1,1386 @@
+/*
+  This file is derived from:
+  https://github.com/capricorn86/happy-dom/blob/6cbcc10a1a227b36e38a7bc33203b2ae029cca95/packages/happy-dom/test/nodes/document/Document.test.ts ,
+  available under the MIT License.
+
+  Original licence below:
+  =======================
+
+  MIT License
+
+  Copyright (c) 2019 David Ortner (capricorn86)
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import Window from '../../../src/window/Window.js'
+import IWindow from '../../../src/window/IWindow.js'
+import CustomElement from '../../CustomElement.js'
+import HTMLElement from '../../../src/nodes/html-element/HTMLElement.js'
+import Text from '../../../src/nodes/text/Text.js'
+import Comment from '../../../src/nodes/comment/Comment.js'
+import DocumentFragment from '../../../src/nodes/document-fragment/DocumentFragment.js'
+import NodeIterator from '../../../src/tree-walker/NodeIterator.js'
+import TreeWalker from '../../../src/tree-walker/TreeWalker.js'
+import Node from '../../../src/nodes/node/Node.js'
+import IDocument from '../../../src/nodes/document/IDocument.js'
+import Document from '../../../src/nodes/document/Document.js'
+import Element from '../../../src/nodes/element/Element.js'
+import Event from '../../../src/event/Event.js'
+import SVGSVGElement from '../../../src/nodes/svg-element/SVGSVGElement.js'
+import NamespaceURI from '../../../src/config/NamespaceURI.js'
+import Attr from '../../../src/nodes/attr/Attr.js'
+import ParentNodeUtility from '../../../src/nodes/parent-node/ParentNodeUtility.js'
+import QuerySelector from '../../../src/query-selector/QuerySelector.js'
+import NodeFilter from '../../../src/tree-walker/NodeFilter.js'
+import HTMLTemplateElement from '../../../src/nodes/html-template-element/HTMLTemplateElement.js'
+import IHTMLCollection from '../../../src/nodes/element/IHTMLCollection.js'
+import IElement from '../../../src/nodes/element/IElement.js'
+import INodeList from '../../../src/nodes/node/INodeList.js'
+import IHTMLElement from '../../../src/nodes/html-element/IHTMLElement.js'
+import IHTMLLinkElement from '../../../src/nodes/html-link-element/IHTMLLinkElement.js'
+import IResponse from '../../../src/fetch/types/IResponse.js'
+import ResourceFetch from '../../../src/fetch/ResourceFetch.js'
+import IHTMLScriptElement from '../../../src/nodes/html-script-element/IHTMLScriptElement.js'
+import DocumentReadyStateEnum from '../../../src/nodes/document/DocumentReadyStateEnum.js'
+import ISVGElement from '../../../src/nodes/svg-element/ISVGElement.js'
+import CustomEvent from '../../../src/event/events/CustomEvent.js'
+import Selection from '../../../src/selection/Selection.js'
+import Range from '../../../src/range/Range.js'
+import ProcessingInstruction from '../../../src/nodes/processing-instruction/ProcessingInstruction.js'
+import DOMException from '../../../src/exception/DOMException.js'
+import type IShadowRoot from '../../../src/nodes/shadow-root/IShadowRoot.js'
+import type IBrowserWindow from '../../../src/window/IBrowserWindow.js'
+import Fetch from '../../../src/fetch/Fetch.js'
+import * as PropertySymbol from '../../../src/PropertySymbol.js'
+import { addTestElement, initTestReplicaDom } from '../../../test-setup.js'
+
+ 
+
+describe('document', () => {
+  let window: IWindow
+  let document: IDocument
+
+  let replicaWindow: IWindow
+  let replicaDocument: IDocument
+
+  beforeEach(() => {
+    window = new Window()
+    document = window.document
+
+    replicaWindow = new Window()
+    replicaDocument = replicaWindow.document
+
+    initTestReplicaDom(window, replicaWindow)
+  })
+
+  function testElement(type: string) {
+    return addTestElement(
+      document,
+      replicaDocument,
+      type,
+      'createElement',
+    )
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  for (const property of ['charset', 'characterSet']) {
+    describe(`get ${property}()`, () => {
+      it('returns the value of a "charset" attribute set in a meta element.', () => {
+        const { primary, replica } = testElement('meta')
+
+        primary.setAttribute('charset', 'windows-1252')
+
+        document.head.appendChild(primary)
+
+        expect(replica.ownerDocument[property]).toBe('windows-1252')
+      })
+    })
+  }
+
+  describe('get referrer()', () => {
+    it('returns empty string.', () => {
+      expect(document.referrer).toBe('')
+    })
+  })
+
+  describe('get nodeName()', () => {
+    it('returns "#document".', () => {
+      expect(document.nodeName).toBe('#document')
+    })
+  })
+
+  describe('get children()', () => {
+    it('returns Element child nodes.', () => {
+      document.appendChild(document.createTextNode('test'))
+      expect(document.children.length).toEqual(1)
+      expect(document.children[0] === document.documentElement).toBe(true)
+    })
+
+    it('is a getter.', () => {
+      expect(typeof Object.getOwnPropertyDescriptor(Document.prototype, 'children')?.get).toBe(
+        'function',
+      );
+    })
+  })
+
+  describe('get links()', () => {
+    it('returns a elements.', () => {
+      const link1 = document.createElement('a')
+      const link2 = document.createElement('a')
+      link1.setAttribute('href', '')
+
+      document.body.appendChild(link1)
+      document.body.appendChild(link2)
+
+      let links = document.links
+
+      expect(links.length).toBe(1)
+      expect(links[0]).toBe(link1)
+
+      link2.setAttribute('href', '')
+      links = document.links
+      expect(links.length).toBe(2)
+      expect(links[0]).toBe(link1)
+      expect(links[1]).toBe(link2)
+    })
+  })
+
+  describe('get scripts()', () => {
+    it('returns script elements.', () => {
+      const div = document.createElement('div')
+      const span1 = document.createElement('span')
+      const span2 = document.createElement('span')
+      const script1 = document.createElement('script')
+      const script2 = document.createElement('script')
+
+      span1.appendChild(script1)
+      span2.appendChild(script2)
+
+      div.appendChild(span1)
+      div.appendChild(span2)
+
+      document.body.appendChild(div)
+
+      const scripts = Array.from(document.scripts)
+
+      expect(scripts.length).toBe(2)
+      expect(scripts[0]).toBe(script1)
+      expect(scripts[1]).toBe(script2)
+    })
+  })
+
+  describe('get childElementCount()', () => {
+    it('returns child element count.', () => {
+      document.appendChild(document.createElement('div'))
+      document.appendChild(document.createTextNode('test'))
+      expect(document.childElementCount).toEqual(2)
+    })
+  })
+
+  describe('get firstElementChild()', () => {
+    it('returns first element child.', () => {
+      const div = document.createElement('div')
+      const span1 = document.createElement('span')
+      const span2 = document.createElement('span')
+      const text1 = document.createTextNode('text1')
+      const text2 = document.createTextNode('text2')
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      div.appendChild(text1)
+      div.appendChild(span1)
+      div.appendChild(span2)
+      div.appendChild(text2)
+
+      expect(div.firstElementChild === span1).toBe(true)
+    })
+  })
+
+  describe('get lastElementChild()', () => {
+    it('returns last element child.', () => {
+      const div = document.createElement('div')
+      const span1 = document.createElement('span')
+      const span2 = document.createElement('span')
+      const text1 = document.createTextNode('text1')
+      const text2 = document.createTextNode('text2')
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      div.appendChild(text1)
+      div.appendChild(span1)
+      div.appendChild(span2)
+      div.appendChild(text2)
+
+      expect(div.lastElementChild === span2).toBe(true)
+    })
+  })
+
+  describe('get cookie()', () => {
+    it('returns cookie string.', () => {
+      document.cookie = 'name=value1'
+      expect(document.cookie).toBe('name=value1')
+    })
+  })
+
+  describe('set cookie()', () => {
+    it('sets multiple cookies.', () => {
+      document.cookie = 'name1=value1'
+      document.cookie = 'name2=value2'
+      expect(document.cookie).toBe('name1=value1; name2=value2')
+    })
+
+    it('replaces cookie with the same name, but treats cookies with no value set differently from cookies with a value.', () => {
+      document.cookie = 'name=value1'
+      document.cookie = 'name'
+      document.cookie = 'name=value2'
+      document.cookie = 'name'
+      expect(document.cookie).toBe('name=value2; name')
+    })
+
+    it('sets a cookie with a domain.', () => {
+      window.location.href = 'https://test.com'
+      document.cookie = 'name=value1; domain=test.com'
+      expect(document.cookie).toBe('name=value1')
+    })
+
+    it('sets a cookie with an invalid domain.', () => {
+      window.location.href = 'https://test.com'
+      document.cookie = 'name=value1; domain=invalid.com'
+      expect(document.cookie).toBe('')
+    })
+
+    it('sets a cookie on a top-domain from a sub-domain.', () => {
+      window.location.href = 'https://sub.test.com'
+      document.cookie = 'name=value1; domain=test.com'
+      expect(document.cookie).toBe('name=value1')
+    })
+
+    it('sets a cookie with a path.', () => {
+      window.location.href = 'https://sub.test.com/path/to/cookie/'
+      document.cookie = 'name1=value1; path=path/to'
+      document.cookie = 'name2=value2; path=/path/to'
+      document.cookie = 'name3=value3; path=/path/to/cookie/'
+      expect(document.cookie).toBe('name1=value1; name2=value2; name3=value3')
+    })
+
+    it('does not set cookie if the path does not match the current path.', () => {
+      window.location.href = 'https://sub.test.com/path/to/cookie/'
+      document.cookie = 'name1=value1; path=/cookie/'
+      expect(document.cookie).toBe('')
+    })
+
+    it('sets a cookie if it expires is in the future.', () => {
+      const date = new Date()
+      const oneHour = 3600000
+      date.setTime(date.getTime() + oneHour)
+      const expires = date.toUTCString()
+      document.cookie = `name=value1; expires=${expires}`
+      expect(document.cookie).toBe('name=value1')
+    })
+
+    it('does not set cookie if "expires" is in the past.', () => {
+      document.cookie = 'name=value1; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+      expect(document.cookie).toBe('')
+    })
+
+    it('unset previous cookie.', () => {
+      document.cookie = 'name=Dave; expires=Thu, 01 Jan 2030 00:00:00 GMT;'
+      expect(document.cookie).toBe('name=Dave')
+      document.cookie = 'name=; expires=Thu, 01 Jan 1970 00:00:00 GMT;'
+      expect(document.cookie).toBe('')
+    })
+
+    it('removes a previously defined cookie if "expires" is in the past, but treats cookies with no value set differently from cookies with a value.', () => {
+      document.cookie = 'name=value1'
+      document.cookie = 'name'
+      document.cookie = 'name=value1; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+      expect(document.cookie).toBe('name')
+      document.cookie = 'name; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+      expect(document.cookie).toBe('')
+    })
+  })
+
+  describe('get title() and set title()', () => {
+    it('returns and sets title.', () => {
+      document.title = 'test title'
+      expect(document.title).toBe('test title')
+      const title = <Element>document.head.querySelector('title')
+      expect(title.textContent).toBe('test title')
+      document.title = 'new title'
+      expect(document.title).toBe('new title')
+      expect(title.textContent).toBe('new title')
+      title.textContent = 'new title 2'
+      expect(document.title).toBe('new title 2')
+    })
+  })
+
+  describe('get body()', () => {
+    it('returns <body> element.', () => {
+      expect(document.body === document.children[0].children[1]).toBe(true)
+    })
+  })
+
+  describe('get head()', () => {
+    it('returns <head> element.', () => {
+      expect(document.head === document.children[0].children[0]).toBe(true)
+    })
+  })
+
+  describe('get documentElement()', () => {
+    it('returns <html> element.', () => {
+      expect(document.documentElement === document.children[0]).toBe(true)
+    })
+  })
+
+  describe('get doctype()', () => {
+    it('returns DocumentType element.', () => {
+      expect(document.doctype === document.childNodes[0]).toBe(true)
+    })
+  })
+
+  describe('get styleSheets()', () => {
+    it('returns all stylesheets loaded to the document.', async () => {
+      await new Promise((resolve) => {
+        const textNode = document.createTextNode(
+          'body { background-color: red }\ndiv { background-color: green }',
+        );
+        const style = document.createElement('style')
+        const link = <IHTMLLinkElement>document.createElement('link')
+        let fetchedUrl: string | null = null
+
+        link.rel = 'stylesheet'
+        link.href = 'https://localhost:8080/path/to/file.css'
+
+        vi.spyOn(Fetch.prototype, 'send').mockImplementation(function () {
+          fetchedUrl = this.request.url
+          return <Promise<IResponse>>Promise.resolve({
+            text: () => Promise.resolve('button { background-color: red }'),
+            ok: true,
+          })
+        })
+
+        style.appendChild(textNode)
+
+        document.appendChild(style)
+        document.appendChild(link)
+
+        setTimeout(() => {
+          expect(fetchedUrl).toBe('https://localhost:8080/path/to/file.css')
+
+          const styleSheets = document.styleSheets
+
+          expect(styleSheets.length).toBe(2)
+          expect(styleSheets[0].cssRules.length).toBe(2)
+          expect(styleSheets[0].cssRules[0].cssText).toBe('body { background-color: red; }')
+          expect(styleSheets[0].cssRules[1].cssText).toBe('div { background-color: green; }')
+          expect(styleSheets[1].cssRules.length).toBe(1)
+          expect(styleSheets[1].cssRules[0].cssText).toBe('button { background-color: red; }')
+
+          resolve(null)
+        }, 0)
+      })
+    })
+  })
+
+  describe('get activeElement()', () => {
+    it('returns the currently active element.', () => {
+      const div = <IHTMLElement>document.createElement('div')
+      const span = <IHTMLElement>document.createElement('span')
+
+      document.appendChild(div)
+      document.appendChild(span)
+
+      expect(document.activeElement === document.body).toBe(true)
+
+      div.focus()
+
+      expect(document.activeElement === div).toBe(true)
+
+      span.focus()
+
+      expect(document.activeElement === span).toBe(true)
+
+      span.blur()
+
+      expect(document.activeElement === document.body).toBe(true)
+    })
+
+    it('unsets the active element when it gets disconnected.', () => {
+      const div = <IHTMLElement>document.createElement('div')
+
+      document.appendChild(div)
+
+      expect(document.activeElement === document.body).toBe(true)
+
+      div.focus()
+
+      expect(document.activeElement === div).toBe(true)
+
+      div.remove()
+
+      expect(document.activeElement === document.body).toBe(true)
+    })
+
+    it('returns the first custom element that has document as root node when the focused element is nestled in multiple shadow roots.', () => {
+      class CustomElementA extends (<Window>window).HTMLElement {
+        constructor() {
+          super()
+          this.attachShadow({ mode: 'open' })
+        }
+
+        public connectedCallback(): void {
+          (<IShadowRoot> this.shadowRoot).innerHTML = `
+						<div>
+							<custom-element-b></custom-element-b>
+						</div>
+					`
+        }
+      }
+      class CustomElementB extends (<Window>window).HTMLElement {
+        constructor() {
+          super()
+          this.attachShadow({ mode: 'open' })
+        }
+
+        public connectedCallback(): void {
+          (<IShadowRoot> this.shadowRoot).innerHTML = `
+						<div>
+							<button tabindex="0"></button>
+						</div>
+					`
+        }
+      }
+
+      window.customElements.define('custom-element-a', CustomElementA)
+      window.customElements.define('custom-element-b', CustomElementB)
+
+      const customElementA = document.createElement('custom-element-a')
+      const div = document.createElement('div')
+      div.appendChild(customElementA)
+      document.body.appendChild(div)
+
+      const button = <IHTMLElement>(
+				(<IHTMLElement>(
+					customElementA.shadowRoot.querySelector('custom-element-b')
+				)).shadowRoot.querySelector('button')
+			)
+
+      let focusCalls = 0
+      button.addEventListener('focus', () => focusCalls++)
+
+      button.focus()
+      button.focus()
+
+      expect(document.activeElement === customElementA).toBe(true)
+      expect(focusCalls).toBe(1)
+    })
+  })
+
+  describe('get scrollingElement()', () => {
+    it('returns document element as scrolling element.', () => {
+      expect(document.scrollingElement === document.documentElement).toBe(true)
+    })
+  })
+
+  describe('get location()', () => {
+    it('returns the current location', () => {
+      expect(document.location === window.location).toBe(true)
+    })
+  })
+
+  describe('get baseURI()', () => {
+    it('returns location.href.', () => {
+      document.location.href = 'https://localhost:8080/base/path/to/script/?key=value=1#test'
+
+      expect(document.baseURI).toBe('https://localhost:8080/base/path/to/script/?key=value=1#test')
+    })
+
+    it('returns the "href" attribute set on a <base> element.', () => {
+      document.location.href = 'https://localhost:8080/base/path/to/script/?key=value=1#test'
+
+      const base = document.createElement('base')
+      base.setAttribute('href', 'https://www.test.test/base/path/to/script/?key=value=1#test')
+      document.documentElement.appendChild(base)
+
+      expect(document.baseURI).toBe('https://www.test.test/base/path/to/script/?key=value=1#test')
+    })
+  })
+
+  describe('uRL', () => {
+    it('returns the URL of the document.', () => {
+      document.location.href = 'http://localhost:8080/path/to/file.html'
+      expect(document.URL).toBe('http://localhost:8080/path/to/file.html')
+    })
+  })
+  describe('documentURI', () => {
+    it('returns the documentURI of the document.', () => {
+      document.location.href = 'http://localhost:8080/path/to/file.html'
+      expect(document.documentURI).toBe('http://localhost:8080/path/to/file.html')
+    })
+  })
+
+  describe('append()', () => {
+    it('inserts a set of Node objects or DOMString objects after the last child of the ParentNode. DOMString objects are inserted as equivalent Text nodes.', () => {
+      const node1 = document.createComment('test1')
+      const node2 = document.createComment('test2')
+      let isCalled = false
+
+      vi.spyOn(ParentNodeUtility, 'append').mockImplementation((parentNode, ...nodes) => {
+        expect(parentNode === document).toBe(true)
+        expect(nodes.length).toBe(2)
+        expect(nodes[0] === node1).toBe(true)
+        expect(nodes[1] === node2).toBe(true)
+        isCalled = true
+      })
+
+      document.append(node1, node2)
+      expect(isCalled).toBe(true)
+    })
+  })
+
+  describe('prepend()', () => {
+    it('inserts a set of Node objects or DOMString objects before the first child of the ParentNode. DOMString objects are inserted as equivalent Text nodes.', () => {
+      const node1 = document.createComment('test1')
+      const node2 = document.createComment('test2')
+      let isCalled = false
+
+      vi.spyOn(ParentNodeUtility, 'prepend').mockImplementation((parentNode, ...nodes) => {
+        expect(parentNode === document).toBe(true)
+        expect(nodes.length).toBe(2)
+        expect(nodes[0] === node1).toBe(true)
+        expect(nodes[1] === node2).toBe(true)
+        isCalled = true
+      })
+
+      document.prepend(node1, node2)
+      expect(isCalled).toBe(true)
+    })
+  })
+
+  describe('replaceChildren()', () => {
+    it('replaces the existing children of a ParentNode with a specified new set of children.', () => {
+      const node1 = document.createComment('test1')
+      const node2 = document.createComment('test2')
+      let isCalled = false
+
+      vi.spyOn(ParentNodeUtility, 'replaceChildren').mockImplementation((parentNode, ...nodes) => {
+        expect(parentNode === document).toBe(true)
+        expect(nodes.length).toBe(2)
+        expect(nodes[0] === node1).toBe(true)
+        expect(nodes[1] === node2).toBe(true)
+        isCalled = true
+      })
+
+      document.replaceChildren(node1, node2)
+      expect(isCalled).toBe(true)
+    })
+  })
+
+  describe('querySelectorAll()', () => {
+    it('query CSS selector to find matching elements.', () => {
+      const element = document.createElement('div')
+      const expectedSelector = 'selector'
+
+      vi.spyOn(QuerySelector, 'querySelectorAll').mockImplementation((parentNode, selector) => {
+        expect(parentNode === document).toBe(true)
+        expect(selector).toEqual(expectedSelector)
+        return <INodeList<IElement>>[element]
+      })
+
+      const result = document.querySelectorAll(expectedSelector)
+
+      expect(result.length).toBe(1)
+      expect(result[0] === element).toBe(true)
+    })
+  })
+
+  describe('querySelector()', () => {
+    it('query CSS selector to find a matching element.', () => {
+      const element = document.createElement('div')
+      const expectedSelector = 'selector'
+
+      vi.spyOn(QuerySelector, 'querySelector').mockImplementation((parentNode, selector) => {
+        expect(parentNode === document).toBe(true)
+        expect(selector).toEqual(expectedSelector)
+        return element
+      })
+
+      expect(document.querySelector(expectedSelector) === element).toBe(true)
+    })
+  })
+
+  describe('getElementsByClassName()', () => {
+    it('returns an elements by class name.', () => {
+      const element = document.createElement('div')
+      const className = 'className'
+
+      vi.spyOn(ParentNodeUtility, 'getElementsByClassName').mockImplementation(
+        (parentNode, requestedClassName) => {
+          expect(parentNode === document).toBe(true)
+          expect(requestedClassName).toEqual(className)
+          return <IHTMLCollection<IElement>>[element]
+        }
+      )
+
+      const result = document.getElementsByClassName(className)
+      expect(result.length).toBe(1)
+      expect(result[0] === element).toBe(true)
+    })
+  })
+
+  describe('getElementsByTagName()', () => {
+    it('returns an elements by tag name.', () => {
+      const element = document.createElement('div')
+      const tagName = 'tag-name'
+
+      vi.spyOn(ParentNodeUtility, 'getElementsByTagName').mockImplementation(
+        (parentNode, requestedTagName) => {
+          expect(parentNode === document).toBe(true)
+          expect(requestedTagName).toEqual(tagName)
+          return <IHTMLCollection<IElement>>[element]
+        }
+      )
+
+      const result = document.getElementsByTagName(tagName)
+      expect(result.length).toBe(1)
+      expect(result[0] === element).toBe(true)
+    })
+  })
+
+  describe('getElementsByTagNameNS()', () => {
+    it('returns an elements by tag name and namespace.', () => {
+      const element = document.createElement('div')
+      const tagName = 'tag-name'
+      const namespaceURI = '/namespace/uri/'
+
+      vi.spyOn(ParentNodeUtility, 'getElementsByTagNameNS').mockImplementation(
+        (parentNode, requestedNamespaceURI, requestedTagName) => {
+          expect(parentNode === document).toBe(true)
+          expect(requestedNamespaceURI).toEqual(namespaceURI)
+          expect(requestedTagName).toEqual(tagName)
+          return <IHTMLCollection<IElement>>[element]
+        }
+      )
+
+      const result = document.getElementsByTagNameNS(namespaceURI, tagName)
+
+      expect(result.length).toBe(1)
+      expect(result[0] === element).toBe(true)
+    })
+  })
+
+  describe('getElementById()', () => {
+    it('returns an element by ID.', () => {
+      const element = document.createElement('div')
+      const id = 'id'
+
+      vi.spyOn(ParentNodeUtility, 'getElementById').mockImplementation(
+        (parentNode, requestedID) => {
+          expect(parentNode === document).toBe(true)
+          expect(requestedID).toEqual(id)
+          return element
+        }
+      )
+
+      expect(document.getElementById(id) === element).toBe(true)
+    })
+  })
+
+  describe('getElementsByName()', () => {
+    it('returns elements by name.', () => {
+      const parent = document.createElement('div')
+      parent.innerHTML = `<img alt="" name="image" src=""/><img alt="" name="image" src=""/><img alt="" name="image" src=""/><img alt="" name="image" src=""/><meta name="test"><p name="test"><span name="test">test</span></p></meta>`
+      document.appendChild(parent)
+      expect(document.getElementsByName('image').length).toBe(4)
+      expect(document.getElementsByName('test').length).toBe(3)
+    })
+  })
+
+  describe('appendChild()', () => {
+    it('updates the children property when appending an element child.', () => {
+      const div = document.createElement('div')
+      const span = document.createElement('span')
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      document.appendChild(document.createComment('test'))
+      document.appendChild(div)
+      document.appendChild(document.createComment('test'))
+      document.appendChild(span)
+
+      expect(document.children.length).toBe(2)
+      expect(document.children[0]).toBe(div)
+      expect(document.children[1]).toBe(span)
+    })
+
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
+    it('append the children instead of the actual element if the type is DocumentFragment.', () => {
+      const template = <HTMLTemplateElement>document.createElement('template')
+
+      template.innerHTML = '<div>Div</div><span>Span</span>'
+
+      const clone = template.content.cloneNode(true)
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      document.appendChild(clone)
+
+      expect(clone.childNodes.length).toBe(0)
+      expect(clone.children.length).toBe(0)
+      expect(document.children.map(child => child.outerHTML).join('')).toBe(
+        '<div>Div</div><span>Span</span>',
+      );
+    })
+  })
+
+  describe('removeChild()', () => {
+    it('updates the children property when removing an element child.', () => {
+      const div = document.createElement('div')
+      const span = document.createElement('span')
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      document.appendChild(document.createComment('test'))
+      document.appendChild(div)
+      document.appendChild(document.createComment('test'))
+      document.appendChild(span)
+
+      document.removeChild(div)
+
+      expect(document.children.length).toBe(1)
+      expect(document.children[0]).toBe(span)
+    })
+  })
+
+  describe('insertBefore()', () => {
+    it('updates the children property when appending an element child.', () => {
+      const div1 = document.createElement('div')
+      const div2 = document.createElement('div')
+      const span = document.createElement('span')
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      document.appendChild(document.createComment('test'))
+      document.appendChild(div1)
+      document.appendChild(document.createComment('test'))
+      document.appendChild(span)
+      document.insertBefore(div2, div1)
+
+      expect(document.children.length).toBe(3)
+      expect(document.children[0]).toBe(div2)
+      expect(document.children[1]).toBe(div1)
+      expect(document.children[2]).toBe(span)
+    })
+
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
+    it('insert the children instead of the actual element before another reference Node if the type is DocumentFragment.', () => {
+      const child1 = document.createElement('span')
+      const child2 = document.createElement('span')
+      const template = <HTMLTemplateElement>document.createElement('template')
+
+      template.innerHTML = '<div>Template DIV 1</div><span>Template SPAN 1</span>'
+
+      const clone = template.content.cloneNode(true)
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      document.appendChild(child1)
+      document.appendChild(child2)
+
+      document.insertBefore(clone, child2)
+
+      expect(document.children.length).toBe(4)
+      expect(document.children.map(child => child.outerHTML).join('')).toBe(
+        '<span></span><div>Template DIV 1</div><span>Template SPAN 1</span><span></span>',
+      );
+    })
+  })
+
+  describe('write()', () => {
+    it('replaces the content of documentElement with new content the first time it is called and writes the body part to the body the second time.', () => {
+      const html = `
+				<html>
+					<head>
+						<title>Title</title>
+					</head>
+					<body>
+						<span>Body</span>
+					</body>
+				</html>
+			`
+      document.write(html)
+      document.write(html)
+      expect(document.documentElement.outerHTML.replace(/[\s]/gm, '')).toBe(
+				`
+				<html>
+					<head>
+						<title>Title</title>
+					</head>
+					<body>
+						<span>Body</span>
+						<span>Body</span>
+					</body>
+				</html>
+				`.replace(/[\s]/gm, ''),
+      );
+    })
+
+    it('adds elements outside of the <html> tag to the <body> tag.', () => {
+      const html = `
+				<html>
+					<head>
+						<title>Title</title>
+					</head>
+					<body>
+						<span>Body</span>
+					</body>
+				</html>
+				<div>Should be added to body</div>
+			`
+      document.write(html)
+      expect(document.documentElement.outerHTML.replace(/[\s]/gm, '')).toBe(
+				`
+				<html>
+					<head>
+						<title>Title</title>
+					</head>
+					<body>
+						<span>Body</span>
+						<div>Should be added to body</div>
+					</body>
+				</html>
+				`.replace(/[\s]/gm, ''),
+      );
+    })
+
+    it('adds elements outside of the <html> tag to the <body> tag.', () => {
+      const html = `<html test="1"><body>Test></body></html>`
+      document.write(html)
+      expect(document.documentElement.outerHTML).toBe(
+        '<html test="1"><head></head><body>Test></body></html>',
+      );
+    })
+  })
+
+  describe('open()', () => {
+    it('clears the document and opens it for writing.', () => {
+      const html = `
+				<html>
+					<head>
+						<title>Title</title>
+					</head>
+					<body>
+						<span>Body</span>
+					</body>
+				</html>
+			`
+      document.write(html)
+      document.open()
+      document.write(html)
+      expect(document.documentElement.outerHTML.replace(/[\s]/gm, '')).toBe(
+        html.replace(/[\s]/gm, ''),
+      );
+    })
+  })
+
+  describe('close()', () => {
+    it('has a close method.', () => {
+      document.close()
+      expect(typeof document.close).toBe('function')
+    })
+  })
+
+  describe('createElement()', () => {
+    it('creates an element.', () => {
+      const div = document.createElement('div')
+      expect(div.tagName).toBe('DIV')
+      expect(div.namespaceURI).toBe(NamespaceURI.html)
+      expect(div instanceof HTMLElement).toBe(true)
+    })
+
+    it('creates an svg element.', () => {
+      const div = document.createElement('svg')
+      expect(div.tagName).toBe('SVG')
+      expect(div.namespaceURI).toBe(NamespaceURI.html)
+      expect(div instanceof SVGSVGElement).toBe(true)
+    })
+
+    it('creates a custom element.', () => {
+      window.customElements.define('custom-element', CustomElement)
+      const div = document.createElement('custom-element')
+      expect(div.tagName).toBe('CUSTOM-ELEMENT')
+      expect(div.namespaceURI).toBe(NamespaceURI.html)
+      expect(div instanceof CustomElement).toBe(true)
+    })
+
+    it('creates a custom element that has been extended from an "li" element.', () => {
+      window.customElements.define('custom-element', CustomElement, { extends: 'li' })
+      const div = document.createElement('li', { is: 'custom-element' })
+      expect(div.tagName).toBe('LI')
+      expect(div.namespaceURI).toBe(NamespaceURI.html)
+      expect(div instanceof CustomElement).toBe(true)
+    })
+  })
+
+  describe('createElementNS()', () => {
+    it('creates an svg element with namespace set to SVG.', () => {
+      const svg = document.createElementNS(NamespaceURI.svg, 'svg')
+      expect(svg.tagName).toBe('SVG')
+      expect(svg.namespaceURI).toBe(NamespaceURI.svg)
+      expect(svg instanceof SVGSVGElement).toBe(true)
+    })
+
+    it('creates a custom element with namespace set to SVG.', () => {
+      window.customElements.define('custom-element', CustomElement)
+      const div = document.createElementNS(NamespaceURI.svg, 'custom-element')
+      expect(div.tagName).toBe('CUSTOM-ELEMENT')
+      expect(div.namespaceURI).toBe(NamespaceURI.svg)
+      expect(div instanceof CustomElement).toBe(true)
+    })
+
+    it('creates a custom element that has been extended from an "li" element with namespace set to SVG.', () => {
+      window.customElements.define('custom-element', CustomElement, { extends: 'li' })
+      const div = document.createElementNS(NamespaceURI.svg, 'li', { is: 'custom-element' })
+      expect(div.tagName).toBe('LI')
+      expect(div.namespaceURI).toBe(NamespaceURI.svg)
+      expect(div instanceof CustomElement).toBe(true)
+    })
+
+    it('creates a custom element with namespace set to SVG and can set the style.', () => {
+      const svg = <ISVGElement>document.createElementNS(NamespaceURI.svg, 'svg')
+      svg.style.cssText = 'user-select:none;'
+      expect(svg.style.cssText).toBe('user-select: none;')
+    })
+
+    it('creates an element when tag name isn't a string.', () => {
+      const element = <ISVGElement>(
+				document.createElementNS(<string>(<unknown>null), <string>(<unknown>true))
+			)
+      expect(element.tagName).toBe('TRUE')
+    })
+  })
+
+  describe('createAttribute()', () => {
+    it('creates an Attr node.', () => {
+      const attribute = document.createAttribute('KEY1')
+
+      expect(attribute instanceof Attr).toBe(true)
+
+      expect(attribute.value).toBe(null)
+      expect(attribute.name).toBe('key1')
+      expect(attribute.namespaceURI).toBe(null)
+      expect(attribute.specified).toBe(true)
+      expect(attribute.ownerElement === null).toBe(true)
+      expect(attribute.ownerDocument === document).toBe(true)
+    })
+  })
+
+  describe('createAttributeNS()', () => {
+    it('creates an Attr node with namespace set to HTML.', () => {
+      const attribute = document.createAttributeNS(NamespaceURI.html, 'KEY1')
+
+      expect(attribute instanceof Attr).toBe(true)
+
+      expect(attribute.value).toBe(null)
+      expect(attribute.name).toBe('KEY1')
+      expect(attribute.namespaceURI).toBe(NamespaceURI.html)
+      expect(attribute.specified).toBe(true)
+      expect(attribute.ownerElement === null).toBe(true)
+      expect(attribute.ownerDocument === document).toBe(true)
+    })
+
+    it('creates an Attr node with namespace set to SVG.', () => {
+      const attribute = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
+      expect(attribute instanceof Attr).toBe(true)
+
+      expect(attribute.value).toBe(null)
+      expect(attribute.name).toBe('KEY1')
+      expect(attribute.namespaceURI).toBe(NamespaceURI.svg)
+      expect(attribute.specified).toBe(true)
+      expect(attribute.ownerElement === null).toBe(true)
+      expect(attribute.ownerDocument === document).toBe(true)
+    })
+  })
+
+  describe('createTextNode()', () => {
+    it('creates a text node.', () => {
+      const textContent = 'text'
+      const textNode = document.createTextNode(textContent)
+      expect(textNode.textContent).toBe(textContent)
+      expect(textNode instanceof Text).toBe(true)
+    })
+
+    it('creates a text node without content.', () => {
+      const textNode = document.createTextNode()
+      expect(textNode.data).toBe('')
+    })
+  })
+
+  describe('createComment()', () => {
+    it('creates a comment node.', () => {
+      const textContent = 'text'
+      const commentNode = document.createComment(textContent)
+      expect(commentNode.textContent).toBe(textContent)
+      expect(commentNode instanceof Comment).toBe(true)
+    })
+
+    it('creates a comment node without content.', () => {
+      const commentNode = document.createComment()
+      expect(commentNode.data).toBe('')
+    })
+  })
+
+  describe('createDocumentFragment()', () => {
+    it('creates a document fragment.', () => {
+      const documentFragment = document.createDocumentFragment()
+      expect(documentFragment.ownerDocument).toBe(document)
+      expect(documentFragment instanceof DocumentFragment).toBe(true)
+    })
+  })
+
+  describe('createNodeIterator()', () => {
+    it('creates a node iterator.', () => {
+      const root = document.createElement('div')
+      const whatToShow = 1
+      const filter = {
+        acceptNode(node) {
+          if (node === Node.ELEMENT_NODE) {
+            return NodeFilter.FILTER_ACCEPT
+          }
+          return NodeFilter.FILTER_REJECT
+        }
+      }
+      const nodeIterator = document.createNodeIterator(root, whatToShow, filter)
+      expect(nodeIterator.root).toBe(root)
+      expect(nodeIterator.whatToShow).toBe(whatToShow)
+      expect(nodeIterator.filter).toBe(filter)
+      expect(nodeIterator).toBeInstanceOf(NodeIterator)
+    })
+  })
+
+  describe('createTreeWalker()', () => {
+    it('creates a tree walker.', () => {
+      const root = document.createElement('div')
+      const whatToShow = 1
+      const filter = {
+        acceptNode: (node) => {
+          if (node === Node.ELEMENT_NODE) {
+            return NodeFilter.FILTER_ACCEPT
+          }
+          return NodeFilter.FILTER_REJECT
+        }
+      }
+      const treeWalker = document.createTreeWalker(root, whatToShow, filter)
+      expect(treeWalker.root).toBe(root)
+      expect(treeWalker.whatToShow).toBe(whatToShow)
+      expect(treeWalker.filter).toBe(filter)
+      expect(treeWalker).toBeInstanceOf(TreeWalker)
+    })
+  })
+
+  describe('createEvent()', () => {
+    it('creates a legacy event.', () => {
+      const event = document.createEvent('Event')
+      event.initEvent('click', true, true)
+      expect(event.type).toBe('click')
+      expect(event.bubbles).toBe(true)
+      expect(event.cancelable).toBe(true)
+      expect(event instanceof Event).toBe(true)
+    })
+
+    it('creates a legacy custom event.', () => {
+      const event = <CustomEvent>document.createEvent('CustomEvent')
+      const detail = {}
+      event.initCustomEvent('click', true, true, detail)
+      expect(event.type).toBe('click')
+      expect(event.bubbles).toBe(true)
+      expect(event.cancelable).toBe(true)
+      expect(event.detail).toBe(detail)
+      expect(event instanceof CustomEvent).toBe(true)
+    })
+  })
+
+  describe('importNode()', () => {
+    it('creates a clone of a Node and sets the ownerDocument to be the current document.', () => {
+      const window1 = new Window()
+      const window2 = new Window()
+      const node = window1.document.createElement('div')
+      const clone = <Element>window2.document.importNode(node)
+      expect(clone.tagName).toBe('DIV')
+      expect(clone.ownerDocument === window2.document).toBe(true)
+      expect(clone instanceof HTMLElement).toBe(true)
+    })
+
+    it('creates a clone of a Node and sets the ownerDocument to be the current document on child nodes when setting the "deep" parameter to "true".', () => {
+      const window1 = new Window()
+      const window2 = new Window()
+      const node = window1.document.createElement('div')
+      const childNode1 = window1.document.createElement('span')
+      const childNode2 = window1.document.createElement('span')
+
+      node.appendChild(childNode1)
+      node.appendChild(childNode2)
+
+      const clone = <Element>window2.document.importNode(node, true)
+      expect(clone.tagName).toBe('DIV')
+      expect(clone.ownerDocument === window2.document).toBe(true)
+
+      expect(clone.children.length).toBe(2)
+      expect(clone.children[0].tagName).toBe('SPAN')
+      expect(clone.children[0].ownerDocument === window2.document).toBe(true)
+      expect(clone.children[1].tagName).toBe('SPAN')
+      expect(clone.children[1].ownerDocument === window2.document).toBe(true)
+    })
+  })
+
+  describe('cloneNode()', () => {
+    it('clones the properties of the document when cloned.', () => {
+      const child = document.createElement('div')
+      child.className = 'className'
+
+      for (const node of document.childNodes.slice()) {
+        node.parentNode.removeChild(node)
+      }
+
+      document.appendChild(child)
+
+      const clone = document.cloneNode(false)
+      const clone2 = document.cloneNode(true)
+      expect(clone[PropertySymbol.ownerWindow] === window).toBe(true)
+      expect(clone.defaultView === null).toBe(true)
+      expect(clone.children.length).toBe(0)
+      expect(clone2.children.length).toBe(1)
+      expect(clone2.children[0].outerHTML).toBe('<div class="className"></div>')
+    })
+  })
+
+  describe('adoptNode()', () => {
+    it('removes node from its original document and sets the ownerDocument to be the current document.', () => {
+      const originalDocument = new Window().document
+      const node = originalDocument.createElement('div')
+      originalDocument.body.append(node)
+      const adopted = <Element>document.adoptNode(node)
+
+      expect(adopted.tagName).toBe('DIV')
+      expect(adopted instanceof HTMLElement).toBe(true)
+      expect(adopted.ownerDocument === document).toBe(true)
+      expect(originalDocument.querySelector('div')).toBe(null)
+    })
+
+    it('just change the ownerDocument of the node to be the current document, if the original document does not have node inside tree.', () => {
+      const node = new Window().document.createElement('div')
+      const adopted = <Element>document.adoptNode(node)
+
+      expect(adopted.tagName).toBe('DIV')
+      expect(adopted instanceof HTMLElement).toBe(true)
+      expect(adopted.ownerDocument === document).toBe(true)
+    })
+  })
+
+  describe('addEventListener()', () => {
+    it('triggers "readystatechange" event if no resources needs to be loaded.', async () => {
+      await new Promise((resolve) => {
+        let readyChangeEvent: Event | null = null
+
+        document.addEventListener('readystatechange', (event) => {
+          readyChangeEvent = event
+        })
+
+        expect(document.readyState).toBe(DocumentReadyStateEnum.interactive)
+
+        setTimeout(() => {
+          expect((<Event>readyChangeEvent).target).toBe(document)
+          expect(document.readyState).toBe(DocumentReadyStateEnum.complete)
+          resolve(null)
+        }, 1)
+      })
+    })
+
+    it('triggers "readystatechange" event when all resources have been loaded.', async () => {
+      await new Promise((resolve) => {
+        const cssURL = 'https://localhost:8080/path/to/file.css'
+        const jsURL = 'https://localhost:8080/path/to/file.js'
+        const cssResponse = 'body { background-color: red; }'
+        const jsResponse = 'globalThis.test = "test";'
+        let resourceFetchCSSWindow: IBrowserWindow | null = null
+        let resourceFetchCSSURL: string | null = null
+        let resourceFetchJSWindow: IBrowserWindow | null = null
+        let resourceFetchJSURL: string | null = null
+        let readyChangeEvent: Event | null = null
+
+        vi.spyOn(ResourceFetch.prototype, 'fetch').mockImplementation(async function (url: string) {
+          if (url.endsWith('.css')) {
+            resourceFetchCSSWindow = this.window
+            resourceFetchCSSURL = url
+            return cssResponse
+          }
+
+          resourceFetchJSWindow = this.window
+          resourceFetchJSURL = url
+          return jsResponse
+        })
+
+        document.addEventListener('readystatechange', (event) => {
+          readyChangeEvent = event
+        })
+
+        const script = <IHTMLScriptElement>document.createElement('script')
+        script.async = true
+        script.src = jsURL
+
+        const link = <IHTMLLinkElement>document.createElement('link')
+        link.href = cssURL
+        link.rel = 'stylesheet'
+
+        document.body.appendChild(script)
+        document.body.appendChild(link)
+
+        expect(document.readyState).toBe(DocumentReadyStateEnum.interactive)
+
+        setTimeout(() => {
+          expect(resourceFetchCSSWindow).toBe(window)
+          expect(resourceFetchCSSURL).toBe(cssURL)
+          expect(resourceFetchJSWindow).toBe(window)
+          expect(resourceFetchJSURL).toBe(jsURL)
+          expect((<Event>readyChangeEvent).target).toBe(document)
+          expect(document.readyState).toBe(DocumentReadyStateEnum.complete)
+          expect(document.styleSheets.length).toBe(1)
+          expect(document.styleSheets[0].cssRules[0].cssText).toBe(cssResponse)
+
+          expect(window.test).toBe('test')
+
+          delete window.test
+
+          resolve(null)
+        }, 0)
+      })
+    })
+  })
+
+  describe('getSelection()', () => {
+    it('returns an instance of Selection.', () => {
+      expect(document.getSelection() instanceof Selection).toBe(true)
+    })
+
+    it('returns the same instance when called multiple times.', () => {
+      const selection1 = document.getSelection()
+      const selection2 = document.getSelection()
+      expect(selection1 === selection2).toBe(true)
+    })
+  })
+
+  describe('createRange()', () => {
+    it('returns an instance of Range.', () => {
+      expect(document.createRange() instanceof Range).toBe(true)
+    })
+  })
+
+  describe('hasFocus()', () => {
+    it('returns "true" if activeElement has focus.', () => {
+      expect(document.hasFocus()).toBe(true)
+      document.documentElement.remove()
+      expect(document.hasFocus()).toBe(false)
+    })
+  })
+
+  describe('dispatchEvent()', () => {
+    it('bubbles events to Window.', () => {
+      const event = new Event('click', { bubbles: true })
+      let emittedEvent: Event | null = null
+
+      window.addEventListener('click', event => (emittedEvent = event))
+      document.dispatchEvent(event)
+
+      expect(emittedEvent).toBe(event)
+    })
+  })
+
+  describe('createProcessingInstruction()', () => {
+    it('creates a Processing Instruction node with target & data.', () => {
+      const instruction = document.createProcessingInstruction('foo', 'bar')
+      expect(instruction instanceof ProcessingInstruction).toBe(true)
+      expect(instruction.target).toBe('foo')
+      expect(instruction.data).toBe('bar')
+      expect(instruction.ownerDocument).toBe(document)
+    })
+
+    it('throws an exception if target is invalid".', () => {
+      expect.assertions(1)
+      try {
+        document.createProcessingInstruction('-foo', 'bar')
+      }
+ catch (e) {
+        expect(e).toEqual(
+          new DOMException(
+						`Failed to execute 'createProcessingInstruction' on 'Document': The target provided ('-foo') is not a valid name.`,
+          )
+        )
+      }
+    })
+
+    it('throws an exception if data contains "?>".', () => {
+      expect.assertions(1)
+      try {
+        document.createProcessingInstruction('foo', 'bar?>')
+      }
+ catch (e) {
+        expect(e).toEqual(
+          new DOMException(
+						`Failed to execute 'createProcessingInstruction' on 'Document': The data provided ('?>') contains '?>'`,
+          )
+        )
+      }
+    })
+  })
+
+  describe('currentScript', () => {
+    it('returns the currently executing script element.', () => {
+      expect(document.currentScript).toBe(null)
+      const script1 = document.createElement('script')
+      script1.textContent = 'window.test = document.currentScript;'
+      document.body.appendChild(script1)
+      expect(window.test).toBe(script1)
+      expect(document.currentScript).toBe(null)
+      const script2 = document.createElement('script')
+      script2.textContent = 'window.test = document.currentScript;'
+      document.body.appendChild(script2)
+      expect(window.test).toBe(script2)
+      expect(document.currentScript).toBe(null)
+    })
+  })
+})
