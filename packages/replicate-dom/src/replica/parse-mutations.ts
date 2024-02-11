@@ -1,5 +1,6 @@
 import type { DomClasses } from '../primary/mutable-dom-props'
 import type {
+  SerializedAttr,
   SerializedCommentNode,
   SerializedDocumentFragment,
   SerializedDomElement,
@@ -37,6 +38,14 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
       const [, text] = node as SerializedCommentNode
       return doc.createComment(text ?? '')
     }
+    if (node[0] === 'Attr') {
+      const [, name, value, namespace] = node as SerializedAttr
+      const attr = namespace
+        ? doc.createAttributeNS(namespace, name)
+        : doc.createAttribute(name)
+      attr.value = value
+      return attr
+    }
     if (node[0] === 'DocumentFragment') {
       const [, text] = node as SerializedDocumentFragment
       const frag = doc.createDocumentFragment()
@@ -49,6 +58,10 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
     const [tag, attributes, children] = node as SerializedDomElement
     const element = doc.createElement(tag)
     for (const [name, value] of Object.entries(attributes)) {
+      // if (name === 'namespaceURI') {
+      //   element.setAttribute('namespaceURI', value)
+      //   continue
+      // }
       element.setAttribute(name, value)
     }
     const parsedChildren = children.map(child => parseDomNode(child, doc, classes))

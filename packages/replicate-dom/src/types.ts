@@ -16,12 +16,15 @@ export type SerializedCommentNode = ['Comment', string]
 
 export type SerializedDocumentFragment = ['DocumentFragment', string]
 
+export type SerializedAttr = ['Attr', name: string, value: string, namespace?: string]
+
 export type SerializedDomNode =
   | SerializedDomTextNode
   | SerializedDomElement
   | SerializedTextNode
   | SerializedCommentNode
   | SerializedDocumentFragment
+  | SerializedAttr
 
 export interface HTMLPatch {
   targetNodePath: DomNodePath

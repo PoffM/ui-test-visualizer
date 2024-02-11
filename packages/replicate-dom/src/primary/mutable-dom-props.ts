@@ -21,6 +21,7 @@ export interface DomClasses {
   DocumentFragment: new () => DocumentFragment
   XMLSerializer: new () => XMLSerializer
   DOMParser: new () => DOMParser
+  Attr: new () => Attr
 }
 
 /** All methods and setters that mutate the DOM */
@@ -37,6 +38,7 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'removeChild',
         'setAttribute',
         'setAttributeNS',
+        'setAttributeNode',
         'removeAttribute',
         'scroll',
         'scrollTo',
@@ -77,7 +79,6 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'appendChild',
         'replaceChild',
         'removeChild',
-
       ],
       setters: ['textContent', 'nodeValue'],
     } satisfies DOMNodeSpyConfig<Node>,
