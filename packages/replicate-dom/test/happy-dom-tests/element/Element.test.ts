@@ -31,7 +31,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Node, Window } from 'happy-dom'
-import type { HTMLTemplateElement, IAttr, IDocument, IElement, IWindow, Text } from 'happy-dom'
+import type { Element, HTMLTemplateElement, IAttr, IDocument, IElement, IWindow, Text } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
 
@@ -1349,9 +1349,9 @@ describe('element', () => {
 
       it('sets an Attr node on an <svg> element.', () => {
         const { primary, replica } = testElement('div')
-        const svg = primary.append(
+        const svg = primary.appendChild(
           document.createElementNS(NamespaceURI.svg, 'svg'),
-        )
+        ) as Element
 
         const replicaSvg = replica.children[0]!
 
@@ -1361,9 +1361,7 @@ describe('element', () => {
         attribute1.value = 'value1'
         attribute2.value = 'value2'
 
-        // @ts-expect-error method should exist
         svg[method](attribute1)
-        // @ts-expect-error method should exist
         svg[method](attribute2)
 
         expect(replicaSvg.attributes.length).toBe(2)
@@ -1424,15 +1422,15 @@ describe('element', () => {
       primary.setAttributeNode(attribute1)
       primary.setAttributeNode(attribute2)
 
-      expect(replica.getAttributeNode('key1') === attribute1).toBe(true)
-      expect(replica.getAttributeNode('key2') === attribute2).toBe(true)
-      expect(replica.getAttributeNode('KEY1') === attribute1).toBe(true)
-      expect(replica.getAttributeNode('KEY2') === attribute2).toBe(true)
+      expect(replica.getAttributeNode('key1')?.value === attribute1.value).toBe(true)
+      expect(replica.getAttributeNode('key2')?.value === attribute2.value).toBe(true)
+      expect(replica.getAttributeNode('KEY1')?.value === attribute1.value).toBe(true)
+      expect(replica.getAttributeNode('KEY2')?.value === attribute2.value).toBe(true)
     })
 
     it('returns an Attr node from an <svg> element.', () => {
       const { primary, replica } = testElement('div')
-      const svg = primary.append(
+      const svg = primary.appendChild(
         document.createElementNS(NamespaceURI.svg, 'svg'),
       )
       const replicaSvg = replica.children[0]!
@@ -1463,8 +1461,10 @@ describe('element', () => {
 
       primary.setAttributeNode(attribute1)
 
-      expect(replica.getAttributeNodeNS(NamespaceURI.svg, 'key1')).toEqual(attribute1)
-      expect(replica.getAttributeNodeNS(NamespaceURI.svg, 'KEY1')).toEqual(attribute1)
+      expect(replica.getAttributeNodeNS(NamespaceURI.svg, 'key1')?.value)
+        .toEqual(attribute1.value)
+      expect(replica.getAttributeNodeNS(NamespaceURI.svg, 'KEY1')?.value)
+        .toEqual(attribute1.value)
     })
 
     it('returns an Attr node from an <svg> element.', () => {
