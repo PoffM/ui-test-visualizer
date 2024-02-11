@@ -168,7 +168,6 @@ describe('charaterData', () => {
       const node1 = document.createComment('test1')
       const node2 = document.createComment('test2')
 
-      // @ts-expect-error should work
       primary.replaceWith(node1, node2)
 
       expect(primary.ownerDocument.body.innerHTML).toBe('<!--test1--><!--test2-->')
@@ -182,7 +181,6 @@ describe('charaterData', () => {
       const node1 = document.createComment('test1')
       const node2 = document.createComment('test2')
 
-      // @ts-expect-error should work
       primary.before(node1, node2)
 
       expect(primary.ownerDocument.body.innerHTML).toBe('<!--test1--><!--test2--><!--test-->')
@@ -196,7 +194,6 @@ describe('charaterData', () => {
       const node1 = document.createComment('test1')
       const node2 = document.createComment('test2')
 
-      // @ts-expect-error should work
       primary.after(node1, node2)
 
       expect(primary.ownerDocument.body.innerHTML).toBe('<!--test--><!--test1--><!--test2-->')

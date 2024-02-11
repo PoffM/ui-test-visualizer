@@ -33,7 +33,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
-import type { IDocument, IHTMLElement, IWindow } from 'happy-dom'
+import type { HTMLElement, IDocument, IHTMLElement, IWindow } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 
 describe(' HTMLElement', () => {
@@ -321,14 +321,14 @@ describe(' HTMLElement', () => {
     it('returns the attribute "dir".', () => {
       const { primary, replica } = testElement('div')
       primary.setAttribute('dir', 'rtl')
-      expect(replica.dir).toBe('rtl')
+      expect((replica as HTMLElement).dir).toBe('rtl')
     })
   })
 
   describe('set dir()', () => {
     it('sets the attribute "tabindex".', () => {
       const { primary, replica } = testElement('div')
-      primary.dir = 'rtl'
+      ;(primary as HTMLElement).dir = 'rtl'
       expect(replica.getAttribute('dir')).toBe('rtl')
     })
   })
@@ -337,16 +337,16 @@ describe(' HTMLElement', () => {
     it('returns the attribute "hidden".', () => {
       const { primary, replica } = testElement('div')
       primary.setAttribute('hidden', '')
-      expect(replica.hidden).toBe(true)
+      expect((replica as HTMLElement).hidden).toBe(true)
     })
   })
 
   describe('set hidden()', () => {
     it('sets the attribute "hidden".', () => {
       const { primary, replica } = testElement('div')
-      primary.hidden = true
+      ;(primary as HTMLElement).hidden = true
       expect(replica.getAttribute('hidden')).toBe('')
-      primary.hidden = false
+      ;(primary as HTMLElement).hidden = false
       expect(replica.getAttribute('hidden')).toBe(null)
     })
   })

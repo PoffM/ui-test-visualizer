@@ -1,5 +1,4 @@
-import type { HTMLElement, IDocument, INode, IWindow } from 'happy-dom'
-import type CharacterData from 'happy-dom/lib/nodes/character-data/CharacterData'
+import type { IDocument, IHTMLElement, INode, IWindow } from 'happy-dom'
 import { applyDomPatch, initPrimaryDom } from '../src'
 import { getNodePath } from '../src/primary/serialize-mutations'
 import { getNodeByPath } from '../src/replica/parse-mutations'
@@ -33,9 +32,12 @@ export function addTestElement<
   arg: string,
   method: M = 'createElement' as M,
 ) {
+  const numArgs = primaryDocument[method].length
+  // @ts-expect-error The methods call should be valid
+  const testEl = numArgs ? primaryDocument[method](arg) : primaryDocument[method]()
   const primary = primaryDocument.body.appendChild(
-    // @ts-expect-error The methods call should be valid
-    primaryDocument[method](arg),
+    // @ts-expect-error The element should be valid
+    testEl,
   )
   const path = getNodePath(
     primary as unknown as Node,
@@ -53,10 +55,9 @@ export function addTestElement<
   }
 
   type Return =
-     M extends 'createElement' ? HTMLElement
+     M extends 'createElement' ? IHTMLElement
        : M extends 'createTextNode' ? Text
-         : M extends 'createComment' ? CharacterData
-           : never
+         : ReturnType<IDocument[M]>
 
   return {
     primary: primary as unknown as Return,
