@@ -61,7 +61,8 @@
   "scripts": {
     "build": "pnpm run -r \"/^build:.*/\"",
     "dev": "pnpm run -r \"/^dev:.*/\"",
-    "test": "tsc && pnpm run --filter {./packages/*} test"
+    "test": "pnpm run --filter {./packages/*} test",
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",
