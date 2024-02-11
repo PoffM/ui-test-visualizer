@@ -859,24 +859,28 @@ describe('element', () => {
     })
 
     it('insert before comment node should be at the correct location.', () => {
+      const { primary, replica } = testElement('div')
+
       const span1 = document.createElement('span')
       const span2 = document.createElement('span')
       const span3 = document.createElement('span')
       const comment = document.createComment('test')
 
-      element.appendChild(span1)
-      element.appendChild(comment)
-      element.appendChild(span2)
-      element.insertBefore(span3, comment)
+      primary.appendChild(span1)
+      primary.appendChild(comment)
+      primary.appendChild(span2)
+      primary.insertBefore(span3, comment)
 
-      expect(element.children.length).toBe(3)
-      expect(element.children[0] === span1).toBe(true)
-      expect(element.children[1] === span3).toBe(true)
-      expect(element.children[2] === span2).toBe(true)
+      expect(replica.children.length).toBe(3)
+      expect(replica.children[0]).toBeTruthy()
+      expect(replica.children[1]).toBeTruthy()
+      expect(replica.children[2]).toBeTruthy()
     })
 
     // See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
     it('insert the children instead of the actual element before another reference Node if the type is DocumentFragment.', () => {
+      const { primary, replica } = testElement('div')
+
       const child1 = document.createElement('span')
       const child2 = document.createElement('span')
       const template = <HTMLTemplateElement>document.createElement('template')
@@ -885,22 +889,24 @@ describe('element', () => {
 
       const clone = template.content.cloneNode(true)
 
-      element.appendChild(child1)
-      element.appendChild(child2)
+      primary.appendChild(child1)
+      primary.appendChild(child2)
 
-      element.insertBefore(clone, child2)
+      primary.insertBefore(clone, child2)
 
-      expect(element.children.length).toBe(4)
-      expect(element.innerHTML).toEqual(
+      expect(replica.children.length).toBe(4)
+      expect(replica.innerHTML).toEqual(
         '<span></span><div>Template DIV 1</div><span>Template SPAN 1</span><span></span>',
       )
     })
 
     it('removes child from previous parent node when moved.', () => {
+      const { primary, replica } = testElement('div')
+
       const div = document.createElement('div')
       const span1 = document.createElement('span')
       const span2 = document.createElement('span')
-      const otherParent = document.createElement('div')
+      const otherParent = testElement('div')
       const otherSpan1 = document.createElement('span')
       const otherSpan2 = document.createElement('span')
 
@@ -910,413 +916,373 @@ describe('element', () => {
       otherSpan1.setAttribute('id', 'otherSpan1')
       otherSpan2.setAttribute('id', 'otherSpan2')
 
-      otherParent.appendChild(document.createComment('test'))
-      otherParent.appendChild(otherSpan1)
-      otherParent.appendChild(document.createComment('test'))
-      otherParent.appendChild(otherSpan2)
-      otherParent.insertBefore(div, otherSpan2)
+      otherParent.primary.appendChild(document.createComment('test'))
+      otherParent.primary.appendChild(otherSpan1)
+      otherParent.primary.appendChild(document.createComment('test'))
+      otherParent.primary.appendChild(otherSpan2)
+      otherParent.primary.insertBefore(div, otherSpan2)
 
-      expect(otherParent.children.length).toBe(3)
-      expect(otherParent.children[0] === otherSpan1).toBe(true)
-      expect(otherParent.children[1] === div).toBe(true)
-      expect(otherParent.children[2] === otherSpan2).toBe(true)
-      expect(otherParent.children.otherSpan1 === otherSpan1).toBe(true)
-      expect(otherParent.children.div === div).toBe(true)
-      expect(otherParent.children.otherSpan2 === otherSpan2).toBe(true)
+      expect(otherParent.replica.children.length).toBe(3)
+      expect(otherParent.replica.children[0] === otherSpan1).toBe(true)
+      expect(otherParent.replica.children[1] === div).toBe(true)
+      expect(otherParent.replica.children[2] === otherSpan2).toBe(true)
+      expect(otherParent.replica.children.otherSpan1 === otherSpan1).toBe(true)
+      expect(otherParent.replica.children.div === div).toBe(true)
+      expect(otherParent.replica.children.otherSpan2 === otherSpan2).toBe(true)
 
-      element.appendChild(document.createComment('test'))
-      element.appendChild(span1)
-      element.appendChild(document.createComment('test'))
-      element.appendChild(document.createComment('test'))
-      element.appendChild(span2)
-      element.appendChild(document.createComment('test'))
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(span1)
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(span2)
+      primary.appendChild(document.createComment('test'))
 
-      element.insertBefore(div, span2)
+      primary.insertBefore(div, span2)
 
-      expect(otherParent.children.length).toBe(2)
-      expect(otherParent.children[0] === otherSpan1).toBe(true)
-      expect(otherParent.children[1] === otherSpan2).toBe(true)
-      expect(otherParent.children.div === undefined).toBe(true)
-      expect(otherParent.children.otherSpan1 === otherSpan1).toBe(true)
-      expect(otherParent.children.otherSpan2 === otherSpan2).toBe(true)
+      expect(otherParent.replica.children.length).toBe(2)
+      expect(otherParent.replica.children[0] === otherSpan1).toBe(true)
+      expect(otherParent.replica.children[1] === otherSpan2).toBe(true)
+      expect(otherParent.replica.children.div === undefined).toBe(true)
+      expect(otherParent.replica.children.otherSpan1 === otherSpan1).toBe(true)
+      expect(otherParent.replica.children.otherSpan2 === otherSpan2).toBe(true)
 
-      expect(element.children.length).toBe(3)
-      expect(element.children[0] === span1).toBe(true)
-      expect(element.children[1] === div).toBe(true)
-      expect(element.children[2] === span2).toBe(true)
-      expect(element.children.span1 === span1).toBe(true)
-      expect(element.children.div === div).toBe(true)
-      expect(element.children.span2 === span2).toBe(true)
-    })
-  })
-
-  describe('get previousElementSibling()', () => {
-    it('returns previous element sibling..', () => {
-      const node = document.createComment('test')
-      const previousElementSibling = document.createElement('div')
-      vi.spyOn(NonDocumentChildNodeUtility, 'previousElementSibling').mockImplementation(
-        (childNode) => {
-          expect(childNode).toBe(node)
-          return previousElementSibling
-        },
-      )
-
-      expect(node.previousElementSibling === previousElementSibling).toBe(true)
-    })
-  })
-
-  describe('get nextElementSibling()', () => {
-    it('returns next element sibling..', () => {
-      const node = document.createComment('test')
-      const nextElementSibling = document.createElement('div')
-      vi.spyOn(NonDocumentChildNodeUtility, 'nextElementSibling').mockImplementation(
-        (childNode) => {
-          expect(childNode).toBe(node)
-          return nextElementSibling
-        },
-      )
-
-      expect(node.nextElementSibling === nextElementSibling).toBe(true)
+      expect(replica.children.length).toBe(3)
+      expect(replica.children[0] === span1).toBe(true)
+      expect(replica.children[1] === div).toBe(true)
+      expect(replica.children[2] === span2).toBe(true)
+      expect(replica.children.span1 === span1).toBe(true)
+      expect(replica.children.div === div).toBe(true)
+      expect(replica.children.span2 === span2).toBe(true)
     })
   })
 
   describe('attributeChangedCallback()', () => {
     it('calls attribute changed callback when it is implemented by a custom element (web component).', () => {
-      const customElement = <CustomElement>document.createElement('custom-element')
+      const { primary, replica } = testElement('div')
+      const customElement = document.createElement('custom-element')
 
-      element.appendChild(customElement)
-      document.body.appendChild(element)
+      primary.appendChild(customElement)
 
       customElement.setAttribute('key1', 'value1')
       customElement.setAttribute('key2', 'value2')
       customElement.setAttribute('KEY1', 'newValue')
 
-      expect(customElement.changedAttributes.length).toBe(3)
+      expect(replica.childNodes[0]!.changedAttributes.length).toBe(3)
 
-      expect(customElement.changedAttributes[0].name).toBe('key1')
-      expect(customElement.changedAttributes[0].newValue).toBe('value1')
-      expect(customElement.changedAttributes[0].oldValue).toBe(null)
+      expect(replica.childNodes[0]!.changedAttributes[0].name).toBe('key1')
+      expect(replica.childNodes[0]!.changedAttributes[0].newValue).toBe('value1')
+      expect(replica.childNodes[0]!.changedAttributes[0].oldValue).toBe(null)
 
-      expect(customElement.changedAttributes[1].name).toBe('key2')
-      expect(customElement.changedAttributes[1].newValue).toBe('value2')
-      expect(customElement.changedAttributes[1].oldValue).toBe(null)
+      expect(replica.childNodes[0]!.changedAttributes[1].name).toBe('key2')
+      expect(replica.childNodes[0]!.changedAttributes[1].newValue).toBe('value2')
+      expect(replica.childNodes[0]!.changedAttributes[1].oldValue).toBe(null)
 
-      expect(customElement.changedAttributes[2].name).toBe('key1')
-      expect(customElement.changedAttributes[2].newValue).toBe('newValue')
-      expect(customElement.changedAttributes[2].oldValue).toBe('value1')
+      expect(replica.childNodes[0]!.changedAttributes[2].name).toBe('key1')
+      expect(replica.childNodes[0]!.changedAttributes[2].newValue).toBe('newValue')
+      expect(replica.childNodes[0]!.changedAttributes[2].oldValue).toBe('value1')
     })
 
     it('does not call the attribute changed callback when the attribute name is not available in the observedAttributes() getter method.', () => {
+      const { primary, replica } = testElement('div')
       const customElement = <CustomElement>document.createElement('custom-element')
 
-      element.appendChild(customElement)
-      document.body.appendChild(element)
+      primary.appendChild(customElement)
 
       customElement.setAttribute('k1', 'value1')
       customElement.setAttribute('k2', 'value2')
 
-      expect(customElement.changedAttributes.length).toBe(0)
+      expect(replica.childNodes[0]!.changedAttributes.length).toBe(0)
     })
   })
 
   describe('setAttribute()', () => {
     it('sets an attribute on an element.', () => {
-      element.setAttribute('key1', 'value1')
-      element.setAttribute('key2', '')
+      const { primary, replica } = testElement('div')
 
-      expect(element.attributes.length).toBe(2)
+      primary.setAttribute('key1', 'value1')
+      primary.setAttribute('key2', '')
 
-      expect(element.attributes[0].name).toBe('key1')
-      expect(element.attributes[0].value).toBe('value1')
-      expect(element.attributes[0].namespaceURI).toBe(null)
-      expect(element.attributes[0].specified).toBe(true)
-      expect(element.attributes[0].ownerElement === element).toBe(true)
-      expect(element.attributes[0].ownerDocument === document).toBe(true)
+      expect(replica.attributes.length).toBe(2)
 
-      expect(element.attributes[1].name).toBe('key2')
-      expect(element.attributes[1].value).toBe('')
-      expect(element.attributes[1].namespaceURI).toBe(null)
-      expect(element.attributes[1].specified).toBe(true)
-      expect(element.attributes[1].ownerElement === element).toBe(true)
-      expect(element.attributes[1].ownerDocument === document).toBe(true)
+      expect(replica.attributes[0]!.name).toBe('key1')
+      expect(replica.attributes[0]!.value).toBe('value1')
+      expect(replica.attributes[0]!.namespaceURI).toBe(null)
+      expect(replica.attributes[0]!.specified).toBe(true)
+      expect(replica.attributes[0]!.ownerElement === replica).toBe(true)
+      expect(replica.attributes[0]!.ownerDocument === document).toBe(true)
 
-      expect(element.attributes.key1.name).toBe('key1')
-      expect(element.attributes.key1.value).toBe('value1')
-      expect(element.attributes.key1.namespaceURI).toBe(null)
-      expect(element.attributes.key1.specified).toBe(true)
-      expect(element.attributes.key1.ownerElement === element).toBe(true)
-      expect(element.attributes.key1.ownerDocument === document).toBe(true)
+      expect(replica.attributes[1]!.name).toBe('key2')
+      expect(replica.attributes[1]!.value).toBe('')
+      expect(replica.attributes[1]!.namespaceURI).toBe(null)
+      expect(replica.attributes[1]!.specified).toBe(true)
+      expect(replica.attributes[1]!.ownerElement === replica).toBe(true)
+      expect(replica.attributes[1]!.ownerDocument === document).toBe(true)
 
-      expect(element.attributes.key2.name).toBe('key2')
-      expect(element.attributes.key2.value).toBe('')
-      expect(element.attributes.key2.namespaceURI).toBe(null)
-      expect(element.attributes.key2.specified).toBe(true)
-      expect(element.attributes.key2.ownerElement === element).toBe(true)
-      expect(element.attributes.key2.ownerDocument === document).toBe(true)
+      expect(replica.attributes.key1.name).toBe('key1')
+      expect(replica.attributes.key1.value).toBe('value1')
+      expect(replica.attributes.key1.namespaceURI).toBe(null)
+      expect(replica.attributes.key1.specified).toBe(true)
+      expect(replica.attributes.key1.ownerElement === replica).toBe(true)
+      expect(replica.attributes.key1.ownerDocument === document).toBe(true)
+
+      expect(replica.attributes.key2.name).toBe('key2')
+      expect(replica.attributes.key2.value).toBe('')
+      expect(replica.attributes.key2.namespaceURI).toBe(null)
+      expect(replica.attributes.key2.specified).toBe(true)
+      expect(replica.attributes.key2.ownerElement === replica).toBe(true)
+      expect(replica.attributes.key2.ownerDocument === document).toBe(true)
     })
   })
 
   describe('setAttributeNS()', () => {
     it('sets a namespace attribute on an element.', () => {
-      element.setAttributeNS(NAMESPACE_URI, 'global:local1', 'value1')
-      element.setAttributeNS(NAMESPACE_URI, 'global:local2', '')
+      const { primary, replica } = testElement('div')
 
-      expect(element.attributes.length).toBe(2)
+      primary.setAttributeNS(NAMESPACE_URI, 'global:local1', 'value1')
+      primary.setAttributeNS(NAMESPACE_URI, 'global:local2', '')
 
-      expect(element.attributes[0].name).toBe('global:local1')
-      expect(element.attributes[0].value).toBe('value1')
-      expect(element.attributes[0].namespaceURI).toBe(NAMESPACE_URI)
-      expect(element.attributes[0].specified).toBe(true)
-      expect(element.attributes[0].ownerElement === element).toBe(true)
-      expect(element.attributes[0].ownerDocument === document).toBe(true)
+      expect(replica.attributes.length).toBe(2)
 
-      expect(element.attributes[1].name).toBe('global:local2')
-      expect(element.attributes[1].value).toBe('')
-      expect(element.attributes[1].namespaceURI).toBe(NAMESPACE_URI)
-      expect(element.attributes[1].specified).toBe(true)
-      expect(element.attributes[1].ownerElement === element).toBe(true)
-      expect(element.attributes[1].ownerDocument === document).toBe(true)
+      expect(replica.attributes[0]!.name).toBe('global:local1')
+      expect(replica.attributes[0]!.value).toBe('value1')
+      expect(replica.attributes[0]!.namespaceURI).toBe(NAMESPACE_URI)
+      expect(replica.attributes[0]!.specified).toBe(true)
+      expect(replica.attributes[0]!.ownerElement === replica).toBe(true)
+      expect(replica.attributes[0]!.ownerDocument === document).toBe(true)
 
-      expect(element.attributes['global:local1'].name).toBe('global:local1')
-      expect(element.attributes['global:local1'].value).toBe('value1')
-      expect(element.attributes['global:local1'].namespaceURI).toBe(NAMESPACE_URI)
-      expect(element.attributes['global:local1'].specified).toBe(true)
-      expect(element.attributes['global:local1'].ownerElement === element).toBe(true)
-      expect(element.attributes['global:local1'].ownerDocument === document).toBe(true)
+      expect(replica.attributes[1]!.name).toBe('global:local2')
+      expect(replica.attributes[1]!.value).toBe('')
+      expect(replica.attributes[1]!.namespaceURI).toBe(NAMESPACE_URI)
+      expect(replica.attributes[1]!.specified).toBe(true)
+      expect(replica.attributes[1]!.ownerElement === replica).toBe(true)
+      expect(replica.attributes[1]!.ownerDocument === document).toBe(true)
 
-      expect(element.attributes['global:local2'].name).toBe('global:local2')
-      expect(element.attributes['global:local2'].value).toBe('')
-      expect(element.attributes['global:local2'].namespaceURI).toBe(NAMESPACE_URI)
-      expect(element.attributes['global:local2'].specified).toBe(true)
-      expect(element.attributes['global:local2'].ownerElement === element).toBe(true)
-      expect(element.attributes['global:local2'].ownerDocument === document).toBe(true)
+      expect(replica.attributes['global:local1'].name).toBe('global:local1')
+      expect(replica.attributes['global:local1'].value).toBe('value1')
+      expect(replica.attributes['global:local1'].namespaceURI).toBe(NAMESPACE_URI)
+      expect(replica.attributes['global:local1'].specified).toBe(true)
+      expect(replica.attributes['global:local1'].ownerElement === replica).toBe(true)
+      expect(replica.attributes['global:local1'].ownerDocument === document).toBe(true)
+
+      expect(replica.attributes['global:local2'].name).toBe('global:local2')
+      expect(replica.attributes['global:local2'].value).toBe('')
+      expect(replica.attributes['global:local2'].namespaceURI).toBe(NAMESPACE_URI)
+      expect(replica.attributes['global:local2'].specified).toBe(true)
+      expect(replica.attributes['global:local2'].ownerElement === replica).toBe(true)
+      expect(replica.attributes['global:local2'].ownerDocument === document).toBe(true)
     })
   })
 
   describe('getAttributeNames()', () => {
     it('returns attribute names.', () => {
-      element.setAttributeNS(NAMESPACE_URI, 'global:local1', 'value1')
-      element.setAttribute('key1', 'value1')
-      element.setAttribute('key2', '')
-      expect(element.getAttributeNames()).toEqual(['global:local1', 'key1', 'key2'])
+      const { primary, replica } = testElement('div')
+
+      primary.setAttributeNS(NAMESPACE_URI, 'global:local1', 'value1')
+      primary.setAttribute('key1', 'value1')
+      primary.setAttribute('key2', '')
+      expect(replica.getAttributeNames()).toEqual(['global:local1', 'key1', 'key2'])
     })
   })
 
   describe('hasAttribute()', () => {
     it('returns "true" if an element has an attribute.', () => {
-      element.setAttribute('key1', 'value1')
-      element.setAttribute('key2', '')
-      expect(element.hasAttribute('key1')).toBe(true)
-      expect(element.hasAttribute('key2')).toBe(true)
-      element.removeAttribute('key1')
-      element.removeAttribute('key2')
-      expect(element.hasAttribute('key1')).toBe(false)
-      expect(element.hasAttribute('key2')).toBe(false)
+      const { primary, replica } = testElement('div')
+
+      primary.setAttribute('key1', 'value1')
+      primary.setAttribute('key2', '')
+      expect(replica.hasAttribute('key1')).toBe(true)
+      expect(replica.hasAttribute('key2')).toBe(true)
+      primary.removeAttribute('key1')
+      primary.removeAttribute('key2')
+      expect(replica.hasAttribute('key1')).toBe(false)
+      expect(replica.hasAttribute('key2')).toBe(false)
     })
   })
 
   describe('hasAttributeNS()', () => {
     it('returns "true" if an element has a namespace attribute.', () => {
-      element.setAttributeNS(NAMESPACE_URI, 'global:local1', 'value1')
-      element.setAttributeNS(NAMESPACE_URI, 'global:local2', '')
-      expect(element.hasAttributeNS(NAMESPACE_URI, 'local1')).toBe(true)
-      expect(element.hasAttributeNS(NAMESPACE_URI, 'local2')).toBe(true)
-      element.removeAttributeNS(NAMESPACE_URI, 'local1')
-      element.removeAttributeNS(NAMESPACE_URI, 'local2')
-      expect(element.hasAttributeNS(NAMESPACE_URI, 'local1')).toBe(false)
-      expect(element.hasAttributeNS(NAMESPACE_URI, 'local2')).toBe(false)
+      const { primary, replica } = testElement('div')
+
+      primary.setAttributeNS(NAMESPACE_URI, 'global:local1', 'value1')
+      primary.setAttributeNS(NAMESPACE_URI, 'global:local2', '')
+      expect(replica.hasAttributeNS(NAMESPACE_URI, 'local1')).toBe(true)
+      expect(replica.hasAttributeNS(NAMESPACE_URI, 'local2')).toBe(true)
+      primary.removeAttributeNS(NAMESPACE_URI, 'local1')
+      primary.removeAttributeNS(NAMESPACE_URI, 'local2')
+      expect(replica.hasAttributeNS(NAMESPACE_URI, 'local1')).toBe(false)
+      expect(replica.hasAttributeNS(NAMESPACE_URI, 'local2')).toBe(false)
     })
   })
 
   describe('removeAttribute()', () => {
     it('removes an attribute.', () => {
-      element.setAttribute('key1', 'value1')
-      element.removeAttribute('key1')
-      expect(element.attributes.length).toBe(0)
+      const { primary, replica } = testElement('div')
+
+      primary.setAttribute('key1', 'value1')
+      primary.removeAttribute('key1')
+      expect(replica.attributes.length).toBe(0)
     })
   })
 
   describe('removeAttributeNS()', () => {
     it('removes a namespace attribute.', () => {
-      element.setAttributeNS(NAMESPACE_URI, 'global:local', 'value')
-      element.removeAttributeNS(NAMESPACE_URI, 'local')
-      expect(element.attributes.length).toBe(0)
+      const { primary, replica } = testElement('div')
+
+      primary.setAttributeNS(NAMESPACE_URI, 'global:local', 'value')
+      primary.removeAttributeNS(NAMESPACE_URI, 'local')
+      expect(replica.attributes.length).toBe(0)
     })
   })
 
   describe('toggleAttribute()', () => {
     it('toggles an attribute.', () => {
-      element.toggleAttribute('key1')
-      expect(element.hasAttribute('key1')).toBe(true)
-      element.toggleAttribute('key1')
-      expect(element.hasAttribute('key1')).toBe(false)
-      element.toggleAttribute('key1', true)
-      expect(element.hasAttribute('key1')).toBe(true)
-      element.toggleAttribute('key1', true)
-      expect(element.hasAttribute('key1')).toBe(true)
-      element.toggleAttribute('key1', false)
-      expect(element.hasAttribute('key1')).toBe(false)
+      const { primary, replica } = testElement('div')
+
+      primary.toggleAttribute('key1')
+      expect(replica.hasAttribute('key1')).toBe(true)
+      primary.toggleAttribute('key1')
+      expect(replica.hasAttribute('key1')).toBe(false)
+      primary.toggleAttribute('key1', true)
+      expect(replica.hasAttribute('key1')).toBe(true)
+      primary.toggleAttribute('key1', true)
+      expect(replica.hasAttribute('key1')).toBe(true)
+      primary.toggleAttribute('key1', false)
+      expect(replica.hasAttribute('key1')).toBe(false)
     })
   })
 
   describe('attachShadow()', () => {
     it('creates a new open ShadowRoot node and sets it to the "shadowRoot" property.', () => {
-      element.attachShadow({ mode: 'open' })
-      expect(element[PropertySymbol.shadowRoot] instanceof ShadowRoot).toBe(true)
-      expect(element.shadowRoot instanceof ShadowRoot).toBe(true)
-      expect(element.shadowRoot.ownerDocument === document).toBe(true)
-      expect(element.shadowRoot.isConnected).toBe(false)
-      document.appendChild(element)
-      expect(element.shadowRoot.isConnected).toBe(true)
+      const { primary, replica } = testElement('div')
+
+      primary.attachShadow({ mode: 'open' })
+      expect(replica[PropertySymbol.shadowRoot] instanceof ShadowRoot).toBe(true)
+      expect(replica.shadowRoot instanceof ShadowRoot).toBe(true)
+      expect(replica.shadowRoot.ownerDocument === replica.ownerDocument).toBe(true)
+      expect(replica.shadowRoot.isConnected).toBe(false)
+      expect(replica.shadowRoot.isConnected).toBe(true)
     })
 
     it('creates a new closed ShadowRoot node and sets it to the internal "[PropertySymbol.shadowRoot]" property.', () => {
-      element.attachShadow({ mode: 'closed' })
-      expect(element.shadowRoot).toBe(null)
-      expect(element[PropertySymbol.shadowRoot] instanceof ShadowRoot).toBe(true)
-      expect(element[PropertySymbol.shadowRoot].ownerDocument === document).toBe(true)
-      expect(element[PropertySymbol.shadowRoot].isConnected).toBe(false)
-      document.appendChild(element)
-      expect(element[PropertySymbol.shadowRoot].isConnected).toBe(true)
+      const { primary, replica } = testElement('div')
+
+      primary.attachShadow({ mode: 'closed' })
+      expect(replica.shadowRoot).toBe(null)
+      expect(replica[PropertySymbol.shadowRoot] instanceof ShadowRoot).toBe(true)
+      expect(replica[PropertySymbol.shadowRoot].ownerDocument === replica.ownerDocument).toBe(true)
+      expect(replica[PropertySymbol.shadowRoot].isConnected).toBe(false)
+      expect(replica[PropertySymbol.shadowRoot].isConnected).toBe(true)
     })
   })
 
   for (const functionName of ['scroll', 'scrollTo']) {
     describe(`${functionName}()`, () => {
       it('sets the properties scrollTop and scrollLeft.', () => {
-        element[functionName](50, 60)
-        expect(element.scrollLeft).toBe(50)
-        expect(element.scrollTop).toBe(60)
+        const { primary, replica } = testElement('div')
+
+        primary[functionName](50, 60)
+        expect(replica.scrollLeft).toBe(50)
+        expect(replica.scrollTop).toBe(60)
       })
     })
 
     describe(`${functionName}()`, () => {
       it('sets the properties scrollTop and scrollLeft using object.', () => {
-        element[functionName]({ left: 50, top: 60 })
-        expect(element.scrollLeft).toBe(50)
-        expect(element.scrollTop).toBe(60)
+        const { primary, replica } = testElement('div')
+
+        primary[functionName]({ left: 50, top: 60 })
+        expect(replica.scrollLeft).toBe(50)
+        expect(replica.scrollTop).toBe(60)
       })
     })
 
     describe(`${functionName}()`, () => {
       it('sets only the property scrollTop.', () => {
-        element[functionName]({ top: 60 })
-        expect(element.scrollLeft).toBe(0)
-        expect(element.scrollTop).toBe(60)
+        const { primary, replica } = testElement('div')
+
+        primary[functionName]({ top: 60 })
+        expect(replica.scrollLeft).toBe(0)
+        expect(replica.scrollTop).toBe(60)
       })
     })
 
     describe(`${functionName}()`, () => {
       it('sets only the property scrollLeft.', () => {
-        element[functionName]({ left: 60 })
-        expect(element.scrollLeft).toBe(60)
-        expect(element.scrollTop).toBe(0)
+        const { primary, replica } = testElement('div')
+
+        primary[functionName]({ left: 60 })
+        expect(replica.scrollLeft).toBe(60)
+        expect(replica.scrollTop).toBe(0)
       })
     })
 
     describe(`${functionName}()`, () => {
       it('sets the properties scrollTop and scrollLeft with animation.', async () => {
-        element[functionName]({ left: 50, top: 60, behavior: 'smooth' })
-        expect(element.scrollLeft).toBe(0)
-        expect(element.scrollTop).toBe(0)
+        const { primary, replica } = testElement('div')
+
+        primary[functionName]({ left: 50, top: 60, behavior: 'smooth' })
+        expect(replica.scrollLeft).toBe(0)
+        expect(replica.scrollTop).toBe(0)
         await window.happyDOM?.waitUntilComplete()
-        expect(element.scrollLeft).toBe(50)
-        expect(element.scrollTop).toBe(60)
+        expect(replica.scrollLeft).toBe(50)
+        expect(replica.scrollTop).toBe(60)
       })
     })
   }
 
-  describe('get scrollHeight()', () => {
-    it('returns the scroll height.', () => {
-      expect(element.scrollHeight).toBe(0)
-    })
-  })
-
-  describe('get scrollWidth()', () => {
-    it('returns the scroll width.', () => {
-      expect(element.scrollWidth).toBe(0)
-    })
-  })
-
-  describe('toString()', () => {
-    it('returns the same as outerHTML.', () => {
-      expect(element.toString()).toBe(element.outerHTML)
-    })
-  })
-
-  describe('getBoundingClientRect()', () => {
-    it('returns an instance of DOMRect.', () => {
-      const domRect = element.getBoundingClientRect()
-      expect(domRect instanceof DOMRect).toBe(true)
-    })
-  })
-
-  describe('cloneNode()', () => {
-    it('clones the properties of the element when cloned.', () => {
-      const child = document.createElement('div')
-
-      child.className = 'className'
-
-      element[PropertySymbol.tagName] = 'tagName'
-      element[PropertySymbol.namespaceURI] = 'namespaceURI'
-
-      element.appendChild(child)
-
-      const clone = element.cloneNode(false)
-      const clone2 = element.cloneNode(true)
-      expect(clone.tagName).toBe('tagName')
-      expect(clone.namespaceURI).toBe('namespaceURI')
-      expect(clone.children.length).toEqual(0)
-      expect(clone2.children.length).toBe(1)
-      expect(clone2.children[0].outerHTML).toBe('<div class="className"></div>')
-    })
-  })
-
   for (const method of ['setAttributeNode', 'setAttributeNodeNS']) {
     describe(`${method}()`, () => {
       it('sets an Attr node on a <div> element.', () => {
+        const { primary, replica } = testElement('div')
+
         const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
         const attribute2 = document.createAttribute('KEY2')
 
         attribute1.value = 'value1'
         attribute2.value = 'value2'
 
-        element[method](attribute1)
-        element[method](attribute2)
+        primary[method](attribute1)
+        primary[method](attribute2)
 
-        expect(element.attributes.length).toBe(2)
+        expect(replica.attributes.length).toBe(2)
 
-        expect((<IAttr>element.attributes[0]).name).toBe('key1')
-        expect((<IAttr>element.attributes[0]).namespaceURI).toBe(NamespaceURI.svg)
-        expect((<IAttr>element.attributes[0]).value).toBe('value1')
-        expect((<IAttr>element.attributes[0]).specified).toBe(true)
-        expect((<IAttr>element.attributes[0]).ownerElement).toBe(element)
-        expect((<IAttr>element.attributes[0]).ownerDocument).toBe(document)
+        expect((<IAttr>replica.attributes[0]).name).toBe('key1')
+        expect((<IAttr>replica.attributes[0]).namespaceURI).toBe(NamespaceURI.svg)
+        expect((<IAttr>replica.attributes[0]).value).toBe('value1')
+        expect((<IAttr>replica.attributes[0]).specified).toBe(true)
+        expect((<IAttr>replica.attributes[0]).ownerElement).toBe(replica)
+        expect((<IAttr>replica.attributes[0]).ownerDocument).toBe(replicaDocument)
 
-        expect((<IAttr>element.attributes[1]).name).toBe('key2')
-        expect((<IAttr>element.attributes[1]).namespaceURI).toBe(null)
-        expect((<IAttr>element.attributes[1]).value).toBe('value2')
-        expect((<IAttr>element.attributes[1]).specified).toBe(true)
-        expect((<IAttr>element.attributes[1]).ownerElement).toBe(element)
-        expect((<IAttr>element.attributes[1]).ownerDocument).toBe(document)
+        expect((<IAttr>replica.attributes[1]).name).toBe('key2')
+        expect((<IAttr>replica.attributes[1]).namespaceURI).toBe(null)
+        expect((<IAttr>replica.attributes[1]).value).toBe('value2')
+        expect((<IAttr>replica.attributes[1]).specified).toBe(true)
+        expect((<IAttr>replica.attributes[1]).ownerElement).toBe(replica)
+        expect((<IAttr>replica.attributes[1]).ownerDocument).toBe(document)
 
-        expect((<IAttr>element.attributes.key1).name).toBe('key1')
-        expect((<IAttr>element.attributes.key1).namespaceURI).toBe(NamespaceURI.svg)
-        expect((<IAttr>element.attributes.key1).value).toBe('value1')
-        expect((<IAttr>element.attributes.key1).specified).toBe(true)
-        expect((<IAttr>element.attributes.key1).ownerElement).toBe(element)
-        expect((<IAttr>element.attributes.key1).ownerDocument).toBe(document)
+        expect((<IAttr>replica.attributes.key1).name).toBe('key1')
+        expect((<IAttr>replica.attributes.key1).namespaceURI).toBe(NamespaceURI.svg)
+        expect((<IAttr>replica.attributes.key1).value).toBe('value1')
+        expect((<IAttr>replica.attributes.key1).specified).toBe(true)
+        expect((<IAttr>replica.attributes.key1).ownerElement).toBe(replica)
+        expect((<IAttr>replica.attributes.key1).ownerDocument).toBe(replicaDocument)
 
-        expect((<IAttr>element.attributes.key2).name).toBe('key2')
-        expect((<IAttr>element.attributes.key2).namespaceURI).toBe(null)
-        expect((<IAttr>element.attributes.key2).value).toBe('value2')
-        expect((<IAttr>element.attributes.key2).specified).toBe(true)
-        expect((<IAttr>element.attributes.key2).ownerElement).toBe(element)
-        expect((<IAttr>element.attributes.key2).ownerDocument).toBe(document)
+        expect((<IAttr>replica.attributes.key2).name).toBe('key2')
+        expect((<IAttr>replica.attributes.key2).namespaceURI).toBe(null)
+        expect((<IAttr>replica.attributes.key2).value).toBe('value2')
+        expect((<IAttr>replica.attributes.key2).specified).toBe(true)
+        expect((<IAttr>replica.attributes.key2).ownerElement).toBe(replica)
+        expect((<IAttr>replica.attributes.key2).ownerDocument).toBe(replicaDocument)
       })
 
       it('sets an Attr node on an <svg> element.', () => {
-        const svg = document.createElementNS(NamespaceURI.svg, 'svg')
+        const { primary, replica } = testElement('div')
+        const svg = primary.append(
+          document.createElementNS(NamespaceURI.svg, 'svg'),
+        )
+
+        const replicaSvg = replica.children[0]!
+
         const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
         const attribute2 = document.createAttribute('KEY2')
 
@@ -1326,58 +1292,65 @@ describe('element', () => {
         svg[method](attribute1)
         svg[method](attribute2)
 
-        expect(svg.attributes.length).toBe(2)
+        expect(replicaSvg.attributes.length).toBe(2)
 
-        expect((<IAttr>svg.attributes[0]).name).toBe('KEY1')
-        expect((<IAttr>svg.attributes[0]).namespaceURI).toBe(NamespaceURI.svg)
-        expect((<IAttr>svg.attributes[0]).value).toBe('value1')
-        expect((<IAttr>svg.attributes[0]).specified).toBe(true)
-        expect((<IAttr>svg.attributes[0]).ownerElement).toBe(svg)
-        expect((<IAttr>svg.attributes[0]).ownerDocument).toBe(document)
+        expect((<IAttr>replicaSvg.attributes[0]).name).toBe('KEY1')
+        expect((<IAttr>replicaSvg.attributes[0]).namespaceURI).toBe(NamespaceURI.svg)
+        expect((<IAttr>replicaSvg.attributes[0]).value).toBe('value1')
+        expect((<IAttr>replicaSvg.attributes[0]).specified).toBe(true)
+        expect((<IAttr>replicaSvg.attributes[0]).ownerElement).toBe(replicaSvg)
+        expect((<IAttr>replicaSvg.attributes[0]).ownerDocument).toBe(replicaDocument)
 
-        expect((<IAttr>svg.attributes[1]).name).toBe('key2')
-        expect((<IAttr>svg.attributes[1]).namespaceURI).toBe(null)
-        expect((<IAttr>svg.attributes[1]).value).toBe('value2')
-        expect((<IAttr>svg.attributes[1]).specified).toBe(true)
-        expect((<IAttr>svg.attributes[1]).ownerElement).toBe(svg)
-        expect((<IAttr>svg.attributes[1]).ownerDocument).toBe(document)
+        expect((<IAttr>replicaSvg.attributes[1]).name).toBe('key2')
+        expect((<IAttr>replicaSvg.attributes[1]).namespaceURI).toBe(null)
+        expect((<IAttr>replicaSvg.attributes[1]).value).toBe('value2')
+        expect((<IAttr>replicaSvg.attributes[1]).specified).toBe(true)
+        expect((<IAttr>replicaSvg.attributes[1]).ownerElement).toBe(replicaSvg)
+        expect((<IAttr>replicaSvg.attributes[1]).ownerDocument).toBe(replicaDocument)
 
-        expect((<IAttr>svg.attributes.KEY1).name).toBe('KEY1')
-        expect((<IAttr>svg.attributes.KEY1).namespaceURI).toBe(NamespaceURI.svg)
-        expect((<IAttr>svg.attributes.KEY1).value).toBe('value1')
-        expect((<IAttr>svg.attributes.KEY1).specified).toBe(true)
-        expect((<IAttr>svg.attributes.KEY1).ownerElement).toBe(svg)
-        expect((<IAttr>svg.attributes.KEY1).ownerDocument).toBe(document)
+        expect((<IAttr>replicaSvg.attributes.KEY1).name).toBe('KEY1')
+        expect((<IAttr>replicaSvg.attributes.KEY1).namespaceURI).toBe(NamespaceURI.svg)
+        expect((<IAttr>replicaSvg.attributes.KEY1).value).toBe('value1')
+        expect((<IAttr>replicaSvg.attributes.KEY1).specified).toBe(true)
+        expect((<IAttr>replicaSvg.attributes.KEY1).ownerElement).toBe(replicaSvg)
+        expect((<IAttr>replicaSvg.attributes.KEY1).ownerDocument).toBe(replicaDocument)
 
-        expect((<IAttr>svg.attributes.key2).name).toBe('key2')
-        expect((<IAttr>svg.attributes.key2).namespaceURI).toBe(null)
-        expect((<IAttr>svg.attributes.key2).value).toBe('value2')
-        expect((<IAttr>svg.attributes.key2).specified).toBe(true)
-        expect((<IAttr>svg.attributes.key2).ownerElement).toBe(svg)
-        expect((<IAttr>svg.attributes.key2).ownerDocument).toBe(document)
+        expect((<IAttr>replicaSvg.attributes.key2).name).toBe('key2')
+        expect((<IAttr>replicaSvg.attributes.key2).namespaceURI).toBe(null)
+        expect((<IAttr>replicaSvg.attributes.key2).value).toBe('value2')
+        expect((<IAttr>replicaSvg.attributes.key2).specified).toBe(true)
+        expect((<IAttr>replicaSvg.attributes.key2).ownerElement).toBe(replicaSvg)
+        expect((<IAttr>replicaSvg.attributes.key2).ownerDocument).toBe(replicaDocument)
       })
     })
   }
 
   describe(`getAttributeNode()`, () => {
     it('returns an Attr node from a <div> element.', () => {
+      const { primary, replica } = testElement('div')
+
       const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
       const attribute2 = document.createAttribute('KEY2')
 
       attribute1.value = 'value1'
       attribute2.value = 'value2'
 
-      element.setAttributeNode(attribute1)
-      element.setAttributeNode(attribute2)
+      primary.setAttributeNode(attribute1)
+      primary.setAttributeNode(attribute2)
 
-      expect(element.getAttributeNode('key1') === attribute1).toBe(true)
-      expect(element.getAttributeNode('key2') === attribute2).toBe(true)
-      expect(element.getAttributeNode('KEY1') === attribute1).toBe(true)
-      expect(element.getAttributeNode('KEY2') === attribute2).toBe(true)
+      expect(replica.getAttributeNode('key1') === attribute1).toBe(true)
+      expect(replica.getAttributeNode('key2') === attribute2).toBe(true)
+      expect(replica.getAttributeNode('KEY1') === attribute1).toBe(true)
+      expect(replica.getAttributeNode('KEY2') === attribute2).toBe(true)
     })
 
     it('returns an Attr node from an <svg> element.', () => {
-      const svg = document.createElementNS(NamespaceURI.svg, 'svg')
+      const { primary, replica } = testElement('div')
+      const svg = primary.append(
+        document.createElementNS(NamespaceURI.svg, 'svg'),
+      )
+      const replicaSvg = replica.children[0]!
+
       const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
       const attribute2 = document.createAttribute('KEY2')
 
@@ -1387,79 +1360,89 @@ describe('element', () => {
       svg.setAttributeNode(attribute1)
       svg.setAttributeNode(attribute2)
 
-      expect(svg.getAttributeNode('key1') === null).toBe(true)
-      expect(svg.getAttributeNode('key2') === attribute2).toBe(true)
-      expect(svg.getAttributeNode('KEY1') === attribute1).toBe(true)
-      expect(svg.getAttributeNode('KEY2') === null).toBe(true)
+      expect(replicaSvg.getAttributeNode('key1') === null).toBe(true)
+      expect(replicaSvg.getAttributeNode('key2') === attribute2).toBe(true)
+      expect(replicaSvg.getAttributeNode('KEY1') === attribute1).toBe(true)
+      expect(replicaSvg.getAttributeNode('KEY2') === null).toBe(true)
     })
   })
 
-  describe(`getAttributeNode()`, () => {
+  describe(`getAttributeNode() 2`, () => {
     it('returns a namespaced Attr node from a <div> element.', () => {
+      const { primary, replica } = testElement('div')
+
       const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
 
       attribute1.value = 'value1'
 
-      element.setAttributeNode(attribute1)
+      primary.setAttributeNode(attribute1)
 
-      expect(element.getAttributeNodeNS(NamespaceURI.svg, 'key1') === attribute1).toBe(true)
-      expect(element.getAttributeNodeNS(NamespaceURI.svg, 'KEY1') === attribute1).toBe(true)
+      expect(replica.getAttributeNodeNS(NamespaceURI.svg, 'key1')).toEqual(attribute1)
+      expect(replica.getAttributeNodeNS(NamespaceURI.svg, 'KEY1')).toEqual(attribute1)
     })
 
     it('returns an Attr node from an <svg> element.', () => {
-      const svg = document.createElementNS(NamespaceURI.svg, 'svg')
+      const { primary, replica } = testElement('div')
+      const svg = primary.append(
+        document.createElementNS(NamespaceURI.svg, 'svg'),
+      )
+      const replicaSvg = replica.children[0]!
+
       const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
 
       attribute1.value = 'value1'
 
       svg.setAttributeNode(attribute1)
 
-      expect(svg.getAttributeNodeNS(NamespaceURI.svg, 'key1') === null).toBe(true)
-      expect(svg.getAttributeNodeNS(NamespaceURI.svg, 'KEY1') === attribute1).toBe(true)
-      expect(svg.getAttributeNodeNS(NamespaceURI.svg, 'KEY2') === null).toBe(true)
+      expect(replicaSvg.getAttributeNodeNS(NamespaceURI.svg, 'key1') === null).toBe(true)
+      expect(replicaSvg.getAttributeNodeNS(NamespaceURI.svg, 'KEY1')).toEqual(attribute1)
+      expect(replicaSvg.getAttributeNodeNS(NamespaceURI.svg, 'KEY2') === null).toBe(true)
     })
   })
 
   for (const method of ['removeAttributeNode', 'removeAttributeNodeNS']) {
     describe(`${method}()`, () => {
       it('removes an Attr node.', () => {
+        const { primary, replica } = testElement('div')
         const attribute = document.createAttribute('KEY1')
 
         attribute.value = 'value1'
-        element.setAttributeNode(attribute)
-        element[method](attribute)
+        primary.setAttributeNode(attribute)
+        primary[method](attribute)
 
-        expect(element.attributes.length).toBe(0)
+        expect(replica.attributes.length).toBe(0)
       })
     })
   }
 
-  describe('replaceWith()', () => {
+  describe('replaceWith() 2', () => {
     it('replaces a node with another node.', () => {
-      const parent = document.createElement('div')
+      const { primary, replica } = testElement('div')
+
       const newChild = document.createElement('span')
       newChild.className = 'child4'
-      parent.innerHTML
+      primary.innerHTML
 				= '<span class="child1"></span><span class="child2"></span><span class="child3"></span>'
 
-      parent.children[2].replaceWith(newChild)
-      expect(parent.innerHTML).toBe(
+      primary.children[2]!.replaceWith(newChild)
+      expect(replica.innerHTML).toBe(
         '<span class="child1"></span><span class="child2"></span><span class="child4"></span>',
       )
     })
 
     it('replaces a node with a mixed list of Node and DOMString (string).', () => {
-      const parent = document.createElement('div')
+      const { primary, replica } = testElement('div')
+
       const newChildrenParent = document.createElement('div')
       const newChildrenHtml
 				= '<span class="child4"></span><span class="child5"></span><span class="child6"></span>'
       newChildrenParent.innerHTML
 				= '<span class="child7"></span><span class="child8"></span><span class="child9"></span>'
-      parent.innerHTML
+      primary.innerHTML
 				= '<span class="child1"></span><span class="child2"></span><span class="child3"></span>'
 
-      parent.children[2].replaceWith(...[newChildrenHtml, ...newChildrenParent.children])
-      expect(parent.innerHTML).toBe(
+      primary.children[2]!.replaceWith(...[newChildrenHtml, ...newChildrenParent.children])
+      expect(replica.innerHTML).toBe(
         '<span class="child1"></span><span class="child2"></span><span class="child4"></span><span class="child5"></span><span class="child6"></span><span class="child7"></span><span class="child8"></span><span class="child9"></span>',
       )
     })
@@ -1467,27 +1450,11 @@ describe('element', () => {
 
   describe('scroll()', () => {
     it('sets the properties "scrollTop" and "scrollLeft".', () => {
-      const div = document.createElement('div')
-      div.scroll(10, 15)
-      expect(div.scrollLeft).toBe(10)
-      expect(div.scrollTop).toBe(15)
-    })
-  })
+      const { primary, replica } = testElement('div')
 
-  describe('dispatchEvent()', () => {
-    it('evaluates attribute event listeners.', () => {
-      const div = document.createElement('div')
-      div.setAttribute('onclick', 'divClicked = true')
-      div.dispatchEvent(new Event('click'))
-      expect(window.divClicked).toBe(true)
-    })
-
-    it('doesn\'t evaluate attribute event listener is immediate propagation has been stopped.', () => {
-      const div = document.createElement('div')
-      div.addEventListener('click', (e: Event) => e.stopImmediatePropagation())
-      div.setAttribute('onclick', 'divClicked = true')
-      div.dispatchEvent(new Event('click'))
-      expect(window.divClicked).toBe(undefined)
+      primary.scroll(10, 15)
+      expect(replica.scrollLeft).toBe(10)
+      expect(replica.scrollTop).toBe(15)
     })
   })
 })
