@@ -30,7 +30,7 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { Node, Window } from 'happy-dom'
+import { Node, ShadowRoot, Window } from 'happy-dom'
 import type { Element, HTMLTemplateElement, IAttr, IDocument, IElement, IWindow, Text } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
@@ -1214,10 +1214,21 @@ describe('element', () => {
     it('creates a new open ShadowRoot node and sets it to the "shadowRoot" property.', () => {
       const { primary, replica } = testElement('div')
 
-      primary.attachShadow({ mode: 'open' })
-      expect(replica instanceof ShadowRoot).toBe(true)
-      expect(replica.shadowRoot instanceof ShadowRoot).toBe(true)
-      expect(replica.shadowRoot.ownerDocument === replica.ownerDocument).toBe(true)
+      const element = document.createElement('div')
+      element.id = 'test-shadow-container'
+
+      element.attachShadow({ mode: 'open' })
+
+      expect(element.shadowRoot.constructor === ShadowRoot).toBe(true)
+      expect(element.shadowRoot.ownerDocument === document).toBe(true)
+      expect(element.shadowRoot.isConnected).toBe(false)
+      primary.appendChild(element)
+      expect(element.shadowRoot.isConnected).toBe(true)
+
+      const replicaShadowRoot = replica.querySelector('#test-shadow-container')!.shadowRoot
+      expect(replicaShadowRoot.constructor === ShadowRoot).toBe(true)
+      expect(replicaShadowRoot.ownerDocument === replicaDocument).toBe(true)
+      expect(replicaShadowRoot.isConnected).toBe(true)
     })
 
     it('creates a new closed ShadowRoot node and sets it to the internal "[PropertySymbol.shadowRoot]" property.', () => {

@@ -55,16 +55,23 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
       return frag
     }
 
-    const [tag, attributes, children] = node as SerializedDomElement
+    const [
+      tag,
+      attributes,
+      children,
+      specialProps,
+    ] = node as SerializedDomElement
 
     const element = (() => {
-      if (attributes.namespaceURI) {
-        const el = doc.createElementNS(attributes.namespaceURI, tag)
-        delete attributes.namespaceURI
-        return el
+      if (specialProps.namespaceURI) {
+        return doc.createElementNS(specialProps.namespaceURI, tag)
       }
       return doc.createElement(tag)
     })()
+
+    if (specialProps.shadowRoot) {
+      const shadowRoot = element.attachShadow(specialProps.shadowRoot.init)
+    }
 
     for (const [name, value] of Object.entries(attributes)) {
       element.setAttribute(name, value)

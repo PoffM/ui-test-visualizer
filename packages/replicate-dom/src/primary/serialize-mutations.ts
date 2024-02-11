@@ -94,16 +94,32 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
       attributes[attr.name] = attr.value
     }
 
-    // Special case for SVG elements or others that use a namespace.
-    // Remove this attribute on the receiver side, as it's not a real attribute.
-    if (node.namespaceURI && node.namespaceURI !== DEFAULT_NS) {
-      attributes.namespaceURI = node.namespaceURI
-    }
+    const specialProps = (() => {
+      const result: Record<string, unknown> = {}
+
+      if (node.shadowRoot) {
+        result.shadowRoot = {
+          init: { mode: node.shadowRoot.mode },
+        }
+      }
+      // Special case for SVG elements or others that use a namespace.
+      // Remove this attribute on the receiver side, as it's not a real attribute.
+      if (node.namespaceURI && node.namespaceURI !== DEFAULT_NS) {
+        result.namespaceURI = node.namespaceURI
+      }
+
+      return result
+    })()
 
     const children = Array.from(node.childNodes)
       .map(node => serializeDomNode(node, classes))
 
-    return [node.tagName.toLowerCase(), attributes, children]
+    return [
+      node.tagName.toLowerCase(),
+      attributes,
+      children,
+      specialProps,
+    ]
   }
   throw new Error(`Unhandled node type: ${node.nodeType}`)
 }

@@ -5,9 +5,15 @@ export type DomNodePath = number[]
 export type SerializedDomTextNode = string | null
 
 export type SerializedDomElement = [
-  string,
-  Record<string, string>,
-  SerializedDomNode[],
+  tagName: string,
+  attributes: Record<string, string>,
+  children: SerializedDomNode[],
+  specialProps: {
+    namespaceURI?: string
+    shadowRoot?: {
+      init: ShadowRootInit
+    }
+  },
 ]
 
 export type SerializedTextNode = ['Text', string | null]

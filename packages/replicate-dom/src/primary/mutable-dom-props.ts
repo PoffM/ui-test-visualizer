@@ -46,6 +46,7 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'removeAttributeNS',
         'scroll',
         'scrollTo',
+        'attachShadow',
       ],
       setters: [
         'innerHTML',
