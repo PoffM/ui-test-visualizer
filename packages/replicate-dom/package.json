@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",
-    "happy-dom": "^13.3.8"
+    "happy-dom": "^13.3.8",
+    "vite": "^5.0.12"
   }
 }

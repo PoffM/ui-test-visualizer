@@ -32,7 +32,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
 import type { HTMLTemplateElement, IDocument, IWindow, Text } from 'happy-dom'
-import { addTestElement, initTestReplicaDom } from '../../../test-setup'
+import { addTestElement, initTestReplicaDom } from '../../test-setup'
 
 describe('documentFragment', () => {
   let window: IWindow

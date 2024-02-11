@@ -198,6 +198,9 @@ importers:
       happy-dom:
         specifier: ^13.3.8
         version: 13.3.8
+      vite:
+        specifier: ^5.0.12
+        version: 5.0.12(@types/node@20.11.16)
 
 packages:
 
