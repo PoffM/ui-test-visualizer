@@ -29,5 +29,5 @@ export type SerializedDomNode =
 export interface HTMLPatch {
   targetNodePath: DomNodePath
   prop: string | string[]
-  args: (DomNodePath | SerializedDomNode)[]
+  args: (DomNodePath | SerializedDomNode | { object: unknown })[]
 }

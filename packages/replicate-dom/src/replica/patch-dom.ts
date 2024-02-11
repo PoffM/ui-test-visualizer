@@ -57,11 +57,12 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
         || typeof arg === 'string'
         || typeof arg === 'number'
         || typeof arg === 'boolean'
-
-        // TODO maybe do better validation on object args.
-        || typeof arg === 'object'
       ) {
         return arg
+      }
+
+      if (typeof arg === 'object' && !Array.isArray(arg)) {
+        return arg.object
       }
 
       throw new Error(`Unknown mutation arg type: ${arg}`)

@@ -43,7 +43,7 @@ export function serializeDomMutationArg(
   arg: string | Node | null,
   root: Node,
   classes: DomClasses,
-): number[] | SerializedDomNode {
+): number[] | SerializedDomNode | { object: unknown } {
   if (
     typeof arg === 'string'
     || typeof arg === 'number'
@@ -67,7 +67,7 @@ export function serializeDomMutationArg(
     return serializeDomNode(arg, classes)
   }
   if (typeof arg === 'object') {
-    return JSON.parse(JSON.stringify(arg))
+    return { object: JSON.parse(JSON.stringify(arg)) }
   }
   throw new Error(`Unknown node type: ${JSON.stringify(arg)}`)
 }
