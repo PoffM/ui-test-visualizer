@@ -33,6 +33,7 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'normalize',
         'insertBefore',
         'insertAdjacentElement',
+        'insertAdjacentText',
         'appendChild',
         'replaceChild',
         'removeChild',
