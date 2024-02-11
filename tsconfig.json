@@ -15,5 +15,5 @@
     "skipLibCheck": true
   },
   "include": ["./**/*.ts"],
-  "exclude": ["examples/**/*"]
+  "exclude": ["examples/**/*", "**/unused-happy-dom-tests/**/*.ts"]
 }
