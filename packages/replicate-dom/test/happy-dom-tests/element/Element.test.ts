@@ -1096,14 +1096,14 @@ describe('element', () => {
       expect(replica.attributes[0]!.namespaceURI).toBe(NAMESPACE_URI)
       expect(replica.attributes[0]!.specified).toBe(true)
       expect(replica.attributes[0]!.ownerElement === replica).toBe(true)
-      expect(replica.attributes[0]!.ownerDocument === document).toBe(true)
+      expect(replica.attributes[0]!.ownerDocument === replicaDocument).toBe(true)
 
       expect(replica.attributes[1]!.name).toBe('global:local2')
       expect(replica.attributes[1]!.value).toBe('')
       expect(replica.attributes[1]!.namespaceURI).toBe(NAMESPACE_URI)
       expect(replica.attributes[1]!.specified).toBe(true)
       expect(replica.attributes[1]!.ownerElement === replica).toBe(true)
-      expect(replica.attributes[1]!.ownerDocument === document).toBe(true)
+      expect(replica.attributes[1]!.ownerDocument === replicaDocument).toBe(true)
 
       // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].name).toBe('global:local1')
@@ -1116,7 +1116,7 @@ describe('element', () => {
       // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].ownerElement === replica).toBe(true)
       // @ts-expect-error named attributes should work
-      expect(replica.attributes['global:local1'].ownerDocument === document).toBe(true)
+      expect(replica.attributes['global:local1'].ownerDocument === replicaDocument).toBe(true)
 
       // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].name).toBe('global:local2')
@@ -1129,7 +1129,7 @@ describe('element', () => {
       // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].ownerElement === replica).toBe(true)
       // @ts-expect-error named attributes should work
-      expect(replica.attributes['global:local2'].ownerDocument === document).toBe(true)
+      expect(replica.attributes['global:local2'].ownerDocument === replicaDocument).toBe(true)
     })
   })
 
@@ -1236,7 +1236,6 @@ describe('element', () => {
     describe(`${functionName}()`, () => {
       it('sets the properties scrollTop and scrollLeft.', () => {
         const { primary, replica } = testElement('div')
-
         primary[functionName](50, 60)
         expect(replica.scrollLeft).toBe(50)
         expect(replica.scrollTop).toBe(60)
@@ -1470,7 +1469,7 @@ describe('element', () => {
 
     it('returns an Attr node from an <svg> element.', () => {
       const { primary, replica } = testElement('div')
-      const svg = primary.append(
+      const svg = primary.appendChild(
         document.createElementNS(NamespaceURI.svg, 'svg'),
       )
       const replicaSvg = replica.children[0]!

@@ -36,7 +36,10 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'replaceChild',
         'removeChild',
         'setAttribute',
+        'setAttributeNS',
         'removeAttribute',
+        'scroll',
+        'scrollTo',
       ],
       setters: [
         'innerHTML',
@@ -74,6 +77,7 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'appendChild',
         'replaceChild',
         'removeChild',
+
       ],
       setters: ['textContent', 'nodeValue'],
     } satisfies DOMNodeSpyConfig<Node>,
