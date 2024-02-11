@@ -153,7 +153,7 @@ export async function initVscodeMock({
         webview: {
           postMessage: async (msg) => {
             if (msg.htmlPatch) {
-              applyDomPatch(replicaWindow.document, msg.htmlPatch)
+              applyDomPatch(replicaWindow.document, msg.htmlPatch, replicaWindow)
               onReplicaDomUpdate(replicaWindow.document)
             }
             return true

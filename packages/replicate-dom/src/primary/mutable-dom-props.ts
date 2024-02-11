@@ -18,6 +18,9 @@ export interface DomClasses {
   Node: new () => Node
   CharacterData: new () => CharacterData
   Comment: new () => Comment
+  DocumentFragment: new () => DocumentFragment
+  XMLSerializer: new () => XMLSerializer
+  DOMParser: new () => DOMParser
 }
 
 /** All methods and setters that mutate the DOM */

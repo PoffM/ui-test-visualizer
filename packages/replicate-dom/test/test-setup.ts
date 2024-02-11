@@ -1,3 +1,4 @@
+import { DocumentFragment } from 'happy-dom'
 import type { IDocument, IHTMLElement, INode, IWindow } from 'happy-dom'
 import { applyDomPatch, initPrimaryDom } from '../src'
 import { getNodePath } from '../src/primary/serialize-mutations'
@@ -5,11 +6,15 @@ import { getNodeByPath } from '../src/replica/parse-mutations'
 
 export function initTestReplicaDom(
   primaryWindow: IWindow | Window,
-  replicaDocument: IDocument | Document,
+  replicaWindow: IWindow | Window,
 ) {
   initPrimaryDom({
     onMutation(htmlPatch) {
-      applyDomPatch(replicaDocument as unknown as Node, htmlPatch)
+      applyDomPatch(
+        replicaWindow.document as unknown as Node,
+        htmlPatch,
+        replicaWindow as unknown as typeof globalThis,
+      )
     },
     root: primaryWindow.document as unknown as Node,
     classes: primaryWindow as unknown as typeof globalThis.window,
@@ -35,10 +40,21 @@ export function addTestElement<
   const numArgs = primaryDocument[method].length
   // @ts-expect-error The methods call should be valid
   const testEl = numArgs ? primaryDocument[method](arg) : primaryDocument[method]()
-  const primary = primaryDocument.body.appendChild(
-    // @ts-expect-error The element should be valid
-    testEl,
-  )
+
+  const primary = (() => {
+    if (testEl instanceof DocumentFragment) {
+      testEl.append(primaryDocument.createElement('div'))
+      primaryDocument.body.appendChild(
+        testEl,
+      )
+      return primaryDocument.body.firstElementChild
+    }
+    return primaryDocument.body.appendChild(
+      // @ts-expect-error The element should be valid
+      testEl,
+    )
+  })()
+
   const path = getNodePath(
     primary as unknown as Node,
     primaryDocument as unknown as Node,

@@ -48,7 +48,7 @@ describe('text', () => {
     replicaWindow = new Window()
     replicaDocument = replicaWindow.document
 
-    initTestReplicaDom(window, replicaDocument)
+    initTestReplicaDom(window, replicaWindow)
   })
 
   function testElement(arg: string) {

@@ -1,8 +1,9 @@
 import { castArray } from 'lodash'
 import type { DomNodePath, HTMLPatch, SerializedDomNode } from '../types'
+import type { DomClasses } from '../primary/mutable-dom-props'
 import { getNodeByPath, parseDomNode } from './parse-mutations'
 
-export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
+export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClasses) {
   const doc = root.nodeType === 9 // Check if the root node is Node.DOCUMENT_NODE
     ? root as Document
     : root.ownerDocument
@@ -41,7 +42,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch) {
       if (Array.isArray(arg)) {
         // If the first element is a string (the tag), it's a serialized dom node
         if (typeof arg[0] === 'string') {
-          return parseDomNode(arg as SerializedDomNode, doc)
+          return parseDomNode(arg as SerializedDomNode, doc, classes)
         }
         // If the first element is a number, it's a path to an existing node
         if (typeof arg[0] === 'number') {

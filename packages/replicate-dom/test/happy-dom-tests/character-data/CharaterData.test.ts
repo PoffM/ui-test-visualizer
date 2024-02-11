@@ -48,7 +48,7 @@ describe('charaterData', () => {
     replicaWindow = new Window()
     replicaDocument = replicaWindow.document
 
-    initTestReplicaDom(window, replicaDocument)
+    initTestReplicaDom(window, replicaWindow)
   })
 
   function testComment(type: string) {

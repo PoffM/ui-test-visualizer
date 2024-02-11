@@ -29,333 +29,202 @@
   SOFTWARE.
 */
 
-import Window from '../../../src/window/Window.js';
-import Document from '../../../src/nodes/document/Document.js';
-import DocumentFragment from '../../../src/nodes/document-fragment/DocumentFragment.js';
-import IDocumentFragment from '../../../src/nodes/document-fragment/IDocumentFragment.js';
-import Node from '../../../src/nodes/node/Node.js';
-import ParentNodeUtility from '../../../src/nodes/parent-node/ParentNodeUtility.js';
-import QuerySelector from '../../../src/query-selector/QuerySelector.js';
-import HTMLTemplateElement from '../../../src/nodes/html-template-element/HTMLTemplateElement.js';
-import Text from '../../../src/nodes/text/Text.js';
-import INodeList from '../../../src/nodes/node/INodeList.js';
-import IElement from '../../../src/nodes/element/IElement.js';
-import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
-import * as PropertySymbol from '../../../src/PropertySymbol.js';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { Window } from 'happy-dom'
+import type { HTMLTemplateElement, IDocument, IWindow, Text } from 'happy-dom'
+import { addTestElement, initTestReplicaDom } from '../../../test-setup'
 
-describe('DocumentFragment', () => {
-	let window: Window;
-	let document: Document;
-	let documentFragment: IDocumentFragment;
+describe('documentFragment', () => {
+  let window: IWindow
+  let document: IDocument
 
-	beforeEach(() => {
-		window = new Window();
-		document = window.document;
-		documentFragment = document.createDocumentFragment();
-	});
+  let replicaWindow: IWindow
+  let replicaDocument: IDocument
 
-	afterEach(() => {
-		vi.restoreAllMocks();
-	});
+  beforeEach(() => {
+    window = new Window()
+    document = window.document
 
-	describe('get children()', () => {
-		it('Returns Element child nodes.', () => {
-			const div = document.createElement('div');
-			const span = document.createElement('span');
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(span);
-			expect(Array.from(documentFragment.children)).toEqual([div, span]);
-		});
+    replicaWindow = new Window()
+    replicaDocument = replicaWindow.document
 
-		it('Is a getter.', () => {
-			expect(
-				typeof Object.getOwnPropertyDescriptor(DocumentFragment.prototype, 'children')?.get
-			).toBe('function');
-		});
-	});
+    initTestReplicaDom(window, replicaWindow)
+  })
 
-	describe('get childElementCount()', () => {
-		it('Returns child element count.', () => {
-			const div = document.createElement('div');
-			const span = document.createElement('span');
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(span);
-			expect(documentFragment.childElementCount).toEqual(2);
-		});
-	});
+  function testElement(type: string) {
+    return addTestElement(
+      document,
+      replicaDocument,
+      type,
+      'createDocumentFragment',
+    )
+  }
 
-	describe('get firstElementChild()', () => {
-		it('Returns first element child.', () => {
-			const div = document.createElement('div');
-			const span = document.createElement('span');
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(span);
-			expect(documentFragment.firstElementChild === div).toBe(true);
-		});
-	});
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
 
-	describe('get lastElementChild()', () => {
-		it('Returns last element child.', () => {
-			const div = document.createElement('div');
-			const span = document.createElement('span');
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(document.createTextNode('test'));
-			documentFragment.appendChild(span);
-			expect(documentFragment.lastElementChild === span).toBe(true);
-		});
-	});
+  describe('set textContent()', () => {
+    it('replaces child nodes with a text node.', () => {
+      const { primary, replica } = testElement('test')
+      const div = document.createElement('div')
+      const textNode1 = document.createTextNode('text1')
+      const textNode2 = document.createTextNode('text2')
 
-	describe('get textContent()', () => {
-		it('Returns text node data of children as a concatenated string.', () => {
-			const div = document.createElement('div');
-			const textNode1 = document.createTextNode('text1');
-			const textNode2 = document.createTextNode('text2');
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(textNode2);
-			div.appendChild(textNode1);
-			expect(documentFragment.textContent).toBe('text1text2');
-		});
-	});
+      primary.appendChild(div)
+      primary.appendChild(textNode1)
+      primary.appendChild(textNode2)
 
-	describe('set textContent()', () => {
-		it('Replaces child nodes with a text node.', () => {
-			const div = document.createElement('div');
-			const textNode1 = document.createTextNode('text1');
-			const textNode2 = document.createTextNode('text2');
+      primary.textContent = 'new_text'
 
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(textNode1);
-			documentFragment.appendChild(textNode2);
+      expect(replica.textContent).toBe('new_text')
+      expect(replica.childNodes.length).toBe(1)
+      expect((<Text>replica.childNodes[0]).textContent).toBe('new_text')
+    })
 
-			documentFragment.textContent = 'new_text';
+    it('removes all child nodes if textContent is set to empty string.', () => {
+      const { primary, replica } = testElement('test')
+      const div = document.createElement('div')
+      const textNode1 = document.createTextNode('text1')
+      const textNode2 = document.createTextNode('text2')
 
-			expect(documentFragment.textContent).toBe('new_text');
-			expect(documentFragment.childNodes.length).toBe(1);
-			expect((<Text>documentFragment.childNodes[0]).textContent).toBe('new_text');
-		});
+      primary.appendChild(div)
+      primary.appendChild(textNode1)
+      primary.appendChild(textNode2)
 
-		it('Removes all child nodes if textContent is set to empty string.', () => {
-			const div = document.createElement('div');
-			const textNode1 = document.createTextNode('text1');
-			const textNode2 = document.createTextNode('text2');
+      primary.textContent = ''
 
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(textNode1);
-			documentFragment.appendChild(textNode2);
+      expect(replica.childNodes.length).toBe(0)
+    })
+  })
 
-			documentFragment.textContent = '';
+  describe('append()', () => {
+    it('inserts a set of Node objects or DOMString objects after the last child of the ParentNode. DOMString objects are inserted as equivalent Text nodes.', () => {
+      const { primary, replica } = testElement('test')
+      const node1 = document.createComment('test1')
+      const node2 = document.createComment('test2')
 
-			expect(documentFragment.childNodes.length).toBe(0);
-		});
-	});
+      primary.append(node1, node2)
+      expect(replica.childNodes.length).toBe(2)
+    })
+  })
 
-	describe('append()', () => {
-		it('Inserts a set of Node objects or DOMString objects after the last child of the ParentNode. DOMString objects are inserted as equivalent Text nodes.', () => {
-			const node1 = document.createComment('test1');
-			const node2 = document.createComment('test2');
-			let isCalled = false;
+  describe('prepend()', () => {
+    it('inserts a set of Node objects or DOMString objects before the first child of the ParentNode. DOMString objects are inserted as equivalent Text nodes.', () => {
+      const { primary, replica } = testElement('test')
 
-			vi.spyOn(ParentNodeUtility, 'append').mockImplementation((parentNode, ...nodes) => {
-				expect(parentNode).toBe(documentFragment);
-				expect(Array.from(nodes)).toEqual([node1, node2]);
-				isCalled = true;
-			});
+      const node1 = document.createComment('test1')
+      const node2 = document.createComment('test2')
 
-			documentFragment.append(node1, node2);
-			expect(isCalled).toBe(true);
-		});
-	});
+      primary.prepend(node1, node2)
+      expect(replica.childNodes.length).toBe(2)
+    })
+  })
 
-	describe('prepend()', () => {
-		it('Inserts a set of Node objects or DOMString objects before the first child of the ParentNode. DOMString objects are inserted as equivalent Text nodes.', () => {
-			const node1 = document.createComment('test1');
-			const node2 = document.createComment('test2');
-			let isCalled = false;
+  describe('replaceChildren()', () => {
+    it('replaces the existing children of a ParentNode with a specified new set of children.', () => {
+      const { primary, replica } = testElement('test')
 
-			vi.spyOn(ParentNodeUtility, 'prepend').mockImplementation((parentNode, ...nodes) => {
-				expect(parentNode).toBe(documentFragment);
-				expect(Array.from(nodes)).toEqual([node1, node2]);
-				isCalled = true;
-			});
+      const node1 = document.createComment('test1')
+      const node2 = document.createComment('test2')
 
-			documentFragment.prepend(node1, node2);
-			expect(isCalled).toBe(true);
-		});
-	});
+      primary.replaceChildren(node1, node2)
+      expect(replica.childNodes.length).toBe(2)
+    })
+  })
 
-	describe('replaceChildren()', () => {
-		it('Replaces the existing children of a ParentNode with a specified new set of children.', () => {
-			const node1 = document.createComment('test1');
-			const node2 = document.createComment('test2');
-			let isCalled = false;
+  describe('appendChild()', () => {
+    it('updates the children property when appending an element child.', () => {
+      const { primary, replica } = testElement('test')
 
-			vi.spyOn(ParentNodeUtility, 'replaceChildren').mockImplementation((parentNode, ...nodes) => {
-				expect(parentNode).toBe(documentFragment);
-				expect(Array.from(nodes)).toEqual([node1, node2]);
-				isCalled = true;
-			});
+      const div = document.createElement('div')
+      const span = document.createElement('span')
 
-			documentFragment.replaceChildren(node1, node2);
-			expect(isCalled).toBe(true);
-		});
-	});
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(div)
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(span)
 
-	describe('querySelectorAll()', () => {
-		it('Query CSS selector to find matching elements.', () => {
-			const element = document.createElement('div');
-			const expectedSelector = 'selector';
+      expect(replica.children.length).toEqual(2)
+    })
 
-			vi.spyOn(QuerySelector, 'querySelectorAll').mockImplementation((parentNode, selector) => {
-				expect(parentNode).toBe(documentFragment);
-				expect(selector).toBe(expectedSelector);
-				return <INodeList<IElement>>[element];
-			});
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
+    it('append the children instead of the actual element if the type is DocumentFragment.', () => {
+      const frag = testElement('test')
+      const template = addTestElement(
+        document,
+        replicaDocument,
+        'template',
+        'createElement',
+      )
 
-			expect(Array.from(documentFragment.querySelectorAll(expectedSelector))).toEqual([element]);
-		});
-	});
+      template.primary.innerHTML = '<div>Div</div><span>Span</span>'
 
-	describe('querySelector()', () => {
-		it('Query CSS selector to find a matching element.', () => {
-			const element = document.createElement('div');
-			const expectedSelector = 'selector';
+      const clone = (template.primary as HTMLTemplateElement).content.cloneNode(true)
 
-			vi.spyOn(QuerySelector, 'querySelector').mockImplementation((parentNode, selector) => {
-				expect(parentNode).toBe(documentFragment);
-				expect(selector).toBe(expectedSelector);
-				return element;
-			});
+      frag.primary.appendChild(clone)
 
-			expect(documentFragment.querySelector(expectedSelector)).toBe(element);
-		});
-	});
+      expect(frag.replica.children.map(child => child.outerHTML).join('')).toBe(
+        '<div>Div</div><span>Span</span>',
+      )
+    })
+  })
 
-	describe('appendChild()', () => {
-		it('Updates the children property when appending an element child.', () => {
-			const div = document.createElement('div');
-			const span = document.createElement('span');
+  describe('removeChild()', () => {
+    it('updates the children property when removing an element child.', () => {
+      const { primary, replica } = testElement('test')
+      const div = document.createElement('div')
+      const span = document.createElement('span')
 
-			documentFragment.appendChild(document.createComment('test'));
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(document.createComment('test'));
-			documentFragment.appendChild(span);
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(div)
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(span)
 
-			expect(Array.from(documentFragment.children)).toEqual([div, span]);
-		});
+      primary.removeChild(div)
 
-		// See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
-		it('Append the children instead of the actual element if the type is DocumentFragment.', () => {
-			const template = <HTMLTemplateElement>document.createElement('template');
+      expect(replica.children.length).toEqual(1)
+    })
+  })
 
-			template.innerHTML = '<div>Div</div><span>Span</span>';
+  describe('insertBefore()', () => {
+    it('updates the children property when appending an element child.', () => {
+      const { primary, replica } = testElement('test')
 
-			const clone = template.content.cloneNode(true);
+      const div1 = document.createElement('div')
+      const div2 = document.createElement('div')
+      const span = document.createElement('span')
 
-			documentFragment.appendChild(clone);
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(div1)
+      primary.appendChild(document.createComment('test'))
+      primary.appendChild(span)
+      primary.insertBefore(div2, div1)
 
-			expect(Array.from(clone.childNodes)).toEqual([]);
-			expect(Array.from(clone.children)).toEqual([]);
-			expect(documentFragment.children.map((child) => child.outerHTML).join('')).toBe(
-				'<div>Div</div><span>Span</span>'
-			);
-		});
-	});
+      expect(replica.children.length).toEqual(3)
+    })
 
-	describe('removeChild()', () => {
-		it('Updates the children property when removing an element child.', () => {
-			const div = document.createElement('div');
-			const span = document.createElement('span');
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
+    it('insert the children instead of the actual element before another reference Node if the type is DocumentFragment.', () => {
+      const { primary, replica } = testElement('test')
 
-			documentFragment.appendChild(document.createComment('test'));
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(document.createComment('test'));
-			documentFragment.appendChild(span);
+      const child1 = document.createElement('span')
+      const child2 = document.createElement('span')
+      const template = <HTMLTemplateElement>document.createElement('template')
 
-			documentFragment.removeChild(div);
+      template.innerHTML = '<div>Template DIV 1</div><span>Template SPAN 1</span>'
 
-			expect(Array.from(documentFragment.children)).toEqual([span]);
-		});
-	});
+      const clone = template.content.cloneNode(true)
 
-	describe('insertBefore()', () => {
-		it('Updates the children property when appending an element child.', () => {
-			const div1 = document.createElement('div');
-			const div2 = document.createElement('div');
-			const span = document.createElement('span');
+      primary.appendChild(child1)
+      primary.appendChild(child2)
 
-			documentFragment.appendChild(document.createComment('test'));
-			documentFragment.appendChild(div1);
-			documentFragment.appendChild(document.createComment('test'));
-			documentFragment.appendChild(span);
-			documentFragment.insertBefore(div2, div1);
+      primary.insertBefore(clone, child2)
 
-			expect(Array.from(documentFragment.children)).toEqual([div2, div1, span]);
-		});
-
-		// See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
-		it('Insert the children instead of the actual element before another reference Node if the type is DocumentFragment.', () => {
-			const child1 = document.createElement('span');
-			const child2 = document.createElement('span');
-			const template = <HTMLTemplateElement>document.createElement('template');
-
-			template.innerHTML = '<div>Template DIV 1</div><span>Template SPAN 1</span>';
-
-			const clone = template.content.cloneNode(true);
-
-			documentFragment.appendChild(child1);
-			documentFragment.appendChild(child2);
-
-			documentFragment.insertBefore(clone, child2);
-
-			expect(documentFragment.children.length).toBe(4);
-			expect(documentFragment.children.map((child) => child.outerHTML).join('')).toEqual(
-				'<span></span><div>Template DIV 1</div><span>Template SPAN 1</span><span></span>'
-			);
-		});
-	});
-
-	describe('cloneNode', () => {
-		it('Makes a shallow clone of a node (default behavior).', () => {
-			const text = document.createTextNode('test');
-			const div = document.createElement('div');
-			const comment = document.createComment('test');
-
-			documentFragment.appendChild(text);
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(comment);
-
-			const clone = documentFragment.cloneNode(false);
-
-			expect(clone.nodeType).toBe(Node.DOCUMENT_FRAGMENT_NODE);
-			expect((<DocumentFragment>clone)[PropertySymbol.rootNode]).toBe(clone);
-			expect(clone.childNodes.length).toBe(0);
-			expect(clone.children.length).toBe(0);
-		});
-
-		it('Makes a deep clone of the document fragment.', () => {
-			const text = document.createTextNode('test');
-			const div = document.createElement('div');
-			const comment = document.createComment('test');
-
-			documentFragment.appendChild(text);
-			documentFragment.appendChild(div);
-			documentFragment.appendChild(comment);
-
-			const clone = documentFragment.cloneNode(true);
-
-			expect(clone.nodeType).toBe(Node.DOCUMENT_FRAGMENT_NODE);
-			expect((<DocumentFragment>clone)[PropertySymbol.rootNode]).toBe(clone);
-			expect(clone.childNodes.length).toBe(3);
-			expect(Array.from(clone.children)).toEqual(
-				Array.from(clone.childNodes.filter((node) => node.nodeType === Node.ELEMENT_NODE))
-			);
-		});
-	});
-});
+      expect(replica.children.length).toBe(4)
+      expect(replica.children.map(child => child.outerHTML).join('')).toEqual(
+        '<span></span><div>Template DIV 1</div><span>Template SPAN 1</span><span></span>',
+      )
+    })
+  })
+})

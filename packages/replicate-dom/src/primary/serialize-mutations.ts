@@ -59,6 +59,7 @@ export function serializeDomMutationArg(
     arg instanceof classes.Element
     || arg instanceof classes.Text
     || arg instanceof classes.Comment
+    || arg instanceof classes.DocumentFragment
   ) {
     return serializeDomNode(arg, classes)
   }
@@ -71,6 +72,12 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
   }
   if (node instanceof classes.Comment) {
     return ['Comment', node.data]
+  }
+  if (node instanceof classes.DocumentFragment) {
+    return [
+      'DocumentFragment',
+      new classes.XMLSerializer().serializeToString(node),
+    ]
   }
   else if (node instanceof classes.Element) {
     const attributes: Record<string, string> = {}

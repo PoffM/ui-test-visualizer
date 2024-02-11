@@ -58,6 +58,7 @@ export function App() {
       applyDomPatch(
         shadow,
         (event.data.htmlPatch as HTMLPatch),
+        window,
       )
     })
   }

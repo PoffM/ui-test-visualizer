@@ -14,11 +14,14 @@ export type SerializedTextNode = ['Text', string | null]
 
 export type SerializedCommentNode = ['Comment', string]
 
+export type SerializedDocumentFragment = ['DocumentFragment', string]
+
 export type SerializedDomNode =
   | SerializedDomTextNode
   | SerializedDomElement
   | SerializedTextNode
   | SerializedCommentNode
+  | SerializedDocumentFragment
 
 export interface HTMLPatch {
   targetNodePath: DomNodePath
