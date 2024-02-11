@@ -35,19 +35,21 @@ export function getNodePath(node: Node, root: Node) {
   return indices
 }
 
+/**
+ * Returns a serialized representation of a DOM node or a string.
+ * When the node is an existing DOM node, it returns a path to the node.
+ */
 export function serializeDomMutationArg(
   arg: string | Node | null,
   root: Node,
   classes: DomClasses,
-) {
+): number[] | SerializedDomNode {
   if (
     typeof arg === 'string'
     || typeof arg === 'number'
     || typeof arg === 'boolean'
+    || arg === null
   ) {
-    return arg
-  }
-  if (arg === null) {
     return arg
   }
   // Existing nodes are referenced by their numeric path,
@@ -64,7 +66,10 @@ export function serializeDomMutationArg(
   ) {
     return serializeDomNode(arg, classes)
   }
-  throw new Error(`Unknown node type: ${arg}`)
+  if (typeof arg === 'object') {
+    return JSON.parse(JSON.stringify(arg))
+  }
+  throw new Error(`Unknown node type: ${JSON.stringify(arg)}`)
 }
 
 function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {

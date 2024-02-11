@@ -1317,7 +1317,7 @@ describe('element', () => {
         expect((<IAttr>replica.attributes[1]).value).toBe('value2')
         expect((<IAttr>replica.attributes[1]).specified).toBe(true)
         expect((<IAttr>replica.attributes[1]).ownerElement).toBe(replica)
-        expect((<IAttr>replica.attributes[1]).ownerDocument).toBe(document)
+        expect((<IAttr>replica.attributes[1]).ownerDocument).toBe(replicaDocument)
 
         // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key1).name).toBe('key1')
@@ -1480,7 +1480,7 @@ describe('element', () => {
       svg.setAttributeNode(attribute1)
 
       expect(replicaSvg.getAttributeNodeNS(NamespaceURI.svg, 'key1') === null).toBe(true)
-      expect(replicaSvg.getAttributeNodeNS(NamespaceURI.svg, 'KEY1')).toEqual(attribute1)
+      expect(replicaSvg.getAttributeNodeNS(NamespaceURI.svg, 'KEY1')?.value).toEqual(attribute1.value)
       expect(replicaSvg.getAttributeNodeNS(NamespaceURI.svg, 'KEY2') === null).toBe(true)
     })
   })

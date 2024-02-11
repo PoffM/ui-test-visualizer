@@ -56,7 +56,11 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
         || arg === null
         || typeof arg === 'string'
         || typeof arg === 'number'
-        || typeof arg === 'boolean') {
+        || typeof arg === 'boolean'
+
+        // TODO maybe do better validation on object args.
+        || typeof arg === 'object'
+      ) {
         return arg
       }
 
