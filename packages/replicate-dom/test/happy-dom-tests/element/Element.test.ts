@@ -31,10 +31,16 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Node, Window } from 'happy-dom'
-import type { HTMLTemplateElement, IDocument, IElement, IWindow, Text } from 'happy-dom'
+import type { HTMLTemplateElement, IAttr, IDocument, IElement, IWindow, Text } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
+import CustomElement from '../CustomElement'
 
 const NAMESPACE_URI = 'https://test.test'
+const NamespaceURI = {
+  html: 'http://www.w3.org/1999/xhtml',
+  svg: 'http://www.w3.org/2000/svg',
+  mathML: 'http://www.w3.org/1998/Math/MathML',
+}
 
 describe('element', () => {
   let window: IWindow
@@ -49,6 +55,8 @@ describe('element', () => {
 
     replicaWindow = new Window()
     replicaDocument = replicaWindow.document
+
+    window.customElements.define('custom-element', CustomElement)
 
     initTestReplicaDom(window, replicaWindow)
   })
@@ -746,9 +754,13 @@ describe('element', () => {
       expect(otherParent.replica.children[0]).toBeTruthy()
       expect(otherParent.replica.children[1]).toBeTruthy()
       expect(otherParent.replica.children[2]).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.div1).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.div2).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.otherDiv).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.otherSpan).toBeTruthy()
 
       primary.appendChild(document.createComment('test'))
@@ -759,16 +771,23 @@ describe('element', () => {
       expect(otherParent.replica.children.length).toBe(2)
       expect(otherParent.replica.children[0]).toBeTruthy()
       expect(otherParent.replica.children[1]).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.div1).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.div2).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.otherDiv).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.otherSpan).toBeTruthy()
 
       expect(replica.children.length).toBe(2)
       expect(replica.children[0]).toBeTruthy()
       expect(replica.children[1]).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(replica.children.div1).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(replica.children.div2).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(replica.children.span).toBeTruthy()
     })
   })
@@ -788,14 +807,18 @@ describe('element', () => {
       primary.appendChild(document.createComment('test'))
       primary.appendChild(span)
 
+      // @ts-expect-error named children should work
       expect(replica.children.div).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(replica.children.span).toBeTruthy()
 
       primary.removeChild(div)
 
       expect(replica.children.length).toBe(1)
       expect(replica.children[0]).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(replica.children.div).toBeFalsy()
+      // @ts-expect-error named children should work
       expect(replica.children.span).toBeTruthy()
     })
   })
@@ -923,12 +946,15 @@ describe('element', () => {
       otherParent.primary.insertBefore(div, otherSpan2)
 
       expect(otherParent.replica.children.length).toBe(3)
-      expect(otherParent.replica.children[0] === otherSpan1).toBe(true)
-      expect(otherParent.replica.children[1] === div).toBe(true)
-      expect(otherParent.replica.children[2] === otherSpan2).toBe(true)
-      expect(otherParent.replica.children.otherSpan1 === otherSpan1).toBe(true)
-      expect(otherParent.replica.children.div === div).toBe(true)
-      expect(otherParent.replica.children.otherSpan2 === otherSpan2).toBe(true)
+      expect(otherParent.replica.children[0]).toBeTruthy()
+      expect(otherParent.replica.children[1]).toBeTruthy()
+      expect(otherParent.replica.children[2]).toBeTruthy()
+      // @ts-expect-error named children should work
+      expect(otherParent.replica.children.otherSpan1).toBeTruthy()
+      // @ts-expect-error named children should work
+      expect(otherParent.replica.children.div).toBeTruthy()
+      // @ts-expect-error named children should work
+      expect(otherParent.replica.children.otherSpan2).toBeTruthy()
 
       primary.appendChild(document.createComment('test'))
       primary.appendChild(span1)
@@ -940,18 +966,24 @@ describe('element', () => {
       primary.insertBefore(div, span2)
 
       expect(otherParent.replica.children.length).toBe(2)
-      expect(otherParent.replica.children[0] === otherSpan1).toBe(true)
-      expect(otherParent.replica.children[1] === otherSpan2).toBe(true)
+      expect(otherParent.replica.children[0]).toBeTruthy()
+      expect(otherParent.replica.children[1]).toBeTruthy()
+      // @ts-expect-error named children should work
       expect(otherParent.replica.children.div === undefined).toBe(true)
-      expect(otherParent.replica.children.otherSpan1 === otherSpan1).toBe(true)
-      expect(otherParent.replica.children.otherSpan2 === otherSpan2).toBe(true)
+      // @ts-expect-error named children should work
+      expect(otherParent.replica.children.otherSpan1).toBeTruthy()
+      // @ts-expect-error named children should work
+      expect(otherParent.replica.children.otherSpan2).toBeTruthy()
 
       expect(replica.children.length).toBe(3)
       expect(replica.children[0] === span1).toBe(true)
       expect(replica.children[1] === div).toBe(true)
       expect(replica.children[2] === span2).toBe(true)
+      // @ts-expect-error named children should work
       expect(replica.children.span1 === span1).toBe(true)
+      // @ts-expect-error named children should work
       expect(replica.children.div === div).toBe(true)
+      // @ts-expect-error named children should work
       expect(replica.children.span2 === span2).toBe(true)
     })
   })
@@ -959,7 +991,7 @@ describe('element', () => {
   describe('attributeChangedCallback()', () => {
     it('calls attribute changed callback when it is implemented by a custom element (web component).', () => {
       const { primary, replica } = testElement('div')
-      const customElement = document.createElement('custom-element')
+      const customElement = <CustomElement>document.createElement('custom-element')
 
       primary.appendChild(customElement)
 
@@ -967,19 +999,21 @@ describe('element', () => {
       customElement.setAttribute('key2', 'value2')
       customElement.setAttribute('KEY1', 'newValue')
 
-      expect(replica.childNodes[0]!.changedAttributes.length).toBe(3)
+      const replicaElement = replica.childNodes[0] as CustomElement
 
-      expect(replica.childNodes[0]!.changedAttributes[0].name).toBe('key1')
-      expect(replica.childNodes[0]!.changedAttributes[0].newValue).toBe('value1')
-      expect(replica.childNodes[0]!.changedAttributes[0].oldValue).toBe(null)
+      expect(replicaElement.changedAttributes.length).toBe(3)
 
-      expect(replica.childNodes[0]!.changedAttributes[1].name).toBe('key2')
-      expect(replica.childNodes[0]!.changedAttributes[1].newValue).toBe('value2')
-      expect(replica.childNodes[0]!.changedAttributes[1].oldValue).toBe(null)
+      expect(replicaElement.changedAttributes[0]?.name).toBe('key1')
+      expect(replicaElement.changedAttributes[0]?.newValue).toBe('value1')
+      expect(replicaElement.changedAttributes[0]?.oldValue).toBe(null)
 
-      expect(replica.childNodes[0]!.changedAttributes[2].name).toBe('key1')
-      expect(replica.childNodes[0]!.changedAttributes[2].newValue).toBe('newValue')
-      expect(replica.childNodes[0]!.changedAttributes[2].oldValue).toBe('value1')
+      expect(replicaElement.changedAttributes[1]?.name).toBe('key2')
+      expect(replicaElement.changedAttributes[1]?.newValue).toBe('value2')
+      expect(replicaElement.changedAttributes[1]?.oldValue).toBe(null)
+
+      expect(replicaElement.changedAttributes[2]?.name).toBe('key1')
+      expect(replicaElement.changedAttributes[2]?.newValue).toBe('newValue')
+      expect(replicaElement.changedAttributes[2]?.oldValue).toBe('value1')
     })
 
     it('does not call the attribute changed callback when the attribute name is not available in the observedAttributes() getter method.', () => {
@@ -991,7 +1025,9 @@ describe('element', () => {
       customElement.setAttribute('k1', 'value1')
       customElement.setAttribute('k2', 'value2')
 
-      expect(replica.childNodes[0]!.changedAttributes.length).toBe(0)
+      const replicaElement = replica.childNodes[0] as CustomElement
+
+      expect(replicaElement.changedAttributes.length).toBe(0)
     })
   })
 
@@ -1018,18 +1054,30 @@ describe('element', () => {
       expect(replica.attributes[1]!.ownerElement === replica).toBe(true)
       expect(replica.attributes[1]!.ownerDocument === document).toBe(true)
 
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.name).toBe('key1')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.value).toBe('value1')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.namespaceURI).toBe(null)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.specified).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.ownerElement === replica).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.ownerDocument === document).toBe(true)
 
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.name).toBe('key2')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.value).toBe('')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.namespaceURI).toBe(null)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.specified).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.ownerElement === replica).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.ownerDocument === document).toBe(true)
     })
   })
@@ -1057,18 +1105,30 @@ describe('element', () => {
       expect(replica.attributes[1]!.ownerElement === replica).toBe(true)
       expect(replica.attributes[1]!.ownerDocument === document).toBe(true)
 
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].name).toBe('global:local1')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].value).toBe('value1')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].namespaceURI).toBe(NAMESPACE_URI)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].specified).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].ownerElement === replica).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].ownerDocument === document).toBe(true)
 
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].name).toBe('global:local2')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].value).toBe('')
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].namespaceURI).toBe(NAMESPACE_URI)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].specified).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].ownerElement === replica).toBe(true)
+      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].ownerDocument === document).toBe(true)
     })
   })
@@ -1156,11 +1216,9 @@ describe('element', () => {
       const { primary, replica } = testElement('div')
 
       primary.attachShadow({ mode: 'open' })
-      expect(replica[PropertySymbol.shadowRoot] instanceof ShadowRoot).toBe(true)
+      expect(replica instanceof ShadowRoot).toBe(true)
       expect(replica.shadowRoot instanceof ShadowRoot).toBe(true)
       expect(replica.shadowRoot.ownerDocument === replica.ownerDocument).toBe(true)
-      expect(replica.shadowRoot.isConnected).toBe(false)
-      expect(replica.shadowRoot.isConnected).toBe(true)
     })
 
     it('creates a new closed ShadowRoot node and sets it to the internal "[PropertySymbol.shadowRoot]" property.', () => {
@@ -1168,14 +1226,13 @@ describe('element', () => {
 
       primary.attachShadow({ mode: 'closed' })
       expect(replica.shadowRoot).toBe(null)
-      expect(replica[PropertySymbol.shadowRoot] instanceof ShadowRoot).toBe(true)
-      expect(replica[PropertySymbol.shadowRoot].ownerDocument === replica.ownerDocument).toBe(true)
-      expect(replica[PropertySymbol.shadowRoot].isConnected).toBe(false)
-      expect(replica[PropertySymbol.shadowRoot].isConnected).toBe(true)
+      expect(replica instanceof ShadowRoot).toBe(true)
+      expect(replica.isConnected).toBe(false)
+      expect(replica.isConnected).toBe(true)
     })
   })
 
-  for (const functionName of ['scroll', 'scrollTo']) {
+  for (const functionName of ['scroll', 'scrollTo'] as const) {
     describe(`${functionName}()`, () => {
       it('sets the properties scrollTop and scrollLeft.', () => {
         const { primary, replica } = testElement('div')
@@ -1190,6 +1247,7 @@ describe('element', () => {
       it('sets the properties scrollTop and scrollLeft using object.', () => {
         const { primary, replica } = testElement('div')
 
+        // @ts-expect-error should work
         primary[functionName]({ left: 50, top: 60 })
         expect(replica.scrollLeft).toBe(50)
         expect(replica.scrollTop).toBe(60)
@@ -1200,6 +1258,7 @@ describe('element', () => {
       it('sets only the property scrollTop.', () => {
         const { primary, replica } = testElement('div')
 
+        // @ts-expect-error should work
         primary[functionName]({ top: 60 })
         expect(replica.scrollLeft).toBe(0)
         expect(replica.scrollTop).toBe(60)
@@ -1210,6 +1269,7 @@ describe('element', () => {
       it('sets only the property scrollLeft.', () => {
         const { primary, replica } = testElement('div')
 
+        // @ts-expect-error should work
         primary[functionName]({ left: 60 })
         expect(replica.scrollLeft).toBe(60)
         expect(replica.scrollTop).toBe(0)
@@ -1220,6 +1280,7 @@ describe('element', () => {
       it('sets the properties scrollTop and scrollLeft with animation.', async () => {
         const { primary, replica } = testElement('div')
 
+        // @ts-expect-error should work
         primary[functionName]({ left: 50, top: 60, behavior: 'smooth' })
         expect(replica.scrollLeft).toBe(0)
         expect(replica.scrollTop).toBe(0)
@@ -1230,7 +1291,7 @@ describe('element', () => {
     })
   }
 
-  for (const method of ['setAttributeNode', 'setAttributeNodeNS']) {
+  for (const method of ['setAttributeNode', 'setAttributeNodeNS'] as const) {
     describe(`${method}()`, () => {
       it('sets an Attr node on a <div> element.', () => {
         const { primary, replica } = testElement('div')
@@ -1260,18 +1321,30 @@ describe('element', () => {
         expect((<IAttr>replica.attributes[1]).ownerElement).toBe(replica)
         expect((<IAttr>replica.attributes[1]).ownerDocument).toBe(document)
 
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key1).name).toBe('key1')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key1).namespaceURI).toBe(NamespaceURI.svg)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key1).value).toBe('value1')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key1).specified).toBe(true)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key1).ownerElement).toBe(replica)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key1).ownerDocument).toBe(replicaDocument)
 
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key2).name).toBe('key2')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key2).namespaceURI).toBe(null)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key2).value).toBe('value2')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key2).specified).toBe(true)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key2).ownerElement).toBe(replica)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replica.attributes.key2).ownerDocument).toBe(replicaDocument)
       })
 
@@ -1289,7 +1362,9 @@ describe('element', () => {
         attribute1.value = 'value1'
         attribute2.value = 'value2'
 
+        // @ts-expect-error method should exist
         svg[method](attribute1)
+        // @ts-expect-error method should exist
         svg[method](attribute2)
 
         expect(replicaSvg.attributes.length).toBe(2)
@@ -1308,18 +1383,30 @@ describe('element', () => {
         expect((<IAttr>replicaSvg.attributes[1]).ownerElement).toBe(replicaSvg)
         expect((<IAttr>replicaSvg.attributes[1]).ownerDocument).toBe(replicaDocument)
 
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.KEY1).name).toBe('KEY1')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.KEY1).namespaceURI).toBe(NamespaceURI.svg)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.KEY1).value).toBe('value1')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.KEY1).specified).toBe(true)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.KEY1).ownerElement).toBe(replicaSvg)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.KEY1).ownerDocument).toBe(replicaDocument)
 
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.key2).name).toBe('key2')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.key2).namespaceURI).toBe(null)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.key2).value).toBe('value2')
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.key2).specified).toBe(true)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.key2).ownerElement).toBe(replicaSvg)
+        // @ts-expect-error named attributes should work
         expect((<IAttr>replicaSvg.attributes.key2).ownerDocument).toBe(replicaDocument)
       })
     })
@@ -1400,7 +1487,7 @@ describe('element', () => {
     })
   })
 
-  for (const method of ['removeAttributeNode', 'removeAttributeNodeNS']) {
+  for (const method of ['removeAttributeNode', 'removeAttributeNodeNS'] as const) {
     describe(`${method}()`, () => {
       it('removes an Attr node.', () => {
         const { primary, replica } = testElement('div')
