@@ -63,8 +63,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
       throw new Error(`Unknown mutation arg type: ${arg}`)
     })
 
-    // @ts-expect-error The key should exist on this node because the key comes from the same node in the primary DOM.
-    targetNode[prop](...parsedArgs)
+    Reflect.apply(targetFn, targetNode, parsedArgs)
     return
   }
 

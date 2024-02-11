@@ -88,9 +88,12 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
     for (const attr of Array.from(node.attributes)) {
       attributes[attr.name] = attr.value
     }
-    // if (node.namespaceURI) {
-    //   attributes.namespaceURI = node.namespaceURI
-    // }
+
+    // Special case for SVG elements or others that use a namespace.
+    // Remove this attribute on the receiver side, as it's not a real attribute.
+    if (node.namespaceURI && node.namespaceURI !== DEFAULT_NS) {
+      attributes.namespaceURI = node.namespaceURI
+    }
 
     const children = Array.from(node.childNodes)
       .map(node => serializeDomNode(node, classes))
@@ -99,3 +102,5 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
   }
   throw new Error(`Unhandled node type: ${node.nodeType}`)
 }
+
+const DEFAULT_NS = 'http://www.w3.org/1999/xhtml'

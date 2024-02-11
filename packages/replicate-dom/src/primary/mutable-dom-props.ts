@@ -43,6 +43,7 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'setAttributeNodeNS',
         'removeAttribute',
         'removeAttributeNode',
+        'removeAttributeNS',
         'scroll',
         'scrollTo',
       ],

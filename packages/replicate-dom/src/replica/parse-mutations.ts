@@ -56,12 +56,17 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
     }
 
     const [tag, attributes, children] = node as SerializedDomElement
-    const element = doc.createElement(tag)
+
+    const element = (() => {
+      if (attributes.namespaceURI) {
+        const el = doc.createElementNS(attributes.namespaceURI, tag)
+        delete attributes.namespaceURI
+        return el
+      }
+      return doc.createElement(tag)
+    })()
+
     for (const [name, value] of Object.entries(attributes)) {
-      // if (name === 'namespaceURI') {
-      //   element.setAttribute('namespaceURI', value)
-      //   continue
-      // }
       element.setAttribute(name, value)
     }
     const parsedChildren = children.map(child => parseDomNode(child, doc, classes))

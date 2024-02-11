@@ -1044,14 +1044,14 @@ describe('element', () => {
       expect(replica.attributes[0]!.namespaceURI).toBe(null)
       expect(replica.attributes[0]!.specified).toBe(true)
       expect(replica.attributes[0]!.ownerElement === replica).toBe(true)
-      expect(replica.attributes[0]!.ownerDocument === document).toBe(true)
+      expect(replica.attributes[0]!.ownerDocument === replicaDocument).toBe(true)
 
       expect(replica.attributes[1]!.name).toBe('key2')
       expect(replica.attributes[1]!.value).toBe('')
       expect(replica.attributes[1]!.namespaceURI).toBe(null)
       expect(replica.attributes[1]!.specified).toBe(true)
       expect(replica.attributes[1]!.ownerElement === replica).toBe(true)
-      expect(replica.attributes[1]!.ownerDocument === document).toBe(true)
+      expect(replica.attributes[1]!.ownerDocument === replicaDocument).toBe(true)
 
       // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.name).toBe('key1')
@@ -1064,7 +1064,7 @@ describe('element', () => {
       // @ts-expect-error named attributes should work
       expect(replica.attributes.key1.ownerElement === replica).toBe(true)
       // @ts-expect-error named attributes should work
-      expect(replica.attributes.key1.ownerDocument === document).toBe(true)
+      expect(replica.attributes.key1.ownerDocument === replicaDocument).toBe(true)
 
       // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.name).toBe('key2')
@@ -1077,7 +1077,7 @@ describe('element', () => {
       // @ts-expect-error named attributes should work
       expect(replica.attributes.key2.ownerElement === replica).toBe(true)
       // @ts-expect-error named attributes should work
-      expect(replica.attributes.key2.ownerDocument === document).toBe(true)
+      expect(replica.attributes.key2.ownerDocument === replicaDocument).toBe(true)
     })
   })
 
@@ -1429,9 +1429,9 @@ describe('element', () => {
 
     it('returns an Attr node from an <svg> element.', () => {
       const { primary, replica } = testElement('div')
-      const svg = primary.appendChild(
-        document.createElementNS(NamespaceURI.svg, 'svg'),
-      ) as Element
+      const svg = document.createElementNS(NamespaceURI.svg, 'svg')
+
+      primary.appendChild(svg)
       const replicaSvg = replica.children[0]!
 
       const attribute1 = document.createAttributeNS(NamespaceURI.svg, 'KEY1')
@@ -1444,8 +1444,8 @@ describe('element', () => {
       svg.setAttributeNode(attribute2)
 
       expect(replicaSvg.getAttributeNode('key1') === null).toBe(true)
-      expect(replicaSvg.getAttributeNode('key2') === attribute2).toBe(true)
-      expect(replicaSvg.getAttributeNode('KEY1') === attribute1).toBe(true)
+      expect(replicaSvg.getAttributeNode('key2')?.value).toEqual(attribute2.value)
+      expect(replicaSvg.getAttributeNode('KEY1')?.value).toBe(attribute1.value)
       expect(replicaSvg.getAttributeNode('KEY2') === null).toBe(true)
     })
   })
