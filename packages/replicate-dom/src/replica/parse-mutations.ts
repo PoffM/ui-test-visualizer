@@ -71,6 +71,8 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
 
     if (specialProps.shadowRoot) {
       const shadowRoot = element.attachShadow(specialProps.shadowRoot.init)
+      const content = parseDomNode(specialProps.shadowRoot.content, doc, classes)
+      shadowRoot.append(content)
     }
 
     for (const [name, value] of Object.entries(attributes)) {

@@ -22,6 +22,7 @@ export interface DomClasses {
   XMLSerializer: new () => XMLSerializer
   DOMParser: new () => DOMParser
   Attr: new () => Attr
+  ShadowRoot: new () => ShadowRoot
 }
 
 /** All methods and setters that mutate the DOM */

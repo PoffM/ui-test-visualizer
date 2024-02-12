@@ -1217,7 +1217,8 @@ describe('element', () => {
       const element = document.createElement('div')
       element.id = 'test-shadow-container'
 
-      element.attachShadow({ mode: 'open' })
+      const primaryShadowRoot = element.attachShadow({ mode: 'open' })
+      primaryShadowRoot.innerHTML = '<span>Test Shadow Content</span>'
 
       expect(element.shadowRoot.constructor === ShadowRoot).toBe(true)
       expect(element.shadowRoot.ownerDocument === document).toBe(true)
@@ -1229,16 +1230,37 @@ describe('element', () => {
       expect(replicaShadowRoot.constructor === ShadowRoot).toBe(true)
       expect(replicaShadowRoot.ownerDocument === replicaDocument).toBe(true)
       expect(replicaShadowRoot.isConnected).toBe(true)
+
+      expect(document.body.innerHTML).toBe(replicaDocument.body.innerHTML)
+      expect(primaryShadowRoot.innerHTML).toBe('<span>Test Shadow Content</span>')
+      expect(replicaShadowRoot.innerHTML).toBe('<span>Test Shadow Content</span>')
     })
 
-    it('creates a new closed ShadowRoot node and sets it to the internal "[PropertySymbol.shadowRoot]" property.', () => {
+    it('creates a new closed ShadowRoot node.', () => {
       const { primary, replica } = testElement('div')
 
-      primary.attachShadow({ mode: 'closed' })
-      expect(replica.shadowRoot).toBe(null)
-      expect(replica instanceof ShadowRoot).toBe(true)
-      expect(replica.isConnected).toBe(false)
-      expect(replica.isConnected).toBe(true)
+      const element = document.createElement('div')
+      element.id = 'test-shadow-container'
+
+      const primaryShadowRoot = element.attachShadow({ mode: 'closed' })
+      primaryShadowRoot.innerHTML = '<span>Test Shadow Content</span>'
+
+      // Closed shadow roots are spied on and made open.
+
+      expect(element.shadowRoot.constructor === ShadowRoot).toBe(true)
+      expect(element.shadowRoot.ownerDocument === document).toBe(true)
+      expect(element.shadowRoot.isConnected).toBe(false)
+      primary.appendChild(element)
+      expect(element.shadowRoot.isConnected).toBe(true)
+
+      const replicaShadowRoot = replica.querySelector('#test-shadow-container')!.shadowRoot
+      expect(replicaShadowRoot.constructor === ShadowRoot).toBe(true)
+      expect(replicaShadowRoot.ownerDocument === replicaDocument).toBe(true)
+      expect(replicaShadowRoot.isConnected).toBe(true)
+
+      expect(document.body.innerHTML).toBe(replicaDocument.body.innerHTML)
+      expect(primaryShadowRoot.innerHTML).toBe('<span>Test Shadow Content</span>')
+      expect(replicaShadowRoot.innerHTML).toBe('<span>Test Shadow Content</span>')
     })
   })
 

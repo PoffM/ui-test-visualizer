@@ -110,4 +110,17 @@ export function spyOnDomNodes(
       }))
     }
   }
+
+  // Spy on shadow DOMs and always make them open,
+  // so they can more easily be read and replicated
+  const attachShadowSpy: SpyImpl<[init: ShadowRootInit], ShadowRoot> = spyOn(
+    classes.Element.prototype as Element,
+    'attachShadow',
+    function (this: Element, init: ShadowRootInit) {
+      return attachShadowSpy.getOriginal().call(
+        this,
+        { ...init, mode: 'open' },
+      )
+    },
+  )
 }

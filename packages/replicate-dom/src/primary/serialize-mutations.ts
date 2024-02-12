@@ -1,4 +1,4 @@
-import type { SerializedDomNode } from '../types'
+import type { NodeSpecialProps, SerializedDomNode } from '../types'
 import type { DomClasses } from './mutable-dom-props'
 
 export function getNodePath(node: Node, root: Node) {
@@ -79,7 +79,8 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
   if (node instanceof classes.Comment) {
     return ['Comment', node.data]
   }
-  if (node instanceof classes.DocumentFragment) {
+  if (node instanceof classes.DocumentFragment || node instanceof classes.ShadowRoot) {
+    // TODO serialize without the XMLSerializer
     return [
       'DocumentFragment',
       new classes.XMLSerializer().serializeToString(node),
@@ -94,12 +95,17 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
       attributes[attr.name] = attr.value
     }
 
-    const specialProps = (() => {
-      const result: Record<string, unknown> = {}
+    const specialProps: NodeSpecialProps = (() => {
+      const result: NodeSpecialProps = {}
 
       if (node.shadowRoot) {
         result.shadowRoot = {
-          init: { mode: node.shadowRoot.mode },
+          init: {
+            mode: 'open',
+            delegatesFocus: node.shadowRoot.delegatesFocus,
+            slotAssignment: node.shadowRoot.slotAssignment,
+          },
+          content: serializeDomNode(node.shadowRoot, classes),
         }
       }
       // Special case for SVG elements or others that use a namespace.

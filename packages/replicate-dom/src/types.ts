@@ -8,13 +8,16 @@ export type SerializedDomElement = [
   tagName: string,
   attributes: Record<string, string>,
   children: SerializedDomNode[],
-  specialProps: {
-    namespaceURI?: string
-    shadowRoot?: {
-      init: ShadowRootInit
-    }
-  },
+  specialProps: NodeSpecialProps,
 ]
+
+export interface NodeSpecialProps {
+  namespaceURI?: string
+  shadowRoot?: {
+    init: ShadowRootInit
+    content: SerializedDomNode
+  }
+}
 
 export type SerializedTextNode = ['Text', string | null]
 
