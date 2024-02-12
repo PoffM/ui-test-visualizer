@@ -4,7 +4,7 @@ import { Moon, Sun } from 'lucide-solid'
 import { createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
 import type { HTMLPatch } from 'replicate-dom'
-import { applyDomPatch } from 'replicate-dom/src/replica/patch-dom'
+import { applyDomPatch } from 'replicate-dom'
 import shadowCSSText from './assets/shadow.css?raw'
 import { createColorTheme } from './lib/color-theme'
 
