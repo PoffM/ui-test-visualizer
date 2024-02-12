@@ -71,6 +71,7 @@ describe('element', () => {
   }
 
   afterEach(() => {
+    expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
     vi.restoreAllMocks()
   })
 

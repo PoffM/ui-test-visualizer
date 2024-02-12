@@ -61,6 +61,7 @@ describe('charaterData', () => {
   }
 
   afterEach(() => {
+    expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
     vi.restoreAllMocks()
   })
 

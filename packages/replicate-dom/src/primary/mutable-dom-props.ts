@@ -22,6 +22,7 @@ export interface DomClasses {
   XMLSerializer: new () => XMLSerializer
   Attr: new () => Attr
   ShadowRoot: new () => ShadowRoot
+  HTMLTemplateElement: new () => HTMLTemplateElement
 }
 
 /** All methods and setters that mutate the DOM */
@@ -67,6 +68,14 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         dataset: [],
         attributes: ['setNamedItem', 'removeNamedItem'],
       },
+      setters: [
+        'innerText',
+        'innerHTML',
+        'textContent',
+        'nodeValue',
+        'className',
+        'classList',
+      ],
     } satisfies DOMNodeSpyConfig<HTMLElement>,
     {
       cls: classes.Text,
@@ -123,6 +132,16 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'textContent',
       ],
     } satisfies DOMNodeSpyConfig<DocumentFragment>,
+    {
+      cls: classes.HTMLTemplateElement,
+      methods: [
+        'appendChild',
+        'removeChild',
+        'insertBefore',
+        'replaceChild',
+      ],
+      setters: ['innerHTML'],
+    } satisfies DOMNodeSpyConfig<HTMLTemplateElement>,
     {
       cls: classes.ShadowRoot,
       methods: [
