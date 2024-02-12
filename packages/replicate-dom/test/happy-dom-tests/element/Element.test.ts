@@ -989,7 +989,7 @@ describe('element', () => {
 
   describe('attributeChangedCallback()', () => {
     it('calls attribute changed callback when it is implemented by a custom element (web component).', () => {
-      const { primary, replica } = testElement('div')
+      const { primary } = testElement('div')
       const customElement = <CustomElement>document.createElement('custom-element')
 
       primary.appendChild(customElement)
@@ -998,25 +998,23 @@ describe('element', () => {
       customElement.setAttribute('key2', 'value2')
       customElement.setAttribute('KEY1', 'newValue')
 
-      const replicaElement = replica.childNodes[0] as CustomElement
+      expect(customElement.changedAttributes.length).toBe(3)
 
-      expect(replicaElement.changedAttributes.length).toBe(3)
+      expect(customElement.changedAttributes[0]?.name).toBe('key1')
+      expect(customElement.changedAttributes[0]?.newValue).toBe('value1')
+      expect(customElement.changedAttributes[0]?.oldValue).toBe(null)
 
-      expect(replicaElement.changedAttributes[0]?.name).toBe('key1')
-      expect(replicaElement.changedAttributes[0]?.newValue).toBe('value1')
-      expect(replicaElement.changedAttributes[0]?.oldValue).toBe(null)
+      expect(customElement.changedAttributes[1]?.name).toBe('key2')
+      expect(customElement.changedAttributes[1]?.newValue).toBe('value2')
+      expect(customElement.changedAttributes[1]?.oldValue).toBe(null)
 
-      expect(replicaElement.changedAttributes[1]?.name).toBe('key2')
-      expect(replicaElement.changedAttributes[1]?.newValue).toBe('value2')
-      expect(replicaElement.changedAttributes[1]?.oldValue).toBe(null)
-
-      expect(replicaElement.changedAttributes[2]?.name).toBe('key1')
-      expect(replicaElement.changedAttributes[2]?.newValue).toBe('newValue')
-      expect(replicaElement.changedAttributes[2]?.oldValue).toBe('value1')
+      expect(customElement.changedAttributes[2]?.name).toBe('key1')
+      expect(customElement.changedAttributes[2]?.newValue).toBe('newValue')
+      expect(customElement.changedAttributes[2]?.oldValue).toBe('value1')
     })
 
     it('does not call the attribute changed callback when the attribute name is not available in the observedAttributes() getter method.', () => {
-      const { primary, replica } = testElement('div')
+      const { primary } = testElement('div')
       const customElement = <CustomElement>document.createElement('custom-element')
 
       primary.appendChild(customElement)
@@ -1024,9 +1022,7 @@ describe('element', () => {
       customElement.setAttribute('k1', 'value1')
       customElement.setAttribute('k2', 'value2')
 
-      const replicaElement = replica.childNodes[0] as CustomElement
-
-      expect(replicaElement.changedAttributes.length).toBe(0)
+      expect(customElement.changedAttributes.length).toBe(0)
     })
   })
 
