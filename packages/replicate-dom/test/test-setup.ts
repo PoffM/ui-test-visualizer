@@ -58,6 +58,7 @@ export function addTestElement<
   const path = getNodePath(
     primary as unknown as Node,
     primaryDocument as unknown as Node,
+    primaryDocument.defaultView as unknown as typeof globalThis.window,
   )
   if (!path) {
     throw new Error('Node not found in original document')
@@ -65,6 +66,7 @@ export function addTestElement<
   const replica = getNodeByPath(
     replicaDocument as unknown as Node,
     path,
+    primaryDocument.defaultView as unknown as typeof globalThis.window,
   )
   if (!replica) {
     throw new Error(`Node not found in replica document at ${path}`)
