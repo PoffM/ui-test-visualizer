@@ -21,7 +21,7 @@ export function initPrimaryDom(cfg: PrimaryDomConfig) {
         return
       }
 
-      const nodePath = getNodePath(node, cfg.root)
+      const nodePath = getNodePath(node, cfg.root, cfg.classes)
 
       if (!nodePath) {
         return

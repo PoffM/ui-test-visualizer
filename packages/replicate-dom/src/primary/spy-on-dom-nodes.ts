@@ -3,6 +3,7 @@ import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
 import type { DomClasses } from './mutable-dom-props'
 import { MUTABLE_DOM_PROPS } from './mutable-dom-props'
+import { containsNode } from './contains-node-util'
 
 export type MutationCallback = (
   node: Node,
@@ -19,7 +20,7 @@ export function spyOnDomNodes(
 ) {
   // Don't recursively call the callback
   let spyDepth = 0
-  function trackSpy<A extends any[], R>(fn: (...args: A) => R) {
+  function trackSpyDepth<A extends any[], R>(fn: (...args: A) => R) {
     return function wrappedSpyFn(this: unknown, ...args: A) {
       spyDepth++
       const result: R = fn.apply(this, args)
@@ -28,11 +29,11 @@ export function spyOnDomNodes(
     }
   }
 
-  // Only call it for nodes within the root,
-  // in case both primary and replica DOMs are in the same process.
+  // Only call the callback for nodes within the root,
+  // to make sure different DOM trees in the same JS process are unaffected by each other.
   const originalCallback = callback
   callback = (node, ...args) => {
-    if (root.contains(node)) {
+    if (containsNode(root, node, classes)) {
       return originalCallback(node, ...args)
     }
   }
@@ -42,7 +43,7 @@ export function spyOnDomNodes(
       const methodSpy: SpyImpl<unknown[], unknown> = spyOn(
         cls.prototype,
         method,
-        trackSpy(function interceptMethod(this: any, ...args: any[]) {
+        trackSpyDepth(function interceptMethod(this: any, ...args: any[]) {
           callback(this, method, args, spyDepth)
           return methodSpy.getOriginal().call(this, ...args)
         }),
@@ -60,7 +61,7 @@ export function spyOnDomNodes(
         spyOn(
           cls.prototype,
           { setter },
-          trackSpy(function (this: any, value) {
+          trackSpyDepth(function interceptSetter(this: any, value) {
             originalSetter.call(this, value)
             callback(this, setter, castArray(value), spyDepth)
           }),
@@ -68,9 +69,11 @@ export function spyOnDomNodes(
       }
     }
 
+    // Spy on mutations on nested objects:
+    // e.g. "style", "classList", "dataset", "attributes"
     for (const [getter, spiedMethods] of Object.entries(nestedMethods ?? {})) {
     // Spy on the getter property.
-      const spy = spyOn(cls.prototype, { getter }, trackSpy(function (this: any) {
+      const spy = spyOn(cls.prototype, { getter }, trackSpyDepth(function interceptGetter(this: any) {
       // @ts-expect-error asserted types here should be correct
         const nestedObj = spy.getOriginal().call(this) as T[G] & object
 

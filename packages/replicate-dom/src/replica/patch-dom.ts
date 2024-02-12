@@ -12,7 +12,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
     throw new Error('Root node must be a Document type or have an owner document')
   }
 
-  let targetNode = getNodeByPath(root, htmlPatch.targetNodePath)
+  let targetNode = getNodeByPath(root, htmlPatch.targetNodePath, classes)
   if (!targetNode) {
     throw new Error(`Node not found: ${String(htmlPatch.targetNodePath)}`)
   }
@@ -46,7 +46,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
         }
         // If the first element is a number, it's a path to an existing node
         if (typeof arg[0] === 'number') {
-          return getNodeByPath(root, arg as DomNodePath)
+          return getNodeByPath(root, arg as DomNodePath, classes)
         }
       }
 

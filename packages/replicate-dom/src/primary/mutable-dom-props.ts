@@ -20,7 +20,6 @@ export interface DomClasses {
   Comment: new () => Comment
   DocumentFragment: new () => DocumentFragment
   XMLSerializer: new () => XMLSerializer
-  DOMParser: new () => DOMParser
   Attr: new () => Attr
   ShadowRoot: new () => ShadowRoot
 }
@@ -35,6 +34,7 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'insertBefore',
         'insertAdjacentElement',
         'insertAdjacentText',
+        'append',
         'appendChild',
         'replaceChild',
         'removeChild',
@@ -48,6 +48,8 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'scroll',
         'scrollTo',
         'attachShadow',
+        'prepend',
+        'replaceChildren',
       ],
       setters: [
         'innerHTML',
@@ -107,5 +109,35 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
       ],
       setters: ['textContent', 'nodeValue', 'data'],
     } satisfies DOMNodeSpyConfig<CharacterData>,
+    {
+      cls: classes.DocumentFragment,
+      methods: [
+        'append',
+        'appendChild',
+        'insertBefore',
+        'prepend',
+        'replaceChildren',
+        'removeChild',
+      ],
+      setters: [
+        'textContent',
+      ],
+    } satisfies DOMNodeSpyConfig<DocumentFragment>,
+    {
+      cls: classes.ShadowRoot,
+      methods: [
+        'append',
+        'appendChild',
+        'insertBefore',
+        'prepend',
+        'replaceChildren',
+        'removeChild',
+      ],
+      setters: [
+        'textContent',
+        'innerHTML',
+        'adoptedStyleSheets',
+      ],
+    } satisfies DOMNodeSpyConfig<ShadowRoot>,
   ]
 }

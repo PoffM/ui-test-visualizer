@@ -1,30 +1,37 @@
-import type { NodeSpecialProps, SerializedDomNode } from '../types'
+import type { DomNodePath, NodeSpecialProps, SerializedDomNode } from '../types'
+import { containsNode } from './contains-node-util'
 import type { DomClasses } from './mutable-dom-props'
 
-export function getNodePath(node: Node, root: Node) {
-  const indices = []
+export function getNodePath(node: Node, root: Node, classes: DomClasses): DomNodePath | null {
+  const indices: DomNodePath = []
   let currentNode = node
 
   // Traverse up the tree until the root node is reached
   while (currentNode && currentNode !== root) {
-    const parent = currentNode.parentNode
+    if (currentNode.parentNode) {
+      const parent = currentNode.parentNode
 
-    if (!parent) {
-      // If the parent is null, the node is not in the DOM
-      return null
+      // When the parent is the root, use "children" instead of "childNodes" to ignore the "<!DOCTYPE html>" node.
+      const siblings = parent === root ? parent.children : parent.childNodes
+
+      let index = Array.prototype.indexOf.call(siblings, currentNode)
+
+      if (index === -1) {
+        index = 0
+      }
+
+      indices.unshift(index) // Add the index to the beginning of the array
+      currentNode = parent
+      continue
     }
 
-    // When the parent is the root, use "children" instead of "childNodes" to ignore the "<!DOCTYPE html>" node.
-    const siblings = parent === root ? parent.children : parent.childNodes
-
-    let index = Array.prototype.indexOf.call(siblings, currentNode)
-
-    if (index === -1) {
-      index = 0
+    if (currentNode instanceof classes.ShadowRoot && currentNode.host) {
+      indices.unshift('shadowRoot')
+      currentNode = currentNode.host
+      continue
     }
 
-    indices.unshift(index) // Add the index to the beginning of the array
-    currentNode = parent
+    return null
   }
 
   // If the root node is not an ancestor of the node, return null
@@ -43,7 +50,7 @@ export function serializeDomMutationArg(
   arg: string | Node | null,
   root: Node,
   classes: DomClasses,
-): number[] | SerializedDomNode | { object: unknown } {
+): DomNodePath | SerializedDomNode | { object: unknown } {
   if (
     typeof arg === 'string'
     || typeof arg === 'number'
@@ -54,8 +61,8 @@ export function serializeDomMutationArg(
   }
   // Existing nodes are referenced by their numeric path,
   // so the receiver can look them up in its DOM
-  if (arg instanceof classes.Node && root.contains(arg)) {
-    return getNodePath(arg, root)
+  if (arg instanceof classes.Node && containsNode(root, arg, classes)) {
+    return getNodePath(arg, root, classes)
   }
   if (
     arg instanceof classes.Element
@@ -79,11 +86,16 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
   if (node instanceof classes.Comment) {
     return ['Comment', node.data]
   }
-  if (node instanceof classes.DocumentFragment || node instanceof classes.ShadowRoot) {
-    // TODO serialize without the XMLSerializer
+  if (node instanceof classes.DocumentFragment) {
     return [
       'DocumentFragment',
-      new classes.XMLSerializer().serializeToString(node),
+      Array.from(node.childNodes).map(node => serializeDomNode(node, classes)),
+    ]
+  }
+  if (node instanceof classes.ShadowRoot) {
+    return [
+      'ShadowRoot',
+      Array.from(node.childNodes).map(node => serializeDomNode(node, classes)),
     ]
   }
   if (node instanceof classes.Attr) {

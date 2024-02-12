@@ -1236,6 +1236,48 @@ describe('element', () => {
       expect(replicaShadowRoot.innerHTML).toBe('<span>Test Shadow Content</span>')
     })
 
+    it('replicates nested ShadowRoots.', () => {
+      const { primary, replica } = testElement('div')
+
+      const container1 = document.createElement('div') as Element
+      container1.id = 'container1'
+      const shadow1 = container1.attachShadow({ mode: 'open' })
+
+      const container2 = shadow1.appendChild(document.createElement('div')) as Element
+      container2.id = 'container2'
+      const shadow2 = container2.attachShadow({ mode: 'open' })
+
+      const container3 = shadow2.appendChild(document.createElement('div')) as Element
+      container3.id = 'container3'
+
+      // The initial "appendChild" replicates the first 2 shadows and their content at once
+      primary.appendChild(container1)
+
+      expect((primary.childNodes[0] as Element).id).toBe('container1')
+      expect(((primary.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).id).toBe('container2')
+      expect((((primary.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).id).toBe('container3')
+
+      // Make sure the nested shadow roots are replicated.
+      expect((replica.childNodes[0] as Element).id).toBe('container1')
+      expect(((replica.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).id).toBe('container2')
+      expect((((replica.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).id).toBe('container3')
+
+      const shadow3 = container3.attachShadow({ mode: 'open' })
+      const container4 = shadow3.appendChild(document.createElement('div')) as Element
+      container4.id = 'container4'
+
+      const shadow4 = container4.attachShadow({ mode: 'open' })
+      const container5 = shadow4.appendChild(document.createElement('div')) as Element
+      container5.id = 'container5'
+
+      // container 4 primary.childNodes[0].shadowRoot.childNodes[0].shadowRoot.childNodes[0].shadowRoot
+
+      const replicaContainer3 = ((replica.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element
+      expect(replicaContainer3.id).toBe('container3')
+      expect((replicaContainer3.shadowRoot?.childNodes[0] as Element).id).toBe('container4')
+      expect(((replicaContainer3.shadowRoot?.childNodes[0] as Element).shadowRoot?.childNodes[0] as Element).id).toBe('container5')
+    })
+
     it('creates a new closed ShadowRoot node.', () => {
       const { primary, replica } = testElement('div')
 
