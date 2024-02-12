@@ -27,6 +27,7 @@ export async function jestDebugConfig(
       await findUp('dist/inject-test.js', { cwd: __filename }),
       ...(fw.setupFiles ?? []),
       '--detectOpenHandles',
+      // TODO find out why Jest doesn't exit on its own
       '--forceExit',
     ],
   }

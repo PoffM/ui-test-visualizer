@@ -40,6 +40,12 @@ export function spyOnDomNodes(
 
   for (const { cls, methods, setters, nestedMethods } of MUTABLE_DOM_PROPS(classes)) {
     for (const method of methods ?? []) {
+      // Some methods are not available in some environments,
+      // e.g. jsdom doesn't implement 'scroll'.
+      if (!Reflect.has(cls.prototype, method)) {
+        continue
+      }
+
       const methodSpy: SpyImpl<unknown[], unknown> = spyOn(
         cls.prototype,
         method,
@@ -51,7 +57,7 @@ export function spyOnDomNodes(
     }
 
     for (const setter of setters ?? []) {
-    // Store a reference to the original setter
+      // Store a reference to the original setter
       const originalSetter = Object.getOwnPropertyDescriptor(
         cls.prototype,
         setter,
