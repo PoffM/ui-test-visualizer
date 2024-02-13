@@ -18,6 +18,7 @@ export interface DomClasses {
   Node: new () => Node
   CharacterData: new () => CharacterData
   Comment: new () => Comment
+  Document: new () => Document
   DocumentFragment: new () => DocumentFragment
   XMLSerializer: new () => XMLSerializer
   Attr: new () => Attr
@@ -62,6 +63,9 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
     } satisfies DOMNodeSpyConfig<Element>,
     {
       cls: classes.HTMLElement,
+      methods: [
+        'focus',
+      ],
       nestedMethods: {
         style: ['setProperty'],
         classList: ['add', 'remove', 'replace', 'toggle'],
@@ -118,6 +122,24 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
       ],
       setters: ['textContent', 'nodeValue', 'data'],
     } satisfies DOMNodeSpyConfig<CharacterData>,
+    {
+      cls: classes.Document,
+      methods: [
+        'open',
+        'write',
+        'append',
+        'appendChild',
+        'insertBefore',
+        'prepend',
+        'replaceChildren',
+        'removeChild',
+      ],
+      setters: [
+        'textContent',
+        'title',
+        'cookie',
+      ],
+    } satisfies DOMNodeSpyConfig<Document>,
     {
       cls: classes.DocumentFragment,
       methods: [

@@ -15,7 +15,7 @@ export function containsNode(parent: Node, target: Node, win: DomClasses) {
   return false
 }
 
-export function findNestedShadowRoots(node: Node, win: DomClasses): ShadowRoot[] {
+function findNestedShadowRoots(node: Node, win: DomClasses): ShadowRoot[] {
   const shadowRoots: ShadowRoot[] = []
   if (node instanceof win.Element && node.shadowRoot) {
     shadowRoots.push(node.shadowRoot)

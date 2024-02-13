@@ -1,6 +1,7 @@
 import { castArray } from 'lodash'
 import type { DomNodePath, HTMLPatch, SerializedDomNode } from '../types'
 import type { DomClasses } from '../primary/mutable-dom-props'
+import { getPropertyDescriptor } from '../property-util'
 import { getNodeByPath, parseDomNode } from './parse-mutations'
 
 export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClasses) {
@@ -73,21 +74,10 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
   }
 
   // Check if the property is a setter
-  const propDescriptor = (() => {
-    for (
-      let proto = Object.getPrototypeOf(targetNode);
-      proto !== null;
-      proto = Object.getPrototypeOf(proto)
-    ) {
-      const descriptor = Object.getOwnPropertyDescriptor(proto, prop)
-      if (descriptor) {
-        return descriptor
-      }
-    }
-  })()
+  const propDescriptor = getPropertyDescriptor(targetNode, prop)
 
   // If it's a defined setter
-  if (typeof propDescriptor?.set === 'function') {
+  if (typeof propDescriptor?.descriptor.set === 'function') {
     Reflect.set(targetNode, prop, htmlPatch.args[0])
   }
   // If it's a regular property

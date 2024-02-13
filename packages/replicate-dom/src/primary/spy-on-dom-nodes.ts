@@ -1,6 +1,7 @@
 import { castArray } from 'lodash'
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
+import { getPropertyDescriptor } from '../property-util'
 import type { DomClasses } from './mutable-dom-props'
 import { MUTABLE_DOM_PROPS } from './mutable-dom-props'
 import { containsNode } from './contains-node-util'
@@ -58,17 +59,19 @@ export function spyOnDomNodes(
 
     for (const setter of setters ?? []) {
       // Store a reference to the original setter
-      const originalSetter = Object.getOwnPropertyDescriptor(
-        cls.prototype,
-        setter,
-      )?.set
+      const originalDescriptor = getPropertyDescriptor(cls.prototype, setter)
 
-      if (originalSetter) {
+      if (originalDescriptor) {
+        const { descriptor, proto } = originalDescriptor
+        const setFn = descriptor.set
+        if (!setFn) {
+          continue
+        }
         spyOn(
-          cls.prototype,
+          proto as any,
           { setter },
           trackSpyDepth(function interceptSetter(this: any, value) {
-            originalSetter.call(this, value)
+            setFn.call(this, value)
             callback(this, setter, castArray(value), spyDepth)
           }),
         )
