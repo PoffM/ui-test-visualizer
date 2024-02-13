@@ -1,6 +1,15 @@
 import type { DomClasses } from './mutable-dom-props'
 
-export function containsNode(parent: Node, target: Node, win: DomClasses) {
+export function containsNode(parent: Node, target: Node | Location, win: DomClasses) {
+  // Handle Locations
+  if (target instanceof win.Location) {
+    if (parent instanceof win.Document || parent instanceof win.HTMLDocument) {
+      return target === parent.location
+    }
+    return parent.ownerDocument?.location === target
+  }
+
+  // Handle descendants the easy way
   if (parent.contains(target)) {
     return true
   }

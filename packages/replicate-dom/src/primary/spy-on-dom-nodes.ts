@@ -101,7 +101,7 @@ export function spyOnDomNodes(
     // Spy on mutations on nested objects:
     // e.g. "style", "classList", "dataset", "attributes"
     for (const [getter, spiedMethods] of Object.entries(nestedMethods ?? {})) {
-    // Spy on the getter property.
+      // Spy on the getter property.
       const spy = spyOn(cls.prototype, { getter }, trackSpyDepth(function interceptGetter(this: any) {
       // @ts-expect-error asserted types here should be correct
         const nestedObj = spy.getOriginal().call(this) as T[G] & object
@@ -124,7 +124,7 @@ export function spyOnDomNodes(
           },
           // Listen to the nested object's setter properties
           set: (_, setter, value) => {
-          // Report the mutation
+            // Report the mutation
             if (typeof setter === 'string') {
               callback(this, [getter, setter], [value], spyDepth)
             }

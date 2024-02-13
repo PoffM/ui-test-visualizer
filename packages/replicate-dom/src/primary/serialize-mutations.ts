@@ -32,6 +32,17 @@ export function getNodePath(node: Node, root: Node, classes: DomClasses): DomNod
       continue
     }
 
+    if (
+      currentNode instanceof classes.Location
+      && (root instanceof classes.Document
+      || root instanceof classes.HTMLDocument)
+      && root.location === currentNode
+    ) {
+      indices.unshift('location')
+      currentNode = root
+      continue
+    }
+
     return null
   }
 

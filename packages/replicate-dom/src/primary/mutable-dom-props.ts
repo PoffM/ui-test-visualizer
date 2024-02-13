@@ -25,6 +25,7 @@ export interface DomClasses {
   Attr: new () => Attr
   ShadowRoot: new () => ShadowRoot
   HTMLTemplateElement: new () => HTMLTemplateElement
+  Location: new () => Location
 }
 
 /** All methods and setters that mutate the DOM */
@@ -200,5 +201,12 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'adoptedStyleSheets',
       ],
     } satisfies DOMNodeSpyConfig<ShadowRoot>,
+    {
+      cls: classes.Location,
+      methods: [],
+      setters: [
+        'href',
+      ],
+    } satisfies DOMNodeSpyConfig<Location>,
   ]
 }

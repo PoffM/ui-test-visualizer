@@ -1,6 +1,6 @@
 // Types used when syncing the DOM from a primary to a replica.
 
-export type DomNodePath = (number | 'shadowRoot')[]
+export type DomNodePath = (number | 'shadowRoot' | 'location')[]
 
 export type SerializedDomTextNode = string | null
 
