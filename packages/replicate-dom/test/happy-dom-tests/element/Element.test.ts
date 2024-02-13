@@ -1101,30 +1101,18 @@ describe('element', () => {
       expect(replica.attributes[1]!.ownerElement === replica).toBe(true)
       expect(replica.attributes[1]!.ownerDocument === replicaDocument).toBe(true)
 
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].name).toBe('global:local1')
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].value).toBe('value1')
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].namespaceURI).toBe(NAMESPACE_URI)
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].specified).toBe(true)
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].ownerElement === replica).toBe(true)
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local1'].ownerDocument === replicaDocument).toBe(true)
 
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].name).toBe('global:local2')
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].value).toBe('')
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].namespaceURI).toBe(NAMESPACE_URI)
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].specified).toBe(true)
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].ownerElement === replica).toBe(true)
-      // @ts-expect-error named attributes should work
       expect(replica.attributes['global:local2'].ownerDocument === replicaDocument).toBe(true)
     })
   })
