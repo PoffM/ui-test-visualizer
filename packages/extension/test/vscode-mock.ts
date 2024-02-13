@@ -4,7 +4,7 @@ import type * as vscode from 'vscode'
 import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { findUp } from 'find-up'
 import { applyDomPatch } from 'replicate-dom'
-import { Node, Window } from 'happy-dom'
+import { Window } from 'happy-dom'
 import type { ExtensionSettingsKey } from '../src/extension/extension-setting'
 
 export const defaultTestSettings: Record<ExtensionSettingsKey, unknown> = {
@@ -137,13 +137,6 @@ export async function initVscodeMock({
   })
 
   const replicaWindow = new Window() as unknown as typeof globalThis.window
-
-  // Remove the <!DOCTYPE> node.
-  for (const node of Array.from(replicaWindow.document.childNodes)) {
-    if (node.nodeType === Node.DOCUMENT_TYPE_NODE) {
-      replicaWindow.document.removeChild(node)
-    }
-  }
 
   const panels: vscode.WebviewPanel[] = []
 

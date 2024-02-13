@@ -27,13 +27,8 @@ export function getNodeByPath(root: Node, path: DomNodePath, classes: DomClasses
       currentElement = Reflect.get(currentElement, 'location')
     }
     else if (typeof index === 'number') {
-      // Check if the root node is Node.DOCUMENT_NODE
-      const childProp = currentElement.nodeType === 9 ? 'children' : 'childNodes'
-      // @ts-expect-error "children" exists when the node is a Document
-      const children: ArrayLike<Node> = currentElement[childProp]
-      currentElement = children[index]
+      currentElement = currentElement.childNodes[index]
     }
-
     if (!currentElement) {
       throw new Error(`Node not found: ${path.join('.')}`)
     }
