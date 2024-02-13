@@ -14,9 +14,6 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
   }
 
   let targetNode = getNodeByPath(root, htmlPatch.targetNodePath, classes)
-  if (!targetNode) {
-    throw new Error(`Node not found: ${String(htmlPatch.targetNodePath)}`)
-  }
 
   const propPath = castArray(htmlPatch.prop)
 
@@ -77,7 +74,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
   const propDescriptor = getPropertyDescriptor(targetNode, prop)
 
   // If it's a defined setter
-  if (typeof propDescriptor?.descriptor.set === 'function') {
+  if (typeof propDescriptor?.set === 'function') {
     Reflect.set(targetNode, prop, htmlPatch.args[0])
   }
   // If it's a regular property

@@ -11,7 +11,8 @@ export function getNodePath(node: Node, root: Node, classes: DomClasses): DomNod
     if (currentNode.parentNode) {
       const parent = currentNode.parentNode
 
-      // When the parent is the root, use "children" instead of "childNodes" to ignore the "<!DOCTYPE html>" node.
+      // When the parent is the root, use "children" instead of "childNodes"
+      // to ignore the "<!DOCTYPE html>" node.
       const siblings = parent === root ? parent.children : parent.childNodes
 
       let index = Array.prototype.indexOf.call(siblings, currentNode)

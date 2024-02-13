@@ -1,10 +1,7 @@
 export function getPropertyDescriptor(
-  obj: unknown,
+  obj: object,
   p: PropertyKey,
-): {
-  descriptor: PropertyDescriptor
-  proto: unknown
-} | undefined {
+): PropertyDescriptor | undefined {
   for (
     let proto = obj;
     proto !== null;
@@ -12,7 +9,7 @@ export function getPropertyDescriptor(
   ) {
     const descriptor = Object.getOwnPropertyDescriptor(proto, p)
     if (descriptor) {
-      return { descriptor, proto }
+      return descriptor
     }
   }
 }

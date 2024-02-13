@@ -14,22 +14,20 @@ export function getNodeByPath(root: Node, path: DomNodePath, classes: DomClasses
   let currentElement: Node | undefined = root
 
   for (const index of path) {
-    currentElement = ((): Node | undefined => {
-      if (
-        index === 'shadowRoot'
-        && currentElement instanceof classes.Element
-        && currentElement.shadowRoot
-      ) {
-        return currentElement.shadowRoot
-      }
-      if (typeof index === 'number') {
-        const children: ArrayLike<Node> = currentElement.nodeType === 9 // Check if the root node is Node.DOCUMENT_NODE
-          ? (currentElement as Document).children
-          : currentElement.childNodes
-        return children[index]
-      }
-      throw new Error(`Invalid path index: ${index}`)
-    })()
+    if (
+      index === 'shadowRoot'
+      && currentElement instanceof classes.Element
+      && currentElement.shadowRoot
+    ) {
+      currentElement = currentElement.shadowRoot
+    }
+    if (typeof index === 'number') {
+      // Check if the root node is Node.DOCUMENT_NODE
+      const childProp = currentElement.nodeType === 9 ? 'children' : 'childNodes'
+      // @ts-expect-error "children" exists when the node is a Document
+      const children: ArrayLike<Node> = currentElement[childProp]
+      currentElement = children[index]
+    }
 
     if (!currentElement) {
       throw new Error(`Node not found: ${path.join('.')}`)

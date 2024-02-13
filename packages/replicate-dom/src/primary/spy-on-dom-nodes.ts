@@ -32,11 +32,32 @@ export function spyOnDomNodes(
 
   // Only call the callback for nodes within the root,
   // to make sure different DOM trees in the same JS process are unaffected by each other.
-  const originalCallback = callback
-  callback = (node, ...args) => {
-    if (containsNode(root, node, classes)) {
-      return originalCallback(node, ...args)
+  {
+    const originalCallback = callback
+    callback = (node, ...args) => {
+      if (containsNode(root, node, classes)) {
+        return originalCallback(node, ...args)
+      }
     }
+  }
+
+  // Handle "connectedCallback()" calls used in custom elements / web components
+  {
+    const connectedCallbackSymbol = Reflect.ownKeys(classes.Node.prototype)
+      .find(key => key.toString() === 'Symbol(connectToNode)')
+
+    const connectedCallbackSpy: SpyImpl<unknown[], unknown> = spyOn(
+      classes.Node.prototype,
+      // @ts-expect-error symbols should work here
+      connectedCallbackSymbol,
+      function (this: Node, ...args) {
+        const originalSpyDepth = spyDepth
+        spyDepth = 0
+        const result = connectedCallbackSpy.getOriginal().call(this, ...args)
+        spyDepth = originalSpyDepth
+        return result
+      },
+    )
   }
 
   for (const { cls, methods, setters, nestedMethods } of MUTABLE_DOM_PROPS(classes)) {
@@ -59,16 +80,15 @@ export function spyOnDomNodes(
 
     for (const setter of setters ?? []) {
       // Store a reference to the original setter
-      const originalDescriptor = getPropertyDescriptor(cls.prototype, setter)
+      const descriptor = getPropertyDescriptor(cls.prototype, setter)
 
-      if (originalDescriptor) {
-        const { descriptor, proto } = originalDescriptor
+      if (descriptor) {
         const setFn = descriptor.set
         if (!setFn) {
           continue
         }
         spyOn(
-          proto as any,
+          cls.prototype,
           { setter },
           trackSpyDepth(function interceptSetter(this: any, value) {
             setFn.call(this, value)
