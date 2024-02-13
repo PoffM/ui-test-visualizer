@@ -11,7 +11,7 @@ import type {
 } from '../types'
 
 export function getNodeByPath(root: Node, path: DomNodePath, classes: DomClasses) {
-  let currentElement: Node | undefined = root
+  let currentElement: Node | Location | undefined = root
 
   for (const index of path) {
     if (
@@ -23,10 +23,17 @@ export function getNodeByPath(root: Node, path: DomNodePath, classes: DomClasses
     }
     else if (
       index === 'location'
+      && (
+        currentElement instanceof classes.Document
+        || currentElement instanceof classes.HTMLDocument
+      )
     ) {
-      currentElement = Reflect.get(currentElement, 'location')
+      currentElement = currentElement.location
     }
-    else if (typeof index === 'number') {
+    else if (
+      typeof index === 'number'
+      && currentElement instanceof classes.Node
+    ) {
       currentElement = currentElement.childNodes[index]
     }
     if (!currentElement) {
