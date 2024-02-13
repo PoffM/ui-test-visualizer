@@ -46,18 +46,20 @@ export function spyOnDomNodes(
     const connectedCallbackSymbol = Reflect.ownKeys(classes.Node.prototype)
       .find(key => key.toString() === 'Symbol(connectToNode)')
 
-    const connectedCallbackSpy: SpyImpl<unknown[], unknown> = spyOn(
-      classes.Node.prototype,
-      // @ts-expect-error symbols should work here
-      connectedCallbackSymbol,
-      function (this: Node, ...args) {
-        const originalSpyDepth = spyDepth
-        spyDepth = 0
-        const result = connectedCallbackSpy.getOriginal().call(this, ...args)
-        spyDepth = originalSpyDepth
-        return result
-      },
-    )
+    if (connectedCallbackSymbol) {
+      const connectedCallbackSpy: SpyImpl<unknown[], unknown> = spyOn(
+        classes.Node.prototype,
+        // @ts-expect-error symbols should work here
+        connectedCallbackSymbol,
+        function (this: Node, ...args) {
+          const originalSpyDepth = spyDepth
+          spyDepth = 0
+          const result = connectedCallbackSpy.getOriginal().call(this, ...args)
+          spyDepth = originalSpyDepth
+          return result
+        },
+      )
+    }
   }
 
   for (const { cls, methods, setters, nestedMethods } of MUTABLE_DOM_PROPS(classes)) {
