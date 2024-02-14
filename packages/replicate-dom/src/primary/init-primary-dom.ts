@@ -21,6 +21,11 @@ export function initPrimaryDom(cfg: PrimaryDomConfig) {
         return
       }
 
+      // Ignore operations involving doctype nodes
+      if ([node, ...args].some(it => it instanceof cfg.classes.DocumentType)) {
+        return
+      }
+
       const nodePath = getNodePath(node, cfg.root, cfg.classes)
 
       if (!nodePath) {

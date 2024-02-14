@@ -26,6 +26,7 @@ export interface DomClasses {
   ShadowRoot: new () => ShadowRoot
   HTMLTemplateElement: new () => HTMLTemplateElement
   Location: new () => Location
+  DocumentType: new () => DocumentType
 }
 
 /** All methods and setters that mutate the DOM */
