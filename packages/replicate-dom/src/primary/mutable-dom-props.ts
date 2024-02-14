@@ -27,6 +27,8 @@ export interface DomClasses {
   HTMLTemplateElement: new () => HTMLTemplateElement
   Location: new () => Location
   DocumentType: new () => DocumentType
+  HTMLButtonElement: new () => HTMLButtonElement
+  HTMLDialogElement: new () => HTMLDialogElement
 }
 
 /** All methods and setters that mutate the DOM */
@@ -96,6 +98,24 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'classList',
       ],
     } satisfies DOMNodeSpyConfig<HTMLElement>,
+    {
+      cls: classes.HTMLButtonElement,
+      methods: [
+        'setCustomValidity',
+      ],
+      nestedMethods: {},
+      setters: [],
+    } satisfies DOMNodeSpyConfig<HTMLButtonElement>,
+    {
+      cls: classes.HTMLDialogElement,
+      methods: [
+        'close',
+        'show',
+        'showModal',
+      ],
+      nestedMethods: {},
+      setters: ['returnValue'],
+    } satisfies DOMNodeSpyConfig<HTMLDialogElement>,
     {
       cls: classes.CharacterData,
       methods: [
