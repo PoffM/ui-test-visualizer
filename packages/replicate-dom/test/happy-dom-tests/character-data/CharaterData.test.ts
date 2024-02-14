@@ -29,7 +29,7 @@
   SOFTWARE.
 */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { IDocument, IWindow } from 'happy-dom'
 import { Window } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
@@ -62,7 +62,6 @@ describe('charaterData', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
-    vi.restoreAllMocks()
   })
 
   describe('get length()', () => {
