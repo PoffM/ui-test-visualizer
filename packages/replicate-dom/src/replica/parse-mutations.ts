@@ -34,7 +34,11 @@ export function getNodeByPath(root: Node, path: DomNodePath, classes: DomClasses
       typeof index === 'number'
       && currentElement instanceof classes.Node
     ) {
-      currentElement = currentElement.childNodes[index]
+      // Check if the root node is Node.DOCUMENT_NODE
+      const childProp = currentElement.nodeType === 9 ? 'children' : 'childNodes'
+      // @ts-expect-error "children" exists when the node is a Document
+      const children: ArrayLike<Node> = currentElement[childProp]
+      currentElement = children[index]
     }
     if (!currentElement) {
       throw new Error(`Node not found: ${path.join('.')}`)

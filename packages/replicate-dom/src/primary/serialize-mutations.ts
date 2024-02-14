@@ -11,7 +11,9 @@ export function getNodePath(node: Node, root: Node, classes: DomClasses): DomNod
     if (currentNode.parentNode) {
       const parent = currentNode.parentNode
 
-      const siblings = parent.childNodes
+      // When the parent is the root, use "children" instead of "childNodes"
+      // to ignore the "<!DOCTYPE html>" node.
+      const siblings = parent === root ? parent.children : parent.childNodes
 
       let index = Array.prototype.indexOf.call(siblings, currentNode)
 
@@ -91,7 +93,7 @@ export function serializeDomMutationArg(
 
 function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
   if (node instanceof classes.Text) {
-    return ['Text', node.textContent]
+    return ['Text', node.data]
   }
   if (node instanceof classes.Comment) {
     return ['Comment', node.data]

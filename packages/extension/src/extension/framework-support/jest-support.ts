@@ -23,6 +23,7 @@ export async function jestDebugConfig(
       cleanTestNameForTerminal(testName),
       '--runInBand',
       '--testTimeout=1000000000',
+      '--silent=false',
       '--setupFiles',
       await findUp('dist/inject-test.js', { cwd: __filename }),
       ...(fw.setupFiles ?? []),

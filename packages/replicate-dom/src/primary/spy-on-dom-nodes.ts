@@ -42,6 +42,7 @@ export function spyOnDomNodes(
   }
 
   // Handle "connectedCallback()" calls used in custom elements / web components
+  // TODO make this work in jsdom
   {
     const connectedCallbackSymbol = Reflect.ownKeys(classes.Node.prototype)
       .find(key => key.toString() === 'Symbol(connectToNode)')

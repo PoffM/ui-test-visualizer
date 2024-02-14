@@ -30,7 +30,18 @@ export interface DomClasses {
 
 /** All methods and setters that mutate the DOM */
 export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] {
-  return [
+  const cfgs: DOMNodeSpyConfig<any>[] = [
+    {
+      cls: classes.Node,
+      methods: [
+        'normalize',
+        'insertBefore',
+        'appendChild',
+        'replaceChild',
+        'removeChild',
+      ],
+      setters: ['textContent', 'nodeValue'],
+    } satisfies DOMNodeSpyConfig<Node>,
     {
       cls: classes.Element,
       methods: [
@@ -85,28 +96,6 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
       ],
     } satisfies DOMNodeSpyConfig<HTMLElement>,
     {
-      cls: classes.Text,
-      methods: [
-        'normalize',
-        'appendData',
-        'insertData',
-        'deleteData',
-        'replaceData',
-      ],
-      setters: ['textContent', 'nodeValue'],
-    } satisfies DOMNodeSpyConfig<Text>,
-    {
-      cls: classes.Node,
-      methods: [
-        'normalize',
-        'insertBefore',
-        'appendChild',
-        'replaceChild',
-        'removeChild',
-      ],
-      setters: ['textContent', 'nodeValue'],
-    } satisfies DOMNodeSpyConfig<Node>,
-    {
       cls: classes.CharacterData,
       methods: [
         'normalize',
@@ -125,6 +114,17 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
       ],
       setters: ['textContent', 'nodeValue', 'data'],
     } satisfies DOMNodeSpyConfig<CharacterData>,
+    {
+      cls: classes.Text,
+      methods: [
+        'normalize',
+        'appendData',
+        'insertData',
+        'deleteData',
+        'replaceData',
+      ],
+      setters: ['textContent', 'nodeValue'],
+    } satisfies DOMNodeSpyConfig<Text>,
     {
       cls: classes.Document,
       methods: [
@@ -209,4 +209,21 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
       ],
     } satisfies DOMNodeSpyConfig<Location>,
   ]
+
+  // Add the classes in the right order (superclass before subclass), so
+  // spy functions can be added to the prototypes without conflicting with each other
+  for (let i = 0; i < cfgs.length; i++) {
+    for (let j = 0; j < i; j++) {
+      const after = cfgs[i]!.cls
+      const before = cfgs[j]!.cls
+
+      if (before.prototype instanceof after) {
+        throw new TypeError(
+          `${MUTABLE_DOM_PROPS.name}: Superclasses should be added to the list before subclasses: ${before.name} came before ${after.name}`,
+        )
+      }
+    }
+  }
+
+  return cfgs
 }
