@@ -29,7 +29,7 @@
   SOFTWARE.
 */
 
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
 import type { Element, HTMLTemplateElement, IDocument, IHTMLElement, IShadowRoot, IWindow } from 'happy-dom'
 import { initTestReplicaDom } from '../../test-setup'
@@ -49,6 +49,10 @@ describe('document', () => {
     replicaDocument = replicaWindow.document
 
     initTestReplicaDom(window, replicaWindow)
+  })
+
+  afterEach(() => {
+    expect(replicaDocument.body?.outerHTML).toBe(document.body?.outerHTML)
   })
 
   for (const property of ['charset', 'characterSet']) {
