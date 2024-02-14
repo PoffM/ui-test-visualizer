@@ -113,7 +113,7 @@ describe('document', () => {
     it('returns child element count.', () => {
       document.appendChild(document.createElement('div'))
       document.appendChild(document.createTextNode('test'))
-      expect(replicaDocument.childNodes.length).toEqual(2)
+      expect(replicaDocument.childElementCount).toEqual(2)
     })
   })
 
@@ -389,8 +389,8 @@ describe('document', () => {
       document.appendChild(span)
 
       expect(replicaDocument.children.length).toBe(2)
-      expect(replicaDocument.children[0]).toBe(div)
-      expect(replicaDocument.children[1]).toBe(span)
+      expect(replicaDocument.children[0]!.tagName).toBe('DIV')
+      expect(replicaDocument.children[1]!.tagName).toBe('SPAN')
     })
 
     // See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
@@ -432,7 +432,7 @@ describe('document', () => {
       document.removeChild(div)
 
       expect(replicaDocument.children.length).toBe(1)
-      expect(replicaDocument.children[0]).toBe(span)
+      expect(replicaDocument.children[0]!.tagName).toBe('SPAN')
     })
   })
 
@@ -453,9 +453,9 @@ describe('document', () => {
       document.insertBefore(div2, div1)
 
       expect(replicaDocument.children.length).toBe(3)
-      expect(replicaDocument.children[0]).toBe(div2)
-      expect(replicaDocument.children[1]).toBe(div1)
-      expect(replicaDocument.children[2]).toBe(span)
+      expect(replicaDocument.children[0]!.tagName).toBe('DIV')
+      expect(replicaDocument.children[1]!.tagName).toBe('DIV')
+      expect(replicaDocument.children[2]!.tagName).toBe('SPAN')
     })
 
     // See: https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment
