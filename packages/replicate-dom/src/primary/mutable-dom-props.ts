@@ -75,6 +75,8 @@ export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] 
         'nodeValue',
         'className',
         'classList',
+        'scrollLeft',
+        'scrollTop',
       ],
     } satisfies DOMNodeSpyConfig<Element>,
     {
