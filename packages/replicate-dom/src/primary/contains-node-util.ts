@@ -1,6 +1,4 @@
-import type { DomClasses } from './mutable-dom-props'
-
-export function containsNode(parent: Node, target: Node | Location, win: DomClasses) {
+export function containsNode(parent: Node, target: Node | Location, win: typeof window): boolean {
   // Handle Locations
   if (target instanceof win.Location) {
     if (parent instanceof win.Document || parent instanceof win.HTMLDocument) {
@@ -24,7 +22,7 @@ export function containsNode(parent: Node, target: Node | Location, win: DomClas
   return false
 }
 
-function findNestedShadowRoots(node: Node, win: DomClasses): ShadowRoot[] {
+function findNestedShadowRoots(node: Node, win: typeof window): ShadowRoot[] {
   const shadowRoots: ShadowRoot[] = []
   if (node instanceof win.Element && node.shadowRoot) {
     shadowRoots.push(node.shadowRoot)

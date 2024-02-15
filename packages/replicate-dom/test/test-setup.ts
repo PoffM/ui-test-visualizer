@@ -13,11 +13,11 @@ export function initTestReplicaDom(
       applyDomPatch(
         replicaWindow.document as unknown as Node,
         htmlPatch,
-        replicaWindow as unknown as typeof globalThis,
+        replicaWindow as unknown as Window & typeof globalThis,
       )
     },
     root: primaryWindow.document as unknown as Node,
-    classes: primaryWindow as unknown as typeof globalThis.window,
+    win: primaryWindow as unknown as typeof globalThis.window,
   })
 }
 

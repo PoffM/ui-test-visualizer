@@ -1,8 +1,7 @@
 import type { DomNodePath, NodeSpecialProps, SerializedDomNode } from '../types'
 import { containsNode } from './contains-node-util'
-import type { DomClasses } from './mutable-dom-props'
 
-export function getNodePath(node: Node, root: Node, classes: DomClasses): DomNodePath | null {
+export function getNodePath(node: Node, root: Node, win: typeof window): DomNodePath | null {
   const indices: DomNodePath = []
   let currentNode = node
 
@@ -26,16 +25,16 @@ export function getNodePath(node: Node, root: Node, classes: DomClasses): DomNod
       continue
     }
 
-    if (currentNode instanceof classes.ShadowRoot && currentNode.host) {
+    if (currentNode instanceof win.ShadowRoot && currentNode.host) {
       indices.unshift('shadowRoot')
       currentNode = currentNode.host
       continue
     }
 
     if (
-      currentNode instanceof classes.Location
-      && (root instanceof classes.Document
-      || root instanceof classes.HTMLDocument)
+      currentNode instanceof win.Location
+      && (root instanceof win.Document
+      || root instanceof win.HTMLDocument)
       && root.location === currentNode
     ) {
       indices.unshift('location')
@@ -61,7 +60,7 @@ export function getNodePath(node: Node, root: Node, classes: DomClasses): DomNod
 export function serializeDomMutationArg(
   arg: string | Node | null,
   root: Node,
-  classes: DomClasses,
+  win: typeof window,
 ): DomNodePath | SerializedDomNode | { object: unknown } {
   if (
     typeof arg === 'string'
@@ -73,17 +72,17 @@ export function serializeDomMutationArg(
   }
   // Existing nodes are referenced by their numeric path,
   // so the receiver can look them up in its DOM
-  if (arg instanceof classes.Node && containsNode(root, arg, classes)) {
-    return getNodePath(arg, root, classes)
+  if (arg instanceof win.Node && containsNode(root, arg, win)) {
+    return getNodePath(arg, root, win)
   }
   if (
-    arg instanceof classes.Element
-    || arg instanceof classes.Text
-    || arg instanceof classes.Comment
-    || arg instanceof classes.DocumentFragment
-    || arg instanceof classes.Attr
+    arg instanceof win.Element
+    || arg instanceof win.Text
+    || arg instanceof win.Comment
+    || arg instanceof win.DocumentFragment
+    || arg instanceof win.Attr
   ) {
-    return serializeDomNode(arg, classes)
+    return serializeDomNode(arg, win)
   }
   if (typeof arg === 'object') {
     return { object: JSON.parse(JSON.stringify(arg)) }
@@ -91,29 +90,29 @@ export function serializeDomMutationArg(
   throw new Error(`Unknown node type: ${JSON.stringify(arg)}`)
 }
 
-function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
-  if (node instanceof classes.Text) {
+function serializeDomNode(node: Node, win: typeof window): SerializedDomNode {
+  if (node instanceof win.Text) {
     return ['Text', node.data]
   }
-  if (node instanceof classes.Comment) {
+  if (node instanceof win.Comment) {
     return ['Comment', node.data]
   }
-  if (node instanceof classes.DocumentFragment) {
+  if (node instanceof win.DocumentFragment) {
     return [
       'DocumentFragment',
-      Array.from(node.childNodes).map(node => serializeDomNode(node, classes)),
+      Array.from(node.childNodes).map(node => serializeDomNode(node, win)),
     ]
   }
-  if (node instanceof classes.ShadowRoot) {
+  if (node instanceof win.ShadowRoot) {
     return [
       'ShadowRoot',
-      Array.from(node.childNodes).map(node => serializeDomNode(node, classes)),
+      Array.from(node.childNodes).map(node => serializeDomNode(node, win)),
     ]
   }
-  if (node instanceof classes.Attr) {
+  if (node instanceof win.Attr) {
     return ['Attr', node.name, node.value, node.namespaceURI ?? undefined]
   }
-  else if (node instanceof classes.Element) {
+  else if (node instanceof win.Element) {
     const attributes: Record<string, string> = {}
     for (const attr of Array.from(node.attributes)) {
       attributes[attr.name] = attr.value
@@ -129,7 +128,7 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
             delegatesFocus: node.shadowRoot.delegatesFocus,
             slotAssignment: node.shadowRoot.slotAssignment,
           },
-          content: serializeDomNode(node.shadowRoot, classes),
+          content: serializeDomNode(node.shadowRoot, win),
         }
       }
       // Special case for SVG elements or others that use a namespace.
@@ -142,7 +141,7 @@ function serializeDomNode(node: Node, classes: DomClasses): SerializedDomNode {
     })()
 
     const children = Array.from(node.childNodes)
-      .map(node => serializeDomNode(node, classes))
+      .map(node => serializeDomNode(node, win))
 
     return [
       node.tagName.toLowerCase(),

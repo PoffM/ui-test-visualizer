@@ -1,4 +1,3 @@
-import type { DomClasses } from '../primary/mutable-dom-props'
 import type {
   DomNodePath,
   SerializedAttr,
@@ -10,7 +9,7 @@ import type {
   SerializedTextNode,
 } from '../types'
 
-export function getNodeByPath(root: Node, path: DomNodePath, classes: DomClasses) {
+export function getNodeByPath(root: Node, path: DomNodePath, classes: typeof window) {
   let currentElement: Node | Location | undefined = root
 
   for (const index of path) {
@@ -48,7 +47,7 @@ export function getNodeByPath(root: Node, path: DomNodePath, classes: DomClasses
   return currentElement
 }
 
-export function parseDomNode(node: SerializedDomNode, doc: Document, classes: DomClasses): Node {
+export function parseDomNode(node: SerializedDomNode, doc: Document, win: typeof window): Node {
   if (typeof node === 'string' || node === null) {
     return doc.createTextNode(node ?? '')
   }
@@ -74,7 +73,7 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
         const [, serializedChildren] = node as SerializedDocumentFragment
         const frag = doc.createDocumentFragment()
         const parsedChildren = serializedChildren
-          .map(child => parseDomNode(child, doc, classes))
+          .map(child => parseDomNode(child, doc, win))
         frag.append(...parsedChildren)
         return frag
       }
@@ -82,7 +81,7 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
         const [, serializedChildren] = node as SerializedShadowRoot
         const frag = doc.createDocumentFragment()
         const parsedChildren = serializedChildren
-          .map(child => parseDomNode(child, doc, classes))
+          .map(child => parseDomNode(child, doc, win))
         frag.append(...parsedChildren)
         return frag
       }
@@ -103,14 +102,14 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, classes: Do
 
         if (specialProps.shadowRoot) {
           const shadowRoot = element.attachShadow(specialProps.shadowRoot.init)
-          const content = parseDomNode(specialProps.shadowRoot.content, doc, classes)
+          const content = parseDomNode(specialProps.shadowRoot.content, doc, win)
           shadowRoot.append(content)
         }
 
         for (const [name, value] of Object.entries(attributes)) {
           element.setAttribute(name, value)
         }
-        const parsedChildren = children.map(child => parseDomNode(child, doc, classes))
+        const parsedChildren = children.map(child => parseDomNode(child, doc, win))
         element.append(...parsedChildren)
         return element
       }

@@ -1,252 +1,188 @@
-/** Get only the object keys that match the given matcher type.  */
-type FilterKeys<T, Matcher, IfMatch, IfNotMatch> = keyof {
-  [K in keyof T]: T[K] extends Matcher ? IfMatch : IfNotMatch;
-}
+import type { IWindow } from 'happy-dom'
+import { uniq } from 'lodash'
 
-/** Configures which methods and properties should be spied on. */
 export interface DOMNodeSpyConfig<T> {
-  cls: new () => T
-  methods?: Extract<FilterKeys<T, Function, string, never>, string>[]
-  setters?: Extract<FilterKeys<T, Function, never, string>, string>[]
-  nestedMethods?: { [P in keyof T]?: (keyof T[P])[] }
+  nestedMethods?: NestedMethods<T>
+  mutableProps: {
+    prop: keyof T
+    desc: PropertyDescriptor
+  }[]
 }
 
-export interface DomClasses {
-  Element: new () => Element
-  HTMLElement: new () => HTMLElement
-  Text: new () => Text
-  Node: new () => Node
-  CharacterData: new () => CharacterData
-  Comment: new () => Comment
-  Document: new () => Document
-  HTMLDocument: new () => HTMLDocument
-  DocumentFragment: new () => DocumentFragment
-  XMLSerializer: new () => XMLSerializer
-  Attr: new () => Attr
-  ShadowRoot: new () => ShadowRoot
-  HTMLTemplateElement: new () => HTMLTemplateElement
-  Location: new () => Location
-  DocumentType: new () => DocumentType
-  HTMLButtonElement: new () => HTMLButtonElement
-  HTMLDialogElement: new () => HTMLDialogElement
+export interface MutableDomDescriptorMap extends Map<unknown, unknown> {
+  get: <E extends Node>(key: new () => E) => DOMNodeSpyConfig<E> | undefined
+  set: <E extends Node>(key: new () => E, value: DOMNodeSpyConfig<E>) => this
+  keys: () => IterableIterator<new () => Node>
 }
 
-/** All methods and setters that mutate the DOM */
-export function MUTABLE_DOM_PROPS(classes: DomClasses): DOMNodeSpyConfig<any>[] {
-  const cfgs: DOMNodeSpyConfig<any>[] = [
-    {
-      cls: classes.Node,
-      methods: [
-        'normalize',
-        'insertBefore',
-        'appendChild',
-        'replaceChild',
-        'removeChild',
-      ],
-      setters: ['textContent', 'nodeValue'],
-    } satisfies DOMNodeSpyConfig<Node>,
-    {
-      cls: classes.Element,
-      methods: [
-        'normalize',
-        'insertBefore',
-        'insertAdjacentElement',
-        'insertAdjacentText',
-        'append',
-        'appendChild',
-        'replaceChild',
-        'removeChild',
-        'setAttribute',
-        'setAttributeNS',
-        'setAttributeNode',
-        'setAttributeNodeNS',
-        'removeAttribute',
-        'removeAttributeNode',
-        'removeAttributeNS',
-        'scroll',
-        'scrollTo',
-        'attachShadow',
-        'prepend',
-        'replaceChildren',
-      ],
-      setters: [
-        'innerHTML',
-        'textContent',
-        'nodeValue',
-        'className',
-        'classList',
-        'scrollLeft',
-        'scrollTop',
-      ],
-    } satisfies DOMNodeSpyConfig<Element>,
-    {
-      cls: classes.HTMLElement,
-      methods: [
-        'focus',
-        'blur',
-      ],
-      nestedMethods: {
-        style: ['setProperty'],
-        classList: ['add', 'remove', 'replace', 'toggle'],
-        dataset: [],
-        attributes: ['setNamedItem', 'removeNamedItem'],
-      },
-      setters: [
-        'innerText',
-        'innerHTML',
-        'textContent',
-        'nodeValue',
-        'className',
-        'classList',
-      ],
-    } satisfies DOMNodeSpyConfig<HTMLElement>,
-    {
-      cls: classes.HTMLButtonElement,
-      methods: [
-        'setCustomValidity',
-      ],
-      nestedMethods: {},
-      setters: [],
-    } satisfies DOMNodeSpyConfig<HTMLButtonElement>,
-    {
-      cls: classes.HTMLDialogElement,
-      methods: [
-        'close',
-        'show',
-        'showModal',
-      ],
-      nestedMethods: {},
-      setters: ['returnValue'],
-    } satisfies DOMNodeSpyConfig<HTMLDialogElement>,
-    {
-      cls: classes.CharacterData,
-      methods: [
-        'normalize',
-        'insertBefore',
-        'appendChild',
-        'appendData',
-        'deleteData',
-        'insertData',
-        'replaceData',
-        'replaceChild',
-        'replaceWith',
-        'removeChild',
-        'remove',
-        'before',
-        'after',
-      ],
-      setters: ['textContent', 'nodeValue', 'data'],
-    } satisfies DOMNodeSpyConfig<CharacterData>,
-    {
-      cls: classes.Text,
-      methods: [
-        'normalize',
-        'appendData',
-        'insertData',
-        'deleteData',
-        'replaceData',
-      ],
-      setters: ['textContent', 'nodeValue'],
-    } satisfies DOMNodeSpyConfig<Text>,
-    {
-      cls: classes.Document,
-      methods: [
-        'open',
-        'write',
-        'append',
-        'appendChild',
-        'insertBefore',
-        'prepend',
-        'replaceChildren',
-        'removeChild',
-      ],
-      setters: [
-        'textContent',
-        'title',
-        'cookie',
-      ],
-    } satisfies DOMNodeSpyConfig<Document>,
-    {
-      cls: classes.HTMLDocument,
-      methods: [
-        'open',
-        'write',
-        'append',
-        'appendChild',
-        'insertBefore',
-        'prepend',
-        'replaceChildren',
-        'removeChild',
-      ],
-      setters: [
-        'textContent',
-        'title',
-        'cookie',
-      ],
-    } satisfies DOMNodeSpyConfig<HTMLDocument>,
-    {
-      cls: classes.DocumentFragment,
-      methods: [
-        'append',
-        'appendChild',
-        'insertBefore',
-        'prepend',
-        'replaceChildren',
-        'removeChild',
-      ],
-      setters: [
-        'textContent',
-      ],
-    } satisfies DOMNodeSpyConfig<DocumentFragment>,
-    {
-      cls: classes.HTMLTemplateElement,
-      methods: [
-        'appendChild',
-        'removeChild',
-        'insertBefore',
-        'replaceChild',
-      ],
-      setters: ['innerHTML'],
-    } satisfies DOMNodeSpyConfig<HTMLTemplateElement>,
-    {
-      cls: classes.ShadowRoot,
-      methods: [
-        'append',
-        'appendChild',
-        'insertBefore',
-        'prepend',
-        'replaceChildren',
-        'removeChild',
-      ],
-      setters: [
-        'textContent',
-        'innerHTML',
-        'adoptedStyleSheets',
-      ],
-    } satisfies DOMNodeSpyConfig<ShadowRoot>,
-    {
-      cls: classes.Location,
-      methods: [],
-      setters: [
-        'href',
-      ],
-    } satisfies DOMNodeSpyConfig<Location>,
-  ]
+export function MUTABLE_DOM_PROPS(
+  win: Window & typeof globalThis,
+): MutableDomDescriptorMap {
+  const windowValues = Object.values(win) as unknown[]
+  const domClasses = uniq(
+    windowValues.filter(
+      val => val === win.Node
+      // @ts-expect-error Prototype should exist on the object
+      || val?.prototype instanceof win.Node,
+    ) as (new () => Node)[],
+  ).sort((a, b) => protoLength(a) - protoLength(b))
 
-  // Add the classes in the right order (superclass before subclass), so
-  // spy functions can be added to the prototypes without conflicting with each other
-  for (let i = 0; i < cfgs.length; i++) {
-    for (let j = 0; j < i; j++) {
-      const after = cfgs[i]!.cls
-      const before = cfgs[j]!.cls
+  const map: MutableDomDescriptorMap = new Map()
 
-      if (before.prototype instanceof after) {
-        throw new TypeError(
-          `${MUTABLE_DOM_PROPS.name}: Superclasses should be added to the list before subclasses: ${before.name} came before ${after.name}`,
-        )
+  for (const cls of domClasses) {
+    map.set(cls, { mutableProps: [] })
+    const descriptors = Object.getOwnPropertyDescriptors(
+      Reflect.get(cls, 'prototype') as Node,
+    )
+
+    for (const [prop, desc] of Object.entries(descriptors)) {
+      if (Reflect.has(IGNORED_DESCRIPTORS, prop)) {
+        continue
+      }
+
+      if (desc.set || typeof desc.value === 'function') {
+        // @ts-expect-error The prop should exist on the object
+        map.get(cls)!.mutableProps.push({ prop, desc })
       }
     }
   }
 
-  return cfgs
+  const htmlElementNestedMethods: NestedMethods<HTMLElement> = {
+    style: ['setProperty'],
+    classList: ['add', 'remove', 'replace', 'toggle'],
+    dataset: [],
+    attributes: ['setNamedItem', 'removeNamedItem'],
+  }
+  map.get(win.HTMLElement)!.nestedMethods = htmlElementNestedMethods
+
+  return map
+}
+
+function protoLength(obj: unknown): number {
+  let count = 0
+  let proto = obj
+  while (proto) {
+    count++
+    proto = Reflect.getPrototypeOf(proto)
+  }
+  return count
+}
+
+type NestedMethods<T> = {
+  [P in keyof T]?: (keyof T[P])[]
+}
+
+type FunctionKeys<T> = {
+  [P in keyof T]: T[P] extends Function ? P : never
+}[keyof T]
+
+/**
+ * Map of Node names to their types.
+ *
+ * e.g.
+ * ```
+ * {
+ *   Node: Node,
+ *   Element: Element,
+ *   HTMLElement: HTMLElement,
+ *   HTMLButtonElement: HTMLButtonElement,
+ *   ...etc...
+ * }
+ * ```
+ */
+type NodeFunctionKeysMap = {
+  [
+  P in keyof IWindow as IWindow[P] extends IWindow['Node']
+    ? any extends IWindow[P]
+      ? never
+      : P
+    : never
+  ]: FunctionKeys<IWindow[P]['prototype']>
+}
+
+type ObjectKeys =
+  | 'constructor'
+  | 'toString'
+  | 'toLocaleString'
+  | 'valueOf'
+  | 'hasOwnProperty'
+  | 'isPrototypeOf'
+  | 'propertyIsEnumerable'
+
+type NodeFunctionKeys =
+  (NodeFunctionKeysMap[keyof NodeFunctionKeysMap] | FunctionKeys<Node> | ObjectKeys)
+  & string
+
+/**
+ * Methods on Node and its subclasses that don't mutate the DOM;
+ * Don't replicate calls to these.
+ */
+const IGNORED_DESCRIPTORS: { [key in NodeFunctionKeys]?: true } = {
+  constructor: true,
+  toString: true,
+  toLocaleString: true,
+  valueOf: true,
+  hasOwnProperty: true,
+  isPrototypeOf: true,
+  propertyIsEnumerable: true,
+
+  getAttribute: true,
+  getRootNode: true,
+  getAttributeNS: true,
+  getAttributeNames: true,
+  getAttributeNode: true,
+  getAttributeNodeNS: true,
+  getBoundingClientRect: true,
+  getClientRects: true,
+  getElementsByClassName: true,
+  getElementsByTagName: true,
+  getElementsByTagNameNS: true,
+  getBBox: true,
+  getInnerHTML: true,
+  getCTM: true,
+  getCurrentTime: true,
+  getElementById: true,
+  getEnclosureList: true,
+  getIntersectionList: true,
+  getScreenCTM: true,
+
+  querySelector: true,
+  querySelectorAll: true,
+
+  addEventListener: true,
+  removeEventListener: true,
+  checkIntersection: true,
+  checkValidity: true,
+
+  cloneNode: true,
+
+  hasAttribute: true,
+  hasAttributeNS: true,
+  hasAttributes: true,
+  closest: true,
+  dispatchEvent: true,
+
+  compareDocumentPosition: true,
+  contains: true,
+  hasChildNodes: true,
+  isDefaultNamespace: true,
+  isEqualNode: true,
+  isSameNode: true,
+  lookupNamespaceURI: true,
+  lookupPrefix: true,
+
+  click: true,
+  canPlayType: true,
+  matches: true,
+  reportValidity: true,
+  captureStream: true,
+  checkEnclosure: true,
+
+  createSVGNumber: true,
+  createSVGLength: true,
+  createSVGAngle: true,
+  createSVGPoint: true,
+  createSVGRect: true,
+  createSVGTransform: true,
+  item: true,
 }

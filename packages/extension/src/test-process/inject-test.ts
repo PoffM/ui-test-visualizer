@@ -29,7 +29,7 @@ async function preTest() {
       initPrimaryDom({
         root: testWindow.document,
         onMutation: htmlPatch => client.send(JSON.stringify(htmlPatch)),
-        classes: globalThis.window,
+        win: globalThis.window,
       })
 
       loadStylesIntoHead(testWindow)

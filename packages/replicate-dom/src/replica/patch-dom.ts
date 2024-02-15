@@ -1,10 +1,9 @@
 import { castArray } from 'lodash'
 import type { DomNodePath, HTMLPatch, SerializedDomNode } from '../types'
-import type { DomClasses } from '../primary/mutable-dom-props'
 import { getPropertyDescriptor } from '../property-util'
 import { getNodeByPath, parseDomNode } from './parse-mutations'
 
-export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClasses) {
+export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, win: typeof window) {
   const doc = root.nodeType === 9 // Check if the root node is Node.DOCUMENT_NODE
     ? root as Document
     : root.ownerDocument
@@ -13,7 +12,7 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
     throw new Error('Root node must be a Document type or have an owner document')
   }
 
-  let targetNode = getNodeByPath(root, htmlPatch.targetNodePath, classes)
+  let targetNode = getNodeByPath(root, htmlPatch.targetNodePath, win)
 
   const propPath = castArray(htmlPatch.prop)
 
@@ -40,11 +39,11 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, classes: DomClas
       if (Array.isArray(arg)) {
         // If the first element is a string (the tag), it's a serialized dom node
         if (typeof arg[0] === 'string') {
-          return parseDomNode(arg as SerializedDomNode, doc, classes)
+          return parseDomNode(arg as SerializedDomNode, doc, win)
         }
         // If the first element is a number, it's a path to an existing node
         if (typeof arg[0] === 'number') {
-          return getNodeByPath(root, arg as DomNodePath, classes)
+          return getNodeByPath(root, arg as DomNodePath, win)
         }
       }
 

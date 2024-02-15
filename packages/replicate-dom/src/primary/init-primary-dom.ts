@@ -1,17 +1,16 @@
 import type { HTMLPatch } from '../types'
 import { spyOnDomNodes } from './spy-on-dom-nodes'
 import { getNodePath, serializeDomMutationArg } from './serialize-mutations'
-import type { DomClasses } from './mutable-dom-props'
 
 export interface PrimaryDomConfig {
   root: Node
-  classes: DomClasses
+  win: typeof window
   onMutation: (patch: HTMLPatch) => void
 }
 
 export function initPrimaryDom(cfg: PrimaryDomConfig) {
   spyOnDomNodes(
-    cfg.classes,
+    cfg.win,
     cfg.root,
     function emitHtmlPatch(node, prop, args, spyDepth) {
       // Don't emit patches for nested mutations.
@@ -22,18 +21,18 @@ export function initPrimaryDom(cfg: PrimaryDomConfig) {
       }
 
       // Ignore operations involving doctype nodes
-      if ([node, ...args].some(it => it instanceof cfg.classes.DocumentType)) {
+      if ([node, ...args].some(it => it instanceof cfg.win.DocumentType)) {
         return
       }
 
-      const nodePath = getNodePath(node, cfg.root, cfg.classes)
+      const nodePath = getNodePath(node, cfg.root, cfg.win)
 
       if (!nodePath) {
         return
       }
 
       const serializedArgs = args.map(it =>
-        serializeDomMutationArg(it, cfg.root, cfg.classes),
+        serializeDomMutationArg(it, cfg.root, cfg.win),
       )
 
       const htmlPatch: HTMLPatch = {

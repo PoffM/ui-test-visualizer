@@ -2,7 +2,6 @@ import { castArray } from 'lodash'
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
 import { getPropertyDescriptor } from '../property-util'
-import type { DomClasses } from './mutable-dom-props'
 import { MUTABLE_DOM_PROPS } from './mutable-dom-props'
 import { containsNode } from './contains-node-util'
 
@@ -15,7 +14,7 @@ export type MutationCallback = (
 
 /** Run a callback function when a DOM node is mutated. */
 export function spyOnDomNodes(
-  classes: DomClasses,
+  win: typeof window,
   root: Node,
   callback: MutationCallback,
 ) {
@@ -35,7 +34,7 @@ export function spyOnDomNodes(
   {
     const originalCallback = callback
     callback = (node, ...args) => {
-      if (containsNode(root, node, classes)) {
+      if (containsNode(root, node, win)) {
         return originalCallback(node, ...args)
       }
     }
@@ -44,12 +43,12 @@ export function spyOnDomNodes(
   // Handle "connectedCallback()" calls used in custom elements / web components
   // TODO make this work in jsdom
   {
-    const connectedCallbackSymbol = Reflect.ownKeys(classes.Node.prototype)
+    const connectedCallbackSymbol = Reflect.ownKeys(win.Node.prototype)
       .find(key => key.toString() === 'Symbol(connectToNode)')
 
     if (connectedCallbackSymbol) {
-      const connectedCallbackSpy: SpyImpl<unknown[], unknown> = spyOn(
-        classes.Node.prototype,
+      const connectedCallbackSpy = spyOn(
+        win.Node.prototype,
         // @ts-expect-error symbols should work here
         connectedCallbackSymbol,
         function (this: Node, ...args) {
@@ -63,41 +62,45 @@ export function spyOnDomNodes(
     }
   }
 
-  for (const { cls, methods, setters, nestedMethods } of MUTABLE_DOM_PROPS(classes)) {
-    for (const method of methods ?? []) {
-      // Some methods are not available in some environments,
-      // e.g. jsdom doesn't implement 'scroll'.
-      if (!Reflect.has(cls.prototype, method)) {
-        continue
-      }
+  const mutableDomProps = MUTABLE_DOM_PROPS(win)
+  for (const cls of mutableDomProps.keys()) {
+    const { mutableProps, nestedMethods } = mutableDomProps.get(cls)!
 
-      const methodSpy: SpyImpl<unknown[], unknown> = spyOn(
-        cls.prototype,
-        method,
-        trackSpyDepth(function interceptMethod(this: any, ...args: any[]) {
-          callback(this, method, args, spyDepth)
-          return methodSpy.getOriginal().call(this, ...args)
-        }),
-      )
-    }
-
-    for (const setter of setters ?? []) {
-      // Store a reference to the original setter
-      const descriptor = getPropertyDescriptor(cls.prototype, setter)
-
-      if (descriptor) {
-        const setFn = descriptor.set
-        if (!setFn) {
+    for (const { prop, desc } of mutableProps) {
+      if (typeof desc.value === 'function') {
+        // Some methods are not available in some environments,
+        // e.g. jsdom doesn't implement 'scroll'.
+        if (!Reflect.has(cls.prototype, prop)) {
           continue
         }
-        spyOn(
+
+        const methodSpy: SpyImpl<unknown[], unknown> = spyOn(
           cls.prototype,
-          { setter },
-          trackSpyDepth(function interceptSetter(this: any, value) {
-            setFn.call(this, value)
-            callback(this, setter, castArray(value), spyDepth)
+          prop,
+          trackSpyDepth(function interceptMethod(this: any, ...args: any[]) {
+            callback(this, prop, args, spyDepth)
+            return methodSpy.getOriginal().call(this, ...args)
           }),
         )
+      }
+      if (desc.set) {
+        // Store a reference to the original setter
+        const descriptor = getPropertyDescriptor(cls.prototype, prop)
+
+        if (descriptor) {
+          const setFn = descriptor.set
+          if (!setFn) {
+            continue
+          }
+          spyOn(
+            cls.prototype,
+            { setter: prop },
+            trackSpyDepth(function interceptSetter(this: any, value) {
+              setFn.call(this, value)
+              callback(this, prop, castArray(value), spyDepth)
+            }),
+          )
+        }
       }
     }
 
@@ -106,12 +109,12 @@ export function spyOnDomNodes(
     for (const [getter, spiedMethods] of Object.entries(nestedMethods ?? {})) {
       // Spy on the getter property.
       const spy = spyOn(cls.prototype, { getter }, trackSpyDepth(function interceptGetter(this: any) {
-      // @ts-expect-error asserted types here should be correct
+        // @ts-expect-error asserted types here should be correct
         const nestedObj = spy.getOriginal().call(this) as T[G] & object
 
         // Wrap the nested object in a Proxy so we can listen to property changes:
         return new Proxy(nestedObj, {
-        // Listen to the specified method on the nested object
+          // Listen to the specified method on the nested object
           get: (_, accessedProp: string) => {
             if ((spiedMethods as string[]).includes(accessedProp)) {
               return (...spiedMethodArgs: any[]) => {
@@ -135,7 +138,7 @@ export function spyOnDomNodes(
             return Reflect.set(nestedObj, setter, value)
           },
           deleteProperty: (_, prop) => {
-          // Report the mutation
+            // Report the mutation
             if (typeof prop === 'string') {
               callback(this, [getter, prop], [], spyDepth)
             }
@@ -149,7 +152,7 @@ export function spyOnDomNodes(
   // Spy on shadow DOMs and always make them open,
   // so they can more easily be read and replicated
   const attachShadowSpy: SpyImpl<[init: ShadowRootInit], ShadowRoot> = spyOn(
-    classes.Element.prototype as Element,
+    win.Element.prototype,
     'attachShadow',
     function (this: Element, init: ShadowRootInit) {
       return attachShadowSpy.getOriginal().call(
