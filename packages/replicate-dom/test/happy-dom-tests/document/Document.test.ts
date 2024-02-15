@@ -64,6 +64,7 @@ describe('document', () => {
 
         document.head.appendChild(meta)
 
+        // @ts-expect-error property should exist
         expect(replicaDocument[property]).toBe('windows-1252')
       })
     })

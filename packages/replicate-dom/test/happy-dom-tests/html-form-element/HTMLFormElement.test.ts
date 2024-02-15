@@ -78,8 +78,10 @@ describe('hTMLFormElement', () => {
     describe(`get ${property}()`, () => {
       it('returns attribute value.', () => {
         const { primary, replica } = testElement('form')
+        // @ts-expect-error property should exist
         expect(replica[property]).toBe('')
         primary.setAttribute(property, 'value')
+        // @ts-expect-error property should exist
         expect(replica[property]).toBe('value')
       })
     })
@@ -87,6 +89,7 @@ describe('hTMLFormElement', () => {
     describe(`set ${property}()`, () => {
       it('sets attribute value.', () => {
         const { primary, replica } = testElement('form')
+        // @ts-expect-error property should exist
         primary[property] = 'value'
         expect(replica.getAttribute(property)).toBe('value')
       })

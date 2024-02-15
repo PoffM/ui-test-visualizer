@@ -47,7 +47,7 @@ describe('hTMLAnchorElement', () => {
     window = new Window({ url: 'https://www.somesite.com/test.html' })
     document = window.document
 
-    replicaWindow = new Window()
+    replicaWindow = new Window({ url: 'https://www.somesite.com/test.html' })
     replicaDocument = replicaWindow.document
 
     initTestReplicaDom(window, replicaWindow)
@@ -82,6 +82,7 @@ describe('hTMLAnchorElement', () => {
       it(`returns the "`, () => {
         const { primary, replica } = testElement('a')
         primary.setAttribute(property, 'test')
+        // @ts-expect-error property should exist
         expect(replica[property]).toBe('test')
       })
     })
@@ -89,6 +90,7 @@ describe('hTMLAnchorElement', () => {
     describe(`set ${property}()`, () => {
       it(`sets the attribute "`, () => {
         const { primary, replica } = testElement('a')
+        // @ts-expect-error property should exist
         primary[property] = 'test'
         expect(replica.getAttribute(property)).toBe('test')
       })

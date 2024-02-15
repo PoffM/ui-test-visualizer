@@ -71,6 +71,7 @@ describe('hTMLIFrameElement', () => {
       it(`returns the "`, () => {
         const newIframe = document.createElement('iframe') as IHTMLIFrameElement
         newIframe.setAttribute(property, 'value')
+        // @ts-expect-error property should exist
         expect(newIframe[property]).toBe('value')
       })
     })
@@ -78,6 +79,7 @@ describe('hTMLIFrameElement', () => {
     describe(`set ${property}()`, () => {
       it(`sets the attribute "`, () => {
         const newIframe = document.createElement('iframe') as IHTMLIFrameElement
+        // @ts-expect-error property should exist
         newIframe[property] = 'value'
         expect(newIframe.getAttribute(property)).toBe('value')
       })
