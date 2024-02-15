@@ -22,10 +22,14 @@ export function spyOnDomNodes(
   let spyDepth = 0
   function trackSpyDepth<A extends any[], R>(fn: (...args: A) => R) {
     return function wrappedSpyFn(this: unknown, ...args: A) {
-      spyDepth++
-      const result: R = fn.apply(this, args)
-      spyDepth--
-      return result
+      try {
+        spyDepth++
+        const result: R = fn.apply(this, args)
+        return result
+      }
+      finally {
+        spyDepth--
+      }
     }
   }
 
@@ -96,8 +100,8 @@ export function spyOnDomNodes(
             cls.prototype,
             { setter: prop },
             trackSpyDepth(function interceptSetter(this: any, value) {
-              setFn.call(this, value)
               callback(this, prop, castArray(value), spyDepth)
+              setFn.call(this, value)
             }),
           )
         }
