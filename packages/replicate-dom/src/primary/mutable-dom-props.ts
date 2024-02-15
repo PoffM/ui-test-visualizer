@@ -23,11 +23,12 @@ export function MUTABLE_DOM_PROPS(
   // Get Node and its subclasses, e.g. Element, HTMLElement, HTMLButtonElement, etc.
   const domClasses = uniq(
     windowValues.filter(
-      val => val === win.Node
       // @ts-expect-error Prototype should exist on the object
-      || val?.prototype instanceof win.Node,
+      val => val?.prototype instanceof win.Node,
     ) as (new () => Node)[],
   ).sort((a, b) => protoLength(a) - protoLength(b))
+  domClasses.unshift(win.Node)
+  domClasses.unshift(win.Location)
 
   const map: MutableDomDescriptorMap = new Map()
 
@@ -38,7 +39,11 @@ export function MUTABLE_DOM_PROPS(
       proto;
       proto = Reflect.getPrototypeOf(proto)
     ) {
-      if (map.has(proto) || proto === win.EventTarget) {
+      if (
+        map.has(proto)
+        || proto === win.EventTarget
+        || proto === win.URL
+      ) {
         break
       }
 
