@@ -1,86 +1,93 @@
-/** Get only the object keys that match the given matcher type.  */
-type FilterKeys<T, Matcher, IfMatch, IfNotMatch> = keyof {
-  [K in keyof T]: T[K] extends Matcher ? IfMatch : IfNotMatch;
-}
+import { uniq } from 'lodash'
+import type { NestedMethods } from './ignored-node-methods'
+import { IGNORED_NODE_METHODS } from './ignored-node-methods'
+import { SPYABLE_NODE_CLASSES } from './spyable-node-classes'
 
-/** Configures which methods and properties should be spied on. */
 export interface DOMNodeSpyConfig<T> {
-  cls: new () => T
-  methods?: Extract<FilterKeys<T, Function, string, never>, string>[]
-  props?: Extract<FilterKeys<T, Function, never, string>, string>[]
-  nestedProps?: { [P in keyof T]?: (keyof T[P])[] }
+  nestedMethods?: NestedMethods<T>
+  mutableProps: {
+    prop: keyof T
+    desc: PropertyDescriptor
+  }[]
 }
 
-/** All methods and setters that mutate the DOM */
-export function MUTABLE_DOM_PROPS(): DOMNodeSpyConfig<any>[] {
-  return [
-    {
-      cls: Element,
-      methods: [
-        'normalize',
-        'insertBefore',
-        'appendChild',
-        'replaceChild',
-        'removeChild',
-        'setAttribute',
-      ],
-      props: [
-        'innerHTML',
-        'textContent',
-        'nodeValue',
-        'className',
-        'classList',
-      ],
-    } satisfies DOMNodeSpyConfig<Element>,
-    {
-      cls: HTMLElement,
-      nestedProps: {
-        style: ['setProperty'],
-        classList: ['add', 'remove', 'replace', 'toggle'],
-        dataset: [],
-        attributes: ['setNamedItem', 'removeNamedItem'],
-      },
-    } satisfies DOMNodeSpyConfig<HTMLElement>,
-    {
-      cls: Text,
-      methods: [
-        'normalize',
-        'appendData',
-        'insertData',
-        'deleteData',
-        'replaceData',
-      ],
-      props: ['textContent', 'nodeValue'],
-    } satisfies DOMNodeSpyConfig<Text>,
-    {
-      cls: Node,
-      methods: [
-        'normalize',
-        'insertBefore',
-        'appendChild',
-        'replaceChild',
-        'removeChild',
-      ],
-      props: ['textContent', 'nodeValue'],
-    } satisfies DOMNodeSpyConfig<Node>,
-    {
-      cls: CharacterData,
-      methods: [
-        'normalize',
-        'insertBefore',
-        'appendChild',
-        'appendData',
-        'deleteData',
-        'insertData',
-        'replaceData',
-        'replaceChild',
-        'replaceWith',
-        'removeChild',
-        'remove',
-        'before',
-        'after',
-      ],
-      props: ['textContent', 'nodeValue', 'data'],
-    } satisfies DOMNodeSpyConfig<CharacterData>,
-  ]
+export interface MutableDomDescriptorMap extends Map<unknown, unknown> {
+  get: <E extends Node>(key: new () => E) => DOMNodeSpyConfig<E> | undefined
+  set: <E extends Node>(key: new () => E, value: DOMNodeSpyConfig<E>) => this
+  keys: () => IterableIterator<new () => Node>
+}
+
+export function MUTABLE_DOM_PROPS(
+  win: Window & typeof globalThis,
+): MutableDomDescriptorMap {
+  // Get Node and its subclasses, e.g. Element, HTMLElement, HTMLButtonElement, etc.
+  const domClasses = uniq(
+    Object.keys(SPYABLE_NODE_CLASSES)
+      .map(name => Reflect.get(win, name))
+      .filter(Boolean)
+      .filter(val => val?.prototype instanceof win.Node)
+      .sort((a, b) => protoLength(a) - protoLength(b)),
+  ) as (new () => Node | Location)[]
+  domClasses.unshift(win.Location)
+
+  const map: MutableDomDescriptorMap = new Map()
+
+  // Loop through Node and its subclasses to find all the mutable properties.
+  for (const cls of domClasses) {
+    for (
+      let proto: object | null = cls;
+      proto;
+      proto = Reflect.getPrototypeOf(proto)
+    ) {
+      if (
+        map.has(proto)
+        || proto === win.EventTarget
+        || proto === win.URL
+        || proto === Reflect.getPrototypeOf(win.Location)
+      ) {
+        break
+      }
+
+      if (!map.has(proto)) {
+        // @ts-expect-error The proto should be the right type
+        map.set(proto, { mutableProps: [] })
+      }
+
+      // Get the descriptors, i.e. the properties defined in the class definition.
+      const descriptors = Object.getOwnPropertyDescriptors(
+        Reflect.get(proto, 'prototype') as Node,
+      )
+
+      for (const [prop, desc] of Object.entries(descriptors)) {
+        if (Reflect.has(IGNORED_NODE_METHODS, prop)) {
+          continue
+        }
+
+        if (desc.set || typeof desc.value === 'function') {
+          // @ts-expect-error The prop should exist on the object
+          map.get(proto)!.mutableProps.push({ prop, desc })
+        }
+      }
+    }
+  }
+
+  const htmlElementNestedMethods: NestedMethods<HTMLElement> = {
+    style: ['setProperty'],
+    classList: ['add', 'remove', 'replace', 'toggle'],
+    dataset: [],
+    attributes: ['setNamedItem', 'removeNamedItem'],
+  }
+  map.get(win.HTMLElement)!.nestedMethods = htmlElementNestedMethods
+
+  return map
+}
+
+function protoLength(obj: unknown): number {
+  let count = 0
+  let proto = obj
+  while (proto) {
+    count++
+    proto = Reflect.getPrototypeOf(proto)
+  }
+  return count
 }

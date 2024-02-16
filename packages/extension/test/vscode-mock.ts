@@ -3,12 +3,11 @@ import { exec } from 'node:child_process'
 import type * as vscode from 'vscode'
 import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { findUp } from 'find-up'
-import { updateDomReplica } from 'replicate-dom'
+import { applyDomPatch } from 'replicate-dom'
 import { Node, Window } from 'happy-dom'
 import type { ExtensionSettingsKey } from '../src/extension/extension-setting'
 
 export const defaultTestSettings: Record<ExtensionSettingsKey, unknown> = {
-  'visual-ui-test-debugger.experimentalFastMode': true,
   'visual-ui-test-debugger.cssFiles': [] as string[],
   'visual-ui-test-debugger.disableCodeLens': false,
   'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
@@ -20,6 +19,8 @@ export interface VscodeMockParams {
   onDebugSessionFinish: (session: vscode.DebugSession) => void
   settings?: Partial<typeof defaultTestSettings>
 }
+
+/** Mock out the VSCode extension api for tests. */
 export async function initVscodeMock({
   testFile,
   onReplicaDomUpdate,
@@ -96,9 +97,15 @@ export async function initVscodeMock({
       cmd,
       { env, cwd: packageRoot },
       (error, stdout, stderr) => {
-        if (error) { console.error(error) }
-        if (stdout) { console.log(stdout) }
-        if (stderr) { console.error(stderr) }
+        if (error) {
+          console.error(error)
+        }
+        if (stdout) {
+          console.log(stdout)
+        }
+        if (stderr) {
+          console.error(stderr)
+        }
       },
     )
 
@@ -148,7 +155,7 @@ export async function initVscodeMock({
         webview: {
           postMessage: async (msg) => {
             if (msg.htmlPatch) {
-              updateDomReplica(replicaWindow.document, msg.htmlPatch)
+              applyDomPatch(replicaWindow.document, msg.htmlPatch, replicaWindow)
               onReplicaDomUpdate(replicaWindow.document)
             }
             return true

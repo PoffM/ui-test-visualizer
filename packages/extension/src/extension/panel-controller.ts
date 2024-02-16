@@ -1,11 +1,11 @@
 import path from 'node:path'
 import getPort from 'get-port'
-import { debounce } from 'lodash'
 import * as vscode from 'vscode'
-import type { RawData, Server as WsServer } from 'ws'
+import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
 
-// Avoids import errorrs when importing in Vitest
+// Avoids import errors when importing in Vitest
+// eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
 const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
 export async function startPanelController() {
@@ -14,26 +14,12 @@ export async function startPanelController() {
 
   let panel: vscode.WebviewPanel | undefined
 
-  const updateWholeHtml = debounce((buffer: RawData) => {
-    const newHtml = buffer.toString()
-    panel?.webview.postMessage({ newHtml })
-  }, 100)
-
-  const isExperimentalFastMode = vscode.workspace
-    .getConfiguration()
-    .get('visual-ui-test-debugger.experimentalFastMode')
-
   // Listen for html updates from the test worker process
   const htmlUpdaterServer = new Server({ port: htmlUpdaterPort })
   htmlUpdaterServer.on('connection', (socket) => {
     socket.on('message', (buffer) => {
-      if (isExperimentalFastMode) {
-        const htmlPatch: HTMLPatch = JSON.parse(buffer.toString())
-        panel?.webview.postMessage({ htmlPatch })
-      }
-      else {
-        updateWholeHtml(buffer)
-      }
+      const htmlPatch: HTMLPatch = JSON.parse(buffer.toString())
+      panel?.webview.postMessage({ htmlPatch })
     })
   })
 

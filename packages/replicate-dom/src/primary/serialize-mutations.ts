@@ -1,29 +1,48 @@
-import type { SerializedDomNode } from '../types'
+import type { DomNodePath, NodeSpecialProps, SerializedDomNode } from '../types'
+import { containsNode } from './contains-node-util'
 
-export function getNodePath(node: Node, root: Node) {
-  const indices = []
+export function getNodePath(node: Node, root: Node, win: typeof window): DomNodePath | null {
+  const indices: DomNodePath = []
   let currentNode = node
 
   // Traverse up the tree until the root node is reached
   while (currentNode && currentNode !== root) {
-    const parent = currentNode.parentNode
+    if (currentNode.parentNode) {
+      const parent = currentNode.parentNode
 
-    if (!parent) {
-      // If the parent is null, the node is not in the DOM
-      return null
+      // When the parent is the root, use "children" instead of "childNodes"
+      // to ignore the "<!DOCTYPE html>" node.
+      const siblings = parent === root ? parent.children : parent.childNodes
+
+      let index = Array.prototype.indexOf.call(siblings, currentNode)
+
+      if (index === -1) {
+        index = 0
+      }
+
+      indices.unshift(index) // Add the index to the beginning of the array
+      currentNode = parent
+      continue
     }
 
-    // When the parent is the root, use "children" instead of "childNodes" to ignore the "<!DOCTYPE html>" node.
-    const siblings = parent === root ? parent.children : parent.childNodes
-
-    let index = Array.prototype.indexOf.call(siblings, currentNode)
-
-    if (index === -1) {
-      index = 0
+    if (currentNode instanceof win.ShadowRoot && currentNode.host) {
+      indices.unshift('shadowRoot')
+      currentNode = currentNode.host
+      continue
     }
 
-    indices.unshift(index) // Add the index to the beginning of the array
-    currentNode = parent
+    if (
+      currentNode instanceof win.Location
+      && (root instanceof win.Document
+      || root instanceof win.HTMLDocument)
+      && root.location === currentNode
+    ) {
+      indices.unshift('location')
+      currentNode = root
+      continue
+    }
+
+    return null
   }
 
   // If the root node is not an ancestor of the node, return null
@@ -34,44 +53,104 @@ export function getNodePath(node: Node, root: Node) {
   return indices
 }
 
+/**
+ * Returns a serialized representation of a DOM node or a string.
+ * When the node is an existing DOM node, it returns a path to the node.
+ */
 export function serializeDomMutationArg(
   arg: string | Node | null,
-  win: Window,
-) {
+  root: Node,
+  win: typeof window,
+): DomNodePath | SerializedDomNode | { object: unknown } {
   if (
     typeof arg === 'string'
     || typeof arg === 'number'
     || typeof arg === 'boolean'
+    || arg === null
   ) {
-    return String(arg)
-  }
-  if (arg === null) {
     return arg
   }
   // Existing nodes are referenced by their numeric path,
   // so the receiver can look them up in its DOM
-  if (arg instanceof Node && win.document.contains(arg)) {
-    return getNodePath(arg, win.document)
+  if (arg instanceof win.Node && containsNode(root, arg, win)) {
+    return getNodePath(arg, root, win)
   }
-  if (arg instanceof Element || arg instanceof Text) {
-    return serializeDomNode(arg)
+  if (
+    arg instanceof win.Element
+    || arg instanceof win.Text
+    || arg instanceof win.Comment
+    || arg instanceof win.DocumentFragment
+    || arg instanceof win.Attr
+  ) {
+    return serializeDomNode(arg, win)
   }
-  throw new Error(`Unknown node type: ${arg}`)
+  if (typeof arg === 'object') {
+    return { object: JSON.parse(JSON.stringify(arg)) }
+  }
+  throw new Error(`Unknown node type: ${JSON.stringify(arg)}`)
 }
 
-function serializeDomNode(node: Node): SerializedDomNode {
-  if (node instanceof Text) {
-    return ['Text', node.textContent]
+function serializeDomNode(node: Node, win: typeof window): SerializedDomNode {
+  if (node instanceof win.Text) {
+    return ['Text', node.data]
   }
-  else if (node instanceof Element) {
+  if (node instanceof win.Comment) {
+    return ['Comment', node.data]
+  }
+  if (node instanceof win.DocumentFragment) {
+    return [
+      'DocumentFragment',
+      Array.from(node.childNodes).map(node => serializeDomNode(node, win)),
+    ]
+  }
+  if (node instanceof win.ShadowRoot) {
+    return [
+      'ShadowRoot',
+      Array.from(node.childNodes).map(node => serializeDomNode(node, win)),
+    ]
+  }
+  if (node instanceof win.Attr) {
+    return ['Attr', node.name, node.value, node.namespaceURI ?? undefined]
+  }
+  else if (node instanceof win.Element) {
     const attributes: Record<string, string> = {}
     for (const attr of Array.from(node.attributes)) {
       attributes[attr.name] = attr.value
     }
 
-    const children = Array.from(node.childNodes).map(serializeDomNode)
+    const specialProps: NodeSpecialProps = (() => {
+      const result: NodeSpecialProps = {}
 
-    return [node.tagName.toLowerCase(), attributes, children]
+      if (node.shadowRoot) {
+        result.shadowRoot = {
+          init: {
+            mode: 'open',
+            delegatesFocus: node.shadowRoot.delegatesFocus,
+            slotAssignment: node.shadowRoot.slotAssignment,
+          },
+          content: serializeDomNode(node.shadowRoot, win),
+        }
+      }
+      // Special case for SVG elements or others that use a namespace.
+      // Remove this attribute on the receiver side, as it's not a real attribute.
+      if (node.namespaceURI && node.namespaceURI !== DEFAULT_NS) {
+        result.namespaceURI = node.namespaceURI
+      }
+
+      return result
+    })()
+
+    const children = Array.from(node.childNodes)
+      .map(node => serializeDomNode(node, win))
+
+    return [
+      node.tagName.toLowerCase(),
+      attributes,
+      children,
+      specialProps,
+    ]
   }
   throw new Error(`Unhandled node type: ${node.nodeType}`)
 }
+
+const DEFAULT_NS = 'http://www.w3.org/1999/xhtml'

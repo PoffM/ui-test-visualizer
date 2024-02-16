@@ -48,11 +48,6 @@
           },
           "default": [],
           "description": "Extra CSS files to load into the tested UI. Supports PostCSS."
-        },
-        "visual-ui-test-debugger.experimentalFastMode": {
-          "type": "boolean",
-          "default": true,
-          "description": "Incrementally update the mirrored DOM instead of re-rendering it entirely on every change. This feature needs more testing."
         }
       }
     },
@@ -66,7 +61,8 @@
   "scripts": {
     "build": "pnpm run -r \"/^build:.*/\"",
     "dev": "pnpm run -r \"/^dev:.*/\"",
-    "test": "tsc && pnpm run --filter {./packages/*} test"
+    "test": "pnpm run --filter {./packages/*} test",
+    "typecheck": "tsc"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.6.4",

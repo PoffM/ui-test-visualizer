@@ -3,7 +3,8 @@ import * as webviewToolkit from '@vscode/webview-ui-toolkit'
 import { Moon, Sun } from 'lucide-solid'
 import { createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
-import { type HTMLPatch, updateDomReplica } from 'replicate-dom'
+import type { HTMLPatch } from 'replicate-dom'
+import { applyDomPatch } from 'replicate-dom'
 import shadowCSSText from './assets/shadow.css?raw'
 import { createColorTheme } from './lib/color-theme'
 
@@ -54,9 +55,10 @@ export function App() {
 
     makeEventListener(window, 'message', (event) => {
       setFirstPatchReceived(true)
-      updateDomReplica(
+      applyDomPatch(
         shadow,
-        (event.data.htmlPatch as HTMLPatch) ?? (event.data.newHtml as string),
+        (event.data.htmlPatch as HTMLPatch),
+        window,
       )
     })
   }

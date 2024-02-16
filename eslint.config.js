@@ -10,7 +10,9 @@ module.exports = config({
     'ts/no-use-before-define': 'off',
     'style/jsx-one-expression-per-line': 'off',
     'style/yield-star-spacing': ['error', 'after'],
-    'ts/no-require-imports': 'off',
-    'ts/no-var-requires': 'off',
+
+    // Named callback functions are useful for debugging;
+    // they are labelled in stack traces.
+    'prefer-arrow-callback': 'off',
   },
 })

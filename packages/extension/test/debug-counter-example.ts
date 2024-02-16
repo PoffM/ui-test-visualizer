@@ -31,6 +31,10 @@ export async function debugCounterExample({
       settings,
       testFile,
       onReplicaDomUpdate(doc) {
+        if (!doc.body) {
+          return
+        }
+
         const count = queryByText(doc.body, /^Count:/)
         if (count) {
           const countNum = Number(count.textContent?.match(/Count:\s*(\d+)/)?.[1])

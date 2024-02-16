@@ -53,9 +53,6 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
         TEST_FRAMEWORK: fwInfo.framework,
         TEST_FILE_PATH: filePath,
         HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
-        EXPERIMENTAL_FAST_MODE: String(
-          extensionSetting('visual-ui-test-debugger.experimentalFastMode'),
-        ),
         TEST_CSS_FILES: JSON.stringify(
           extensionSetting('visual-ui-test-debugger.cssFiles'),
         ),
