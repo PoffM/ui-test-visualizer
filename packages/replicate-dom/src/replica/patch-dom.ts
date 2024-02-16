@@ -82,6 +82,9 @@ export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, win: typeof wind
           lastModified: lastModified ? Number(lastModified) : undefined,
         })
       }
+      if (arg[0] === 'Undefined') {
+        return undefined
+      }
       // If the first element is a string (the tag), it's a serialized dom node
       if (typeof arg[0] === 'string') {
         return parseDomNode(arg as SerializedDomNode, doc, win)

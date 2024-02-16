@@ -70,6 +70,9 @@ export function serializeDomMutationArg(
   ) {
     return arg
   }
+  if (arg === undefined) {
+    return ['Undefined']
+  }
   if (arg instanceof Date) {
     return ['Date', arg.getTime()]
   }

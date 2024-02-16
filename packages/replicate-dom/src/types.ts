@@ -40,12 +40,14 @@ export type SerializedDomNode =
 
 export type SerializedDate = ['Date', number]
 export type SerializedFile = ['File', { name: string, type: string, lastModified: number }]
+export type SerializedUndefined = ['Undefined']
 
 export type SerializedDomMutationArg =
   | DomNodePath
   | SerializedDomNode
   | SerializedDate
   | SerializedFile
+  | SerializedUndefined
   | string
   | number
   | boolean
