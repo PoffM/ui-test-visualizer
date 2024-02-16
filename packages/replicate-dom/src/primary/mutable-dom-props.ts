@@ -18,14 +18,13 @@ export interface MutableDomDescriptorMap extends Map<unknown, unknown> {
 export function MUTABLE_DOM_PROPS(
   win: Window & typeof globalThis,
 ): MutableDomDescriptorMap {
-  const windowValues = Object.values(win) as unknown[]
+  const windowDescriptors = Object.values(Object.getOwnPropertyDescriptors(win))
 
   // Get Node and its subclasses, e.g. Element, HTMLElement, HTMLButtonElement, etc.
   const domClasses = uniq(
-    windowValues.filter(
-      // @ts-expect-error Prototype should exist on the object
-      val => val?.prototype instanceof win.Node,
-    ) as (new () => Node)[],
+    (windowDescriptors
+      .map(desc => desc.get?.call(win) ?? desc.value) as ((new () => Node) | undefined)[])
+      .filter(val => val?.prototype instanceof win.Node),
   ).sort((a, b) => protoLength(a) - protoLength(b))
   domClasses.unshift(win.Node)
   domClasses.unshift(win.Location)
@@ -365,5 +364,4 @@ const IGNORED_DESCRIPTORS: { [key in NodeFunctionKeys]?: true } = {
   item: true,
   assignedElements: true,
   assignedNodes: true,
-
 }
