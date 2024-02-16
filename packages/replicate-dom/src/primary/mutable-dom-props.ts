@@ -1,5 +1,7 @@
-import type { Document, IWindow } from 'happy-dom'
 import { uniq } from 'lodash'
+import type { NestedMethods } from './ignored-node-methods'
+import { IGNORED_NODE_METHODS } from './ignored-node-methods'
+import { SPYABLE_NODE_CLASSES } from './spyable-node-classes'
 
 export interface DOMNodeSpyConfig<T> {
   nestedMethods?: NestedMethods<T>
@@ -18,15 +20,14 @@ export interface MutableDomDescriptorMap extends Map<unknown, unknown> {
 export function MUTABLE_DOM_PROPS(
   win: Window & typeof globalThis,
 ): MutableDomDescriptorMap {
-  const windowDescriptors = Object.values(Object.getOwnPropertyDescriptors(win))
-
   // Get Node and its subclasses, e.g. Element, HTMLElement, HTMLButtonElement, etc.
   const domClasses = uniq(
-    (windowDescriptors
-      .map(desc => desc.get?.call(win) ?? desc.value) as ((new () => Node) | undefined)[])
-      .filter(val => val?.prototype instanceof win.Node),
-  ).sort((a, b) => protoLength(a) - protoLength(b))
-  domClasses.unshift(win.Node)
+    Object.keys(SPYABLE_NODE_CLASSES)
+      .map(name => Reflect.get(win, name))
+      .filter(Boolean)
+      .filter(val => val?.prototype instanceof win.Node)
+      .sort((a, b) => protoLength(a) - protoLength(b)),
+  ) as (new () => Node | Location)[]
   domClasses.unshift(win.Location)
 
   const map: MutableDomDescriptorMap = new Map()
@@ -42,11 +43,13 @@ export function MUTABLE_DOM_PROPS(
         map.has(proto)
         || proto === win.EventTarget
         || proto === win.URL
+        || proto === Reflect.getPrototypeOf(win.Location)
       ) {
         break
       }
 
       if (!map.has(proto)) {
+        // @ts-expect-error The proto should be the right type
         map.set(proto, { mutableProps: [] })
       }
 
@@ -56,7 +59,7 @@ export function MUTABLE_DOM_PROPS(
       )
 
       for (const [prop, desc] of Object.entries(descriptors)) {
-        if (Reflect.has(IGNORED_DESCRIPTORS, prop)) {
+        if (Reflect.has(IGNORED_NODE_METHODS, prop)) {
           continue
         }
 
@@ -87,281 +90,4 @@ function protoLength(obj: unknown): number {
     proto = Reflect.getPrototypeOf(proto)
   }
   return count
-}
-
-type NestedMethods<T> = {
-  [P in keyof T]?: (keyof T[P])[]
-}
-
-type FunctionKeys<T> = {
-  [P in keyof T]: T[P] extends Function ? P : never
-}[keyof T]
-
-/**
- * Map of Node names to their types.
- *
- * e.g.
- * ```
- * {
- *   Node: Node,
- *   Element: Element,
- *   HTMLElement: HTMLElement,
- *   HTMLButtonElement: HTMLButtonElement,
- *   ...etc...
- * }
- * ```
- */
-type NodeFunctionKeysMap = {
-  [
-  P in keyof IWindow as IWindow[P] extends IWindow['Node']
-    ? any extends IWindow[P]
-      ? never
-      : P
-    : never
-  ]: FunctionKeys<IWindow[P]['prototype']>
-}
-
-type ObjectKeys =
-  | 'constructor'
-  | 'toString'
-  | 'toLocaleString'
-  | 'valueOf'
-  | 'hasOwnProperty'
-  | 'isPrototypeOf'
-  | 'propertyIsEnumerable'
-
-type NodeFunctionKeys =
-  (
-    NodeFunctionKeysMap[keyof NodeFunctionKeysMap]
-    | FunctionKeys<Node>
-    | FunctionKeys<Document>
-    | ObjectKeys
-  )
-  & string
-
-/**
- * Methods on Node and its subclasses that don't mutate the DOM;
- * Don't replicate calls to these.
- */
-const IGNORED_DESCRIPTORS: { [key in NodeFunctionKeys]?: true } = {
-  constructor: true,
-  toString: true,
-  toLocaleString: true,
-  valueOf: true,
-  hasOwnProperty: true,
-  isPrototypeOf: true,
-  propertyIsEnumerable: true,
-
-  createElement: true,
-  createAttribute: true,
-  createAttributeNS: true,
-  createComment: true,
-  createDocumentFragment: true,
-  createElementNS: true,
-  createEvent: true,
-  createNodeIterator: true,
-  createProcessingInstruction: true,
-  createRange: true,
-  createSVGAngle: true,
-  createSVGLength: true,
-  createSVGNumber: true,
-  createSVGPoint: true,
-  createSVGRect: true,
-  createSVGTransform: true,
-  createTextNode: true,
-  createTreeWalker: true,
-
-  onreadystatechange: true,
-  onpointerlockchange: true,
-  onpointerlockerror: true,
-  onbeforecopy: true,
-  onbeforecut: true,
-  onbeforepaste: true,
-  onfreeze: true,
-  onresume: true,
-  onsearch: true,
-  onvisibilitychange: true,
-  onfullscreenchange: true,
-  onfullscreenerror: true,
-  onwebkitfullscreenchange: true,
-  onwebkitfullscreenerror: true,
-  onbeforexrselect: true,
-  onabort: true,
-  onbeforeinput: true,
-  onblur: true,
-  oncancel: true,
-  oncanplay: true,
-  oncanplaythrough: true,
-  onchange: true,
-  onclick: true,
-  onclose: true,
-  oncontextlost: true,
-  oncontextmenu: true,
-  oncontextrestored: true,
-  oncuechange: true,
-  ondblclick: true,
-  ondrag: true,
-  ondragend: true,
-  ondragenter: true,
-  ondragleave: true,
-  ondragover: true,
-  ondragstart: true,
-  ondrop: true,
-  ondurationchange: true,
-  onemptied: true,
-  onended: true,
-  onerror: true,
-  onfocus: true,
-  onformdata: true,
-  oninput: true,
-  oninvalid: true,
-  onkeydown: true,
-  onkeypress: true,
-  onkeyup: true,
-  onload: true,
-  onloadeddata: true,
-  onloadedmetadata: true,
-  onloadstart: true,
-  onmousedown: true,
-  onmouseenter: true,
-  onmouseleave: true,
-  onmousemove: true,
-  onmouseout: true,
-  onmouseover: true,
-  onmouseup: true,
-  onmousewheel: true,
-  onpause: true,
-  onplay: true,
-  onplaying: true,
-  onprogress: true,
-  onratechange: true,
-  onreset: true,
-  onresize: true,
-  onscroll: true,
-  onsecuritypolicyviolation: true,
-  onseeked: true,
-  onseeking: true,
-  onselect: true,
-  onslotchange: true,
-  onstalled: true,
-  onsubmit: true,
-  onsuspend: true,
-  ontimeupdate: true,
-  ontoggle: true,
-  onvolumechange: true,
-  onwaiting: true,
-  onwebkitanimationend: true,
-  onwebkitanimationiteration: true,
-  onwebkitanimationstart: true,
-  onwebkittransitionend: true,
-  onwheel: true,
-  onauxclick: true,
-  ongotpointercapture: true,
-  onlostpointercapture: true,
-  onpointerdown: true,
-  onpointermove: true,
-  onpointerrawupdate: true,
-  onpointerup: true,
-  onpointercancel: true,
-  onpointerover: true,
-  onpointerout: true,
-  onpointerenter: true,
-  onpointerleave: true,
-  onselectstart: true,
-  onselectionchange: true,
-  onanimationend: true,
-  onanimationiteration: true,
-  onanimationstart: true,
-  ontransitionrun: true,
-  ontransitionstart: true,
-  ontransitionend: true,
-  ontransitioncancel: true,
-  oncopy: true,
-  oncut: true,
-  onpaste: true,
-  onbeforematch: true,
-  onafterprint: true,
-  onbeforeprint: true,
-  onbeforeunload: true,
-  onhashchange: true,
-  onlanguagechange: true,
-  onmessage: true,
-  onmessageerror: true,
-  onoffline: true,
-  ononline: true,
-  onpagehide: true,
-  onpageshow: true,
-  onpopstate: true,
-  onrejectionhandled: true,
-  onstorage: true,
-  onunhandledrejection: true,
-  onunload: true,
-  onanimationcancel: true,
-  oncompositionend: true,
-  oncompositionstart: true,
-  oncompositionupdate: true,
-  onfocusin: true,
-  onfocusout: true,
-  ongamepadconnected: true,
-  ongamepaddisconnected: true,
-  ontouchcancel: true,
-  ontouchend: true,
-  ontouchmove: true,
-  ontouchstart: true,
-
-  getAttribute: true,
-  getRootNode: true,
-  getAttributeNS: true,
-  getAttributeNames: true,
-  getAttributeNode: true,
-  getAttributeNodeNS: true,
-  getBoundingClientRect: true,
-  getClientRects: true,
-  getElementsByClassName: true,
-  getElementsByTagName: true,
-  getElementsByTagNameNS: true,
-  getBBox: true,
-  getInnerHTML: true,
-  getCTM: true,
-  getCurrentTime: true,
-  getElementById: true,
-  getEnclosureList: true,
-  getIntersectionList: true,
-  getScreenCTM: true,
-
-  querySelector: true,
-  querySelectorAll: true,
-
-  addEventListener: true,
-  removeEventListener: true,
-  checkIntersection: true,
-  checkValidity: true,
-
-  cloneNode: true,
-
-  hasAttribute: true,
-  hasAttributeNS: true,
-  hasAttributes: true,
-  closest: true,
-  dispatchEvent: true,
-
-  compareDocumentPosition: true,
-  contains: true,
-  hasChildNodes: true,
-  isDefaultNamespace: true,
-  isEqualNode: true,
-  isSameNode: true,
-  lookupNamespaceURI: true,
-  lookupPrefix: true,
-
-  click: true,
-  canPlayType: true,
-  matches: true,
-  reportValidity: true,
-  captureStream: true,
-  checkEnclosure: true,
-
-  item: true,
-  assignedElements: true,
-  assignedNodes: true,
 }
