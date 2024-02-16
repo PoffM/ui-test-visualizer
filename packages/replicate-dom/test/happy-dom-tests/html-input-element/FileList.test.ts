@@ -29,33 +29,52 @@
   SOFTWARE.
 */
 
-import Window from '../../../src/window/Window.js';
-import IWindow from '../../../src/window/Window.js';
-import IDocument from '../../../src/nodes/document/IDocument.js';
-import File from '../../../src/file/File.js';
-import IHTMLInputElement from '../../../src/nodes/html-input-element/IHTMLInputElement.js';
-import { beforeEach, afterEach, describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { File, Window } from 'happy-dom'
+import type { IDocument, IHTMLInputElement, IWindow } from 'happy-dom'
+import { addTestElement, initTestReplicaDom } from '../../test-setup'
 
-describe('FileList', () => {
-	let window: IWindow;
-	let document: IDocument;
+describe('fileList', () => {
+  let window: IWindow
+  let document: IDocument
 
-	beforeEach(() => {
-		window = new Window();
-		document = window.document;
-	});
+  let replicaWindow: IWindow
+  let replicaDocument: IDocument
 
-	describe('item()', () => {
-		it('Returns file at index.', () => {
-			const element = <IHTMLInputElement>document.createElement('input');
-			const file1 = new File([''], 'file.txt');
-			const file2 = new File([''], 'file2.txt');
+  beforeEach(() => {
+    window = new Window()
+    document = window.document
 
-			element.files.push(file1);
-			element.files.push(file2);
+    replicaWindow = new Window()
+    replicaDocument = replicaWindow.document
 
-			expect(element.files.item(0)).toBe(file1);
-			expect(element.files.item(1)).toBe(file2);
-		});
-	});
-});
+    initTestReplicaDom(window, replicaWindow)
+  })
+
+  afterEach(() => {
+    expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+  })
+
+  function testElement(type: string) {
+    return addTestElement<IHTMLInputElement>(
+      document,
+      replicaDocument,
+      type,
+      'createElement',
+    )
+  }
+
+  describe('item()', () => {
+    it('returns file at index.', () => {
+      const { primary, replica } = testElement('input')
+      const file1 = new File([''], 'file.txt')
+      const file2 = new File([''], 'file2.txt')
+
+      primary.files.push(file1)
+      primary.files.push(file2)
+
+      expect(replica.files.item(0).name).toBe('file.txt')
+      expect(replica.files.item(1).name).toBe('file2.txt')
+    })
+  })
+})

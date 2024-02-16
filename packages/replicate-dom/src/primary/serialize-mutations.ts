@@ -1,4 +1,4 @@
-import type { DomNodePath, NodeSpecialProps, SerializedDomNode } from '../types'
+import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode } from '../types'
 import { containsNode } from './contains-node-util'
 
 export function getNodePath(node: Node, root: Node, win: typeof window): DomNodePath | null {
@@ -61,7 +61,7 @@ export function serializeDomMutationArg(
   arg: string | Node | null,
   root: Node,
   win: typeof window,
-): DomNodePath | SerializedDomNode | { object: unknown } {
+): SerializedDomMutationArg {
   if (
     typeof arg === 'string'
     || typeof arg === 'number'
@@ -69,6 +69,16 @@ export function serializeDomMutationArg(
     || arg === null
   ) {
     return arg
+  }
+  if (arg instanceof Date) {
+    return ['Date', arg.getTime()]
+  }
+  if (arg instanceof win.File) {
+    return ['File', {
+      name: arg.name,
+      type: arg.type,
+      lastModified: arg.lastModified,
+    }]
   }
   // Existing nodes are referenced by their numeric path,
   // so the receiver can look them up in its DOM

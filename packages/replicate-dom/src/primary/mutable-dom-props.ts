@@ -71,13 +71,29 @@ export function MUTABLE_DOM_PROPS(
     }
   }
 
-  const htmlElementNestedMethods: NestedMethods<HTMLElement> = {
+  map.get(win.HTMLElement)!.nestedMethods = {
     style: ['setProperty'],
     classList: ['add', 'remove', 'replace', 'toggle'],
     dataset: [],
     attributes: ['setNamedItem', 'removeNamedItem'],
   }
-  map.get(win.HTMLElement)!.nestedMethods = htmlElementNestedMethods
+
+  const mutatingArrayMethods: (keyof Array<unknown>)[] = [
+    'push',
+    'shift',
+    'unshift',
+    'pop',
+    'reverse',
+    'splice',
+    'sort',
+    'copyWithin',
+    'fill',
+  ]
+  map.get(win.HTMLInputElement)!.nestedMethods = {
+    // @ts-expect-error Normally you shouldn't be able to access these on the FileList,
+    // but happy-dom treats it as an array
+    files: mutatingArrayMethods,
+  }
 
   return map
 }

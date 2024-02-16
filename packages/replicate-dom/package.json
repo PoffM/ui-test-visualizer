@@ -2,7 +2,7 @@
   "name": "replicate-dom",
   "main": "./src/index.ts",
   "scripts": {
-    "test": "vitest --run"
+    "test": "TZ=UTC vitest --run"
   },
   "dependencies": {
     "lodash": "^4.17.21",

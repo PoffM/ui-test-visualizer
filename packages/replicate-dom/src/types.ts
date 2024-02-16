@@ -2,8 +2,6 @@
 
 export type DomNodePath = (number | 'shadowRoot' | 'location')[]
 
-export type SerializedDomTextNode = string | null
-
 export type SerializedDomElement = [
   tagName: string,
   attributes: Record<string, string>,
@@ -18,6 +16,8 @@ export interface NodeSpecialProps {
     content: SerializedDomNode
   }
 }
+
+export type SerializedDomTextNode = string | null
 
 export type SerializedTextNode = ['Text', string | null]
 
@@ -38,8 +38,21 @@ export type SerializedDomNode =
   | SerializedShadowRoot
   | SerializedAttr
 
+export type SerializedDate = ['Date', number]
+export type SerializedFile = ['File', { name: string, type: string, lastModified: number }]
+
+export type SerializedDomMutationArg =
+  | DomNodePath
+  | SerializedDomNode
+  | SerializedDate
+  | SerializedFile
+  | string
+  | number
+  | boolean
+  | { object: unknown }
+
 export interface HTMLPatch {
   targetNodePath: DomNodePath
   prop: string | string[]
-  args: (DomNodePath | SerializedDomNode | { object: unknown })[]
+  args: SerializedDomMutationArg[]
 }

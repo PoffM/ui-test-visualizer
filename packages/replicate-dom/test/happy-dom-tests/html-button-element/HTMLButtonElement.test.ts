@@ -54,19 +54,19 @@ afterEach(() => {
   expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
 })
 
-describe('hTMLButtonElement', () => {
-  function testElement(type: string) {
-    return addTestElement(
-      document,
-      replicaDocument,
-      type,
-      'createElement',
-    ) as {
-      primary: IHTMLButtonElement
-      replica: IHTMLButtonElement
-    }
+function testElement(type: string) {
+  return addTestElement(
+    document,
+    replicaDocument,
+    type,
+    'createElement',
+  ) as {
+    primary: IHTMLButtonElement
+    replica: IHTMLButtonElement
   }
+}
 
+describe('hTMLButtonElement', () => {
   describe('get value()', () => {
     it(`returns the attribute "value".`, () => {
       const { primary, replica } = testElement('button')

@@ -30,7 +30,8 @@ type NodeCreateMethod = keyof {
 }
 
 export function addTestElement<
-  M extends NodeCreateMethod,
+  R = IHTMLElement,
+  M extends NodeCreateMethod = 'createElement',
 >(
   primaryDocument: IDocument,
   replicaDocument: INode,
@@ -73,7 +74,7 @@ export function addTestElement<
   }
 
   type Return =
-     M extends 'createElement' ? IHTMLElement
+     M extends 'createElement' ? unknown extends R ? IHTMLElement : R
        : M extends 'createTextNode' ? Text
          : ReturnType<IDocument[M]>
 
