@@ -52,7 +52,8 @@ describe('document', () => {
   })
 
   afterEach(() => {
-    expect(replicaDocument.body?.outerHTML).toBe(document.body?.outerHTML)
+    expect(replicaDocument.body?.outerHTML.replace(/\ type="no-execute"/gm, ''))
+      .toBe(document.body?.outerHTML)
   })
 
   for (const property of ['charset', 'characterSet']) {

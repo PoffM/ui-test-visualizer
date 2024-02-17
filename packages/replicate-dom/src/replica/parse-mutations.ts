@@ -115,7 +115,7 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, win: typeof
         // Don't execute scripts on the replica
         if (element instanceof win.HTMLScriptElement) {
           if (!element.type || element.type === 'text/javascript') {
-            element.type = 'noexecute'
+            element.type = 'no-execute'
           }
           const setAttrSpy: SpyImpl<
             [name: string, val: string],
@@ -125,7 +125,7 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, win: typeof
             'setAttribute',
             function (this: HTMLScriptElement, name, val) {
               if (name === 'type' && val === 'text/javascript') {
-                val = 'noexecute'
+                val = 'no-execute'
               }
 
               return setAttrSpy.getOriginal()!.call(this, name, val)
