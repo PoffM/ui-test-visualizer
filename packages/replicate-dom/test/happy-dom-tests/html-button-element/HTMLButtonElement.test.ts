@@ -55,15 +55,12 @@ afterEach(() => {
 })
 
 function testElement(type: string) {
-  return addTestElement(
+  return addTestElement<IHTMLButtonElement>(
     document,
     replicaDocument,
     type,
     'createElement',
-  ) as {
-    primary: IHTMLButtonElement
-    replica: IHTMLButtonElement
-  }
+  )
 }
 
 describe('hTMLButtonElement', () => {
