@@ -1,28 +1,16 @@
 import type { Document, IWindow } from 'happy-dom'
 
-export type NestedMethods<T> = {
-  [P in keyof T]?: (keyof T[P])[];
-}
 type FunctionKeys<T> = {
   [P in keyof T]: T[P] extends Function ? P : never;
 }[keyof T]
+
 /**
- * Map of Node names to their types.
- *
- * e.g.
- * ```
- * {
- *   Node: Node,
- *   Element: Element,
- *   HTMLElement: HTMLElement,
- *   HTMLButtonElement: HTMLButtonElement,
- *   ...etc...
- * }
- * ```
+ * Map of Node names to their function keys.
  */
 type NodeFunctionKeysMap = {
   [P in keyof IWindow as IWindow[P] extends IWindow['Node'] ? any extends IWindow[P] ? never : P : never]: FunctionKeys<IWindow[P]['prototype']>;
 }
+
 type ObjectKeys = 'constructor' |
   'toString' |
   'toLocaleString' |
@@ -30,6 +18,7 @@ type ObjectKeys = 'constructor' |
   'hasOwnProperty' |
   'isPrototypeOf' |
   'propertyIsEnumerable'
+
 type NodeFunctionKeys =
   (
     NodeFunctionKeysMap[keyof NodeFunctionKeysMap] |
@@ -37,6 +26,7 @@ type NodeFunctionKeys =
     FunctionKeys<Document> |
     ObjectKeys) &
     string
+
 /**
  * Methods on Node and its subclasses that don't mutate the DOM;
  * Don't replicate calls to these.

@@ -1,5 +1,4 @@
 import { uniq } from 'lodash'
-import type { NestedMethods } from './ignored-node-methods'
 import { IGNORED_NODE_METHODS } from './ignored-node-methods'
 import { SPYABLE_NODE_CLASSES } from './spyable-node-classes'
 
@@ -9,6 +8,10 @@ export interface DOMNodeSpyConfig<T> {
     prop: keyof T
     desc: PropertyDescriptor
   }[]
+}
+
+export type NestedMethods<T> = {
+  [P in keyof T]?: (keyof Exclude<T[P], null | undefined>)[];
 }
 
 export interface MutableDomDescriptorMap extends Map<unknown, unknown> {
@@ -76,6 +79,16 @@ export function MUTABLE_DOM_PROPS(
     classList: ['add', 'remove', 'replace', 'toggle'],
     dataset: [],
     attributes: ['setNamedItem', 'removeNamedItem'],
+  }
+  map.get(win.HTMLStyleElement)!.nestedMethods = {
+    sheet: [
+      'addRule',
+      'deleteRule',
+      'insertRule',
+      'removeRule',
+      'replace',
+      'replaceSync',
+    ],
   }
 
   const mutatingArrayMethods: (keyof Array<unknown>)[] = [

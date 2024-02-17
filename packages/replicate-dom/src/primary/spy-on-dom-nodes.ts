@@ -116,6 +116,10 @@ export function spyOnDomNodes(
         // @ts-expect-error asserted types here should be correct
         const nestedObj = spy.getOriginal().call(this) as T[G] & object
 
+        if (!nestedObj) {
+          return nestedObj
+        }
+
         // Wrap the nested object in a Proxy so we can listen to property changes:
         return new Proxy(nestedObj, {
           // Listen to the specified method on the nested object
