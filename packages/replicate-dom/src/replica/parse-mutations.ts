@@ -7,33 +7,40 @@ import type {
   SerializedDocumentFragment,
   SerializedDomElement,
   SerializedDomNode,
+  SerializedHTMLTemplateElement,
   SerializedShadowRoot,
   SerializedTextNode,
 } from '../types'
 
-export function getNodeByPath(root: Node, path: DomNodePath, classes: typeof window) {
+export function getNodeByPath(root: Node, path: DomNodePath, win: typeof window) {
   let currentElement: Node | Location | undefined = root
 
   for (const index of path) {
     if (
       index === 'shadowRoot'
-      && currentElement instanceof classes.Element
+      && currentElement instanceof win.Element
       && currentElement.shadowRoot
     ) {
       currentElement = currentElement.shadowRoot
     }
     else if (
+      index === 'content'
+      && currentElement instanceof win.HTMLTemplateElement
+    ) {
+      currentElement = currentElement.content
+    }
+    else if (
       index === 'location'
       && (
-        currentElement instanceof classes.Document
-        || currentElement instanceof classes.HTMLDocument
+        currentElement instanceof win.Document
+        || currentElement instanceof win.HTMLDocument
       )
     ) {
       currentElement = currentElement.location
     }
     else if (
       typeof index === 'number'
-      && currentElement instanceof classes.Node
+      && currentElement instanceof win.Node
     ) {
       // Check if the root node is Node.DOCUMENT_NODE
       const childProp = currentElement.nodeType === 9 ? 'children' : 'childNodes'
@@ -86,6 +93,19 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, win: typeof
           .map(child => parseDomNode(child, doc, win))
         frag.append(...parsedChildren)
         return frag
+      }
+      case 'HTMLTemplateElement': {
+        const [, content] = node as SerializedHTMLTemplateElement
+        const template = doc.createElement('template')
+        if (content) {
+          const fragment = parseDomNode(content, doc, win)
+          if (!(fragment instanceof win.DocumentFragment)) {
+            throw new TypeError('Expected DocumentFragment')
+          }
+
+          template.content.append(...Array.from(fragment.childNodes))
+        }
+        return template
       }
       default: {
         const [

@@ -1,6 +1,6 @@
 // Types used when syncing the DOM from a primary to a replica.
 
-export type DomNodePath = (number | 'shadowRoot' | 'location')[]
+export type DomNodePath = (number | 'shadowRoot' | 'location' | 'content')[]
 
 export type SerializedDomElement = [
   tagName: string,
@@ -27,6 +27,8 @@ export type SerializedDocumentFragment = ['DocumentFragment', SerializedDomNode[
 
 export type SerializedShadowRoot = ['ShadowRoot', SerializedDomNode[]]
 
+export type SerializedHTMLTemplateElement = ['HTMLTemplateElement', SerializedDomNode | null]
+
 export type SerializedAttr = ['Attr', name: string, value: string, namespace?: string]
 
 export type SerializedDomNode =
@@ -36,6 +38,7 @@ export type SerializedDomNode =
   | SerializedCommentNode
   | SerializedDocumentFragment
   | SerializedShadowRoot
+  | SerializedHTMLTemplateElement
   | SerializedAttr
 
 export type SerializedDate = ['Date', number]

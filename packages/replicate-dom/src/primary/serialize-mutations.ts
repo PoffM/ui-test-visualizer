@@ -1,5 +1,5 @@
 import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode } from '../types'
-import { containsNode } from './contains-node-util'
+import { containsNode, findNestedAltRoots } from './contains-node-util'
 
 export function getNodePath(node: Node, root: Node, win: typeof window): DomNodePath | null {
   const indices: DomNodePath = []
@@ -28,6 +28,21 @@ export function getNodePath(node: Node, root: Node, win: typeof window): DomNode
     if (currentNode instanceof win.ShadowRoot && currentNode.host) {
       indices.unshift('shadowRoot')
       currentNode = currentNode.host
+      continue
+    }
+
+    if (currentNode instanceof win.DocumentFragment) {
+      const altRoots = findNestedAltRoots(win.document, win)
+      const altRoot = altRoots.find(({ child }) => child === currentNode)
+      if (!altRoot) {
+        throw new Error('Can\'t find DocumentFragmen\'s parent node.')
+      }
+
+      indices.unshift('content')
+
+      const { parent } = altRoot
+      currentNode = parent
+
       continue
     }
 
@@ -120,6 +135,12 @@ function serializeDomNode(node: Node, win: typeof window): SerializedDomNode {
     return [
       'ShadowRoot',
       Array.from(node.childNodes).map(node => serializeDomNode(node, win)),
+    ]
+  }
+  if (node instanceof win.HTMLTemplateElement) {
+    return [
+      'HTMLTemplateElement',
+      node.content && serializeDomNode(node.content, win),
     ]
   }
   if (node instanceof win.Attr) {

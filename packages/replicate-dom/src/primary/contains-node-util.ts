@@ -12,9 +12,9 @@ export function containsNode(parent: Node, target: Node | Location, win: typeof 
     return true
   }
 
-  const shadowRoots = findNestedShadowRoots(parent, win)
-  for (const shadowRoot of shadowRoots) {
-    if (containsNode(shadowRoot, target, win)) {
+  const altRoots = findNestedAltRoots(parent, win)
+  for (const altRoot of altRoots) {
+    if (containsNode(altRoot.child, target, win)) {
       return true
     }
   }
@@ -22,10 +22,23 @@ export function containsNode(parent: Node, target: Node | Location, win: typeof 
   return false
 }
 
-function findNestedShadowRoots(node: Node, win: typeof window): ShadowRoot[] {
-  const shadowRoots: ShadowRoot[] = []
+export interface AltRootFound {
+  parent: Node
+  child: (ShadowRoot | DocumentFragment)
+}
+
+/**
+ * Find alternative roots for descendent nodes under a shadow DOM's 'shadowRoot'
+ * or HTMLTemplate's 'content', because these are not searched in the built-in
+ * DOM 'contains()' method.
+ */
+export function findNestedAltRoots(node: Node, win: typeof window): AltRootFound[] {
+  const roots: AltRootFound[] = []
   if (node instanceof win.Element && node.shadowRoot) {
-    shadowRoots.push(node.shadowRoot)
+    roots.push({ parent: node, child: node.shadowRoot })
+  }
+  if (node instanceof win.HTMLTemplateElement && node.content) {
+    roots.push({ parent: node, child: node.content })
   }
 
   const childNodes = node.childNodes
@@ -34,8 +47,8 @@ function findNestedShadowRoots(node: Node, win: typeof window): ShadowRoot[] {
     if (!child) {
       continue
     }
-    shadowRoots.push(...findNestedShadowRoots(child, win))
+    roots.push(...findNestedAltRoots(child, win))
   }
 
-  return shadowRoots
+  return roots
 }
