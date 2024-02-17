@@ -1,3 +1,5 @@
+import type { SpyImpl } from 'tinyspy'
+import { spyOn } from 'tinyspy'
 import type {
   DomNodePath,
   SerializedAttr,
@@ -109,6 +111,28 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, win: typeof
         for (const [name, value] of Object.entries(attributes)) {
           element.setAttribute(name, value)
         }
+
+        // Don't execute scripts on the replica
+        if (element instanceof win.HTMLScriptElement) {
+          if (!element.type || element.type === 'text/javascript') {
+            element.type = 'noexecute'
+          }
+          const setAttrSpy: SpyImpl<
+            [name: string, val: string],
+            void
+          > = spyOn(
+            element,
+            'setAttribute',
+            function (this: HTMLScriptElement, name, val) {
+              if (name === 'type' && val === 'text/javascript') {
+                val = 'noexecute'
+              }
+
+              return setAttrSpy.getOriginal()!.call(this, name, val)
+            },
+          )
+        }
+
         const parsedChildren = children.map(child => parseDomNode(child, doc, win))
         element.append(...parsedChildren)
         return element
