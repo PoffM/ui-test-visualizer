@@ -17,7 +17,7 @@ export function spyOnDomNodes(
   win: typeof window,
   root: Node,
   callback: MutationCallback,
-) {
+): void {
   // Don't recursively call the callback
   let spyDepth = 0
   function trackSpyDepth<A extends any[], R>(fn: (...args: A) => R) {

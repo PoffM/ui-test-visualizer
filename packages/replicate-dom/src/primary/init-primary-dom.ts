@@ -8,7 +8,7 @@ export interface PrimaryDomConfig {
   onMutation: (patch: HTMLPatch) => void
 }
 
-export function initPrimaryDom(cfg: PrimaryDomConfig) {
+export function initPrimaryDom(cfg: PrimaryDomConfig): void {
   spyOnDomNodes(
     cfg.win,
     cfg.root,

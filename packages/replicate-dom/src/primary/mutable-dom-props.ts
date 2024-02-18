@@ -11,8 +11,19 @@ export interface DOMNodeSpyConfig<T> {
 }
 
 export type NestedMethods<T> = {
-  [P in keyof T]?: (keyof Exclude<T[P], null | undefined>)[];
+  [P in keyof T]?: MethodKeys<T[P]>[];
 }
+
+type ExtractMethods<T> = {
+  [
+  P in keyof T
+  as T[P] extends ((...args: any[]) => any)
+    ? P
+    : never
+  ]: T[P]
+}
+
+type MethodKeys<T> = keyof ExtractMethods<Exclude<T, null | undefined>>
 
 export interface MutableDomDescriptorMap extends Map<unknown, unknown> {
   get: <E extends Node>(key: new () => E) => DOMNodeSpyConfig<E> | undefined
@@ -74,11 +85,17 @@ export function MUTABLE_DOM_PROPS(
     }
   }
 
-  map.get(win.HTMLElement)!.nestedMethods = {
-    style: ['setProperty'],
+  map.get(win.Element)!.nestedMethods = {
     classList: ['add', 'remove', 'replace', 'toggle'],
+    attributes: ['setNamedItem', 'setNamedItemNS', 'removeNamedItem', 'removeNamedItemNS'],
+  }
+  map.get(win.HTMLElement)!.nestedMethods = {
+    style: ['setProperty', 'removeProperty'],
     dataset: [],
-    attributes: ['setNamedItem', 'removeNamedItem'],
+  }
+  map.get(win.SVGElement)!.nestedMethods = {
+    style: ['setProperty', 'removeProperty'],
+    dataset: [],
   }
   map.get(win.HTMLStyleElement)!.nestedMethods = {
     sheet: [

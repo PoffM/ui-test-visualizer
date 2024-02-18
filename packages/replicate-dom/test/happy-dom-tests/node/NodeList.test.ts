@@ -29,27 +29,43 @@
   SOFTWARE.
 */
 
-import Window from '../../../src/window/Window.js';
-import Document from '../../../src/nodes/document/Document.js';
-import { beforeEach, describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { Window } from 'happy-dom'
+import type { IDocument, IWindow } from 'happy-dom'
+import { initTestReplicaDom } from '../../test-setup'
 
-describe('NodeList', () => {
-	let window: Window;
-	let document: Document;
+let window: IWindow
+let document: IDocument
 
-	beforeEach(() => {
-		window = new Window();
-		document = window.document;
-	});
+let replicaWindow: IWindow
+let replicaDocument: IDocument
 
-	describe('item()', () => {
-		it('Returns node at index.', () => {
-			const text = document.createTextNode('test');
-			const comment = document.createComment('test');
-			document.body.appendChild(text);
-			document.body.appendChild(comment);
-			expect(document.body.childNodes.item(0) === text).toBe(true);
-			expect(document.body.childNodes.item(1) === comment).toBe(true);
-		});
-	});
-});
+beforeEach(() => {
+  window = new Window()
+  document = window.document
+
+  replicaWindow = new Window()
+  replicaDocument = replicaWindow.document
+
+  initTestReplicaDom(window, replicaWindow)
+})
+
+afterEach(() => {
+  expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+})
+
+describe('nodeList', () => {
+  describe('item()', () => {
+    it('returns node at index.', () => {
+      const text = document.createTextNode('test')
+      const comment = document.createComment('test')
+      document.body.appendChild(text)
+      document.body.appendChild(comment)
+      expect(document.body.childNodes.item(0) === text).toBe(true)
+      expect(document.body.childNodes.item(1) === comment).toBe(true)
+
+      expect(replicaDocument.body.childNodes.item(0).nodeType).toBe(text.nodeType)
+      expect(replicaDocument.body.childNodes.item(1).nodeType).toBe(comment.nodeType)
+    })
+  })
+})
