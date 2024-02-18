@@ -4,7 +4,7 @@
   "scripts": {
     "build:extension": "tsup --minify",
     "build:vite": "vite build ./src/web-view-vite",
-    "dev:extension": "tsup --watch --sourcemap",
+    "dev:extension": "tsup --watch . --watch ../replicate-dom --sourcemap",
     "dev:vite": "vite ./src/web-view-vite",
     "test": "vitest --run"
   },
