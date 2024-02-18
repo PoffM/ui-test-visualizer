@@ -145,39 +145,37 @@ describe('document', () => {
       expect(replicaDocument.cookie).toBe('name=value2; name')
     })
 
-    // TODO handle the parent window?
+    it('sets a cookie with a domain.', () => {
+      window.location.href = 'https://test.com'
+      document.cookie = 'name=value1; domain=test.com'
+      expect(replicaDocument.cookie).toBe('name=value1')
+    })
 
-    // it('sets a cookie with a domain.', () => {
-    //   window.location.href = 'https://test.com'
-    //   document.cookie = 'name=value1; domain=test.com'
-    //   expect(replicaDocument.cookie).toBe('name=value1')
-    // })
+    it('sets a cookie with an invalid domain.', () => {
+      window.location.href = 'https://test.com'
+      document.cookie = 'name=value1; domain=invalid.com'
+      expect(replicaDocument.cookie).toBe('')
+    })
 
-    // it('sets a cookie with an invalid domain.', () => {
-    //   window.location.href = 'https://test.com'
-    //   document.cookie = 'name=value1; domain=invalid.com'
-    //   expect(replicaDocument.cookie).toBe('')
-    // })
+    it('sets a cookie on a top-domain from a sub-domain.', () => {
+      window.location.href = 'https://sub.test.com'
+      document.cookie = 'name=value1; domain=test.com'
+      expect(replicaDocument.cookie).toBe('name=value1')
+    })
 
-    // it('sets a cookie on a top-domain from a sub-domain.', () => {
-    //   window.location.href = 'https://sub.test.com'
-    //   document.cookie = 'name=value1; domain=test.com'
-    //   expect(replicaDocument.cookie).toBe('name=value1')
-    // })
+    it('sets a cookie with a path.', () => {
+      window.location.href = 'https://sub.test.com/path/to/cookie/'
+      document.cookie = 'name1=value1; path=path/to'
+      document.cookie = 'name2=value2; path=/path/to'
+      document.cookie = 'name3=value3; path=/path/to/cookie/'
+      expect(replicaDocument.cookie).toBe('name1=value1; name2=value2; name3=value3')
+    })
 
-    // it('sets a cookie with a path.', () => {
-    //   window.location.href = 'https://sub.test.com/path/to/cookie/'
-    //   document.cookie = 'name1=value1; path=path/to'
-    //   document.cookie = 'name2=value2; path=/path/to'
-    //   document.cookie = 'name3=value3; path=/path/to/cookie/'
-    //   expect(replicaDocument.cookie).toBe('name1=value1; name2=value2; name3=value3')
-    // })
-
-    // it('does not set cookie if the path does not match the current path.', () => {
-    //   window.location.href = 'https://sub.test.com/path/to/cookie/'
-    //   document.cookie = 'name1=value1; path=/cookie/'
-    //   expect(replicaDocument.cookie).toBe('')
-    // })
+    it('does not set cookie if the path does not match the current path.', () => {
+      window.location.href = 'https://sub.test.com/path/to/cookie/'
+      document.cookie = 'name1=value1; path=/cookie/'
+      expect(replicaDocument.cookie).toBe('')
+    })
 
     it('sets a cookie if it expires is in the future.', () => {
       const date = new Date()
