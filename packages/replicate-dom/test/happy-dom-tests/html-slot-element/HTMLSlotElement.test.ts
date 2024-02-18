@@ -107,7 +107,6 @@ describe('hTMLSlotElement', () => {
   describe('assign()', () => {
     it('sets the slot\'s manually assigned nodes to an ordered set of slottables.', () => {
       const slot = <IHTMLSlotElement>customElementWithSlot.shadowRoot!.querySelector('slot')
-      // TODO: Do nothing for now. We need to find an example of how it is expected to work before it can be implemented.
 
       expect(slot.assign()).toBe(undefined)
     })

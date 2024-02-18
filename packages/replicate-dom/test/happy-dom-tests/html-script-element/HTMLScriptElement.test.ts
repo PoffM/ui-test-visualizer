@@ -226,8 +226,6 @@ describe('hTMLScriptElement', () => {
       expect(window.test).toBe('test')
       // @ts-expect-error property should exist
       expect(window.currentScript.id).toBe('my-script')
-
-      // TODO anything else that should be tested against the replica?
     })
 
     it('loads external script asynchronously.', async () => {
@@ -402,7 +400,6 @@ describe('hTMLScriptElement', () => {
       const domParser = new window.DOMParser()
       domParser.parseFromString('<script>globalThis.test = "test";</script>', 'text/html')
 
-      // TODO anything else that should be tested against the replica?
       // @ts-expect-error property should exist
       expect(window.test).toBe('test')
     })

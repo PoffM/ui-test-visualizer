@@ -116,12 +116,11 @@ describe('hTMLAnchorElement', () => {
       expect(replica.href).toBe('tel:+123456789')
     })
 
-    // TODO is this ever needed for replicate-dom?
-    // it('returns the "href" attribute when scheme-relative', () => {
-    //   const { primary, replica } = testElement('a')
-    //   primary.setAttribute('href', '//example.com')
-    //   expect(replica.href).toBe('https://example.com/')
-    // })
+    it('returns the "href" attribute when scheme-relative', () => {
+      const { primary, replica } = testElement('a')
+      primary.setAttribute('href', '//example.com')
+      expect(replica.href).toBe('https://example.com/')
+    })
 
     it('returns empty string if "href" attribute is empty.', () => {
       const { replica } = testElement('a')
@@ -130,12 +129,11 @@ describe('hTMLAnchorElement', () => {
   })
 
   describe('toString()', () => {
-    // TODO is this ever needed for replicate-dom?
-    // it('returns the "href" attribute.', () => {
-    //   const { primary, replica } = testElement('a')
-    //   primary.setAttribute('href', 'test')
-    //   expect(replica.toString()).toBe('https://www.somesite.com/test')
-    // })
+    it('returns the "href" attribute.', () => {
+      const { primary, replica } = testElement('a')
+      primary.setAttribute('href', 'test')
+      expect(replica.toString()).toBe('https://www.somesite.com/test')
+    })
 
     it('returns the "href" attribute when scheme is http.', () => {
       const { primary, replica } = testElement('a')
@@ -149,12 +147,11 @@ describe('hTMLAnchorElement', () => {
       expect(replica.toString()).toBe('tel:+123456789')
     })
 
-    // TODO is this ever needed for replicate-dom?
-    // it('returns the "href" attribute when scheme-relative', () => {
-    //   const { primary, replica } = testElement('a')
-    //   primary.setAttribute('href', '//example.com')
-    //   expect(replica.toString()).toBe('https://example.com/')
-    // })
+    it('returns the "href" attribute when scheme-relative', () => {
+      const { primary, replica } = testElement('a')
+      primary.setAttribute('href', '//example.com')
+      expect(replica.toString()).toBe('https://example.com/')
+    })
 
     it('returns empty string if "href" attribute is empty.', () => {
       const { replica } = testElement('a')
@@ -191,12 +188,11 @@ describe('hTMLAnchorElement', () => {
       expect(replica.origin).toBe('http://www.example.com:8080')
     })
 
-    // TODO is this ever needed for replicate-dom?
-    // it('returns the page\'s origin when href is relative.', () => {
-    //   const { primary, replica } = testElement('a')
-    //   primary.setAttribute('href', '/path?q1=a#xyz')
-    //   expect(replica.origin).toBe('https://www.somesite.com')
-    // })
+    it('returns the page\'s origin when href is relative.', () => {
+      const { primary, replica } = testElement('a')
+      primary.setAttribute('href', '/path?q1=a#xyz')
+      expect(replica.origin).toBe('https://www.somesite.com')
+    })
   })
 
   describe('get protocol()', () => {
