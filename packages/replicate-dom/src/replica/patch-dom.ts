@@ -1,4 +1,4 @@
-import { castArray } from 'lodash'
+import castArray from 'lodash/castArray'
 import type { DomNodePath, HTMLPatch, SerializedDomMutationArg, SerializedDomNode } from '../types'
 import { getPropertyDescriptor } from '../property-util'
 import { getNodeByPath, parseDomNode } from './parse-mutations'

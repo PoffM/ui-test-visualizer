@@ -1,4 +1,4 @@
-import { castArray } from 'lodash'
+import castArray from 'lodash/castArray'
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
 import { getPropertyDescriptor } from '../property-util'
