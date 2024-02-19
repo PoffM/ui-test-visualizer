@@ -18,6 +18,16 @@ webviewToolkit
 export function App() {
   const [firstPatchReceived, setFirstPatchReceived] = createSignal(false)
 
+  const inspectorServerPort = (() => {
+    const port = Reflect.get(globalThis, 'inspectorServerPort')
+    if (typeof port !== 'number') {
+      console.warn(`Invalid inspectorServerPort value in the WebView: ${port}`)
+    }
+    return port
+  })()
+
+  console.log('inspectorServerPort:', inspectorServerPort)
+
   const controls = document.createElement('div')
 
   async function initShadow(host: HTMLDivElement) {
@@ -54,17 +64,22 @@ export function App() {
     )
 
     makeEventListener(window, 'message', (event) => {
-      setFirstPatchReceived(true)
-      applyDomPatch(
-        shadow,
-        (event.data.htmlPatch as HTMLPatch),
-        window,
-      )
+      const { htmlPatch } = event.data
+
+      if (htmlPatch) {
+        setFirstPatchReceived(true)
+        applyDomPatch(
+          shadow,
+          (event.data.htmlPatch as HTMLPatch),
+          window,
+        )
+      }
     })
   }
 
   return (
-    <div class="fixed inset-0 pt-[30px]">
+    <div class="fixed inset-0">
+      <div class="h-[30px]"></div>
       <div class="relative h-full w-full">
         <div
           style={{ visibility: firstPatchReceived() ? 'hidden' : 'visible' }}
@@ -76,7 +91,7 @@ export function App() {
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
           class="absolute h-full w-full"
         >
-          <div ref={initShadow} class="h-full w-full" />
+          <div class="h-full w-full" ref={initShadow} />
         </div>
       </div>
       <div class="fixed bottom-0 p-4 flex flex-col justify-end">{controls}</div>

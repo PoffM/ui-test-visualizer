@@ -118,7 +118,7 @@ export function serializeDomMutationArg(
   throw new Error(`Unknown node type: ${JSON.stringify(arg)}`)
 }
 
-function serializeDomNode(node: Node, win: typeof window): SerializedDomNode {
+export function serializeDomNode(node: Node, win: typeof window): SerializedDomNode {
   if (node instanceof win.Text) {
     return ['Text', node.data]
   }

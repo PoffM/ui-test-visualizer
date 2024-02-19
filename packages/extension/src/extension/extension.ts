@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import getPort from 'get-port'
 import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
 import { vitestDebugConfig } from './framework-support/vitest-support'
@@ -21,7 +22,9 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
       await editor.document.save()
 
-      const panelController = await startPanelController()
+      const inspectorServerPort = await getPort()
+
+      const panelController = await startPanelController({ inspectorServerPort })
 
       const dispose1 = vscode.debug.onDidStartDebugSession((currentSession) => {
         panelController.openPanel(extensionContext)
@@ -53,6 +56,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
         TEST_FRAMEWORK: fwInfo.framework,
         TEST_FILE_PATH: filePath,
         HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
+        TEST_INSPECTOR_SERVER_PORT: inspectorServerPort,
         TEST_CSS_FILES: JSON.stringify(
           extensionSetting('visual-ui-test-debugger.cssFiles'),
         ),

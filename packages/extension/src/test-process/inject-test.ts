@@ -1,9 +1,10 @@
 // Inject this code into the test process
 
 import { error as logError } from 'node:console'
+import { Worker } from 'node:worker_threads'
 import { findUpSync } from 'find-up'
 import { createSyncFn } from 'synckit'
-import { initPrimaryDom } from 'replicate-dom'
+import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
@@ -23,7 +24,7 @@ async function preTest() {
       client.addEventListener('open', () => res())
     })
 
-    let testWindow: Window = globalThis.window
+    let testWindow: typeof window = globalThis.window
 
     function initDom() {
       initPrimaryDom({
@@ -40,7 +41,7 @@ async function preTest() {
       get() {
         return testWindow
       },
-      set(newWindow: Window) {
+      set(newWindow: typeof window) {
         if (newWindow !== testWindow) {
           testWindow = newWindow
           initDom()
@@ -52,6 +53,21 @@ async function preTest() {
     if (testWindow) {
       initDom()
     }
+
+    // Launch the inspector worker, so the panel can fetch data from the debugged test process.
+    const inspectorWorker = new Worker(
+      require.resolve('./inspector-worker'),
+      { env: process.env },
+    )
+    process.on('exit', () => inspectorWorker.terminate())
+
+    Reflect.set(
+      globalThis,
+      '__serializeDocument',
+      function serializeWindow() {
+        return serializeDomNode(testWindow.document, testWindow)
+      },
+    )
   }
   catch (error) {
     logError(error)

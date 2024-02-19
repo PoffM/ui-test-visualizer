@@ -13,6 +13,7 @@
     "noEmit": true,
     "sourceMap": true,
     "esModuleInterop": true,
+    "preserveSymlinks": true,
     "skipLibCheck": true
   },
   "include": ["./**/*.ts"],

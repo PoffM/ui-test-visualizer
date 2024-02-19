@@ -1,6 +1,6 @@
 import type { HTMLPatch } from '../types'
 import { spyOnDomNodes } from './spy-on-dom-nodes'
-import { getNodePath, serializeDomMutationArg } from './serialize-mutations'
+import { getNodePath, serializeDomMutationArg } from './serialize'
 
 export interface PrimaryDomConfig {
   root: Node
