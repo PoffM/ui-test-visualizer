@@ -1,4 +1,4 @@
-import { createEffect, from } from 'solid-js'
+import { createEffect, createSignal } from 'solid-js'
 
 export type Theme = 'dark' | 'light' | 'system'
 
@@ -11,7 +11,7 @@ export type Theme = 'dark' | 'light' | 'system'
  * Saves the last selected theme in local storage.
  */
 export function createColorTheme(
-  root: HTMLHtmlElement,
+  root: () => HTMLHtmlElement | undefined,
 ): [() => Theme, () => void] {
   const storedTheme
     = localStorage.getItem('visual-ui-test-debugger.theme') === 'dark'
@@ -24,9 +24,24 @@ export function createColorTheme(
       ? 'dark'
       : 'light')
 
-  root.dataset.theme ||= initialTheme
+  const [theme, setTheme] = createSignal<'dark' | 'light'>(
+    initialTheme,
+  )
 
-  const theme = from<Theme>((set) => {
+  createEffect(() => {
+    const _root = root()
+    if (!_root) {
+      return
+    }
+    _root.dataset.theme ||= theme()
+  })
+
+  createEffect(() => {
+    const _root = root()
+    if (!_root) {
+      return
+    }
+
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations.filter(
         it => it.attributeName === 'data-theme',
@@ -34,25 +49,22 @@ export function createColorTheme(
         const target = mutation.target as HTMLElement
         const newTheme: Theme
           = target.dataset.theme === 'dark' ? 'dark' : 'light'
-        set(newTheme)
+        setTheme(newTheme)
       }
     })
-    observer.observe(root, {
+    observer.observe(_root, {
       attributes: true,
       attributeFilter: ['data-theme'],
     })
-
-    set(root.dataset.theme === 'dark' ? 'dark' : 'light')
-
     return () => observer.disconnect()
   })
 
   createEffect(() => {
     const _theme = theme()
     if (_theme) {
-      if (!root.classList.contains(_theme)) {
-        root.classList.remove('dark', 'light')
-        root.classList.add(_theme)
+      if (!root()?.classList.contains(_theme)) {
+        root()?.classList.remove('dark', 'light')
+        root()?.classList.add(_theme)
       }
 
       localStorage.setItem('visual-ui-test-debugger.theme', _theme)
@@ -60,9 +72,12 @@ export function createColorTheme(
   })
 
   return [
-    () => theme() ?? initialTheme,
-    () =>
-      void (root.dataset.theme
-        = root.dataset.theme === 'dark' ? 'light' : 'dark'),
+    () => theme(),
+    () => {
+      const _root = root()
+      if (_root) {
+        _root.dataset.theme = _root.dataset.theme === 'dark' ? 'light' : 'dark'
+      }
+    },
   ]
 }

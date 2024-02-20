@@ -4,7 +4,8 @@ import { Moon, Sun } from 'lucide-solid'
 import { createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
 import type { HTMLPatch } from 'replicate-dom'
-import { applyDomPatch } from 'replicate-dom'
+import { applyDomPatch, parseDomNode } from 'replicate-dom'
+import uniqueId from 'lodash/uniqueId'
 import shadowCSSText from './assets/shadow.css?raw'
 import { createColorTheme } from './lib/color-theme'
 import { vscode } from './lib/vscode'
@@ -21,28 +22,75 @@ webviewToolkit
 export function App() {
   const [firstPatchReceived, setFirstPatchReceived] = createSignal(false)
 
+  const [htmlEl, setHtmlEl] = createSignal<HTMLHtmlElement>()
+
   const controls = document.createElement('div')
 
-  async function initShadow(host: HTMLDivElement) {
-    const shadow = host.attachShadow({ mode: 'open' })
-    shadow.appendChild(
-      new DOMParser().parseFromString(
-        `<html style="height: 100%; overflow-y: scroll;"><head></head><body></body></html>`,
-        'text/html',
-      ).children[0]!,
-    )
+  function initShadowContent(shadow: DocumentFragment, content: Node) {
+    shadow.replaceChildren(content)
+    const htmlEl = shadow.querySelector('html')!
+    htmlEl.style.height = '100%'
+    htmlEl.style.overflowY = 'scroll'
+    setHtmlEl(htmlEl)
 
     const shadowStyle = document.createElement('style')
     shadowStyle.textContent = shadowCSSText
     shadow.children[0]!.children[0]!.appendChild(shadowStyle)
+  }
+
+  async function initShadow(host: HTMLDivElement) {
+    const shadow = host.attachShadow({ mode: 'open' })
+    initShadowContent(
+      shadow,
+      new DOMParser().parseFromString(
+        `<html><head></head><body></body></html>`,
+        'text/html',
+      ).children[0]!,
+    )
 
     const [theme, toggleTheme] = createColorTheme(
-      shadow.children[0] as HTMLHtmlElement,
+      htmlEl,
     )
+
+    async function refreshShadow() {
+      const token = uniqueId()
+
+      vscode.postMessage({ cmd: 'refresh', token })
+
+      const newHtml = await new Promise<string>((resolve) => {
+        const dispose = makeEventListener(window, 'message', (event) => {
+          if (event.data.token === token) {
+            dispose()
+            resolve(event.data.html)
+          }
+        })
+      })
+
+      const parsed = parseDomNode(
+        JSON.parse(JSON.parse(newHtml)),
+        document,
+        window,
+      )
+
+      // Show a blank for a split second to show that the refresh is happening
+      shadow.querySelector('html body')?.remove()
+      await new Promise(res => setTimeout(res, 40))
+      // Then insert the refreshed content
+      initShadowContent(shadow, parsed)
+    }
 
     render(
       () => (
-        <div class="flex ">
+        <div
+          class="flex gap-2 p-2"
+          style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
+        >
+          <vscode-button
+            appearance="secondary"
+            onClick={refreshShadow}
+          >
+            Refresh
+          </vscode-button>
           <vscode-button
             class="h-10 w-10"
             appearance="secondary"
@@ -70,20 +118,9 @@ export function App() {
     })
   }
 
-  function refreshHtml() {
-    vscode.postMessage('refresh')
-  }
-
   return (
     <div class="fixed inset-0">
-      <div class="h-[30px]">
-        <vscode-button
-          appearance="secondary"
-          onClick={refreshHtml}
-        >
-          Refresh
-        </vscode-button>
-      </div>
+      {controls}
       <div class="relative h-full w-full">
         <div
           style={{ visibility: firstPatchReceived() ? 'hidden' : 'visible' }}
@@ -98,7 +135,6 @@ export function App() {
           <div class="h-full w-full" ref={initShadow} />
         </div>
       </div>
-      <div class="fixed bottom-0 p-4 flex flex-col justify-end">{controls}</div>
     </div>
   )
 }

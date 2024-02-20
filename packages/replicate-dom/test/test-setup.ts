@@ -2,7 +2,7 @@ import { DocumentFragment } from 'happy-dom'
 import type { IDocument, IHTMLElement, INode, IWindow } from 'happy-dom'
 import { applyDomPatch, initPrimaryDom } from '../src'
 import { getNodePath } from '../src/primary/serialize'
-import { getNodeByPath } from '../src/replica/parse-mutations'
+import { getNodeByPath } from '../src/replica/parse'
 
 export function initTestReplicaDom(
   primaryWindow: IWindow | Window,
