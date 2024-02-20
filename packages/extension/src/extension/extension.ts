@@ -5,11 +5,7 @@ import { vitestDebugConfig } from './framework-support/vitest-support'
 import { codeLensProvider } from './code-lens-provider'
 import { startPanelController } from './panel-controller'
 import { extensionSetting } from './extension-setting'
-
-interface EvalResult {
-  type: string
-  result: string
-}
+import { startPanelCommandHandler } from './panel-command-handler'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -35,45 +31,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
         const { panel } = await panelController.openPanel(extensionContext)
 
-        panel.webview.onDidReceiveMessage(async (e) => {
-          if (e === 'refresh') {
-            const uiSession = await getUiTestSession()
-            if (!uiSession) {
-              throw new Error('Could not find UI test session')
-            }
-
-            const serializedHtml: EvalResult = await uiSession.customRequest(
-              'evaluate',
-              {
-                expression: 'globalThis.__serializeHtml()',
-                context: 'repl',
-              },
-            )
-
-            console.log(serializedHtml)
-          }
-        })
-
-        const sessions = [rootSession]
-
-        const onChangeActive = vscode.debug.onDidChangeActiveDebugSession((newSession) => {
-          if (newSession && isChildSession(newSession, rootSession)) {
-            sessions.push(newSession)
-          }
-        })
-
-        async function getUiTestSession() {
-          const bps = vscode.debug.breakpoints
-          for (const session of sessions) {
-            for (const bp of bps) {
-              const dbp = await session.getDebugProtocolBreakpoint(bp)
-              if (dbp && Reflect.get(dbp, 'verified') === true) {
-                return session
-              }
-            }
-          }
-          return null
-        }
+        const panelCommandHandler = startPanelCommandHandler(panel, rootSession)
 
         const onTerminate = vscode.debug.onDidTerminateDebugSession(
           (endedSession) => {
@@ -83,7 +41,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
             panelController.dispose()
             onTerminate.dispose()
-            onChangeActive.dispose()
+            panelCommandHandler.dispose()
           },
         )
       })
@@ -130,13 +88,3 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
-function isChildSession(child: vscode.DebugSession, parent: vscode.DebugSession) {
-  if (!child.parentSession) {
-    return false
-  }
-  if (child.parentSession?.id === parent.id) {
-    return true
-  }
-  return isChildSession(child.parentSession, parent)
-}
