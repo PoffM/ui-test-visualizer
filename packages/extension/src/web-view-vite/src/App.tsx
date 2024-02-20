@@ -70,12 +70,16 @@ export function App() {
     })
   }
 
+  function refreshHtml() {
+    vscode.postMessage('refresh')
+  }
+
   return (
     <div class="fixed inset-0">
       <div class="h-[30px]">
         <vscode-button
           appearance="secondary"
-          onClick={() => vscode.postMessage('refresh')}
+          onClick={refreshHtml}
         >
           Refresh
         </vscode-button>

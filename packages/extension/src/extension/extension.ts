@@ -3,9 +3,8 @@ import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
 import { vitestDebugConfig } from './framework-support/vitest-support'
 import { codeLensProvider } from './code-lens-provider'
-import { startPanelController } from './panel-controller'
+import { startPanelController } from './panel-controller/panel-controller'
 import { extensionSetting } from './extension-setting'
-import { startPanelCommandHandler } from './panel-command-handler'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -26,22 +25,19 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
       const panelController = await startPanelController()
 
-      const onStartDebug = vscode.debug.onDidStartDebugSession(async (rootSession) => {
+      const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
         onStartDebug.dispose()
 
-        const { panel } = await panelController.openPanel(extensionContext)
-
-        const panelCommandHandler = startPanelCommandHandler(panel, rootSession)
+        await panelController.openPanel(extensionContext, currentSession)
 
         const onTerminate = vscode.debug.onDidTerminateDebugSession(
           (endedSession) => {
-            if (rootSession !== endedSession) {
+            if (currentSession !== endedSession) {
               return
             }
 
             panelController.dispose()
             onTerminate.dispose()
-            panelCommandHandler.dispose()
           },
         )
       })

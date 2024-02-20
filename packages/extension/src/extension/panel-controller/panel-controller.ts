@@ -3,16 +3,18 @@ import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
+import { startPanelCommandHandler } from './panel-command-handler'
 
 // Avoids import errors when importing in Vitest
 // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
+const Server = require('../../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
 export async function startPanelController() {
   const htmlUpdaterPort = await getPort()
   const viteDevServerPort = 5173
 
   let panel: vscode.WebviewPanel | undefined
+  let panelCommandHandler: ReturnType<typeof startPanelCommandHandler> | undefined
 
   // Listen for html updates from the test worker process
   const htmlUpdaterServer = new Server({ port: htmlUpdaterPort })
@@ -29,7 +31,10 @@ export async function startPanelController() {
 
   return {
     htmlUpdaterPort,
-    async openPanel(extensionContext: vscode.ExtensionContext) {
+    async openPanel(
+      extensionContext: vscode.ExtensionContext,
+      rootSession: vscode.DebugSession,
+    ) {
       // Create the webview panel
       panel = vscode.window.createWebviewPanel(
         'visualTest',
@@ -95,11 +100,14 @@ export async function startPanelController() {
 
       panel.webview.html = html
 
+      panelCommandHandler = startPanelCommandHandler(panel, rootSession)
+
       return { panel }
     },
     dispose() {
       htmlUpdaterServer.close()
       panel?.dispose()
+      panelCommandHandler?.dispose()
     },
   }
 }

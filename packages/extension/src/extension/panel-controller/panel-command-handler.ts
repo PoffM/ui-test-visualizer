@@ -5,7 +5,10 @@ interface EvalResult {
   result: string
 }
 
-export function startPanelCommandHandler(panel: vscode.WebviewPanel, rootSession: vscode.DebugSession) {
+export function startPanelCommandHandler(
+  panel: vscode.WebviewPanel,
+  rootSession: vscode.DebugSession,
+) {
   const onPanelMessage = panel.webview.onDidReceiveMessage(async (e) => {
     if (e === 'refresh') {
       const uiSession = await getUiTestSession()
@@ -39,6 +42,7 @@ export function startPanelCommandHandler(panel: vscode.WebviewPanel, rootSession
       for (const bp of bps) {
         const dbp = await session.getDebugProtocolBreakpoint(bp)
         if (dbp && Reflect.get(dbp, 'verified') === true) {
+          console.log('ui session', session)
           return session
         }
       }
