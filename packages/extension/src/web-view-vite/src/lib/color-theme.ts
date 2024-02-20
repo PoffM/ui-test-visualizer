@@ -5,14 +5,17 @@ export type Theme = 'dark' | 'light' | 'system'
 /**
  * Creates a color theme signal.
  *
- * Stores the theme in the `<html>` root node's "data-theme" and "class" attributes:
- * e.g. `<html data-theme="dark" class="dark">`.
+ * The source of truth is the `data-theme` attribute on the root `<html>` element.
+ * If there is none, it defaults to the the last selected theme in local storage, or the system preference.
  *
- * Saves the last selected theme in local storage.
+ * Copies the theme into the `<html>` element's class list.
+ *
+ *  e.g. `<html data-theme="dark" class="dark">`.
  */
 export function createColorTheme(
   root: () => HTMLElement | undefined,
 ): [() => Theme | undefined, () => void] {
+  // Get the theme from the `data-theme` attribute on the `<html>` element.
   const theme = from<Theme>((set) => {
     createEffect(() => {
       const _root = root()
