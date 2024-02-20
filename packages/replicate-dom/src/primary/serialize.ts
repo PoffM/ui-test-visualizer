@@ -188,13 +188,3 @@ export function serializeDomNode(node: Node, win: typeof window): SerializedDomN
 }
 
 const DEFAULT_NS = 'http://www.w3.org/1999/xhtml'
-
-
-// import { GlobalWindow } from "happy-dom";
-
-// const w = new GlobalWindow()
-
-// const ser = serializeDomNode(w.document.documentElement, w)
-
-// console.log(ser);
-

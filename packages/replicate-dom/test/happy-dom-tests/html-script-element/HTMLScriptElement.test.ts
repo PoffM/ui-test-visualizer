@@ -55,10 +55,6 @@ describe('hTMLScriptElement', () => {
   })
 
   afterEach(() => {
-    if (replicaDocument.body.outerHTML.replace(/\ type="no-execute"/gm, '') !== document.body.outerHTML.replace(/\ type="no-execute"/gm, '')) {
-      console.log('diff')
-    }
-
     expect(replicaDocument.body.outerHTML.replace(/\ type="no-execute"/gm, ''))
       .toBe(document.body.outerHTML)
   })
