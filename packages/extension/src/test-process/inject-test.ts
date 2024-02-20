@@ -1,7 +1,6 @@
 // Inject this code into the test process
 
 import { error as logError } from 'node:console'
-import { Worker } from 'node:worker_threads'
 import { findUpSync } from 'find-up'
 import { createSyncFn } from 'synckit'
 import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
@@ -54,18 +53,13 @@ async function preTest() {
       initDom()
     }
 
-    // Launch the inspector worker, so the panel can fetch data from the debugged test process.
-    const inspectorWorker = new Worker(
-      require.resolve('./inspector-worker'),
-      { env: process.env },
-    )
-    process.on('exit', () => inspectorWorker.terminate())
-
     Reflect.set(
       globalThis,
-      '__serializeDocument',
-      function serializeWindow() {
-        return serializeDomNode(testWindow.document, testWindow)
+      '__serializeHtml',
+      function serializeHtml() {
+        return JSON.stringify(
+          serializeDomNode(testWindow.document.documentElement, testWindow),
+        )
       },
     )
   }

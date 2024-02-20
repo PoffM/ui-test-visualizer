@@ -7,6 +7,9 @@ import type { HTMLPatch } from 'replicate-dom'
 import { applyDomPatch } from 'replicate-dom'
 import shadowCSSText from './assets/shadow.css?raw'
 import { createColorTheme } from './lib/color-theme'
+import { vscode } from './lib/vscode'
+
+// Importing the router type from the server file
 
 // In order to use the Webview UI Toolkit web components they
 // must be registered with the browser (i.e. webview) using the
@@ -17,16 +20,6 @@ webviewToolkit
 
 export function App() {
   const [firstPatchReceived, setFirstPatchReceived] = createSignal(false)
-
-  const inspectorServerPort = (() => {
-    const port = Reflect.get(globalThis, 'inspectorServerPort')
-    if (typeof port !== 'number') {
-      console.warn(`Invalid inspectorServerPort value in the WebView: ${port}`)
-    }
-    return port
-  })()
-
-  console.log('inspectorServerPort:', inspectorServerPort)
 
   const controls = document.createElement('div')
 
@@ -79,7 +72,14 @@ export function App() {
 
   return (
     <div class="fixed inset-0">
-      <div class="h-[30px]"></div>
+      <div class="h-[30px]">
+        <vscode-button
+          appearance="secondary"
+          onClick={() => vscode.postMessage('refresh')}
+        >
+          Refresh
+        </vscode-button>
+      </div>
       <div class="relative h-full w-full">
         <div
           style={{ visibility: firstPatchReceived() ? 'hidden' : 'visible' }}

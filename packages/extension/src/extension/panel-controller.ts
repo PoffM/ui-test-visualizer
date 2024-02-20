@@ -8,11 +8,7 @@ import type { HTMLPatch } from 'replicate-dom'
 // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
 const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
-export interface PanelControllerParams {
-  inspectorServerPort: number
-}
-
-export async function startPanelController({ inspectorServerPort }: PanelControllerParams) {
+export async function startPanelController() {
   const htmlUpdaterPort = await getPort()
   const viteDevServerPort = 5173
 
@@ -48,7 +44,7 @@ export async function startPanelController({ inspectorServerPort }: PanelControl
 
       panel.iconPath = vscode.Uri.file(path.resolve(__dirname, './debug.svg'))
 
-      let html = await (async () => {
+      const html = await (async () => {
         // In dev mode, load the html from the live Vite app.
         if (process.env.NODE_ENV === 'development') {
           const viteResponse = await fetch(
@@ -97,15 +93,9 @@ export async function startPanelController({ inspectorServerPort }: PanelControl
         throw new Error('Unknown NODE_ENV')
       })()
 
-      html = html.replace(
-        /<head>/,
-        `$&
-        <script type="text/javascript">
-          globalThis.inspectorServerPort=${inspectorServerPort};
-        </script>`,
-      )
-
       panel.webview.html = html
+
+      return { panel }
     },
     dispose() {
       htmlUpdaterServer.close()
