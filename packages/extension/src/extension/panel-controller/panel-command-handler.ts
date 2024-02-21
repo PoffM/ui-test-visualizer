@@ -1,6 +1,42 @@
 import * as vscode from 'vscode'
+import { callProcedure, initTRPC } from '@trpc/server'
 
-interface EvalResult {
+/** Tracks which frame each debug session is paused on. */
+const frameIds = new WeakMap<vscode.DebugSession, number>()
+
+interface PanelRouterCtx {
+  getUiTestSession: () => Promise<vscode.DebugSession | null>
+}
+
+const t = initTRPC.context<PanelRouterCtx>().create()
+
+/** Defines routes callable from the WebView to the Extension back-end. */
+const panelRouter = t.router({
+  refresh: t.procedure
+    .query(async ({ ctx }) => {
+      const uiSession = await ctx.getUiTestSession()
+      if (!uiSession) {
+        throw new Error('Could not find UI test session')
+      }
+
+      const evalResult: EvalResult = await uiSession.customRequest(
+        'evaluate',
+        {
+          expression: 'globalThis.__serializeHtml()',
+          context: 'clipboard',
+          frameId: frameIds.get(uiSession),
+        },
+      )
+
+      const html = evalResult.result
+
+      return html
+    }),
+})
+
+export type PanelRouter = typeof panelRouter
+
+export interface EvalResult {
   type: string
   result: string
 }
@@ -9,8 +45,6 @@ export function startPanelCommandHandler(
   panel: vscode.WebviewPanel,
   rootSession: vscode.DebugSession,
 ) {
-  const frameIds = new WeakMap<vscode.DebugSession, number>()
-
   const frameIdTracker = vscode.languages.registerInlineValuesProvider('*', {
     provideInlineValues(_document, _viewPort, context, _token) {
       const activeSession = vscode.debug.activeDebugSession
@@ -24,33 +58,24 @@ export function startPanelCommandHandler(
   const onPanelMessage = panel.webview.onDidReceiveMessage(async (e) => {
     const { cmd, token } = e
 
-    if (cmd === 'refresh') {
-      try {
-        const uiSession = await getUiTestSession()
-        if (!uiSession) {
-          throw new Error('Could not find UI test session')
-        }
+    try {
+      const result = await callProcedure({
+        procedures: panelRouter._def.procedures,
+        ctx: { getUiTestSession },
+        path: cmd,
+        rawInput: undefined,
+        input: undefined,
+        type: 'query',
+      })
 
-        const evalResult: EvalResult = await uiSession.customRequest(
-          'evaluate',
-          {
-            expression: 'globalThis.__serializeHtml()',
-            context: 'clipboard',
-            frameId: frameIds.get(uiSession),
-          },
-        )
-
-        const html = evalResult.result
-
-        panel.webview.postMessage({ token, html })
-      }
-      catch (error) {
-        console.error(error)
-        panel.webview.postMessage({
-          token,
-          error: error instanceof Error ? error.message : null,
-        })
-      }
+      panel.webview.postMessage({ token, html: result })
+    }
+    catch (error) {
+      console.error(error)
+      panel.webview.postMessage({
+        token,
+        error: error instanceof Error ? error.message : null,
+      })
     }
   })
 
