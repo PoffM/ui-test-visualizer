@@ -1,12 +1,12 @@
 import path from 'node:path'
 import * as vscode from 'vscode'
-import { hotReload } from '../hot-reload'
+import { hotReload } from './util/hot-reload'
 import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
 import { vitestDebugConfig } from './framework-support/vitest-support'
 import { codeLensProvider } from './code-lens-provider'
 import { startPanelController } from './panel-controller/panel-controller'
-import { extensionSetting } from './extension-setting'
+import { extensionSetting } from './util/extension-setting'
 
 const DEBUG_NAME = 'Visually Debug UI'
 

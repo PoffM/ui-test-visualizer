@@ -6,7 +6,7 @@ import { defineConfig } from 'tsup'
 export default defineConfig(options => ({
   entry: {
     'extension': './src/extension/extension.ts',
-    'inject-cli': './src/extension/inject-cli.ts',
+    'inject-cli': './src/test-process/inject-cli.ts',
     'inject-test': './src/test-process/inject-test.ts',
     'load-styles': './src/test-process/load-styles-worker.ts',
   },
