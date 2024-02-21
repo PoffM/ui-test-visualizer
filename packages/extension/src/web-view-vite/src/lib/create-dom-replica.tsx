@@ -1,11 +1,10 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import type { HTMLPatch } from 'replicate-dom'
 import { applyDomPatch, parseDomNode } from 'replicate-dom'
-import uniqueId from 'lodash/uniqueId'
 import { createSignal } from 'solid-js'
 import { setReplicaHtmlEl } from '../App'
 import shadowCSSText from '../assets/shadow.css?raw'
-import { vscode } from './vscode'
+import { client } from './panel-client'
 
 export function createDomReplica() {
   const [firstPatchReceived, setFirstPatchReceived] = createSignal(false)
@@ -48,18 +47,7 @@ export function createDomReplica() {
   }
 
   async function refreshShadow() {
-    const token = uniqueId()
-
-    vscode.postMessage({ cmd: 'refresh', token })
-
-    const newHtml = await new Promise<string>((resolve) => {
-      const dispose = makeEventListener(window, 'message', (event) => {
-        if (event.data.token === token) {
-          dispose()
-          resolve(event.data.html)
-        }
-      })
-    })
+    const newHtml = await client.refresh.query()
 
     const parsed = parseDomNode(
       JSON.parse(JSON.parse(newHtml)),
@@ -67,7 +55,7 @@ export function createDomReplica() {
       window,
     )
 
-    // Show a blank for a split second to show that the refresh is happening
+    // Show a blank page for a split second to show that the refresh is happening
     shadow.querySelector('html body')?.remove()
     await new Promise(res => setTimeout(res, 40))
     // Then insert the refreshed content

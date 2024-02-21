@@ -10,7 +10,7 @@ interface PanelRouterCtx {
 
 const t = initTRPC.context<PanelRouterCtx>().create()
 
-/** Defines routes callable from the WebView to the Extension back-end. */
+/** Defines routes callable from the WebView to the VSCode Extension. */
 const panelRouter = t.router({
   refresh: t.procedure
     .query(async ({ ctx }) => {
@@ -56,24 +56,25 @@ export function startPanelCommandHandler(
   })
 
   const onPanelMessage = panel.webview.onDidReceiveMessage(async (e) => {
-    const { cmd, token } = e
+    const { path, id } = e
 
     try {
+      const ctx: PanelRouterCtx = { getUiTestSession }
       const result = await callProcedure({
         procedures: panelRouter._def.procedures,
-        ctx: { getUiTestSession },
-        path: cmd,
+        ctx,
+        path,
         rawInput: undefined,
         input: undefined,
         type: 'query',
       })
 
-      panel.webview.postMessage({ token, html: result })
+      panel.webview.postMessage({ id, data: result })
     }
     catch (error) {
       console.error(error)
       panel.webview.postMessage({
-        token,
+        id,
         error: error instanceof Error ? error.message : null,
       })
     }
