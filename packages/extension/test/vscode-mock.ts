@@ -138,6 +138,10 @@ export async function initVscodeMock({
     return { dispose: () => endDebugCallbacks.delete(cb) }
   })
 
+  vscode.debug.onDidChangeActiveDebugSession.mockImplementation((cb) => {
+    return { dispose: () => {} }
+  })
+
   const replicaWindow = new Window() as unknown as typeof globalThis.window
 
   // Remove the <!DOCTYPE> node.
@@ -160,12 +164,17 @@ export async function initVscodeMock({
             }
             return true
           },
+          onDidReceiveMessage: () => ({ dispose: () => {} }),
         },
       })
       panels.push(panel)
       return panel
     },
   )
+
+  vscode.languages.registerInlineValuesProvider.mockImplementation(() => {
+    return { dispose: () => {} }
+  })
 
   return { vscode, replicaWindow }
 }
