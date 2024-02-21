@@ -47,8 +47,9 @@ export async function initVscodeMock({
     ...settings,
   }
 
+  // @ts-expect-error property should exist
   vscode.workspace.getConfiguration.mockReturnValue({
-    get: (section) => {
+    get: (section: string) => {
       // @ts-expect-error should work
       const value = resolvedSettings[section]
       if (value === undefined) {
@@ -65,11 +66,13 @@ export async function initVscodeMock({
   const startDebugCallbacks = new Set<(e: vscode.DebugSession) => any>()
   const endDebugCallbacks = new Set<(e: vscode.DebugSession) => any>()
 
+  // @ts-expect-error property should exist
   vscode.commands.registerCommand.mockImplementation((name, cb) => {
     registeredCommands.set(name, cb)
     return { dispose: () => registeredCommands.delete(name) }
   })
 
+  // @ts-expect-error property should exist
   vscode.commands.executeCommand.mockImplementation(async (name, ...args) => {
     const command = registeredCommands.get(name)
     if (!command) {
@@ -78,6 +81,7 @@ export async function initVscodeMock({
     return await command(...args)
   })
 
+  // @ts-expect-error property should exist
   vscode.debug.startDebugging.mockImplementation(async (_, debugConfig) => {
     if (typeof debugConfig === 'string') {
       throw new TypeError('Expected a DebugConfiguration object')
@@ -128,17 +132,20 @@ export async function initVscodeMock({
     return true
   })
 
+  // @ts-expect-error property should exist
   vscode.debug.onDidStartDebugSession.mockImplementation((cb) => {
     startDebugCallbacks.add(cb)
     return { dispose: () => startDebugCallbacks.delete(cb) }
   })
 
+  // @ts-expect-error property should exist
   vscode.debug.onDidTerminateDebugSession.mockImplementation((cb) => {
     endDebugCallbacks.add(cb)
     return { dispose: () => endDebugCallbacks.delete(cb) }
   })
 
-  vscode.debug.onDidChangeActiveDebugSession.mockImplementation((cb) => {
+  // @ts-expect-error property should exist
+  vscode.debug.onDidChangeActiveDebugSession.mockImplementation(() => {
     return { dispose: () => {} }
   })
 
@@ -153,11 +160,12 @@ export async function initVscodeMock({
 
   const panels: vscode.WebviewPanel[] = []
 
+  // @ts-expect-error property should exist
   vscode.window.createWebviewPanel.mockImplementation(
-    (_viewType, _title, _viewColumn, _options) => {
+    () => {
       const panel = mockDeep<vscode.WebviewPanel>({
         webview: {
-          postMessage: async (msg) => {
+          postMessage: async (msg: any) => {
             if (msg.htmlPatch) {
               applyDomPatch(replicaWindow.document, msg.htmlPatch, replicaWindow)
               onReplicaDomUpdate(replicaWindow.document)
@@ -172,6 +180,7 @@ export async function initVscodeMock({
     },
   )
 
+  // @ts-expect-error property should exist
   vscode.languages.registerInlineValuesProvider.mockImplementation(() => {
     return { dispose: () => {} }
   })
