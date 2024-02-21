@@ -19,6 +19,8 @@ export default defineConfig(options => ({
     'tinyspy',
     'replicate-dom',
   ],
+  // Vite handles the webview src watching
+  ignoreWatch: ['src/web-view-vite'],
   target: 'esnext',
   env: {
     NODE_ENV: options.watch ? 'development' : 'production',

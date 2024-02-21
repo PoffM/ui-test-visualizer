@@ -33,6 +33,7 @@
     "@types/vscode-webview": "^1.57.5",
     "@types/ws": "^8.5.10",
     "autoprefixer": "^10.4.17",
+    "chokidar": "^3.6.0",
     "happy-dom": "^13.3.8",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
