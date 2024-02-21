@@ -1,8 +1,9 @@
 import * as webviewToolkit from '@vscode/webview-ui-toolkit'
-import { Moon, RefreshCw, Sun } from 'lucide-solid'
+import { Brush, Moon, RefreshCw, Sun } from 'lucide-solid'
 import { createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
+import { Popover, PopoverContent, PopoverTrigger } from './components/popover'
 
 // Importing the router type from the server file
 
@@ -25,6 +26,10 @@ export function App() {
     firstPatchReceived,
   } = createDomReplica()
 
+  function openStyleMenu() {
+
+  }
+
   return (
     <div class="fixed inset-0">
       <div
@@ -46,6 +51,22 @@ export function App() {
         >
           {theme() === 'dark' ? <Moon /> : <Sun />}
         </vscode-button>
+        <Popover>
+          <PopoverTrigger>
+            <vscode-button
+              class="h-10 w-10"
+              appearance="secondary"
+              onClick={openStyleMenu}
+              title="Link your styles"
+            >
+              <Brush />
+            </vscode-button>
+          </PopoverTrigger>
+          <PopoverContent>
+            A UI toolkit for building accessible web apps and design systems with SolidJS.
+          </PopoverContent>
+        </Popover>
+
       </div>
       <div class="relative h-full w-full">
         <div
