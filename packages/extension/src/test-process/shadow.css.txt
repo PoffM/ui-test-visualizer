@@ -1,7 +1,7 @@
 /*
-  Default color modes inside the mirror DOM.
-  Should be overridden by the tested UI.
-*/
+ * Default color modes inside the mirror DOM.
+ * Supports light and dark modes.
+ */
 
 @media (prefers-color-scheme: dark) {
   :host {

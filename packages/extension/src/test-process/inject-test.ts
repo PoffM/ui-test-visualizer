@@ -1,9 +1,11 @@
 // Inject this code into the test process
 
-import { error as logError } from 'node:console'
+import { log, error as logError } from 'node:console'
 import { findUpSync } from 'find-up'
 import { createSyncFn } from 'synckit'
 import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
+import { z } from 'zod'
+import shadowCss from './shadow.css.txt'
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
@@ -32,7 +34,26 @@ async function preTest() {
         win: globalThis.window,
       })
 
-      loadStylesIntoHead(testWindow)
+      const filesAsString = process.env.TEST_CSS_FILES ?? '[]'
+
+      const files = z.array(z.string()).safeParse(
+        JSON.parse(filesAsString),
+      )
+
+      if (!files.success) {
+        logError(`Invalid CSS files: ${JSON.stringify(filesAsString)} ( ${JSON.stringify(files.error)} )`)
+        return
+      }
+
+      // Insert the default css which supports light and dark mode
+      const defaultShadowStyle = testWindow.document.createElement('style')
+      defaultShadowStyle.textContent = shadowCss
+      testWindow.document.head.appendChild(defaultShadowStyle)
+
+      loadStylesIntoHead(
+        testWindow,
+        files.data,
+      )
     }
 
     // Hook into the window which is set by happy-dom or jsdom
@@ -54,7 +75,7 @@ async function preTest() {
     }
 
     // Add a global function to serialize the whole HTML document,
-    // so the panel can request a refresh of the whole page.
+    // so the webview can request a refresh of the whole page.
     Reflect.set(
       globalThis,
       '__serializeHtml',
@@ -64,26 +85,47 @@ async function preTest() {
         )
       },
     )
+    // Add a global function to replace the styles,
+    // so the webview can change the CSS files and reload during a debug session.
+    Reflect.set(
+      globalThis,
+      '__replaceStyles',
+      function replaceStyles(
+        // 'unknown' because this function is called remotely from the panelRouter.
+        files: unknown,
+      ) {
+        const parsed = z.array(z.string()).safeParse(files)
+        if (!parsed.success) {
+          const err = `Invalid CSS files: ${JSON.stringify(files)} ( ${JSON.stringify(parsed.error)} )`
+          logError(err)
+          throw new Error(err)
+        }
+        const sheets = loadStylesIntoHead(testWindow, parsed.data)
+        return sheets
+      },
+    )
   }
   catch (error) {
     logError(error)
   }
 }
 
-function loadStylesIntoHead(win: Window) {
-  const cssSheets = (() => {
-    const files = JSON.parse(process.env.TEST_CSS_FILES ?? '[]') as string[]
-    if (!files) {
-      return []
-    }
+const injectedStyles = new Set<HTMLStyleElement>()
 
+function loadStylesIntoHead(win: Window, files: string[]) {
+  const cssSheets = (() => {
     const results: (
       | { status: 'fulfilled', value: string }
       | { status: 'rejected', reason: unknown }
     )[] = files.map((file) => {
       try {
         const style = loadStylesInWorker(file)
-        return { status: 'fulfilled', value: String(style) }
+        if (typeof style !== 'string') {
+          throw new TypeError(
+            `Expected a string, but got ${typeof style} when parsing file "${file}"`,
+          )
+        }
+        return { status: 'fulfilled', value: style }
       }
       catch (error) {
         return { status: 'rejected', reason: error }
@@ -107,12 +149,27 @@ function loadStylesIntoHead(win: Window) {
     return sheets
   })()
 
+  // Remove old injected styles
+  for (const oldStyle of [...injectedStyles]) {
+    log('Remove stylesheet: ', oldStyle)
+    oldStyle.remove()
+    injectedStyles.delete(oldStyle)
+  }
+
+  // Add the new styles
   for (const sheet of cssSheets) {
     const style = win.document.createElement('style')
     style.type = 'text/css'
-    style.innerHTML = sheet
+    style.textContent = sheet
+    style.dataset.injected_by_visual_ui_test_debugger = 'true'
+
+    // Add the new styles
     win.document.head.appendChild(style)
+    injectedStyles.add(style)
+    log('Inject stylesheet: ', style)
   }
+
+  return cssSheets
 }
 
 const loadStylesInWorker = createSyncFn(require.resolve('./load-styles'))

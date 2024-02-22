@@ -3,7 +3,6 @@ import type { HTMLPatch } from 'replicate-dom'
 import { applyDomPatch, parseDomNode } from 'replicate-dom'
 import { createSignal } from 'solid-js'
 import { setReplicaHtmlEl } from '../App'
-import shadowCSSText from '../assets/shadow.css?raw'
 import { client } from './panel-client'
 
 export function createDomReplica() {
@@ -40,10 +39,6 @@ export function createDomReplica() {
     htmlEl.style.height = '100%'
     htmlEl.style.overflowY = 'scroll'
     setReplicaHtmlEl(htmlEl)
-
-    const shadowStyle = document.createElement('style')
-    shadowStyle.textContent = shadowCSSText
-    shadow.children[0]!.children[0]!.appendChild(shadowStyle)
   }
 
   async function refreshShadow() {

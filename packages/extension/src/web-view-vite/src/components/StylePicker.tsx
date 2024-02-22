@@ -20,9 +20,11 @@ export function StylePicker(props: StylePickerProps) {
 
   const [filesWereChanged, setFilesWereChanged] = createSignal(false)
 
-  createEffect(() => {
+  // When the style picker is closed, and the files were changed, replace the styles.
+  createEffect(async () => {
     if (!stylePickerOpen() && filesWereChanged()) {
-      // TODO replace the styles
+      await client.replaceStyles.mutate()
+      setFilesWereChanged(false)
     }
   })
 
