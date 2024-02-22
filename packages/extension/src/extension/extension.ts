@@ -113,9 +113,7 @@ export let visuallyDebugUI = async (
     TEST_FRAMEWORK: fwInfo.framework,
     TEST_FILE_PATH: filePath,
     HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
-    TEST_CSS_FILES: JSON.stringify(
-      extensionSetting('visual-ui-test-debugger.cssFiles'),
-    ),
+    TEST_CSS_FILES: JSON.stringify(storage.enabledCssFiles),
   }
 
   vscode.debug.startDebugging(undefined, debugConfig)

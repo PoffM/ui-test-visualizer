@@ -8,7 +8,6 @@ import { Node, Window } from 'happy-dom'
 import type { ExtensionSettingsKey } from '../src/extension/util/extension-setting'
 
 export const defaultTestSettings: Record<ExtensionSettingsKey, unknown> = {
-  'visual-ui-test-debugger.cssFiles': [] as string[],
   'visual-ui-test-debugger.disableCodeLens': false,
   'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
 }

@@ -53,6 +53,8 @@ async function preTest() {
       initDom()
     }
 
+    // Add a global function to serialize the whole HTML document,
+    // so the panel can request a refresh of the whole page.
     Reflect.set(
       globalThis,
       '__serializeHtml',

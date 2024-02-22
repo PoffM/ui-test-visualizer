@@ -19,9 +19,7 @@ it('replicates the test DOM into the webview with SCSS styles (Vitest+React exam
   }
 
   const { counts, buttonColor } = await debugCounterExample({
-    settings: {
-      'visual-ui-test-debugger.cssFiles': [scssFile],
-    },
+    cssFiles: [scssFile],
     testFile: await findUp(
       'examples/vitest-react/test/basic.test.tsx',
       { cwd: __filename },
