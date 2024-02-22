@@ -81,6 +81,7 @@ export function StylePicker(props: StylePickerProps) {
                     appearance="icon"
                     title="Remove"
                     onClick={() => removeExternalFile(file.path)}
+                    style={{ visibility: file.isExternal ? 'visible' : 'hidden' }}
                   >
                     <X />
                   </vscode-button>
@@ -98,7 +99,7 @@ export function StylePicker(props: StylePickerProps) {
             </vscode-button>
             <vscode-button
               appearance="primary"
-              title="Link another file"
+              title="Apply styles"
               onClick={ok}
             >
               OK
