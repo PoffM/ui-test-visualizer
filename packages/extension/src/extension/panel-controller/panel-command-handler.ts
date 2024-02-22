@@ -1,49 +1,16 @@
 import * as vscode from 'vscode'
-import { callProcedure, initTRPC } from '@trpc/server'
+import { callProcedure } from '@trpc/server'
+import type { MyStorageType } from '../extension'
+import type { PanelRouterCtx } from './panel-router'
+import { panelRouter } from './panel-router'
 
 /** Tracks which frame each debug session is paused on. */
-const frameIds = new WeakMap<vscode.DebugSession, number>()
-
-interface PanelRouterCtx {
-  getUiTestSession: () => Promise<vscode.DebugSession | null>
-}
-
-const t = initTRPC.context<PanelRouterCtx>().create()
-
-/** Defines routes callable from the WebView to the VSCode Extension. */
-const panelRouter = t.router({
-  refresh: t.procedure
-    .query(async ({ ctx }) => {
-      const uiSession = await ctx.getUiTestSession()
-      if (!uiSession) {
-        throw new Error('Could not find UI test session')
-      }
-
-      const evalResult: EvalResult = await uiSession.customRequest(
-        'evaluate',
-        {
-          expression: 'globalThis.__serializeHtml()',
-          context: 'clipboard',
-          frameId: frameIds.get(uiSession),
-        },
-      )
-
-      const html = evalResult.result
-
-      return html
-    }),
-})
-
-export type PanelRouter = typeof panelRouter
-
-export interface EvalResult {
-  type: string
-  result: string
-}
+export const frameIds = new WeakMap<vscode.DebugSession, number>()
 
 export function startPanelCommandHandler(
   panel: vscode.WebviewPanel,
   rootSession: vscode.DebugSession,
+  storage: MyStorageType,
 ) {
   const frameIdTracker = vscode.languages.registerInlineValuesProvider('*', {
     provideInlineValues(_document, _viewPort, context, _token) {
@@ -56,17 +23,20 @@ export function startPanelCommandHandler(
   })
 
   const onPanelMessage = panel.webview.onDidReceiveMessage(async (e) => {
-    const { path, id } = e
+    const { path, input, type, id } = e
 
     try {
-      const ctx: PanelRouterCtx = { getUiTestSession }
+      const ctx: PanelRouterCtx = {
+        getUiTestSession,
+        storage,
+      }
       const result = await callProcedure({
         procedures: panelRouter._def.procedures,
         ctx,
         path,
-        rawInput: undefined,
-        input: undefined,
-        type: 'query',
+        rawInput: input,
+        input,
+        type,
       })
 
       panel.webview.postMessage({ id, data: result })

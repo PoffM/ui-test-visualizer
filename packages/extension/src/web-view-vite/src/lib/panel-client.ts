@@ -3,7 +3,7 @@ import { TRPCClientError, createTRPCProxyClient } from '@trpc/client'
 import { observable } from '@trpc/server/observable'
 
 import { makeEventListener } from '@solid-primitives/event-listener'
-import type { PanelRouter } from '../../../extension/panel-controller/panel-command-handler'
+import type { PanelRouter } from '../../../extension/panel-controller/panel-router'
 import { vscode } from './vscode'
 
 /** TRPC link for calling from the VSCode webview to the VSCode Extension. */
@@ -12,7 +12,12 @@ const customLink: TRPCLink<PanelRouter> = () => {
   // useful for storing cache for instance
   return ({ op }) => {
     return observable((observer) => {
-      vscode.postMessage({ path: op.path, id: op.id })
+      vscode.postMessage({
+        path: op.path,
+        id: op.id,
+        type: op.type,
+        input: op.input,
+      })
 
       const dispose = makeEventListener(window, 'message', (event) => {
         if (event.data.id === op.id) {

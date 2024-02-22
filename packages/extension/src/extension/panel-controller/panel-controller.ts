@@ -3,13 +3,17 @@ import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
+import type { MyStorageType } from '../extension'
 import { startPanelCommandHandler } from './panel-command-handler'
 
 // Avoids import errors when importing in Vitest
 // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
 const Server = require('../../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
-export async function startPanelController() {
+export async function startPanelController(
+  extensionContext: vscode.ExtensionContext,
+  storage: MyStorageType,
+) {
   const htmlUpdaterPort = await getPort()
   const viteDevServerPort = 5173
 
@@ -32,7 +36,6 @@ export async function startPanelController() {
   return {
     htmlUpdaterPort,
     async openPanel(
-      extensionContext: vscode.ExtensionContext,
       rootSession: vscode.DebugSession,
     ) {
       // Create the webview panel
@@ -100,7 +103,11 @@ export async function startPanelController() {
 
       panel.webview.html = html
 
-      panelCommandHandler = startPanelCommandHandler(panel, rootSession)
+      panelCommandHandler = startPanelCommandHandler(
+        panel,
+        rootSession,
+        storage,
+      )
 
       return { panel }
     },

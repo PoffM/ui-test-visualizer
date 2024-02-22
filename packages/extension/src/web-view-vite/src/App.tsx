@@ -4,6 +4,7 @@ import { createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { Popover, PopoverContent, PopoverTrigger } from './components/popover'
+import { StylePicker } from './components/StylePicker'
 
 // Importing the router type from the server file
 
@@ -26,10 +27,6 @@ export function App() {
     firstPatchReceived,
   } = createDomReplica()
 
-  function openStyleMenu() {
-
-  }
-
   return (
     <div class="fixed inset-0">
       <div
@@ -39,7 +36,7 @@ export function App() {
         <vscode-button
           appearance="secondary"
           onClick={refreshShadow}
-          title="Refresh"
+          title="Refresh Html"
         >
           <RefreshCw />
         </vscode-button>
@@ -56,14 +53,13 @@ export function App() {
             <vscode-button
               class="h-10 w-10"
               appearance="secondary"
-              onClick={openStyleMenu}
               title="Link your styles"
             >
               <Brush />
             </vscode-button>
           </PopoverTrigger>
           <PopoverContent>
-            A UI toolkit for building accessible web apps and design systems with SolidJS.
+            <StylePicker />
           </PopoverContent>
         </Popover>
 

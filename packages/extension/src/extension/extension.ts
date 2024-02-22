@@ -1,5 +1,6 @@
 import path from 'node:path'
 import * as vscode from 'vscode'
+import { z } from 'zod'
 import { hotReload } from './util/hot-reload'
 import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
@@ -7,6 +8,7 @@ import { vitestDebugConfig } from './framework-support/vitest-support'
 import { codeLensProvider } from './code-lens-provider'
 import { startPanelController } from './panel-controller/panel-controller'
 import { extensionSetting } from './util/extension-setting'
+import { extensionStorage } from './util/extension-storage'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -47,11 +49,22 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
 export function deactivate() {}
 
+function myExtensionStorage(extensionContext: vscode.ExtensionContext) {
+  return extensionStorage({
+    enabledCssFiles: z.array(z.string()),
+    externalCssFiles: z.array(z.string()),
+  }, extensionContext)
+}
+
+export type MyStorageType = ReturnType<typeof myExtensionStorage>
+
 // eslint-disable-next-line import/no-mutable-exports
 export let visuallyDebugUI = async (
   testName: unknown,
   extensionContext: vscode.ExtensionContext,
 ) => {
+  const storage = myExtensionStorage(extensionContext)
+
   if (typeof testName !== 'string') {
     throw new TypeError('Expected a string argument')
   }
@@ -63,12 +76,12 @@ export let visuallyDebugUI = async (
 
   await editor.document.save()
 
-  const panelController = await startPanelController()
+  const panelController = await startPanelController(extensionContext, storage)
 
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()
 
-    await panelController.openPanel(extensionContext, currentSession)
+    await panelController.openPanel(currentSession)
 
     const onTerminate = vscode.debug.onDidTerminateDebugSession(
       (endedSession) => {

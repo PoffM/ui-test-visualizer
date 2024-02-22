@@ -47,7 +47,7 @@ export function createDomReplica() {
   }
 
   async function refreshShadow() {
-    const newHtml = await client.refresh.query()
+    const newHtml = await client.serializeHtml.query()
 
     const parsed = parseDomNode(
       JSON.parse(JSON.parse(newHtml)),
