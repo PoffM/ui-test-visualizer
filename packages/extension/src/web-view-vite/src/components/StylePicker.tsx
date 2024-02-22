@@ -25,6 +25,11 @@ export function StylePicker(props: StylePickerProps) {
     fileQuery.refetch()
   }
 
+  async function removeExternalFile(path: string) {
+    await client.removeExternalCssFile.mutate(path)
+    fileQuery.refetch()
+  }
+
   function ok() {
     props.onOkClick()
   }
@@ -37,7 +42,9 @@ export function StylePicker(props: StylePickerProps) {
           {file => (
             <div class="flex gap-2">
               <label class="grow flex justify-between items-center px-2 select-none hover:bg-accent cursor-pointer">
-                <div class="" title={file.path}>{file.displayPath}</div>
+                <div class="" title={file.path}>
+                  {file.displayPath}
+                </div>
                 <vscode-checkbox
                   checked={file.enabled}
                   onChange={(e: unknown) => {
@@ -49,7 +56,7 @@ export function StylePicker(props: StylePickerProps) {
               <vscode-button
                 appearance="icon"
                 title="Remove"
-                onClick={addExternalFiles}
+                onClick={() => removeExternalFile(file.path)}
               >
                 <X />
               </vscode-button>
