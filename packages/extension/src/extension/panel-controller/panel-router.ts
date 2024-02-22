@@ -97,6 +97,15 @@ export const panelRouter = t.router({
       }
     }),
 
+  removeExternalCssFile: t.procedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const path = input
+      const oldExternalFiles = ctx.storage.externalCssFiles ?? []
+      const newExternalFiles = oldExternalFiles.filter(it => it !== path)
+      ctx.storage.externalCssFiles = newExternalFiles
+    }),
+
   toggleCssFile: t.procedure
     .input(
       z.object({

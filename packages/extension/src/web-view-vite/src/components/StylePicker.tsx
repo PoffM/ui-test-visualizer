@@ -1,10 +1,14 @@
 import { For, createResource } from 'solid-js'
 import '../index.css'
+import get from 'lodash/get'
+import { X } from 'lucide-solid'
 import { client } from '../lib/panel-client'
-import { Checkbox } from './checkbox'
-import { Button } from './button'
 
-export function StylePicker() {
+export interface StylePickerProps {
+  onOkClick: () => void
+}
+
+export function StylePicker(props: StylePickerProps) {
   const [files, fileQuery] = createResource(
     () => client.availableCssFiles.query(),
   )
@@ -21,27 +25,53 @@ export function StylePicker() {
     fileQuery.refetch()
   }
 
+  function ok() {
+    props.onOkClick()
+  }
+
   return (
-    <div class="flex flex-col gap-2 p-2 max-w-[300px]">
-      <div class="flex justify-center">Link your styles</div>
+    <div class="flex flex-col gap-2 max-w-[300px]">
+      <h1 class="font-bold text-sm text-center">Enable your styles</h1>
       <div class="">
         <For each={files()} fallback={<div>Loading...</div>}>
           {file => (
-            <label class="flex justify-between items-center select-none">
-              <div>{file.displayPath}</div>
-              <Checkbox
-                checked={file.enabled}
-                onChange={e => toggleFile(file.path, e)}
-              />
-            </label>
+            <div class="flex gap-2">
+              <label class="grow flex justify-between items-center px-2 select-none hover:bg-accent cursor-pointer">
+                <div class="" title={file.path}>{file.displayPath}</div>
+                <vscode-checkbox
+                  checked={file.enabled}
+                  onChange={(e: unknown) => {
+                    const checked = Boolean(get(e, 'currentTarget.checked'))
+                    return toggleFile(file.path, checked)
+                  }}
+                />
+              </label>
+              <vscode-button
+                appearance="icon"
+                title="Remove"
+                onClick={addExternalFiles}
+              >
+                <X />
+              </vscode-button>
+            </div>
           )}
         </For>
-        <Button
-          variant="outline"
+      </div>
+      <div class="flex justify-between px-2">
+        <vscode-button
+          appearance="secondary"
+          title="Link another file"
           onClick={addExternalFiles}
         >
-          Link another file
-        </Button>
+          Add external file
+        </vscode-button>
+        <vscode-button
+          appearance="primary"
+          title="Link another file"
+          onClick={ok}
+        >
+          OK
+        </vscode-button>
       </div>
     </div>
   )

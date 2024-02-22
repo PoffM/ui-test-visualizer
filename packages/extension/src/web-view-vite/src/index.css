@@ -9,7 +9,7 @@
     border-color: var(--vscode-menu-border);
   }
 
-  /* TODO replace colors with the VSCode equivalents. */
+  /* TODO values with the VSCode equivalent variables. */
   :root {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -17,7 +17,7 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: var(--vscode-list-hoverBackground);
     --accent-foreground: 0 0% 98%;
 
     --popover: var(--vscode-menu-background);

@@ -14,6 +14,7 @@ import { StylePicker } from './components/StylePicker'
 webviewToolkit
   .provideVSCodeDesignSystem()
   .register(webviewToolkit.vsCodeButton())
+  .register(webviewToolkit.vsCodeCheckbox())
 
 export const [replicaHtmlEl, setReplicaHtmlEl] = createSignal<HTMLHtmlElement>()
 export const [theme, toggleTheme] = createColorTheme(
@@ -26,6 +27,8 @@ export function App() {
     refreshShadow,
     firstPatchReceived,
   } = createDomReplica()
+
+  const [stylePickerOpen, setStylePickerOpen] = createSignal(false)
 
   return (
     <div class="fixed inset-0">
@@ -44,22 +47,25 @@ export function App() {
           class="h-10 w-10"
           appearance="secondary"
           onClick={toggleTheme}
-          title={`Switch to ${theme() === 'dark' ? 'light' : 'dark'} mode.`}
+          title={`Switch to ${theme() === 'dark' ? 'light' : 'dark'} mode`}
         >
           {theme() === 'dark' ? <Moon /> : <Sun />}
         </vscode-button>
-        <Popover>
+        <Popover
+          open={stylePickerOpen()}
+          onOpenChange={open => setStylePickerOpen(open)}
+        >
           <PopoverTrigger>
             <vscode-button
               class="h-10 w-10"
               appearance="secondary"
-              title="Link your styles"
+              title="Enable your styles"
             >
               <Brush />
             </vscode-button>
           </PopoverTrigger>
           <PopoverContent>
-            <StylePicker />
+            <StylePicker onOkClick={() => setStylePickerOpen(false)} />
           </PopoverContent>
         </Popover>
 

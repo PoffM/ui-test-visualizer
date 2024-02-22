@@ -26,18 +26,14 @@ const customLink: TRPCLink<PanelRouter> = () => {
             return
           }
 
-          if (event.data.data) {
-            dispose()
-            observer.next({
-              result: {
-                type: 'data',
-                data: event.data.data,
-              },
-            })
-            observer.complete()
-          }
-
-          observer.error(new TRPCClientError('No data or error in response'))
+          dispose()
+          observer.next({
+            result: {
+              type: 'data',
+              data: event.data.data,
+            },
+          })
+          observer.complete()
         }
       })
 
