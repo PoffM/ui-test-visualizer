@@ -66,6 +66,11 @@ export async function debugCounterExample({
       },
     })
 
+    // @ts-expect-error property should exist
+    vscode.workspace.findFiles.mockImplementation(async () => {
+      return cssFiles.map(it => ({ path: it }))
+    })
+
     await activate(mockExtensionContext)
 
     await vscode.commands.executeCommand(
