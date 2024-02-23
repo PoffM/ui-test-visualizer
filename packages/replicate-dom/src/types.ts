@@ -56,6 +56,8 @@ export type SerializedDomMutationArg =
   | boolean
   | { object: unknown }
 
+export type SpyableClass = Node | Location
+
 export interface HTMLPatch {
   targetNodePath: DomNodePath
   prop: string | string[]

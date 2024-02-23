@@ -2,11 +2,12 @@ import castArray from 'lodash/castArray'
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
 import { getPropertyDescriptor } from '../property-util'
+import type { SpyableClass } from '../types'
 import { MUTABLE_DOM_PROPS } from './mutable-dom-props'
 import { containsNode } from './contains-node-util'
 
 export type MutationCallback = (
-  node: Node,
+  node: SpyableClass,
   prop: string | string[],
   args: (Node | null | string)[],
   spyDepth: number
@@ -112,7 +113,7 @@ export function spyOnDomNodes(
     // e.g. "style", "classList", "dataset", "attributes"
     for (const [getter, spiedMethods] of Object.entries(nestedMethods ?? {})) {
       // Spy on the getter property.
-      const spy = spyOn(cls.prototype, { getter }, trackSpyDepth(function interceptGetter(this: any) {
+      const spy = spyOn(cls.prototype, { getter }, trackSpyDepth(function interceptGetter(this: SpyableClass) {
         // @ts-expect-error asserted types here should be correct
         const nestedObj = spy.getOriginal().call(this) as T[G] & object
 

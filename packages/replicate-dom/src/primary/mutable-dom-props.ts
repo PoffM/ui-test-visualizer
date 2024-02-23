@@ -1,4 +1,5 @@
 import uniq from 'lodash/uniq'
+import type { SpyableClass } from '../types'
 import { IGNORED_NODE_METHODS } from './ignored-node-methods'
 import { SPYABLE_NODE_CLASSES } from './spyable-node-classes'
 
@@ -17,7 +18,7 @@ export type NestedMethods<T> = {
 type ExtractMethods<T> = {
   [
   P in keyof T
-  as T[P] extends ((...args: any[]) => any)
+  as T[P] extends ((...args: any[]) => unknown)
     ? P
     : never
   ]: T[P]
@@ -41,7 +42,7 @@ export function MUTABLE_DOM_PROPS(
       .filter(Boolean)
       .filter(val => val?.prototype instanceof win.Node)
       .sort((a, b) => protoLength(a) - protoLength(b)),
-  ) as (new () => Node | Location)[]
+  ) as (new () => SpyableClass)[]
   domClasses.unshift(win.Location)
 
   const map: MutableDomDescriptorMap = new Map()

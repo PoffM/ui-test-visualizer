@@ -10,10 +10,11 @@ import type {
   SerializedHTMLTemplateElement,
   SerializedShadowRoot,
   SerializedTextNode,
+  SpyableClass,
 } from '../types'
 
 export function getNodeByPath(root: Node, path: DomNodePath, win: typeof window) {
-  let currentElement: Node | Location | undefined = root
+  let currentElement: SpyableClass | undefined = root
 
   for (const index of path) {
     if (
