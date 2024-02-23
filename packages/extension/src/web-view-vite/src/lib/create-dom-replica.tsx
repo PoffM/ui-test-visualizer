@@ -45,6 +45,7 @@ export function createDomReplica() {
     const newHtml = await client.serializeHtml.query()
 
     const parsed = parseDomNode(
+      // @ts-expect-error weird issue with the debugger output, you need to JSON.parse twice
       JSON.parse(JSON.parse(newHtml)),
       document,
       window,

@@ -1,3 +1,5 @@
+import '@total-typescript/ts-reset'
+
 import path from 'node:path'
 import * as vscode from 'vscode'
 import { z } from 'zod'

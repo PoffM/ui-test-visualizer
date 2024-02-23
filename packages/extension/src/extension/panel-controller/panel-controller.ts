@@ -24,6 +24,7 @@ export async function startPanelController(
   const htmlUpdaterServer = new Server({ port: htmlUpdaterPort })
   htmlUpdaterServer.on('connection', (socket) => {
     socket.on('message', (buffer) => {
+      // @ts-expect-error The message comes from the test process so allow it without validation
       const htmlPatch: HTMLPatch = JSON.parse(buffer.toString())
       panel?.webview.postMessage({ htmlPatch })
     })
