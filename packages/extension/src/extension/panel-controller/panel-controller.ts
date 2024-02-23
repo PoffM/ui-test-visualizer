@@ -3,8 +3,10 @@ import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
+import { callProcedure } from '@trpc/server'
 import type { MyStorageType } from '../my-extension-storage'
-import { startPanelCommandHandler } from './panel-command-handler'
+import type { DebugSessionTracker } from '../util/debug-session-tracker'
+import { type PanelRouterCtx, panelRouter } from './panel-router'
 
 // Avoids import errors when importing in Vitest
 // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
@@ -18,7 +20,7 @@ export async function startPanelController(
   const viteDevServerPort = 5173
 
   let panel: vscode.WebviewPanel | undefined
-  let panelCommandHandler: ReturnType<typeof startPanelCommandHandler> | undefined
+  let onPanelMessage: vscode.Disposable | undefined
 
   // Listen for html updates from the test worker process
   const htmlUpdaterServer = new Server({ port: htmlUpdaterPort })
@@ -37,7 +39,7 @@ export async function startPanelController(
   return {
     htmlUpdaterPort,
     async openPanel(
-      rootSession: vscode.DebugSession,
+      sessionTracker: DebugSessionTracker,
     ) {
       // Create the webview panel
       panel = vscode.window.createWebviewPanel(
@@ -104,18 +106,40 @@ export async function startPanelController(
 
       panel.webview.html = html
 
-      panelCommandHandler = startPanelCommandHandler(
-        panel,
-        rootSession,
-        storage,
-      )
+      onPanelMessage = panel.webview.onDidReceiveMessage(async (e) => {
+        const { path, input, type, id } = e
+
+        try {
+          const ctx: PanelRouterCtx = {
+            sessionTracker,
+            storage,
+          }
+          const result = await callProcedure({
+            procedures: panelRouter._def.procedures,
+            ctx,
+            path,
+            rawInput: input,
+            input,
+            type,
+          })
+
+          panel?.webview.postMessage({ id, data: result })
+        }
+        catch (error) {
+          console.error(error)
+          panel?.webview.postMessage({
+            id,
+            error: error instanceof Error ? error.message : null,
+          })
+        }
+      })
 
       return { panel }
     },
     dispose() {
       htmlUpdaterServer.close()
       panel?.dispose()
-      panelCommandHandler?.dispose()
+      onPanelMessage?.dispose()
     },
   }
 }

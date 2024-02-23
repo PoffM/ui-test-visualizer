@@ -4,53 +4,24 @@ import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { MyStorageType } from '../my-extension-storage'
-import { frameIds } from './panel-command-handler'
+import type { DebugSessionTracker } from '../util/debug-session-tracker'
 
 export interface PanelRouterCtx {
-  getUiTestSession: () => Promise<vscode.DebugSession | null>
+  sessionTracker: DebugSessionTracker
   storage: MyStorageType
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
 
-/** Re-usable functions between different routes. */
-const middleware = t.middleware(async ({ ctx, next }) => {
-  async function runDebugExpression(expression: string) {
-    const uiSession = await ctx.getUiTestSession()
-    if (!uiSession) {
-      throw new Error('Could not find UI test session')
-    }
-
-    const evalResult: EvalResult = await uiSession.customRequest(
-      'evaluate',
-      {
-        expression,
-        context: 'clipboard',
-        frameId: frameIds.get(uiSession),
-      },
-    )
-
-    const result = evalResult.result
-
-    return result
-  }
-
-  return next({
-    ctx: { ...ctx, runDebugExpression },
-  })
-})
-
-const proc = t.procedure.use(middleware)
-
 /** Defines routes callable from the WebView to the VSCode Extension. */
 export const panelRouter = t.router({
-  serializeHtml: proc
+  serializeHtml: t.procedure
     .query(async ({ ctx }) => {
-      const html = await ctx.runDebugExpression('globalThis.__serializeHtml()')
+      const html = await ctx.sessionTracker.runDebugExpression('globalThis.__serializeHtml()')
       return html
     }),
 
-  availableCssFiles: proc
+  availableCssFiles: t.procedure
     .query(async ({ ctx }) => {
       const workspacePaths = await workspaceCssFiles()
       const externalPaths = await ctx.storage.get('externalCssFiles') ?? []
@@ -83,7 +54,7 @@ export const panelRouter = t.router({
       return fileInfos
     }),
 
-  addExternalCssFiles: proc
+  addExternalCssFiles: t.procedure
     .mutation(async ({ ctx }) => {
       const selectedUris = await vscode.window.showOpenDialog({
         canSelectMany: true,
@@ -100,7 +71,7 @@ export const panelRouter = t.router({
       }
     }),
 
-  removeExternalCssFile: proc
+  removeExternalCssFile: t.procedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
       const path = input
@@ -108,7 +79,7 @@ export const panelRouter = t.router({
       ctx.storage.set('enabledCssFiles', old => (old ?? []).filter(it => it !== path))
     }),
 
-  toggleCssFile: proc
+  toggleCssFile: t.procedure
     .input(
       z.object({
         path: z.string(),
@@ -124,11 +95,11 @@ export const panelRouter = t.router({
       )
     }),
 
-  replaceStyles: proc
+  replaceStyles: t.procedure
     .mutation(async ({ ctx }) => {
       const files = await ctx.storage.get('enabledCssFiles') ?? []
       const filesAsString = JSON.stringify(files)
-      const result = await ctx.runDebugExpression(
+      const result = await ctx.sessionTracker.runDebugExpression(
         `globalThis.__replaceStyles(${filesAsString})`,
       )
       return !!result
@@ -136,8 +107,3 @@ export const panelRouter = t.router({
 })
 
 export type PanelRouter = typeof panelRouter
-
-export interface EvalResult {
-  type: string
-  result: string
-}

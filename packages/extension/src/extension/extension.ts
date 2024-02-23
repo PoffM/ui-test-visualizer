@@ -10,6 +10,7 @@ import { codeLensProvider } from './code-lens-provider'
 import { startPanelController } from './panel-controller/panel-controller'
 import { extensionSetting } from './util/extension-setting'
 import { myExtensionStorage } from './my-extension-storage'
+import { startDebugSessionTracker } from './util/debug-session-tracker'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -73,7 +74,9 @@ export let visuallyDebugUI = async (
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()
 
-    await panelController.openPanel(currentSession)
+    const sessionTracker = await startDebugSessionTracker(currentSession)
+
+    await panelController.openPanel(sessionTracker)
 
     const onTerminate = vscode.debug.onDidTerminateDebugSession(
       (endedSession) => {
@@ -81,6 +84,7 @@ export let visuallyDebugUI = async (
           return
         }
 
+        sessionTracker.dispose()
         panelController.dispose()
         onTerminate.dispose()
       },
