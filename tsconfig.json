@@ -13,8 +13,9 @@
     "noEmit": true,
     "sourceMap": true,
     "esModuleInterop": true,
+    "preserveSymlinks": true,
     "skipLibCheck": true
   },
-  "include": ["./**/*.ts"],
-  "exclude": ["examples/**/*", "**/unused-happy-dom-tests/**/*.ts"]
+  "include": ["packages/**/*"],
+  "exclude": ["examples/**/*", "./packages/replicate-dom/test/happy-dom-tests/**/*.ts"]
 }

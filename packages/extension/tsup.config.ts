@@ -6,7 +6,7 @@ import { defineConfig } from 'tsup'
 export default defineConfig(options => ({
   entry: {
     'extension': './src/extension/extension.ts',
-    'inject-cli': './src/extension/inject-cli.ts',
+    'inject-cli': './src/test-process/inject-cli.ts',
     'inject-test': './src/test-process/inject-test.ts',
     'load-styles': './src/test-process/load-styles-worker.ts',
   },
@@ -19,6 +19,8 @@ export default defineConfig(options => ({
     'tinyspy',
     'replicate-dom',
   ],
+  // Vite handles the webview src watching
+  ignoreWatch: ['src/web-view-vite'],
   target: 'esnext',
   env: {
     NODE_ENV: options.watch ? 'development' : 'production',

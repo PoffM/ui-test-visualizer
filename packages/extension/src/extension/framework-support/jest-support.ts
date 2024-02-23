@@ -6,13 +6,10 @@ import { cleanTestNameForTerminal } from './util'
 export async function jestDebugConfig(
   filePath: string,
   testName: string,
-): Promise<vscode.DebugConfiguration> {
+): Promise<Partial<vscode.DebugConfiguration>> {
   const fw = await detectTestFramework(filePath)
 
   return {
-    name: 'Visually Debug UI',
-    request: 'launch',
-    type: 'pwa-node',
     program: fw.binPath,
     autoAttachChildProcesses: true,
     args: [

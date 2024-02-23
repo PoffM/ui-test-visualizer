@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     './src/web-view-vite/index.html',
     './src/web-view-vite/**/*.{js,ts,jsx,tsx}',
@@ -8,4 +8,5 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  presets: [require('./ui.preset.js')],
 }

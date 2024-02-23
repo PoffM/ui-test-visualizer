@@ -6,11 +6,8 @@ import { cleanTestNameForTerminal } from './util'
 export async function vitestDebugConfig(
   filePath: string,
   testName: string,
-): Promise<vscode.DebugConfiguration> {
+): Promise<Partial<vscode.DebugConfiguration>> {
   return {
-    name: 'Visually Debug UI',
-    request: 'launch',
-    type: 'pwa-node',
     program: await getVitestBinPath(filePath),
     runtimeArgs: ['--require', await findUp('dist/inject-cli.js', { cwd: __filename })],
     args: [

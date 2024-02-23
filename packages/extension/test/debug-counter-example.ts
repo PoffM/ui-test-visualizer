@@ -8,6 +8,7 @@ import { initVscodeMock } from './vscode-mock'
 export interface DebugRunCounterExampleParams {
   testFile?: string
   settings?: Partial<typeof defaultTestSettings>
+  cssFiles?: string[]
 }
 
 /**
@@ -16,6 +17,7 @@ export interface DebugRunCounterExampleParams {
 export async function debugCounterExample({
   testFile,
   settings,
+  cssFiles = [],
 }: DebugRunCounterExampleParams) {
   const result: {
     counts: number[]
@@ -53,7 +55,16 @@ export async function debugCounterExample({
       },
     })
 
-    const mockExtensionContext = mockDeep<vscode.ExtensionContext>()
+    const mockExtensionContext = mockDeep<vscode.ExtensionContext>({
+      globalState: {
+        get: (prop: unknown) => {
+          if (prop === 'enabledCssFiles') {
+            return cssFiles
+          }
+          return null
+        },
+      },
+    })
 
     await activate(mockExtensionContext)
 

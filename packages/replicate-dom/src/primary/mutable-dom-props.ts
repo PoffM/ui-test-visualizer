@@ -1,4 +1,4 @@
-import { uniq } from 'lodash'
+import uniq from 'lodash/uniq'
 import { IGNORED_NODE_METHODS } from './ignored-node-methods'
 import { SPYABLE_NODE_CLASSES } from './spyable-node-classes'
 

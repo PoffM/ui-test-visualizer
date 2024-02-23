@@ -40,14 +40,6 @@
           "type": "string",
           "default": "**/*.{test,spec}.{jsx,tsx}",
           "description": "Show the in-editor Visual UI Debugger buttons on files matching this pattern"
-        },
-        "visual-ui-test-debugger.cssFiles": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "description": "Extra CSS files to load into the tested UI. Supports PostCSS."
         }
       }
     },

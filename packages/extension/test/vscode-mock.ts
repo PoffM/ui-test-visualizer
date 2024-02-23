@@ -5,10 +5,9 @@ import { type DeepMockProxy, mockDeep } from 'vitest-mock-extended'
 import { findUp } from 'find-up'
 import { applyDomPatch } from 'replicate-dom'
 import { Node, Window } from 'happy-dom'
-import type { ExtensionSettingsKey } from '../src/extension/extension-setting'
+import type { ExtensionSettingsKey } from '../src/extension/util/extension-setting'
 
 export const defaultTestSettings: Record<ExtensionSettingsKey, unknown> = {
-  'visual-ui-test-debugger.cssFiles': [] as string[],
   'visual-ui-test-debugger.disableCodeLens': false,
   'visual-ui-test-debugger.codeLensSelector': '**/*.{test,spec}.{jsx,tsx}',
 }
@@ -47,8 +46,9 @@ export async function initVscodeMock({
     ...settings,
   }
 
+  // @ts-expect-error property should exist
   vscode.workspace.getConfiguration.mockReturnValue({
-    get: (section) => {
+    get: (section: string) => {
       // @ts-expect-error should work
       const value = resolvedSettings[section]
       if (value === undefined) {
@@ -65,11 +65,13 @@ export async function initVscodeMock({
   const startDebugCallbacks = new Set<(e: vscode.DebugSession) => any>()
   const endDebugCallbacks = new Set<(e: vscode.DebugSession) => any>()
 
+  // @ts-expect-error property should exist
   vscode.commands.registerCommand.mockImplementation((name, cb) => {
     registeredCommands.set(name, cb)
     return { dispose: () => registeredCommands.delete(name) }
   })
 
+  // @ts-expect-error property should exist
   vscode.commands.executeCommand.mockImplementation(async (name, ...args) => {
     const command = registeredCommands.get(name)
     if (!command) {
@@ -78,6 +80,7 @@ export async function initVscodeMock({
     return await command(...args)
   })
 
+  // @ts-expect-error property should exist
   vscode.debug.startDebugging.mockImplementation(async (_, debugConfig) => {
     if (typeof debugConfig === 'string') {
       throw new TypeError('Expected a DebugConfiguration object')
@@ -128,14 +131,21 @@ export async function initVscodeMock({
     return true
   })
 
+  // @ts-expect-error property should exist
   vscode.debug.onDidStartDebugSession.mockImplementation((cb) => {
     startDebugCallbacks.add(cb)
     return { dispose: () => startDebugCallbacks.delete(cb) }
   })
 
+  // @ts-expect-error property should exist
   vscode.debug.onDidTerminateDebugSession.mockImplementation((cb) => {
     endDebugCallbacks.add(cb)
     return { dispose: () => endDebugCallbacks.delete(cb) }
+  })
+
+  // @ts-expect-error property should exist
+  vscode.debug.onDidChangeActiveDebugSession.mockImplementation(() => {
+    return { dispose: () => {} }
   })
 
   const replicaWindow = new Window() as unknown as typeof globalThis.window
@@ -149,23 +159,30 @@ export async function initVscodeMock({
 
   const panels: vscode.WebviewPanel[] = []
 
+  // @ts-expect-error property should exist
   vscode.window.createWebviewPanel.mockImplementation(
-    (_viewType, _title, _viewColumn, _options) => {
+    () => {
       const panel = mockDeep<vscode.WebviewPanel>({
         webview: {
-          postMessage: async (msg) => {
+          postMessage: async (msg: any) => {
             if (msg.htmlPatch) {
               applyDomPatch(replicaWindow.document, msg.htmlPatch, replicaWindow)
               onReplicaDomUpdate(replicaWindow.document)
             }
             return true
           },
+          onDidReceiveMessage: () => ({ dispose: () => {} }),
         },
       })
       panels.push(panel)
       return panel
     },
   )
+
+  // @ts-expect-error property should exist
+  vscode.languages.registerInlineValuesProvider.mockImplementation(() => {
+    return { dispose: () => {} }
+  })
 
   return { vscode, replicaWindow }
 }

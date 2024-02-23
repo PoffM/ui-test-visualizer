@@ -8,7 +8,7 @@ vi.mock('vscode', () => {
   return vscode
 })
 
-it('replicates the test DOM into the webview (Vitest+React example)', async () => {
+it('replicates the test DOM into the webview with SCSS styles (Vitest+React example)', async () => {
   const scssFile = await findUp(
     'examples/vitest-react/style.scss',
     { cwd: __filename },
@@ -19,9 +19,7 @@ it('replicates the test DOM into the webview (Vitest+React example)', async () =
   }
 
   const { counts, buttonColor } = await debugCounterExample({
-    settings: {
-      'visual-ui-test-debugger.cssFiles': [scssFile],
-    },
+    cssFiles: [scssFile],
     testFile: await findUp(
       'examples/vitest-react/test/basic.test.tsx',
       { cwd: __filename },

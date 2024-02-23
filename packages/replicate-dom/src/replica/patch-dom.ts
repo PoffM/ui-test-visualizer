@@ -1,7 +1,7 @@
-import { castArray } from 'lodash'
+import castArray from 'lodash/castArray'
 import type { DomNodePath, HTMLPatch, SerializedDomMutationArg, SerializedDomNode } from '../types'
 import { getPropertyDescriptor } from '../property-util'
-import { getNodeByPath, parseDomNode } from './parse-mutations'
+import { getNodeByPath, parseDomNode } from './parse'
 
 export function applyDomPatch(root: Node, htmlPatch: HTMLPatch, win: typeof window) {
   const doc = root.nodeType === 9 // Check if the root node is Node.DOCUMENT_NODE
