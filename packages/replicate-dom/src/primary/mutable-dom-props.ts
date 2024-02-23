@@ -1,4 +1,5 @@
 import uniq from 'lodash/uniq'
+import type { Class } from 'type-fest'
 import type { SpyableClass } from '../types'
 import { IGNORED_NODE_METHODS } from './ignored-node-methods'
 import { SPYABLE_NODE_CLASSES } from './spyable-node-classes'
@@ -38,11 +39,11 @@ export function MUTABLE_DOM_PROPS(
   // Get Node and its subclasses, e.g. Element, HTMLElement, HTMLButtonElement, etc.
   const domClasses = uniq(
     Object.keys(SPYABLE_NODE_CLASSES)
-      .map(name => Reflect.get(win, name))
+      .map(name => Reflect.get(win, name) as Class<SpyableClass>)
       .filter(Boolean)
       .filter(val => val?.prototype instanceof win.Node)
       .sort((a, b) => protoLength(a) - protoLength(b)),
-  ) as (new () => SpyableClass)[]
+  )
   domClasses.unshift(win.Location)
 
   const map: MutableDomDescriptorMap = new Map()

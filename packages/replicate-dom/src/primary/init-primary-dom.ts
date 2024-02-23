@@ -1,4 +1,4 @@
-import type { HTMLPatch, SpyableClass } from '../types'
+import type { HTMLPatch } from '../types'
 import { spyOnDomNodes } from './spy-on-dom-nodes'
 import { getNodePath, serializeDomMutationArg } from './serialize'
 
@@ -25,8 +25,8 @@ export function initPrimaryDom(cfg: PrimaryDomConfig): void {
         return
       }
 
-      if (!(node instanceof cfg.win.Node)) {
-        throw new Error('Expected first arg to be an instance of Node')
+      if (!(node instanceof cfg.win.Node || node instanceof cfg.win.Location)) {
+        throw new TypeError('Expected first arg to be an instance of Node')
       }
 
       const nodePath = getNodePath(node, cfg.root, cfg.win)

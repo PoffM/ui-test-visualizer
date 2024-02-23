@@ -1,12 +1,24 @@
-import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode } from '../types'
+import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode, SpyableClass } from '../types'
 import { containsNode, findNestedAltRoots } from './contains-node-util'
 
-export function getNodePath(node: Node, root: Node, win: typeof window): DomNodePath | null {
+export function getNodePath(node: SpyableClass, root: Node, win: typeof window): DomNodePath | null {
   const indices: DomNodePath = []
   let currentNode = node
 
   // Traverse up the tree until the root node is reached
   while (currentNode && currentNode !== root) {
+    if (currentNode instanceof win.Location) {
+      if (!(root instanceof win.Document || root instanceof win.HTMLDocument)) {
+        throw new TypeError('Cannot find given Location\'s parent, given \'root\' is not a Document or HTMLDocument.')
+      }
+      if (root.location !== currentNode) {
+        throw new Error('Given Location is not a child of the root node.')
+      }
+      indices.unshift('location')
+      currentNode = root
+      continue
+    }
+
     if (currentNode.parentNode) {
       const parent = currentNode.parentNode
 
@@ -43,17 +55,6 @@ export function getNodePath(node: Node, root: Node, win: typeof window): DomNode
       const { parent } = altRoot
       currentNode = parent
 
-      continue
-    }
-
-    if (
-      currentNode instanceof win.Location
-      && (root instanceof win.Document
-      || root instanceof win.HTMLDocument)
-      && root.location === currentNode
-    ) {
-      indices.unshift('location')
-      currentNode = root
       continue
     }
 
