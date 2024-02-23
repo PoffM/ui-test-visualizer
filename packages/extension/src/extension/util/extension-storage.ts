@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 import type * as vscode from 'vscode'
+import type { JsonValue } from 'type-fest'
 
 export interface SafeStorage<T> {
   get: <P extends (keyof T & string)>(key: P) => Promise<T[P] | undefined>
@@ -9,7 +10,7 @@ export interface SafeStorage<T> {
 }
 
 /** Wraps VSCode's extension 'globalState' with type-safe getters and setters. */
-export function extensionStorage<T extends Record<string, JSONValue>>(
+export function extensionStorage<T extends Record<string, JsonValue>>(
   schema: { [P in keyof T]: z.ZodType<T[P]> },
 
   /** post-process the data after accessing or setting it. */
@@ -72,11 +73,3 @@ export function extensionStorage<T extends Record<string, JSONValue>>(
     },
   }
 }
-
-type JSONValue = string | number | boolean | null | JSONObject | JSONArray
-
-interface JSONObject {
-  [key: string]: JSONValue
-}
-
-interface JSONArray extends Array<JSONValue> {}
