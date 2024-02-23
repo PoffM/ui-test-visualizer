@@ -8,6 +8,7 @@ import { vitestDebugConfig } from './framework-support/vitest-support'
 import { codeLensProvider } from './code-lens-provider'
 import { startPanelController } from './panel-controller/panel-controller'
 import { extensionSetting } from './util/extension-setting'
+import type { SafeStorage } from './util/extension-storage'
 import { extensionStorage } from './util/extension-storage'
 
 const DEBUG_NAME = 'Visually Debug UI'
@@ -50,10 +51,38 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 export function deactivate() {}
 
 function myExtensionStorage(extensionContext: vscode.ExtensionContext) {
-  return extensionStorage({
+  const schema = {
     enabledCssFiles: z.array(z.string()),
     externalCssFiles: z.array(z.string()),
+  }
+
+  type StorageShape = {
+    [P in keyof typeof schema]: z.infer<typeof schema[P]>
+  }
+
+  const storage: SafeStorage<StorageShape> = extensionStorage(schema, {
+    enabledCssFiles: async (paths) => {
+      const workspacePaths = await workspaceCssFiles()
+      const externalFiles = await storage.get('externalCssFiles')
+      const validFiles = paths.filter(it =>
+        workspacePaths.includes(it)
+        || externalFiles?.includes(it),
+      )
+      return validFiles
+    },
   }, extensionContext)
+
+  return storage
+}
+
+export async function workspaceCssFiles() {
+  const workspaceFiles = await vscode.workspace.findFiles(
+    '**/*.{less,sass,scss,styl,stylus}',
+    '**/node_modules/**',
+  )
+
+  const workspacePaths = workspaceFiles.map(it => it.path)
+  return workspacePaths
 }
 
 export type MyStorageType = ReturnType<typeof myExtensionStorage>
@@ -113,7 +142,7 @@ export let visuallyDebugUI = async (
     TEST_FRAMEWORK: fwInfo.framework,
     TEST_FILE_PATH: filePath,
     HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
-    TEST_CSS_FILES: JSON.stringify(storage.enabledCssFiles),
+    TEST_CSS_FILES: JSON.stringify(await storage.get('enabledCssFiles')),
   }
 
   vscode.debug.startDebugging(undefined, debugConfig)

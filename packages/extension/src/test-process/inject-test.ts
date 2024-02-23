@@ -5,6 +5,7 @@ import { findUpSync } from 'find-up'
 import { createSyncFn } from 'synckit'
 import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
 import { z } from 'zod'
+import difference from 'lodash/difference'
 import shadowCss from './shadow.css.txt'
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
@@ -48,6 +49,7 @@ async function preTest() {
       // Insert the default css which supports light and dark mode
       const defaultShadowStyle = testWindow.document.createElement('style')
       defaultShadowStyle.textContent = shadowCss
+      defaultShadowStyle.dataset.debug_injected = 'true'
       testWindow.document.head.appendChild(defaultShadowStyle)
 
       loadStylesIntoHead(
@@ -110,14 +112,12 @@ async function preTest() {
   }
 }
 
-const injectedStyles = new Set<HTMLStyleElement>()
-
-function loadStylesIntoHead(win: Window, files: string[]) {
+function loadStylesIntoHead(win: typeof window, files: string[]) {
   const cssSheets = (() => {
-    const results: (
+    const results: ({ file: string } & (
       | { status: 'fulfilled', value: string }
       | { status: 'rejected', reason: unknown }
-    )[] = files.map((file) => {
+    ))[] = files.map((file) => {
       try {
         const style = loadStylesInWorker(file)
         if (typeof style !== 'string') {
@@ -125,17 +125,18 @@ function loadStylesIntoHead(win: Window, files: string[]) {
             `Expected a string, but got ${typeof style} when parsing file "${file}"`,
           )
         }
-        return { status: 'fulfilled', value: style }
+        return { file, status: 'fulfilled', value: style }
       }
       catch (error) {
-        return { status: 'rejected', reason: error }
+        logError(`Could not load CSS file "${file}" ${String(error)}`)
+        return { file, status: 'rejected', reason: error }
       }
     })
 
-    const sheets: string[] = []
+    const sheets: { file: string, css: string }[] = []
     for (const [idx, result] of Object.entries(results)) {
       if (result.status === 'fulfilled') {
-        sheets.push(result.value)
+        sheets.push({ file: result.file, css: result.value })
       }
       if (result.status === 'rejected') {
         console.error(
@@ -149,24 +150,49 @@ function loadStylesIntoHead(win: Window, files: string[]) {
     return sheets
   })()
 
-  // Remove old injected styles
-  for (const oldStyle of [...injectedStyles]) {
-    log('Remove stylesheet: ', oldStyle)
-    oldStyle.remove()
-    injectedStyles.delete(oldStyle)
-  }
+  const oldStyles = [
+    ...win.document.querySelectorAll(
+      'head>style[data-debug_injected=true][data-debug_replaceable=true]',
+    ),
+  ].filter((it): it is HTMLStyleElement => it instanceof win.HTMLStyleElement)
 
   // Add the new styles
-  for (const sheet of cssSheets) {
-    const style = win.document.createElement('style')
-    style.type = 'text/css'
-    style.textContent = sheet
-    style.dataset.injected_by_visual_ui_test_debugger = 'true'
+  const newStyles = cssSheets.map((sheet) => {
+    // If the style is already injected then re-use the element
+    const existingStyle = oldStyles.find(it =>
+      it instanceof win.HTMLStyleElement
+      && it.dataset.src_filepath === sheet.file,
+    )
+    if (existingStyle) {
+      existingStyle.textContent = sheet.css
+      return existingStyle
+    }
 
-    // Add the new styles
-    win.document.head.appendChild(style)
-    injectedStyles.add(style)
-    log('Inject stylesheet: ', style)
+    // Add a new style
+    const newStyle = win.document.createElement('style')
+    newStyle.type = 'text/css'
+    newStyle.textContent = sheet.css
+    newStyle.dataset.src_filepath = sheet.file
+    newStyle.dataset.debug_injected = 'true'
+    newStyle.dataset.debug_replaceable = 'true'
+    win.document.head.appendChild(newStyle)
+    return newStyle
+  })
+
+  for (const oldStyle of oldStyles) {
+    if (!newStyles.includes(oldStyle)) {
+      oldStyle.remove()
+    }
+  }
+
+  // Log the styles that were added or removed
+  const added = difference(newStyles, oldStyles)
+  const removed = difference(oldStyles, newStyles)
+  for (const style of added) {
+    log('Loaded stylesheet: ', style.dataset.src_filepath, style)
+  }
+  for (const style of removed) {
+    log('Removed stylesheet: ', style.dataset.src_filepath, style)
   }
 
   return cssSheets

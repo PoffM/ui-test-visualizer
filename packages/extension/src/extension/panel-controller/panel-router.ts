@@ -2,7 +2,7 @@ import path from 'node:path'
 import * as vscode from 'vscode'
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
-import type { MyStorageType } from '../extension'
+import { type MyStorageType, workspaceCssFiles } from '../extension'
 import { frameIds } from './panel-command-handler'
 
 export interface PanelRouterCtx {
@@ -51,15 +51,9 @@ export const panelRouter = t.router({
 
   availableCssFiles: proc
     .query(async ({ ctx }) => {
-      const workspaceFiles = await vscode.workspace.findFiles(
-        '**/*.{less,sass,scss,styl,stylus}',
-        '**/node_modules/**',
-      )
-
-      const workspacePaths = workspaceFiles.map(it => it.path)
-      const externalPaths = ctx.storage.externalCssFiles ?? []
-
-      const enabledFiles = ctx.storage.enabledCssFiles
+      const workspacePaths = await workspaceCssFiles()
+      const externalPaths = await ctx.storage.get('externalCssFiles') ?? []
+      const enabledFiles = await ctx.storage.get('enabledCssFiles') ?? []
 
       function getFileInfo(filePath: string, isExternal: boolean) {
         const displayPath = (() => {
@@ -98,16 +92,10 @@ export const panelRouter = t.router({
 
       if (newPaths?.length) {
         // Add the new files to the stored list of external files
-        ctx.storage.externalCssFiles = [
-          ...(ctx.storage.externalCssFiles ?? []),
-          ...newPaths,
-        ]
+        ctx.storage.set('externalCssFiles', old => [...(old ?? []), ...newPaths])
 
         // Enable the new files automatically
-        ctx.storage.enabledCssFiles = [
-          ...(ctx.storage.enabledCssFiles ?? []),
-          ...newPaths,
-        ]
+        ctx.storage.set('enabledCssFiles', old => [...(old ?? []), ...newPaths])
       }
     }),
 
@@ -115,9 +103,8 @@ export const panelRouter = t.router({
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
       const path = input
-      const oldExternalFiles = ctx.storage.externalCssFiles ?? []
-      const newExternalFiles = oldExternalFiles.filter(it => it !== path)
-      ctx.storage.externalCssFiles = newExternalFiles
+      ctx.storage.set('externalCssFiles', old => (old ?? []).filter(it => it !== path))
+      ctx.storage.set('enabledCssFiles', old => (old ?? []).filter(it => it !== path))
     }),
 
   toggleCssFile: proc
@@ -129,16 +116,16 @@ export const panelRouter = t.router({
     )
     .mutation(async ({ ctx, input }) => {
       const { path, enabled } = input
-      const oldEnabledFiles = ctx.storage.enabledCssFiles ?? []
-      const newEnabledFiles = enabled
-        ? [...oldEnabledFiles, path]
-        : oldEnabledFiles.filter(it => it !== path)
-      ctx.storage.enabledCssFiles = newEnabledFiles
+
+      ctx.storage.set(
+        'enabledCssFiles',
+        old => enabled ? [...(old ?? []), path] : (old ?? []).filter(it => it !== path),
+      )
     }),
 
   replaceStyles: proc
     .mutation(async ({ ctx }) => {
-      const files = ctx.storage.enabledCssFiles ?? []
+      const files = await ctx.storage.get('enabledCssFiles') ?? []
       const filesAsString = JSON.stringify(files)
       const result = await ctx.runDebugExpression(
         `globalThis.__replaceStyles(${filesAsString})`,
