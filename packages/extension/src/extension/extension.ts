@@ -2,7 +2,6 @@ import '@total-typescript/ts-reset'
 
 import path from 'node:path'
 import * as vscode from 'vscode'
-import { z } from 'zod'
 import { hotReload } from './util/hot-reload'
 import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
@@ -10,8 +9,7 @@ import { vitestDebugConfig } from './framework-support/vitest-support'
 import { codeLensProvider } from './code-lens-provider'
 import { startPanelController } from './panel-controller/panel-controller'
 import { extensionSetting } from './util/extension-setting'
-import type { SafeStorage } from './util/extension-storage'
-import { extensionStorage } from './util/extension-storage'
+import { myExtensionStorage } from './my-extension-storage'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -51,43 +49,6 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
-
-function myExtensionStorage(extensionContext: vscode.ExtensionContext) {
-  const schema = {
-    enabledCssFiles: z.array(z.string()),
-    externalCssFiles: z.array(z.string()),
-  }
-
-  type StorageShape = {
-    [P in keyof typeof schema]: z.infer<typeof schema[P]>
-  }
-
-  const storage: SafeStorage<StorageShape> = extensionStorage(schema, {
-    enabledCssFiles: async (paths) => {
-      const workspacePaths = await workspaceCssFiles()
-      const externalFiles = await storage.get('externalCssFiles')
-      const validFiles = paths.filter(it =>
-        workspacePaths.includes(it)
-        || externalFiles?.includes(it),
-      )
-      return validFiles
-    },
-  }, extensionContext)
-
-  return storage
-}
-
-export async function workspaceCssFiles() {
-  const workspaceFiles = await vscode.workspace.findFiles(
-    '**/*.{less,sass,scss,styl,stylus}',
-    '**/node_modules/**',
-  )
-
-  const workspacePaths = workspaceFiles.map(it => it.path)
-  return workspacePaths
-}
-
-export type MyStorageType = ReturnType<typeof myExtensionStorage>
 
 // eslint-disable-next-line import/no-mutable-exports
 export let visuallyDebugUI = async (

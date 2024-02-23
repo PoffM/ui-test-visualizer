@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
 import { callProcedure } from '@trpc/server'
-import type { MyStorageType } from '../extension'
+import type { MyStorageType } from '../my-extension-storage'
 import type { PanelRouterCtx } from './panel-router'
 import { panelRouter } from './panel-router'
 

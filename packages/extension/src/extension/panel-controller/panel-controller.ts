@@ -3,7 +3,7 @@ import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
-import type { MyStorageType } from '../extension'
+import type { MyStorageType } from '../my-extension-storage'
 import { startPanelCommandHandler } from './panel-command-handler'
 
 // Avoids import errors when importing in Vitest

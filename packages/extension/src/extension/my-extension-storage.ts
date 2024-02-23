@@ -1,10 +1,10 @@
 import type * as vscode from 'vscode'
 import { z } from 'zod'
-import { workspaceCssFiles } from '../extension'
-import type { SafeStorage } from './extension-storage'
-import { extensionStorage } from './extension-storage'
+import type { SafeStorage } from './util/extension-storage'
+import { extensionStorage } from './util/extension-storage'
+import { workspaceCssFiles } from './util/workspace-css-files'
 
-function myExtensionStorage(extensionContext: vscode.ExtensionContext) {
+export function myExtensionStorage(extensionContext: vscode.ExtensionContext) {
   const schema = {
     enabledCssFiles: z.array(z.string()),
     externalCssFiles: z.array(z.string()),

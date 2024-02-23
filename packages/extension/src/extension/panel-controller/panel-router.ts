@@ -2,7 +2,8 @@ import path from 'node:path'
 import * as vscode from 'vscode'
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
-import { type MyStorageType, workspaceCssFiles } from '../extension'
+import { workspaceCssFiles } from '../util/workspace-css-files'
+import type { MyStorageType } from '../my-extension-storage'
 import { frameIds } from './panel-command-handler'
 
 export interface PanelRouterCtx {
