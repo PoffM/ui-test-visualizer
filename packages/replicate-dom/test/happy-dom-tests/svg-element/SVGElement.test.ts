@@ -70,10 +70,11 @@ describe('sVGElement', () => {
   })
 
   function replicaElement() {
-    return replicaDocument.querySelector('svg') as ISVGSVGElement
+    return replicaDocument.body.childNodes
+      .find(node => Reflect.get(node, 'tagName') === 'svg') as ISVGSVGElement
   }
   function replicaLine() {
-    return replicaDocument.querySelector('line') as ISVGElement
+    return replicaElement()?.children.find(node => Reflect.get(node, 'tagName') === 'line') as ISVGElement
   }
 
   describe('get ownerSVGElement()', () => {

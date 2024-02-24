@@ -70,7 +70,8 @@ describe('sVGSVGElement', () => {
   })
 
   function replicaElement() {
-    return replicaDocument.querySelector('svg') as ISVGSVGElement
+    return replicaDocument.body.childNodes
+      .find(node => Reflect.get(node, 'tagName') === 'svg') as ISVGSVGElement
   }
 
   for (const property of ['width', 'height', 'x', 'y', 'contentScriptType']) {

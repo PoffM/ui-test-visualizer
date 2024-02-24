@@ -32,7 +32,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
 import type { CustomElementRegistry, HTMLUnknownElement, IDocument, IWindow } from 'happy-dom'
-import { callbacks as callbacksSymbol, formNode as formNodeSymbol,	observers as observersSymbol,	rootNode as rootNodeSymbol,	selectNode as selectNodeSymbol,	textAreaNode as textAreaNodeSymbol } from '../../../node_modules/happy-dom/lib/PropertySymbol.js'
+import * as PropertySymbol from '../../../node_modules/happy-dom/lib/PropertySymbol.js'
 import { initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
 
@@ -64,11 +64,11 @@ describe('hTMLUnknownElement', () => {
 
       parent.appendChild(element)
 
-      expect(window.customElements[callbacksSymbol]['CUSTOM-ELEMENT']!.length).toBe(1)
+      expect(window.customElements[PropertySymbol.callbacks]['custom-element']!.length).toBe(1)
 
       parent.removeChild(element)
 
-      expect(Object.keys(window.customElements[callbacksSymbol]).length).toBe(0)
+      expect(Object.keys(window.customElements[PropertySymbol.callbacks]).length).toBe(0)
 
       parent.appendChild(element)
 
@@ -102,11 +102,11 @@ describe('hTMLUnknownElement', () => {
 
       const childNodes = element.childNodes
       const children = element.children
-      const rootNode = (element[rootNodeSymbol] = document.createElement('div'))
-      const formNode = (element[formNodeSymbol] = document.createElement('div'))
-      const selectNode = (element[selectNodeSymbol] = document.createElement('div'))
-      const textAreaNode = (element[textAreaNodeSymbol] = document.createElement('div'))
-      const observers = element[observersSymbol]
+      const rootNode = (element[PropertySymbol.rootNode] = document.createElement('div'))
+      const formNode = (element[PropertySymbol.formNode] = document.createElement('div'))
+      const selectNode = (element[PropertySymbol.selectNode] = document.createElement('div'))
+      const textAreaNode = (element[PropertySymbol.textAreaNode] = document.createElement('div'))
+      const observers = element[PropertySymbol.observers]
       element.setAttribute('is', 'test')
 
       window.customElements.define('custom-element', CustomElement)
@@ -121,11 +121,11 @@ describe('hTMLUnknownElement', () => {
 
       expect(customElement.childNodes === childNodes).toBe(true)
       expect(customElement.children === children).toBe(true)
-      expect(customElement[rootNodeSymbol] === rootNode).toBe(true)
-      expect(customElement[formNodeSymbol] === formNode).toBe(true)
-      expect(customElement[selectNodeSymbol] === selectNode).toBe(true)
-      expect(customElement[textAreaNodeSymbol] === textAreaNode).toBe(true)
-      expect(customElement[observersSymbol] === observers).toBe(true)
+      expect(customElement[PropertySymbol.rootNode] === rootNode).toBe(true)
+      expect(customElement[PropertySymbol.formNode] === formNode).toBe(true)
+      expect(customElement[PropertySymbol.selectNode] === selectNode).toBe(true)
+      expect(customElement[PropertySymbol.textAreaNode] === textAreaNode).toBe(true)
+      expect(customElement[PropertySymbol.observers] === observers).toBe(true)
       expect(customElement.getAttribute('is')).toBe('test')
       expect(customElement.attributes.length).toBe(2)
       expect(customElement.attributes[0] === attribute1).toBe(true)
