@@ -75,6 +75,7 @@ export async function debugCounterExample({
 
     await vscode.commands.executeCommand(
       'visual-ui-test-debugger.visuallyDebugUI',
+      testFile,
       'simple react testing library test',
     )
   })
