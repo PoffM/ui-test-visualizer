@@ -13,6 +13,7 @@ webviewToolkit
   .provideVSCodeDesignSystem()
   .register(webviewToolkit.vsCodeButton())
   .register(webviewToolkit.vsCodeCheckbox())
+  .register(webviewToolkit.vsCodeProgressRing())
 
 // TODO put these into a context provider
 

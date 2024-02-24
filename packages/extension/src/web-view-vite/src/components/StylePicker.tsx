@@ -1,5 +1,5 @@
 import type { JSX } from 'solid-js'
-import { For, createEffect, createResource, createSignal } from 'solid-js'
+import { For, Show, createEffect, createResource, createSignal } from 'solid-js'
 import '../index.css'
 import get from 'lodash/get'
 import { X } from 'lucide-solid'
@@ -25,6 +25,13 @@ export function StylePicker(props: StylePickerProps) {
     if (!stylePickerOpen() && filesWereChanged()) {
       await client.replaceStyles.mutate()
       setFilesWereChanged(false)
+    }
+  })
+
+  // Remove the locally stored file paths when the style picker is closed.
+  createEffect(() => {
+    if (!stylePickerOpen()) {
+      fileQuery.mutate(undefined)
     }
   })
 
@@ -62,7 +69,10 @@ export function StylePicker(props: StylePickerProps) {
         <div class="flex flex-col gap-2 max-w-[300px]">
           <h1 class="font-bold text-sm text-center">Enable your styles</h1>
           <div class="">
-            <For each={files()} fallback={<div>Loading...</div>}>
+            <Show when={files()?.length === 0}>
+              <div>No CSS files found in workspace</div>
+            </Show>
+            <For each={files()}>
               {file => (
                 <div class="flex gap-2">
                   <label class="grow flex justify-between items-center px-2 select-none hover:bg-accent cursor-pointer">
@@ -88,6 +98,11 @@ export function StylePicker(props: StylePickerProps) {
                 </div>
               )}
             </For>
+            <Show when={files.loading}>
+              <div>
+                <vscode-progress-ring />
+              </div>
+            </Show>
           </div>
           <div class="flex justify-between px-2">
             <vscode-button
