@@ -2,6 +2,7 @@ import '@total-typescript/ts-reset'
 
 import path from 'node:path'
 import * as vscode from 'vscode'
+import { z } from 'zod'
 import { hotReload } from './util/hot-reload'
 import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
@@ -11,6 +12,7 @@ import { startPanelController } from './panel-controller/panel-controller'
 import { extensionSetting } from './util/extension-setting'
 import { myExtensionStorage } from './my-extension-storage'
 import { startDebugSessionTracker } from './util/debug-session-tracker'
+import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -32,7 +34,12 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   const debugTest = vscode.commands.registerCommand(
     'visual-ui-test-debugger.visuallyDebugUI',
-    testName => visuallyDebugUI(testName, extensionContext),
+    (testFile: unknown, testName: unknown, startAndEndLines: unknown) => visuallyDebugUI(
+      testFile,
+      testName,
+      startAndEndLines,
+      extensionContext,
+    ),
   )
 
   if (!extensionSetting('visual-ui-test-debugger.disableCodeLens')) {
@@ -53,21 +60,22 @@ export function deactivate() {}
 
 // eslint-disable-next-line import/no-mutable-exports
 export let visuallyDebugUI = async (
+  testFile: unknown,
   testName: unknown,
+  startAndEndLines: unknown,
   extensionContext: vscode.ExtensionContext,
 ) => {
   const storage = myExtensionStorage(extensionContext)
 
+  if (typeof testFile !== 'string') {
+    throw new TypeError(`Expected string argument \"testFile\", received ${testFile}`)
+  }
   if (typeof testName !== 'string') {
-    throw new TypeError('Expected a string argument')
+    throw new TypeError(`Expected string argument \"testName\", received ${testName}`)
   }
 
-  const editor = vscode.window.activeTextEditor
-  if (!editor) {
-    return
-  }
-
-  await editor.document.save()
+  // Save the test file before starting the debug session
+  await vscode.window.activeTextEditor?.document.save()
 
   const panelController = await startPanelController(extensionContext, storage)
 
@@ -75,6 +83,12 @@ export let visuallyDebugUI = async (
     onStartDebug.dispose()
 
     const sessionTracker = await startDebugSessionTracker(currentSession)
+
+    const breakpointInfoParsed = z.tuple([z.number(), z.number()])
+      .safeParse(startAndEndLines)
+    const autoBreakpoint = breakpointInfoParsed.success
+      ? autoSetFirstBreakpoint(testFile, breakpointInfoParsed.data)
+      : null
 
     await panelController.openPanel(sessionTracker)
 
@@ -84,6 +98,7 @@ export let visuallyDebugUI = async (
           return
         }
 
+        autoBreakpoint?.dispose()
         sessionTracker.dispose()
         panelController.dispose()
         onTerminate.dispose()
@@ -91,23 +106,21 @@ export let visuallyDebugUI = async (
     )
   })
 
-  const filePath = editor.document.fileName
-
-  const fwInfo = await detectTestFramework(filePath)
+  const fwInfo = await detectTestFramework(testFile)
 
   const debugConfig: vscode.DebugConfiguration = {
     name: DEBUG_NAME,
     request: 'launch',
     type: 'pwa-node',
     ...(fwInfo.framework === 'jest'
-      ? await jestDebugConfig(filePath, testName)
-      : await vitestDebugConfig(filePath, testName)),
+      ? await jestDebugConfig(testFile, testName)
+      : await vitestDebugConfig(testFile, testName)),
   }
 
   debugConfig.env = {
     ...debugConfig.env,
     TEST_FRAMEWORK: fwInfo.framework,
-    TEST_FILE_PATH: filePath,
+    TEST_FILE_PATH: testFile,
     HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
     TEST_CSS_FILES: JSON.stringify(await storage.get('enabledCssFiles')),
   }

@@ -1,0 +1,16 @@
+diff --git a/build/parsers/babel_parser.js b/build/parsers/babel_parser.js
+index 56788eabe59bd45fdc9f43328739568705b1ab54..8c6a7078117193a6b7c3a2e13a3c6eb5c17aa81a 100644
+--- a/build/parsers/babel_parser.js
++++ b/build/parsers/babel_parser.js
+@@ -213,6 +213,11 @@ var parse = exports.parse = function parse(file, data, options) {
+         child = addNode('describe', parent, element, lastProperty);
+       } else if (isAnIt(name)) {
+         child = addNode('it', parent, element, lastProperty);
++
++        // Patched code: include the test block in the "it" node
++        const testBlock = element?.expression?.arguments?.find?.(arg => arg?.type === 'ArrowFunctionExpression')?.body
++        child.testBlock = testBlock
++
+       } else if (isAnExpect(element)) {
+         child = addNode('expect', parent, element);
+       } else if (element && element.type === 'VariableDeclaration') {

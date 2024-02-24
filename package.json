@@ -64,5 +64,10 @@
     "type-fest": "^4.10.3",
     "typescript": "^5.3.3",
     "vitest": "^1.3.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "jest-editor-support@31.1.2": "patches/jest-editor-support@31.1.2.patch"
+    }
   }
 }

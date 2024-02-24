@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  jest-editor-support@31.1.2:
+    hash: skiwsjrbmxzwictrfhcuucvvze
+    path: patches/jest-editor-support@31.1.2.patch
+
 importers:
 
   .:
@@ -144,7 +149,7 @@ importers:
         version: 29.7.0(@types/node@20.11.19)(ts-node@10.9.2)
       jest-editor-support:
         specifier: ^31.1.2
-        version: 31.1.2
+        version: 31.1.2(patch_hash=skiwsjrbmxzwictrfhcuucvvze)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -5837,7 +5842,7 @@ packages:
       jest-util: 29.7.0
       pretty-format: 29.7.0
 
-  /jest-editor-support@31.1.2:
+  /jest-editor-support@31.1.2(patch_hash=skiwsjrbmxzwictrfhcuucvvze):
     resolution: {integrity: sha512-QlCN8dWVxMcmvzbkH2G1gSNjMPFM+69+Lx9WZcpYiHEaqrb1QKuVJrVNfbjHrlv0PhgCvzf1EdYKh8qqrQ3Rhw==}
     dependencies:
       '@babel/parser': 7.23.6
@@ -5849,6 +5854,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: false
+    patched: true
 
   /jest-environment-jsdom@29.7.0:
     resolution: {integrity: sha512-k9iQbsf9OyOfdzWH8HDmrRT0gSIcX+FLNW7IQq94tFX0gynPwqDTW0Ho6iMVNjGz/nb+l/vW3dWM2bbLLpkbXA==}
