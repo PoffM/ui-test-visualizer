@@ -35,6 +35,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
 import type { HTMLElement, IDocument, IHTMLElement, IWindow } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
+import { serializeDomNode } from '../../../src'
 
 describe(' HTMLElement', () => {
   let window: IWindow
@@ -63,6 +64,10 @@ describe(' HTMLElement', () => {
   }
 
   afterEach(() => {
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
+
     vi.restoreAllMocks()
   })
 

@@ -69,7 +69,6 @@ async function preTest() {
           initDom()
         }
       },
-      configurable: true,
     })
 
     if (testWindow) {

@@ -35,6 +35,7 @@ import type { IDocument, IHTMLElement, ISVGElement, ISVGSVGElement, IWindow } fr
 import NamespaceURI from '../../../node_modules/happy-dom/lib/config/NamespaceURI'
 import HTMLElementUtility from '../../../node_modules/happy-dom/lib/nodes/html-element/HTMLElementUtility'
 import { initTestReplicaDom } from '../../test-setup'
+import { serializeDomNode } from '../../../src'
 
 describe('sVGElement', () => {
   let window: IWindow
@@ -48,6 +49,10 @@ describe('sVGElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   beforeEach(() => {

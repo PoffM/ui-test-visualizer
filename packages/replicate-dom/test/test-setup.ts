@@ -1,5 +1,5 @@
 import { DocumentFragment } from 'happy-dom'
-import type { IDocument, IHTMLElement, INode, IWindow } from 'happy-dom'
+import type { IDocument, IHTMLElement, IWindow } from 'happy-dom'
 import { applyDomPatch, initPrimaryDom } from '../src'
 import { getNodePath } from '../src/primary/serialize'
 import { getNodeByPath } from '../src/replica/parse'
@@ -34,7 +34,7 @@ export function addTestElement<
   M extends NodeCreateMethod = 'createElement',
 >(
   primaryDocument: IDocument,
-  replicaDocument: INode,
+  replicaDocument: IDocument,
   arg: string,
   method: M = 'createElement' as M,
 ) {
@@ -67,7 +67,7 @@ export function addTestElement<
   const replica = getNodeByPath(
     replicaDocument as unknown as Node,
     path,
-    primaryDocument.defaultView as unknown as typeof globalThis.window,
+    replicaDocument.defaultView as unknown as typeof globalThis.window,
   )
   if (!replica) {
     throw new Error(`Node not found in replica document at ${path}`)

@@ -34,6 +34,7 @@ import { Window } from 'happy-dom'
 import type { ErrorEvent, Event, IBrowserWindow, IDocument, IHTMLLinkElement, IWindow } from 'happy-dom'
 import ResourceFetch from '../../../node_modules/happy-dom/lib/fetch/ResourceFetch'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
+import { serializeDomNode } from '../../../src'
 
 describe('hTMLLinkElement', () => {
   let window: IWindow
@@ -54,6 +55,10 @@ describe('hTMLLinkElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   function testElement(type: string) {

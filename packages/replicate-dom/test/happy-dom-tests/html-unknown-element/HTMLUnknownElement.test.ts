@@ -35,6 +35,7 @@ import type { CustomElementRegistry, HTMLUnknownElement, IDocument, IWindow } fr
 import * as PropertySymbol from '../../../node_modules/happy-dom/lib/PropertySymbol.js'
 import { initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
+import { serializeDomNode } from '../../../src/index.js'
 
 let window: IWindow
 let document: IDocument
@@ -54,6 +55,10 @@ beforeEach(() => {
 
 afterEach(() => {
   expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+  const primarySerialized = serializeDomNode(document.body, window)
+  const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+  expect(replicaSerialized).toEqual(primarySerialized)
 })
 
 describe('hTMLUnknownElement', () => {
@@ -111,6 +116,8 @@ describe('hTMLUnknownElement', () => {
 
       window.customElements.define('custom-element', CustomElement)
 
+      // TODO happy-dom bug? The element can be found with
+      // querySelector but has no parentNode
       const customElement = <CustomElement>document.body.children[0]
 
       expect(document.body.children.length).toBe(1)

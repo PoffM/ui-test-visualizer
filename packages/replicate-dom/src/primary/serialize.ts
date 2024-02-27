@@ -1,3 +1,4 @@
+import type { INode, IWindow } from 'happy-dom'
 import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode, SpyableClass } from '../types'
 import { containsNode, findNestedAltRoots } from './contains-node-util'
 
@@ -119,7 +120,10 @@ export function serializeDomMutationArg(
   throw new Error(`Unknown node type: ${JSON.stringify(arg)}`)
 }
 
-export function serializeDomNode(node: Node, win: typeof window): SerializedDomNode {
+export function serializeDomNode(
+  node: Node | INode,
+  win: typeof window | IWindow,
+): SerializedDomNode {
   if (node instanceof win.Text) {
     return ['Text', node.data]
   }

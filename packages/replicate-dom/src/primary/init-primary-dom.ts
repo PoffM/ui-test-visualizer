@@ -35,8 +35,9 @@ export function initPrimaryDom(cfg: PrimaryDomConfig): void {
         return
       }
 
-      const serializedArgs = args.map(it =>
-        serializeDomMutationArg(it, cfg.root, cfg.win),
+      const serializedArgs = args.map(it => Array.isArray(it)
+        ? it
+        : serializeDomMutationArg(it, cfg.root, cfg.win),
       )
 
       const htmlPatch: HTMLPatch = {

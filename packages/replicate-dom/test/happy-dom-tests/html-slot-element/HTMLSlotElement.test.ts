@@ -33,6 +33,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
 import type { IDocument, IHTMLSlotElement, INodeList, IWindow } from 'happy-dom'
 import { initTestReplicaDom } from '../../test-setup'
+import { serializeDomNode } from '../../../src'
 import CustomElementWithNamedSlots from './CustomElementWithNamedSlots'
 import CustomElementWithSlot from './CustomElementWithSlot'
 
@@ -56,10 +57,10 @@ describe('hTMLSlotElement', () => {
     replicaWindow = new Window()
     replicaDocument = replicaWindow.document
 
+    initTestReplicaDom(window, replicaWindow)
+
     window.customElements.define('custom-element-with-named-slots', CustomElementWithNamedSlots)
     window.customElements.define('custom-element-with-slot', CustomElementWithSlot)
-
-    initTestReplicaDom(window, replicaWindow)
 
     customElementWithNamedSlots = (
       document.createElement('custom-element-with-named-slots')
@@ -81,6 +82,10 @@ describe('hTMLSlotElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   describe('get name()', () => {

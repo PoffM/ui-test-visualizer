@@ -34,6 +34,7 @@ import { Window, XMLSerializer } from 'happy-dom'
 import type { IDocument, IHTMLTemplateElement, IWindow } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
+import { serializeDomNode } from '../../../src'
 
 describe('hTMLTemplateElement', () => {
   let window: IWindow
@@ -54,6 +55,10 @@ describe('hTMLTemplateElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   function testElement<T = IHTMLTemplateElement>(type: string) {

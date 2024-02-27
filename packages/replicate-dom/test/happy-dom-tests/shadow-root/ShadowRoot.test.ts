@@ -34,6 +34,7 @@ import { Window } from 'happy-dom'
 import type { IDocument, IHTMLElement, IWindow } from 'happy-dom'
 import CustomElement from '../CustomElement.js'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
+import { serializeDomNode } from '../../../src/index.js'
 
 describe('shadowRoot', () => {
   let window: IWindow
@@ -49,12 +50,16 @@ describe('shadowRoot', () => {
     replicaWindow = new Window()
     replicaDocument = replicaWindow.document
 
-    window.customElements.define('custom-element', CustomElement)
     initTestReplicaDom(window, replicaWindow)
+    window.customElements.define('custom-element', CustomElement)
   })
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   function testElement<T = IHTMLElement>(type: string) {

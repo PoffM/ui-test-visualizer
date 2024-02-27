@@ -41,6 +41,7 @@ import SVGLength from '../../../node_modules/happy-dom/lib/nodes/svg-element/SVG
 import { initTestReplicaDom } from '../../test-setup'
 import NamespaceURI from '../../../node_modules/happy-dom/lib/config/NamespaceURI'
 import SVGAnimatedRect from '../../../node_modules/happy-dom/lib/nodes/svg-element/SVGAnimatedRect'
+import { serializeDomNode } from '../../../src'
 
 describe('sVGSVGElement', () => {
   let window: IWindow
@@ -53,6 +54,10 @@ describe('sVGSVGElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   beforeEach(() => {

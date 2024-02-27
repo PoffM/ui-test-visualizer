@@ -17,41 +17,46 @@ export function getNodeByPath(root: Node, path: DomNodePath, win: typeof window)
   let currentElement: SpyableClass | undefined = root
 
   for (const index of path) {
-    if (
-      index === 'shadowRoot'
-      && currentElement instanceof win.Element
-      && currentElement.shadowRoot
-    ) {
-      currentElement = currentElement.shadowRoot
-    }
-    else if (
-      index === 'content'
-      && currentElement instanceof win.HTMLTemplateElement
-    ) {
-      currentElement = currentElement.content
-    }
-    else if (
-      index === 'location'
-      && (
-        currentElement instanceof win.Document
-        || currentElement instanceof win.HTMLDocument
-      )
-    ) {
-      currentElement = currentElement.location
-    }
-    else if (
-      typeof index === 'number'
-      && currentElement instanceof win.Node
-    ) {
-      // Check if the root node is Node.DOCUMENT_NODE
-      const childProp = currentElement.nodeType === 9 ? 'children' : 'childNodes'
-      // @ts-expect-error "children" exists when the node is a Document
-      const children: ArrayLike<Node> = currentElement[childProp]
-      currentElement = children[index]
-    }
-    if (!currentElement) {
+    const nextElement = ((): SpyableClass | undefined => {
+      if (
+        index === 'shadowRoot'
+        && currentElement instanceof win.Element
+        && currentElement.shadowRoot
+      ) {
+        return currentElement.shadowRoot
+      }
+      else if (
+        index === 'content'
+        && currentElement instanceof win.HTMLTemplateElement
+      ) {
+        return currentElement.content
+      }
+      else if (
+        index === 'location'
+        && (
+          currentElement instanceof win.Document
+          || currentElement instanceof win.HTMLDocument
+        )
+      ) {
+        return currentElement.location
+      }
+      else if (
+        typeof index === 'number'
+        && currentElement instanceof win.Node
+      ) {
+        // Check if the root node is Node.DOCUMENT_NODE
+        const childProp = currentElement.nodeType === 9 ? 'children' : 'childNodes'
+        // @ts-expect-error "children" exists when the node is a Document
+        const children: ArrayLike<Node> = currentElement[childProp]
+        return children[index]
+      }
+    })()
+
+    if (!nextElement) {
       throw new Error(`Node not found: ${path.join('.')}`)
     }
+
+    currentElement = nextElement
   }
 
   return currentElement

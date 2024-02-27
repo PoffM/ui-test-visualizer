@@ -33,6 +33,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { IDocument, IWindow } from 'happy-dom'
 import { Window } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
+import { serializeDomNode } from '../../../src/index.js'
 
 describe('charaterData', () => {
   let window: IWindow
@@ -62,6 +63,10 @@ describe('charaterData', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   describe('get length()', () => {

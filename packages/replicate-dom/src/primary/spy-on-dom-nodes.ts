@@ -1,15 +1,16 @@
 import castArray from 'lodash/castArray'
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
-import { getPropertyDescriptor } from '../property-util'
-import type { SpyableClass } from '../types'
+import { getPropertyDescriptor, getPropertyDescriptorAndProto } from '../property-util'
+import type { SerializedDomElement, SpyableClass } from '../types'
 import { MUTABLE_DOM_PROPS } from './mutable-dom-props'
 import { containsNode } from './contains-node-util'
+import { serializeDomNode } from './serialize'
 
 export type MutationCallback = (
   node: SpyableClass,
   prop: string | string[],
-  args: (Node | null | string)[],
+  args: (Node | null | string | SerializedDomElement)[],
   spyDepth: number
 ) => void
 
@@ -34,6 +35,16 @@ export function spyOnDomNodes(
     }
   }
 
+  const postSpyQueue: (() => void)[] = []
+  /** Methods that need to be called after the current spy function. e.g. Web Component connectedCallbacks */
+  function flushPostSpyQueue() {
+    if (spyDepth === 1) {
+      while (postSpyQueue.length) {
+        postSpyQueue.shift()?.()
+      }
+    }
+  }
+
   // Only call the callback for nodes within the root,
   // to make sure different DOM trees in the same JS process are unaffected by each other.
   {
@@ -45,26 +56,76 @@ export function spyOnDomNodes(
     }
   }
 
-  // Handle "connectedCallback()" calls used in custom elements / web components
-  // TODO make this work in jsdom
   {
-    const connectedCallbackSymbol = Reflect.ownKeys(win.Node.prototype)
-      .find(key => key.toString() === 'Symbol(connectToNode)')
+    const origDefine = win.customElements.define
+    Object.defineProperty(win.customElements, 'define', {
+      get() {
+        return function overrideDefine(
+          this: CustomElementRegistry,
+          name: string,
+          CustomElementClass: CustomElementConstructor,
+          options?: ElementDefinitionOptions,
+        ) {
+          const lifecycleMethods = [
+            'connectedCallback',
+            'disconnectedCallback',
+            'adoptedCallback',
+            'attributeChangedCallback',
+          ]
 
-    if (connectedCallbackSymbol) {
-      const connectedCallbackSpy = spyOn(
-        win.Node.prototype,
-        // @ts-expect-error symbols should work here
-        connectedCallbackSymbol,
-        function (this: Node, ...args) {
-          const originalSpyDepth = spyDepth
-          spyDepth = 0
-          const result = connectedCallbackSpy.getOriginal().call(this, ...args)
-          spyDepth = originalSpyDepth
-          return result
-        },
-      )
-    }
+          for (const method of lifecycleMethods) {
+            const info = getPropertyDescriptorAndProto(CustomElementClass.prototype, method)
+            if (!info) {
+              continue
+            }
+
+            const { proto } = info
+
+            const lifecycleSpy: SpyImpl = spyOn(
+              proto,
+              // @ts-expect-error method should exist on proto
+              method,
+              function (this: Node, ...args: any[]) {
+                if (method === 'connectedCallback') {
+                  postSpyQueue.push(() => {
+                    if (!this.parentNode) {
+                      return
+                      // throw new Error('Could not find parent node for connectedCallback')
+                    }
+
+                    return callback(
+                      this.parentNode,
+                      'replaceChild',
+                      [serializeDomNode(this, win) as SerializedDomElement, this],
+                      0,
+                    )
+                  })
+                  const result = lifecycleSpy.getOriginal().call(this, ...args)
+                  return result
+                }
+                else {
+                  // Reset to 0 because these callbacks are called inside methods like innerHTML and appendChild
+                  const originalSpyDepth = spyDepth
+                  spyDepth = 0
+                  try {
+                    const result = lifecycleSpy.getOriginal().call(this, ...args)
+                    return result
+                  }
+                  finally {
+                    spyDepth = originalSpyDepth
+                  }
+                }
+              },
+            )
+          }
+
+          origDefine.call(this, name, CustomElementClass, options)
+        }
+      },
+      set() {
+        throw new Error('Cannot redefine customElements.define')
+      },
+    })
   }
 
   const mutableDomProps = MUTABLE_DOM_PROPS(win)
@@ -84,7 +145,9 @@ export function spyOnDomNodes(
           prop,
           trackSpyDepth(function interceptMethod(this: any, ...args: any[]) {
             callback(this, prop, args, spyDepth)
-            return methodSpy.getOriginal().call(this, ...args)
+            const result = methodSpy.getOriginal().call(this, ...args)
+            flushPostSpyQueue()
+            return result
           }),
         )
       }
@@ -103,6 +166,7 @@ export function spyOnDomNodes(
             trackSpyDepth(function interceptSetter(this: any, value) {
               callback(this, prop, castArray(value), spyDepth)
               setFn.call(this, value)
+              flushPostSpyQueue()
             }),
           )
         }

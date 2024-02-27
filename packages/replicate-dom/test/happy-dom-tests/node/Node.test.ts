@@ -35,6 +35,7 @@ import type { ErrorEvent, HTMLTemplateElement, IDocument, IHTMLElement, IShadowR
 import NodeFactory from '../../../node_modules/happy-dom/lib/nodes/NodeFactory'
 import EventPhaseEnum from '../../../node_modules/happy-dom/lib/event/EventPhaseEnum'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
+import { serializeDomNode } from '../../../src'
 
 let window: IWindow
 let document: IDocument
@@ -55,6 +56,10 @@ function testElement(type: string) {
 
 afterEach(() => {
   expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+  const primarySerialized = serializeDomNode(document.body, window)
+  const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+  expect(replicaSerialized).toEqual(primarySerialized)
 })
 
 describe('node', () => {
@@ -317,6 +322,12 @@ describe('node', () => {
   describe('connectedCallback()', () => {
     it('calls connected callback when a custom element is connected to DOM.', () => {
       document.body.innerHTML = '<custom-counter><custom-button></custom-button></custom-counter>'
+
+      const primarySerialized = serializeDomNode(document.body, window)
+      const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+
+      expect(replicaSerialized).toEqual(primarySerialized)
+
       document.body.innerHTML = ''
       expect(customElementOutput).toEqual([
         'Counter:connected',

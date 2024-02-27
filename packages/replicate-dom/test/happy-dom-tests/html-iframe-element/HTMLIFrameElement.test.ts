@@ -34,6 +34,7 @@ import { BrowserWindow, Window } from 'happy-dom'
 import type { IDocument, IHTMLIFrameElement, IResponse, IWindow } from 'happy-dom'
 import type IRequestInfo from 'happy-dom/lib/fetch/types/IRequestInfo'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
+import { serializeDomNode } from '../../../src'
 
 describe('hTMLIFrameElement', () => {
   let window: IWindow
@@ -63,6 +64,11 @@ describe('hTMLIFrameElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
+
     vi.restoreAllMocks()
   })
 

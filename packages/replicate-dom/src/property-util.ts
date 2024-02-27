@@ -15,6 +15,23 @@ export function getPropertyDescriptor(
   }
 }
 
+/** Go up the prototype chain until you get the descriptor for your given property key. */
+export function getPropertyDescriptorAndProto(
+  obj: object,
+  p: PropertyKey,
+): { descriptor: PropertyDescriptor, proto: unknown } | undefined {
+  for (
+    let proto = obj;
+    proto !== null;
+    proto = Object.getPrototypeOf(proto)
+  ) {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, p)
+    if (descriptor) {
+      return { descriptor, proto }
+    }
+  }
+}
+
 /**
  * Go up the prototype chain and get the descriptor from the highest prototype that
  * implements it for your given property key.

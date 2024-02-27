@@ -34,6 +34,7 @@ import { Node, ShadowRoot, Window } from 'happy-dom'
 import type { Element, HTMLTemplateElement, IAttr, IDocument, IElement, IWindow, Text } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
+import { serializeDomNode } from '../../../src'
 
 const NAMESPACE_URI = 'https://test.test'
 const NamespaceURI = {
@@ -56,9 +57,9 @@ describe('element', () => {
     replicaWindow = new Window()
     replicaDocument = replicaWindow.document
 
-    window.customElements.define('custom-element', CustomElement)
-
     initTestReplicaDom(window, replicaWindow)
+    
+    window.customElements.define('custom-element', CustomElement)
   })
 
   function testElement(type: string) {
@@ -73,6 +74,10 @@ describe('element', () => {
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
     vi.restoreAllMocks()
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   describe('children', () => {

@@ -34,6 +34,7 @@ import { Window } from 'happy-dom'
 import type { Event, IDocument, IHTMLOptionElement, IHTMLSelectElement, IWindow } from 'happy-dom'
 import ValidityState from '../../../node_modules/happy-dom/lib/validity-state/ValidityState.js'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
+import { serializeDomNode } from '../../../src/index.js'
 
 describe('hTMLSelectElement', () => {
   let window: IWindow
@@ -54,6 +55,10 @@ describe('hTMLSelectElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   function testElement<T = IHTMLSelectElement>(type: string) {

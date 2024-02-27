@@ -33,6 +33,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
 import type { IDocument, IHTMLMetaElement, IWindow } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
+import { serializeDomNode } from '../../../src'
 
 describe('hTMLMetaElement', () => {
   let window: IWindow
@@ -53,6 +54,10 @@ describe('hTMLMetaElement', () => {
 
   afterEach(() => {
     expect(replicaDocument.body.outerHTML).toBe(document.body.outerHTML)
+
+    const primarySerialized = serializeDomNode(document.body, window)
+    const replicaSerialized = serializeDomNode(replicaDocument.body, replicaWindow)
+    expect(replicaSerialized).toEqual(primarySerialized)
   })
 
   function testElement(type: string) {
