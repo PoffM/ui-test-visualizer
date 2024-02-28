@@ -30,6 +30,7 @@ export function spyOnDomNodes(
         return result
       }
       finally {
+        flushPostSpyQueue()
         spyDepth--
       }
     }
@@ -146,7 +147,6 @@ export function spyOnDomNodes(
           trackSpyDepth(function interceptMethod(this: any, ...args: any[]) {
             callback(this, prop, args, spyDepth)
             const result = methodSpy.getOriginal().call(this, ...args)
-            flushPostSpyQueue()
             return result
           }),
         )
@@ -166,7 +166,6 @@ export function spyOnDomNodes(
             trackSpyDepth(function interceptSetter(this: any, value) {
               callback(this, prop, castArray(value), spyDepth)
               setFn.call(this, value)
-              flushPostSpyQueue()
             }),
           )
         }
