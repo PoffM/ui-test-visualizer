@@ -1,4 +1,3 @@
-import castArray from 'lodash/castArray'
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
 import { getPropertyDescriptor, getPropertyDescriptorAndProto } from '../property-util'
@@ -61,7 +60,7 @@ export function spyOnDomNodes(
     const origDefine = win.customElements.define
     Object.defineProperty(win.customElements, 'define', {
       get() {
-        return function overrideDefine(
+        return function define(
           this: CustomElementRegistry,
           name: string,
           CustomElementClass: CustomElementConstructor,
@@ -164,7 +163,7 @@ export function spyOnDomNodes(
             cls.prototype,
             { setter: prop },
             trackSpyDepth(function interceptSetter(this: any, value) {
-              callback(this, prop, castArray(value), spyDepth)
+              callback(this, prop, [value], spyDepth)
               setFn.call(this, value)
             }),
           )
