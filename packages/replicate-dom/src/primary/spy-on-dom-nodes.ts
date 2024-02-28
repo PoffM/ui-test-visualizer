@@ -177,7 +177,7 @@ export function spyOnDomNodes(
     // e.g. "style", "classList", "dataset", "attributes"
     for (const [getter, spiedMethods] of Object.entries(nestedMethods ?? {})) {
       // Spy on the getter property.
-      const spy = spyOn(cls.prototype, { getter }, trackSpyDepth(function interceptGetter(this: SpyableClass) {
+      const spy = spyOn(cls.prototype, { getter }, function interceptGetter(this: SpyableClass) {
         // @ts-expect-error asserted types here should be correct
         const nestedObj = spy.getOriginal().call(this) as T[G] & object
 
@@ -190,35 +190,35 @@ export function spyOnDomNodes(
           // Listen to the specified method on the nested object
           get: (_, accessedProp: string) => {
             if ((spiedMethods as string[]).includes(accessedProp)) {
-              return (...spiedMethodArgs: any[]) => {
+              return trackSpyDepth((...spiedMethodArgs: any[]) => {
                 callback(this, [getter, accessedProp], spiedMethodArgs, spyDepth)
                 return Reflect.apply(
                   nestedObj[accessedProp],
                   nestedObj,
                   spiedMethodArgs,
                 )
-              }
+              })
             }
             return Reflect.get(nestedObj, accessedProp)
           },
           // Listen to the nested object's setter properties
-          set: (_, setter, value) => {
+          set: trackSpyDepth((_, setter, value) => {
             // Report the mutation
             if (typeof setter === 'string') {
               callback(this, [getter, setter], [value], spyDepth)
             }
             // Apply the original mutation
             return Reflect.set(nestedObj, setter, value)
-          },
-          deleteProperty: (_, prop) => {
+          }),
+          deleteProperty: trackSpyDepth((_, prop) => {
             // Report the mutation
             if (typeof prop === 'string') {
               callback(this, [getter, prop], [], spyDepth)
             }
             return Reflect.deleteProperty(nestedObj, prop)
-          },
+          }),
         })
-      }))
+      })
     }
   }
 
