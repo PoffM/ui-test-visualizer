@@ -18,29 +18,43 @@ export function spyOnDomNodes(
   root: Node,
   callback: MutationCallback,
 ): void {
+  const scriptDepth = new WeakMap<Node, number>()
+  const defaultScript = win.document.createElement('script')
+
+  function getDepth(script: Node = defaultScript) {
+    return scriptDepth.get(script) ?? 0
+  }
+
+  function setDepth(script: Node, setter: (num: number) => number) {
+    scriptDepth.set(script, setter(getDepth(script)))
+  }
+
+  scriptDepth.set(defaultScript, 0)
+
   // Don't recursively call the callback
-  let spyDepth = 0
   const postSpyQueue: (() => void)[] = []
   function trackSpyDepth<A extends any[], R>(fn: (...args: A) => R) {
     return function wrappedSpyFn(this: unknown, ...args: A) {
+      const script = win.document.currentScript ?? defaultScript
+
       try {
-        spyDepth++
+        setDepth(script, num => num + 1)
         const result: R = fn.apply(this, args)
         return result
       }
       finally {
-        if (spyDepth === 1) {
+        if (getDepth(script) === 1) {
           /** Methods that need to be called after the current spy function. e.g. Web Component connectedCallbacks */
           while (postSpyQueue.length) {
             postSpyQueue.shift()?.()
           }
         }
-        spyDepth--
+        setDepth(script, num => num - 1)
       }
     }
   }
 
-  const reportMutation: MutationCallback = (node, ...args) => {
+  const reportMutation: MutationCallback = (node, prop, args) => {
     if (
       // Only call the callback for nodes within the root,
       // to make sure different DOM trees in the same JS process are unaffected by each other.
@@ -49,9 +63,9 @@ export function spyOnDomNodes(
       // Don't emit patches for nested mutations.
       // e.g. a Node's "remove()" might call "removeChild()" internally,
       // so we only want to replicate the top-level remove() call.
-      && spyDepth <= 1
+      && getDepth() <= 1
     ) {
-      return callback(node, ...args)
+      return callback(node, prop, args)
     }
   }
 
@@ -103,14 +117,14 @@ export function spyOnDomNodes(
                 }
                 else {
                   // Reset to 0 because these callbacks are called inside methods like innerHTML and appendChild
-                  const originalSpyDepth = spyDepth
-                  spyDepth = 0
+                  const originalSpyDepth = getDepth()
+                  setDepth(defaultScript, () => 0)
                   try {
                     const result = lifecycleSpy.getOriginal().call(this, ...args)
                     return result
                   }
                   finally {
-                    spyDepth = originalSpyDepth
+                    setDepth(defaultScript, () => originalSpyDepth)
                   }
                 }
               },
