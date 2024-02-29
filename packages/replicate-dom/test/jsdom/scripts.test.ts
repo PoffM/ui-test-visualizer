@@ -19,7 +19,7 @@ beforeEach(() => {
 })
 
 describe('connectedCallback()', () => {
-  it('runs a script and replicates any mutatuins that happen', () => {
+  it('runs a script and replicates any mutations that happen', () => {
     document.body.innerHTML = `
       <div>
         <div id="text"></div>
