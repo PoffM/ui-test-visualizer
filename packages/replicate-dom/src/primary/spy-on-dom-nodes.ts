@@ -10,7 +10,6 @@ export type MutationCallback = (
   node: SpyableClass,
   prop: string | string[],
   args: (Node | null | string | SerializedDomElement)[],
-  spyDepth: number
 ) => void
 
 /** Run a callback function when a DOM node is mutated. */
@@ -21,6 +20,7 @@ export function spyOnDomNodes(
 ): void {
   // Don't recursively call the callback
   let spyDepth = 0
+  const postSpyQueue: (() => void)[] = []
   function trackSpyDepth<A extends any[], R>(fn: (...args: A) => R) {
     return function wrappedSpyFn(this: unknown, ...args: A) {
       try {
@@ -29,30 +29,29 @@ export function spyOnDomNodes(
         return result
       }
       finally {
-        flushPostSpyQueue()
+        if (spyDepth === 1) {
+          /** Methods that need to be called after the current spy function. e.g. Web Component connectedCallbacks */
+          while (postSpyQueue.length) {
+            postSpyQueue.shift()?.()
+          }
+        }
         spyDepth--
       }
     }
   }
 
-  const postSpyQueue: (() => void)[] = []
-  /** Methods that need to be called after the current spy function. e.g. Web Component connectedCallbacks */
-  function flushPostSpyQueue() {
-    if (spyDepth === 1) {
-      while (postSpyQueue.length) {
-        postSpyQueue.shift()?.()
-      }
-    }
-  }
+  const reportMutation: MutationCallback = (node, ...args) => {
+    if (
+      // Only call the callback for nodes within the root,
+      // to make sure different DOM trees in the same JS process are unaffected by each other.
+      containsNode(root, node, win)
 
-  // Only call the callback for nodes within the root,
-  // to make sure different DOM trees in the same JS process are unaffected by each other.
-  {
-    const originalCallback = callback
-    callback = (node, ...args) => {
-      if (containsNode(root, node, win)) {
-        return originalCallback(node, ...args)
-      }
+      // Don't emit patches for nested mutations.
+      // e.g. a Node's "remove()" might call "removeChild()" internally,
+      // so we only want to replicate the top-level remove() call.
+      && spyDepth <= 1
+    ) {
+      return callback(node, ...args)
     }
   }
 
@@ -93,11 +92,10 @@ export function spyOnDomNodes(
                       // throw new Error('Could not find parent node for connectedCallback')
                     }
 
-                    return callback(
+                    return reportMutation(
                       this.parentNode,
                       'replaceChild',
                       [serializeDomNode(this, win) as SerializedDomElement, this],
-                      0,
                     )
                   })
                   const result = lifecycleSpy.getOriginal().call(this, ...args)
@@ -144,7 +142,7 @@ export function spyOnDomNodes(
           cls.prototype,
           prop,
           trackSpyDepth(function interceptMethod(this: any, ...args: any[]) {
-            callback(this, prop, args, spyDepth)
+            reportMutation(this, prop, args)
             const result = methodSpy.getOriginal().call(this, ...args)
             return result
           }),
@@ -163,7 +161,7 @@ export function spyOnDomNodes(
             cls.prototype,
             { setter: prop },
             trackSpyDepth(function interceptSetter(this: any, value) {
-              callback(this, prop, [value], spyDepth)
+              reportMutation(this, prop, [value])
               setFn.call(this, value)
             }),
           )
@@ -189,7 +187,7 @@ export function spyOnDomNodes(
           get: (_, accessedProp: string) => {
             if ((spiedMethods as string[]).includes(accessedProp)) {
               return trackSpyDepth((...spiedMethodArgs: any[]) => {
-                callback(this, [getter, accessedProp], spiedMethodArgs, spyDepth)
+                reportMutation(this, [getter, accessedProp], spiedMethodArgs)
                 return Reflect.apply(
                   nestedObj[accessedProp],
                   nestedObj,
@@ -203,7 +201,7 @@ export function spyOnDomNodes(
           set: trackSpyDepth((_, setter, value) => {
             // Report the mutation
             if (typeof setter === 'string') {
-              callback(this, [getter, setter], [value], spyDepth)
+              reportMutation(this, [getter, setter], [value])
             }
             // Apply the original mutation
             return Reflect.set(nestedObj, setter, value)
@@ -211,7 +209,7 @@ export function spyOnDomNodes(
           deleteProperty: trackSpyDepth((_, prop) => {
             // Report the mutation
             if (typeof prop === 'string') {
-              callback(this, [getter, prop], [], spyDepth)
+              reportMutation(this, [getter, prop], [])
             }
             return Reflect.deleteProperty(nestedObj, prop)
           }),

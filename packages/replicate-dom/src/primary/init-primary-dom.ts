@@ -12,14 +12,7 @@ export function initPrimaryDom(cfg: PrimaryDomConfig): void {
   spyOnDomNodes(
     cfg.win,
     cfg.root,
-    function emitHtmlPatch(node, prop, args, spyDepth) {
-      // Don't emit patches for nested mutations.
-      // e.g. a Node's "remove()" might call "removeChild()" internally,
-      // so we only want to replicate the top-level remove() call.
-      if (spyDepth > 1) {
-        return
-      }
-
+    function emitHtmlPatch(node, prop, args) {
       // Ignore operations involving doctype nodes
       if ([node, ...args].some(it => it instanceof cfg.win.DocumentType)) {
         return
@@ -32,7 +25,7 @@ export function initPrimaryDom(cfg: PrimaryDomConfig): void {
       const nodePath = getNodePath(node, cfg.root, cfg.win)
 
       if (!nodePath) {
-        return
+        throw new Error('Node not found in DOM')
       }
 
       const serializedArgs = args.map(it => Array.isArray(it)
