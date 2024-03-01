@@ -20,10 +20,11 @@ export function spyOnDomNodes(
 ): void {
   const ctxDepth = new WeakMap<object, number>()
 
-  let rootCtx = {}
-  ctxDepth.set(rootCtx, 0)
+  const rootCtx = {}
+  let currentCtx = rootCtx
+  ctxDepth.set(currentCtx, 0)
 
-  function getCtxDepth(ctx: object = rootCtx) {
+  function getCtxDepth(ctx: object = currentCtx) {
     return ctxDepth.get(ctx) ?? 0
   }
 
@@ -32,13 +33,13 @@ export function spyOnDomNodes(
   }
 
   function runInNewCtx<T>(fn: () => T): T {
-    const originalRoot = rootCtx
-    rootCtx = {}
+    const originalRoot = currentCtx
+    currentCtx = {}
     try {
       return fn()
     }
     finally {
-      rootCtx = originalRoot
+      currentCtx = originalRoot
     }
   }
 
@@ -46,7 +47,7 @@ export function spyOnDomNodes(
   const postSpyQueue: (() => void)[] = []
   function trackSpyDepth<A extends any[], R>(fn: (...args: A) => R) {
     return function wrappedSpyFn(this: unknown, ...args: A) {
-      const ctx = win.document.currentScript ?? rootCtx
+      const ctx = win.document.currentScript ?? currentCtx
 
       try {
         setCtxDepth(ctx, num => num + 1)
@@ -54,7 +55,7 @@ export function spyOnDomNodes(
         return result
       }
       finally {
-        if (getCtxDepth(ctx) === 1) {
+        if (getCtxDepth(ctx) === 1 && currentCtx === rootCtx) {
           /** Methods that need to be called after the current spy function. e.g. Web Component connectedCallbacks */
           while (postSpyQueue.length) {
             postSpyQueue.shift()?.()
@@ -136,7 +137,20 @@ export function spyOnDomNodes(
             )
           }
 
-          origDefine.call(this, name, CustomElementClass, options)
+          const GeneratedSubclass = class extends CustomElementClass {
+            constructor(...args: unknown[]) {
+              const originalRoot = currentCtx
+              currentCtx = {}
+              try {
+                super(...args)
+              }
+              finally {
+                currentCtx = originalRoot
+              }
+            }
+          }
+
+          origDefine.call(this, name, GeneratedSubclass, options)
         }
       },
       set() {
