@@ -125,4 +125,11 @@ describe('connectedCallback()', () => {
 
     expect(replicaSerialized).toEqual(primarySerialized)
   })
+
+  it('stores and retrieves the right class in the Custom Element Registry.', () => {
+    class MyElement extends window.HTMLElement {}
+
+    window.customElements.define('my-element', MyElement)
+    expect(window.customElements.get('my-element')).toBe(MyElement)
+  })
 })

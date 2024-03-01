@@ -1,5 +1,6 @@
 import type { SpyImpl } from 'tinyspy'
 import { spyOn } from 'tinyspy'
+import type { Class } from 'type-fest'
 import { getPropertyDescriptor, getPropertyDescriptorAndProto } from '../property-util'
 import type { SerializedDomElement, SpyableClass } from '../types'
 import { MUTABLE_DOM_PROPS } from './mutable-dom-props'
@@ -82,8 +83,12 @@ export function spyOnDomNodes(
   }
 
   {
+    const elementClasses = new Map<string, Class<unknown>>()
     const origDefine = win.customElements.define
     Object.defineProperty(win.customElements, 'define', {
+      set() {
+        throw new Error('Cannot redefine customElements.define')
+      },
       get() {
         return function define(
           this: CustomElementRegistry,
@@ -150,11 +155,21 @@ export function spyOnDomNodes(
             }
           }
 
+          elementClasses.set(name, CustomElementClass)
           origDefine.call(this, name, GeneratedSubclass, options)
         }
       },
+    })
+
+    Object.defineProperty(win.customElements, 'get', {
       set() {
-        throw new Error('Cannot redefine customElements.define')
+        throw new Error('Cannot redefine customElements.set')
+      },
+      get() {
+        return function get(name: string) {
+          const cls = elementClasses.get(name)
+          return cls
+        }
       },
     })
   }
