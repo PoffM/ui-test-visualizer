@@ -21,6 +21,9 @@ export function spyOnDomNodes(
 ): void {
   const ctxDepth = new WeakMap<object, number>()
 
+  /** Track Nodes currently running their "connectedCallback" lifecycle hook. */
+  const connectingNodes = new Set<Node>()
+
   const rootCtx = {}
   let currentCtx = rootCtx
   ctxDepth.set(currentCtx, 0)
@@ -77,6 +80,10 @@ export function spyOnDomNodes(
       // e.g. a Node's "remove()" might call "removeChild()" internally,
       // so we only want to replicate the top-level remove() call.
       && getCtxDepth() <= 1
+
+      // when replicating the "connectedCallback" lifecycle hook,
+      // don't emit patches about the connecting node or its children
+      && [...connectingNodes].every(it => !containsNode(it, node, win))
     ) {
       return callback(node, prop, args)
     }
@@ -117,6 +124,7 @@ export function spyOnDomNodes(
               method,
               function (this: Node, ...args: any[]) {
                 if (method === 'connectedCallback') {
+                  connectingNodes.add(this)
                   postSpyQueue.push(() => {
                     if (!this.parentNode) {
                       return
@@ -129,7 +137,10 @@ export function spyOnDomNodes(
                       [serializeDomNode(this, win) as SerializedDomElement, this],
                     )
                   })
-                  const result = lifecycleSpy.getOriginal().call(this, ...args)
+                  const result = runInNewCtx(() => {
+                    return lifecycleSpy.getOriginal().call(this, ...args)
+                  })
+                  connectingNodes.delete(this)
                   return result
                 }
                 else {

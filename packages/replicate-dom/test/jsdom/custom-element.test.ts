@@ -88,7 +88,7 @@ describe('connectedCallback()', () => {
     expect(replicaSerialized).toEqual(primarySerialized)
   })
 
-  it('calls connected callback which mutates other DOM nodes.', () => {
+  it('calls connectedCallback which mutates other DOM nodes.', () => {
     document.body.innerHTML = `
       <div id="outer">
         <div id="text">Hello</div>
