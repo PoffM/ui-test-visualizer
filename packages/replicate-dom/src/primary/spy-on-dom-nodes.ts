@@ -18,38 +18,49 @@ export function spyOnDomNodes(
   root: Node,
   callback: MutationCallback,
 ): void {
-  const scriptDepth = new WeakMap<Node, number>()
-  const defaultScript = win.document.createElement('script')
+  const ctxDepth = new WeakMap<object, number>()
 
-  function getDepth(script: Node = defaultScript) {
-    return scriptDepth.get(script) ?? 0
+  let rootCtx = {}
+  ctxDepth.set(rootCtx, 0)
+
+  function getCtxDepth(ctx: object = rootCtx) {
+    return ctxDepth.get(ctx) ?? 0
   }
 
-  function setDepth(script: Node, setter: (num: number) => number) {
-    scriptDepth.set(script, setter(getDepth(script)))
+  function setCtxDepth(ctx: object, setter: (num: number) => number) {
+    ctxDepth.set(ctx, setter(getCtxDepth(ctx)))
   }
 
-  scriptDepth.set(defaultScript, 0)
+  function runInNewCtx<T>(fn: () => T): T {
+    const originalRoot = rootCtx
+    rootCtx = {}
+    try {
+      return fn()
+    }
+    finally {
+      rootCtx = originalRoot
+    }
+  }
 
   // Don't recursively call the callback
   const postSpyQueue: (() => void)[] = []
   function trackSpyDepth<A extends any[], R>(fn: (...args: A) => R) {
     return function wrappedSpyFn(this: unknown, ...args: A) {
-      const script = win.document.currentScript ?? defaultScript
+      const ctx = win.document.currentScript ?? rootCtx
 
       try {
-        setDepth(script, num => num + 1)
+        setCtxDepth(ctx, num => num + 1)
         const result: R = fn.apply(this, args)
         return result
       }
       finally {
-        if (getDepth(script) === 1) {
+        if (getCtxDepth(ctx) === 1) {
           /** Methods that need to be called after the current spy function. e.g. Web Component connectedCallbacks */
           while (postSpyQueue.length) {
             postSpyQueue.shift()?.()
           }
         }
-        setDepth(script, num => num - 1)
+        setCtxDepth(ctx, num => num - 1)
       }
     }
   }
@@ -63,7 +74,7 @@ export function spyOnDomNodes(
       // Don't emit patches for nested mutations.
       // e.g. a Node's "remove()" might call "removeChild()" internally,
       // so we only want to replicate the top-level remove() call.
-      && getDepth() <= 1
+      && getCtxDepth() <= 1
     ) {
       return callback(node, prop, args)
     }
@@ -117,15 +128,9 @@ export function spyOnDomNodes(
                 }
                 else {
                   // Reset to 0 because these callbacks are called inside methods like innerHTML and appendChild
-                  const originalSpyDepth = getDepth()
-                  setDepth(defaultScript, () => 0)
-                  try {
-                    const result = lifecycleSpy.getOriginal().call(this, ...args)
-                    return result
-                  }
-                  finally {
-                    setDepth(defaultScript, () => originalSpyDepth)
-                  }
+                  return runInNewCtx(() => {
+                    return lifecycleSpy.getOriginal().call(this, ...args)
+                  })
                 }
               },
             )
