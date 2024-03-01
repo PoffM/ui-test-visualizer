@@ -137,18 +137,13 @@ export function spyOnDomNodes(
                       [serializeDomNode(this, win) as SerializedDomElement, this],
                     )
                   })
-                  const result = runInNewCtx(() => {
-                    return lifecycleSpy.getOriginal().call(this, ...args)
-                  })
-                  connectingNodes.delete(this)
-                  return result
                 }
-                else {
-                  // Reset to 0 because these callbacks are called inside methods like innerHTML and appendChild
-                  return runInNewCtx(() => {
-                    return lifecycleSpy.getOriginal().call(this, ...args)
-                  })
-                }
+                // Run with reset depth because these callbacks are called inside methods like innerHTML and appendChild
+                const result = runInNewCtx(() => {
+                  return lifecycleSpy.getOriginal().call(this, ...args)
+                })
+                connectingNodes.delete(this)
+                return result
               },
             )
           }
