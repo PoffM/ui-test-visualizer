@@ -43,6 +43,10 @@ export function createDomReplica() {
     // instead of overlapping the UI outside the shadow (i.e. the toolbar)
     htmlEl.style.transform = 'scale(1)'
 
+    // Add extra padding to the bottom because the toolbar reduces the scrollable height,
+    // cutting off the bottom of tall UIs
+    htmlEl.style.paddingBottom = '80px'
+
     setReplicaHtmlEl(htmlEl)
   }
 
