@@ -21,7 +21,11 @@ async function loadStyles(filePath: string) {
       return await postcssrc()
     }
     catch (error) {
-      console.error(`Failed to parse PostCSS config found for file ${filePath}`, error)
+      if (error instanceof Error && error.message.startsWith('No PostCSS Config found')) {
+        // Suppress this error because it's fine if there's no PostCSS config.
+        return null
+      }
+      console.warn(`Failed to parse PostCSS config found for file ${filePath}`, error)
       return null
     }
   })()
