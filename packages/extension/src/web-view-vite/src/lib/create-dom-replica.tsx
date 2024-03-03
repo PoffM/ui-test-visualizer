@@ -38,6 +38,11 @@ export function createDomReplica() {
     const htmlEl = shadow.querySelector('html')!
     htmlEl.style.height = '100%'
     htmlEl.style.overflowY = 'scroll'
+
+    // This should cause any position: fixed elements to be positioned relative to the shadow root
+    // instead of overlapping the UI outside the shadow (i.e. the toolbar)
+    htmlEl.style.transform = 'scale(1)'
+
     setReplicaHtmlEl(htmlEl)
   }
 
