@@ -24,13 +24,15 @@ export function Toolbar() {
         {theme() === 'dark' ? <Moon /> : <Sun />}
       </vscode-button>
       <StylePicker
-        button={(
+        button={isRefreshing => (
           <vscode-button
             class="h-10 w-10"
             appearance="secondary"
             title="Enable your styles"
           >
-            <StyleIcon />
+            {isRefreshing
+              ? <vscode-progress-ring class="w-[16px] h-[16px]" />
+              : <StyleIcon />}
           </vscode-button>
         )}
       />

@@ -10,7 +10,7 @@ import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from './popover
 export const StyleIcon = Brush
 
 export interface StylePickerProps {
-  button: JSX.Element
+  button: (isLoading: boolean) => JSX.Element
 }
 
 export function StylePicker(props: StylePickerProps) {
@@ -28,12 +28,16 @@ export function StylePicker(props: StylePickerProps) {
   const [filesWereChanged, setFilesWereChanged] = createSignal(false)
 
   // When the style picker is closed, and the files were changed, replace the styles.
-  createEffect(async () => {
-    if (!stylePickerIsOpen() && filesWereChanged()) {
+  const [refreshQuery] = createResource(
+    () => !stylePickerIsOpen() && filesWereChanged(),
+    async (runQuery) => {
+      if (!runQuery) {
+        return
+      }
       await client.replaceStyles.mutate()
       setFilesWereChanged(false)
-    }
-  })
+    },
+  )
 
   createEffect(() => {
     if (stylePickerIsOpen() && showInitialStyleHint()) {
@@ -76,7 +80,7 @@ export function StylePicker(props: StylePickerProps) {
         open={stylePickerIsOpen()}
         onOpenChange={open => setStylePickerIsOpen(open)}
       >
-        <PopoverTrigger>{props.button}</PopoverTrigger>
+        <PopoverTrigger>{props.button(refreshQuery.loading)}</PopoverTrigger>
         <PopoverContent>
           <PopoverArrow />
           <StylePickerMenu
