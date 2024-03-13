@@ -1,6 +1,6 @@
-import { Brush, Moon, RefreshCw, Sun } from 'lucide-solid'
+import { Moon, RefreshCw, Sun } from 'lucide-solid'
 import { firstPatchReceived, refreshShadow, theme, toggleTheme } from '../App'
-import { StylePicker } from './StylePicker'
+import { StyleIcon, StylePicker } from './StylePicker'
 
 export function Toolbar() {
   return (
@@ -30,7 +30,7 @@ export function Toolbar() {
             appearance="secondary"
             title="Enable your styles"
           >
-            <Brush />
+            <StyleIcon />
           </vscode-button>
         )}
       />

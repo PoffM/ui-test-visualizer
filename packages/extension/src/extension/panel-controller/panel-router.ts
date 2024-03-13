@@ -104,6 +104,36 @@ export const panelRouter = t.router({
       )
       return !!result
     }),
+
+  /** Whether to show the one-time message asking you to enable styles. */
+  showStylePrompt: t.procedure
+    .query(async ({ ctx }) => {
+      const dismissed = await ctx.storage.get('stylePromptDismissed') ?? false
+
+      if (dismissed) {
+        return false
+      }
+
+      const enabledFiles = await ctx.storage.get('enabledCssFiles') ?? []
+      if (enabledFiles.length) {
+        return false
+      }
+
+      const cssFiles = await workspaceCssFiles()
+      const hasWorkspaceCssFiles = cssFiles.length > 0
+
+      return hasWorkspaceCssFiles
+    }),
+
+  dismissStylePrompt: t.procedure
+    .mutation(async ({ ctx }) => {
+      ctx.storage.set('stylePromptDismissed', true)
+    }),
+
+  unDismissStylePrompt: t.procedure
+    .mutation(async ({ ctx }) => {
+      ctx.storage.set('stylePromptDismissed', false)
+    }),
 })
 
 export type PanelRouter = typeof panelRouter

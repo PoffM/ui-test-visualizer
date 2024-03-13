@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js'
-import { splitProps } from 'solid-js'
+import { onMount, splitProps } from 'solid-js'
 
 import { Popover as PopoverPrimitive } from '@kobalte/core'
 import { cn } from '../lib/utils'
@@ -9,6 +9,33 @@ const Popover: Component<PopoverPrimitive.PopoverRootProps> = (props) => {
 }
 
 const PopoverTrigger = PopoverPrimitive.Trigger
+
+function PopoverArrow(props: PopoverPrimitive.PopoverArrowProps) {
+  const [, rest] = splitProps(props, ['class'])
+
+  // Give the arrow a fill color with better contrast against the background
+  let wrapper: HTMLDivElement | undefined
+  onMount(() => {
+    if (!wrapper) {
+      return
+    }
+    const paths = wrapper.querySelectorAll('path')
+    for (const path of paths) {
+      path.setAttribute('fill', 'var(--vscode-menu-border)')
+    }
+  })
+
+  return (
+    <div ref={wrapper}>
+      <PopoverPrimitive.Arrow
+        class={cn(
+          props.class,
+        )}
+        {...rest}
+      />
+    </div>
+  )
+}
 
 const PopoverContent: Component<PopoverPrimitive.PopoverContentProps> = (props) => {
   const [, rest] = splitProps(props, ['class'])
@@ -25,4 +52,4 @@ const PopoverContent: Component<PopoverPrimitive.PopoverContentProps> = (props) 
   )
 }
 
-export { Popover, PopoverTrigger, PopoverContent }
+export { Popover, PopoverTrigger, PopoverContent, PopoverArrow }

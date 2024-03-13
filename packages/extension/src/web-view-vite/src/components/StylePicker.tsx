@@ -2,126 +2,184 @@ import type { JSX } from 'solid-js'
 import { For, Show, createEffect, createResource, createSignal } from 'solid-js'
 import '../index.css'
 import get from 'lodash/get'
-import { X } from 'lucide-solid'
+import { Brush, X } from 'lucide-solid'
 import { client } from '../lib/panel-client'
-import { Popover, PopoverContent, PopoverTrigger } from './popover'
+import { firstPatchReceived } from '../App'
+import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from './popover'
+
+export const StyleIcon = Brush
 
 export interface StylePickerProps {
   button: JSX.Element
 }
 
 export function StylePicker(props: StylePickerProps) {
-  const [stylePickerOpen, setStylePickerOpen] = createSignal(false)
+  const [stylePickerIsOpen, setStylePickerIsOpen] = createSignal(false)
 
-  const [files, fileQuery] = createResource(
-    stylePickerOpen,
-    isOpen => isOpen ? client.availableCssFiles.query() : undefined,
+  const [showInitialStyleHint, initialStyleHintQuery] = createResource(
+    async () => await client.showStylePrompt.query(),
   )
+
+  async function dismissStylePrompt() {
+    initialStyleHintQuery.mutate(false)
+    await client.dismissStylePrompt.mutate()
+  }
 
   const [filesWereChanged, setFilesWereChanged] = createSignal(false)
 
   // When the style picker is closed, and the files were changed, replace the styles.
   createEffect(async () => {
-    if (!stylePickerOpen() && filesWereChanged()) {
+    if (!stylePickerIsOpen() && filesWereChanged()) {
       await client.replaceStyles.mutate()
       setFilesWereChanged(false)
     }
   })
 
-  // Remove the locally stored file paths when the style picker is closed.
   createEffect(() => {
-    if (!stylePickerOpen()) {
-      fileQuery.mutate(undefined)
+    if (stylePickerIsOpen() && showInitialStyleHint()) {
+      dismissStylePrompt()
     }
   })
+
+  // For local dev testing: Un-dismiss the style prompt when the user presses the backtick key.
+  // window.addEventListener('keydown', (event) => {
+  //   if (event.key === '`') {
+  //     client.unDismissStylePrompt.mutate()
+  //   }
+  // })
+
+  return (
+    <div class="relative">
+      {/* Style picker initial hint popover */}
+      <Popover
+        open={showInitialStyleHint() && firstPatchReceived()}
+      >
+        <PopoverTrigger class="-z-50 absolute inset-0"><div /></PopoverTrigger>
+        <PopoverContent class="w-48">
+          <PopoverArrow />
+          <div class="space-y-2">
+            <div>You can use this <StyleIcon size={18} class="inline" /> button to enable CSS files.</div>
+            <div class="w-full flex justify-end">
+              <vscode-button
+                onClick={dismissStylePrompt}
+                appearance="secondary"
+              >
+                OK
+              </vscode-button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {/* Style picker menu popover */}
+      <Popover
+        open={stylePickerIsOpen()}
+        onOpenChange={open => setStylePickerIsOpen(open)}
+      >
+        <PopoverTrigger>{props.button}</PopoverTrigger>
+        <PopoverContent>
+          <PopoverArrow />
+          <StylePickerMenu
+            setFilesWereChanged={setFilesWereChanged}
+            setStylePickerOpen={setStylePickerIsOpen}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
+interface StylePickerMenuProps {
+  setStylePickerOpen: (val: boolean) => void
+  setFilesWereChanged: (val: boolean) => void
+}
+
+function StylePickerMenu(
+  props: StylePickerMenuProps,
+) {
+  const [files, fileQuery] = createResource(
+    () => client.availableCssFiles.query(),
+  )
 
   async function toggleFile(path: string, enabled: boolean) {
     const optimisticUpdate = files()
       ?.map(f => f.path === path ? { ...f, enabled } : f)
     fileQuery.mutate(optimisticUpdate)
     await client.toggleCssFile.mutate({ path, enabled })
-    setFilesWereChanged(true)
+    props.setFilesWereChanged(true)
   }
 
   async function addExternalFiles() {
     await client.addExternalCssFiles.mutate()
-    setFilesWereChanged(true)
+    props.setFilesWereChanged(true)
     fileQuery.refetch()
   }
 
   async function removeExternalFile(path: string) {
     await client.removeExternalCssFile.mutate(path)
-    setFilesWereChanged(true)
+    props.setFilesWereChanged(true)
     fileQuery.refetch()
   }
 
   function ok() {
-    setStylePickerOpen(false)
+    props.setStylePickerOpen(false)
   }
 
   return (
-    <Popover
-      open={stylePickerOpen()}
-      onOpenChange={open => setStylePickerOpen(open)}
-    >
-      <PopoverTrigger>{props.button}</PopoverTrigger>
-      <PopoverContent>
-        <div class="flex flex-col gap-2 max-w-[300px]">
-          <h1 class="font-bold text-sm text-center">Enable your styles</h1>
-          <div class="">
-            <Show when={files()?.length === 0}>
-              <div>No CSS files found in workspace</div>
-            </Show>
-            <For each={files()}>
-              {file => (
-                <div class="flex gap-2">
-                  <label class="grow flex justify-between items-center px-2 select-none hover:bg-accent cursor-pointer">
-                    <div class="" title={file.path}>
-                      {file.displayPath}
-                    </div>
-                    <vscode-checkbox
-                      checked={file.enabled}
-                      onChange={(e: unknown) => {
-                        const checked = Boolean(get(e, 'currentTarget.checked'))
-                        return toggleFile(file.path, checked)
-                      }}
-                    />
-                  </label>
-                  <vscode-button
-                    appearance="icon"
-                    title="Remove"
-                    onClick={() => removeExternalFile(file.path)}
-                    style={{ visibility: file.isExternal ? 'visible' : 'hidden' }}
-                  >
-                    <X />
-                  </vscode-button>
+    <div class="flex flex-col gap-2 max-w-[300px]">
+      <h1 class="font-bold text-sm text-center">Enable your styles</h1>
+      <div class="">
+        <Show when={files()?.length === 0}>
+          <div>No CSS files found in workspace</div>
+        </Show>
+        <For each={files()}>
+          {file => (
+            <div class="flex gap-2">
+              <label class="grow flex justify-between items-center px-2 select-none hover:bg-accent cursor-pointer">
+                <div class="" title={file.path}>
+                  {file.displayPath}
                 </div>
-              )}
-            </For>
-            <Show when={files.loading}>
-              <div>
-                <vscode-progress-ring />
-              </div>
-            </Show>
+                <vscode-checkbox
+                  checked={file.enabled}
+                  onChange={(e: unknown) => {
+                    const checked = Boolean(get(e, 'currentTarget.checked'))
+                    return toggleFile(file.path, checked)
+                  }}
+                />
+              </label>
+              <vscode-button
+                appearance="icon"
+                title="Remove"
+                onClick={() => removeExternalFile(file.path)}
+                style={{ visibility: file.isExternal ? 'visible' : 'hidden' }}
+              >
+                <X />
+              </vscode-button>
+            </div>
+          )}
+        </For>
+        <Show when={files.loading}>
+          <div>
+            <vscode-progress-ring />
           </div>
-          <div class="flex justify-between px-2">
-            <vscode-button
-              appearance="secondary"
-              title="Link another file"
-              onClick={addExternalFiles}
-            >
-              Add external file
-            </vscode-button>
-            <vscode-button
-              appearance="primary"
-              title="Apply styles"
-              onClick={ok}
-            >
-              OK
-            </vscode-button>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </Show>
+      </div>
+      <div class="flex justify-between px-2">
+        <vscode-button
+          appearance="secondary"
+          title="Link another file"
+          onClick={addExternalFiles}
+        >
+          Add external file
+        </vscode-button>
+        <vscode-button
+          appearance="primary"
+          title="Apply styles"
+          onClick={ok}
+        >
+          OK
+        </vscode-button>
+      </div>
+    </div>
   )
 }

@@ -8,6 +8,9 @@ export function myExtensionStorage(extensionContext: vscode.ExtensionContext) {
   const schema = {
     enabledCssFiles: z.array(z.string()),
     externalCssFiles: z.array(z.string()),
+
+    /** Whether to hide the one-time message asking you to enable styles. */
+    stylePromptDismissed: z.boolean(),
   }
 
   type StorageShape = {
