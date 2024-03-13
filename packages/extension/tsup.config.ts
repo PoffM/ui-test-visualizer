@@ -33,18 +33,13 @@ export default defineConfig(options => ({
   plugins: [
     {
       name: 'make-dist-folder',
-      async buildStart() {
+      buildStart: lodash.once(async () => {
         await fs.mkdir(path.resolve(__dirname, './dist/'), { recursive: true })
-      },
+      }),
     },
     {
       name: 'add-package.json',
-      async buildStart() {
-        // Only run for prod build
-        if (options.watch) {
-          return
-        }
-
+      buildStart: lodash.once(async () => {
         const omitKeys: (keyof typeof rootPkg)[] = ['scripts', 'devDependencies', 'pnpm']
         const prodPackageJson = {
           ...lodash.omit(rootPkg, omitKeys),
@@ -56,26 +51,22 @@ export default defineConfig(options => ({
           JSON.stringify(prodPackageJson, null, 2),
         )
         console.log('Created dist/package.json')
-      },
+      }),
     },
     {
       name: 'add-readme',
-      async buildStart() {
-        // Only run for prod build
-        if (options.watch) {
-          return
-        }
+      buildStart: lodash.once(async () => {
         await fs.copyFile(
           path.resolve(__dirname, '../../README.md'),
           path.resolve(__dirname, './dist/README.md'),
         )
         console.log('Created dist/README.md')
-      },
+      }),
     },
     {
       // TODO simpler way to make an svg green
       name: 'prepare-green-icon',
-      async buildStart() {
+      buildStart: lodash.once(async () => {
         console.log('Preparing green debug icon')
         const src = path.resolve(
           __dirname,
@@ -102,7 +93,7 @@ export default defineConfig(options => ({
         )
         await fs.writeFile(dest, newSvg)
         console.log('Green debug icon prepared')
-      },
+      }),
     },
   ],
 }))
