@@ -3,6 +3,11 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { defineConfig } from 'tsup'
 
+// eslint-disable-next-line import/no-named-default
+import { default as lodash } from 'lodash'
+
+import rootPkg from '../../package.json'
+
 export default defineConfig(options => ({
   entry: {
     'extension': './src/extension/extension.ts',
@@ -26,6 +31,47 @@ export default defineConfig(options => ({
     NODE_ENV: options.watch ? 'development' : 'production',
   },
   plugins: [
+    {
+      name: 'make-dist-folder',
+      async buildStart() {
+        await fs.mkdir(path.resolve(__dirname, './dist/'), { recursive: true })
+      },
+    },
+    {
+      name: 'add-package.json',
+      async buildStart() {
+        // Only run for prod build
+        if (options.watch) {
+          return
+        }
+
+        const omitKeys: (keyof typeof rootPkg)[] = ['scripts', 'devDependencies', 'pnpm']
+        const prodPackageJson = {
+          ...lodash.omit(rootPkg, omitKeys),
+          main: './extension.js',
+        }
+
+        await fs.writeFile(
+          path.resolve(__dirname, './dist/package.json'),
+          JSON.stringify(prodPackageJson, null, 2),
+        )
+        console.log('Created dist/package.json')
+      },
+    },
+    {
+      name: 'add-readme',
+      async buildStart() {
+        // Only run for prod build
+        if (options.watch) {
+          return
+        }
+        await fs.copyFile(
+          path.resolve(__dirname, '../../README.md'),
+          path.resolve(__dirname, './dist/README.md'),
+        )
+        console.log('Created dist/README.md')
+      },
+    },
     {
       // TODO simpler way to make an svg green
       name: 'prepare-green-icon',
@@ -54,7 +100,6 @@ export default defineConfig(options => ({
           'fill="currentColor"',
           `fill="${color}"`,
         )
-        await fs.mkdir(path.resolve(__dirname, './dist/'), { recursive: true })
         await fs.writeFile(dest, newSvg)
         console.log('Green debug icon prepared')
       },

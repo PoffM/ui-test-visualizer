@@ -20,7 +20,6 @@
     "vscode": "^1.77.0"
   },
   "activationEvents": [
-    "onCommand:visual-ui-test-debugger.configureTest",
     "workspaceContains:**/vitest.config.*",
     "workspaceContains:**/vite.config.*",
     "workspaceContains:**/jest.config.*",
