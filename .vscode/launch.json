@@ -6,7 +6,7 @@
       "type": "extensionHost",
       "request": "launch",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/extension/dist",
         "${workspaceFolder}/examples/vitest-react"
       ],
       "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"],
@@ -17,7 +17,7 @@
       "type": "extensionHost",
       "request": "launch",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/extension/dist",
         "${workspaceFolder}/examples/jest-react"
       ],
       "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"],

@@ -77,12 +77,14 @@ export async function startPanelController(
           }
 
           const appCss = getUri(
-            'packages/extension/dist/web-view-vite/assets/index.css',
+            path.join('web-view-vite/assets/index.css'),
           )
           const appJs = getUri(
-            'packages/extension/dist/web-view-vite/assets/index.js',
+            path.join('web-view-vite/assets/index.js'),
           )
-          const icon = getUri('packages/extension/dist/debug.svg')
+          const icon = getUri(
+            path.join('debug.svg'),
+          )
 
           const prodHtml = `
             <!doctype html>
