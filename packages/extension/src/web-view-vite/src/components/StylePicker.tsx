@@ -67,6 +67,7 @@ export function StylePicker(props: StylePickerProps) {
               <vscode-button
                 onClick={dismissStylePrompt}
                 appearance="secondary"
+                title="Dismiss style prompt"
               >
                 OK
               </vscode-button>

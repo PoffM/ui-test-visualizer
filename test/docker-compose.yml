@@ -1,0 +1,11 @@
+services:
+  code-server:
+    build:
+      context: ..
+      dockerfile: ./test/Dockerfile
+    command: "/source --auth none --disable-update-check --disable-telemetry --disable-workspace-trust"
+    container_name: vscodeExtension
+    ports:
+      - "8080:8080"
+    volumes:
+      - ..:/source

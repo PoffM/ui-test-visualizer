@@ -9,7 +9,7 @@ export function createDomReplica() {
   const [firstPatchReceived, setFirstPatchReceived] = createSignal(false)
 
   const shadowHost = document.createElement('div')
-  shadowHost.classList.add('h-full', 'w-full')
+  shadowHost.classList.add('h-full', 'w-full', 'dom-replica-container')
 
   const shadow = shadowHost.attachShadow({ mode: 'open' })
   initShadowContent(

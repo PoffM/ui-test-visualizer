@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { findUp } from 'find-up'
 import type * as vscode from 'vscode'
 import { cleanTestNameForTerminal } from './util'
@@ -9,7 +10,7 @@ export async function vitestDebugConfig(
 ): Promise<Partial<vscode.DebugConfiguration>> {
   return {
     program: await getVitestBinPath(filePath),
-    runtimeArgs: ['--require', await findUp('dist/inject-cli.js', { cwd: __filename })],
+    runtimeArgs: ['--require', path.join(__dirname, 'inject-cli.js')],
     args: [
       // The Vitest "run" command
       'run',

@@ -9,20 +9,16 @@ import { default as lodash } from 'lodash'
 import rootPkg from '../../package.json'
 
 export default defineConfig(options => ({
+  treeshake: !options.watch,
   entry: {
     'extension': './src/extension/extension.ts',
     'inject-cli': './src/test-process/inject-cli.ts',
     'inject-test': './src/test-process/inject-test.ts',
     'load-styles': './src/test-process/load-styles-worker.ts',
   },
-  external: ['vscode', './load-styles'],
+  external: ['vscode', './load-styles', 'lightningcss', 'jest-resolve/build/default_resolver', 'ts-node'],
   noExternal: [
-    'get-port',
-    'find-up',
-    'postcss-load-config',
-    'lodash',
-    'tinyspy',
-    'replicate-dom',
+    /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jest-resolve\/build\/default\_resolver)|(ts-node)).)*$/,
   ],
   // Vite handles the webview src watching
   ignoreWatch: ['src/web-view-vite'],
