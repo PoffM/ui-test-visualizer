@@ -25,6 +25,9 @@ test('Steps through the Vitest+React Counter example', async () => {
   // Click the OK button on the initial style prompt
   await replicaPanel.locator('vscode-button[title="Dismiss style prompt"]').click()
 
+  // Wait until the debugger is paused on breakpoint
+  await page.getByText('Paused on breakpoint').waitFor()
+
   const debugHelper = new DebuggerHelper(page)
   await debugHelper.debugStep()
 
@@ -69,8 +72,10 @@ test('Steps through the Jest+React Counter example', async () => {
     .frameLocator('iframe.webview.ready')
     .frameLocator('iframe[title="Tested UI"]')
 
+  // Wait until the debugger is paused on breakpoint
+  await page.getByText('Paused on breakpoint').waitFor()
+
   const debugHelper = new DebuggerHelper(page)
-  await debugHelper.debugStep()
   await debugHelper.debugStep()
 
   // Refresh button should be visible
