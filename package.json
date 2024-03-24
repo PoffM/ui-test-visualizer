@@ -58,16 +58,16 @@
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.6.4",
+    "@antfu/eslint-config": "^2.9.0",
     "@playwright/test": "^1.42.1",
     "@total-typescript/ts-reset": "^0.5.1",
-    "@types/node": "^20.11.20",
+    "@types/node": "^20.11.30",
     "@vscode/vsce": "^2.24.0",
     "eslint": "^8.57.0",
     "tsup": "^8.0.2",
-    "type-fest": "^4.10.3",
-    "typescript": "^5.3.3",
-    "vitest": "^1.3.1"
+    "type-fest": "^4.13.1",
+    "typescript": "^5.4.3",
+    "vitest": "^1.4.0"
   },
   "pnpm": {
     "patchedDependencies": {
