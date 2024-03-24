@@ -53,6 +53,7 @@
     "dev": "pnpm run -r \"/^dev:.*/\"",
     "test": "pnpm run --filter {./packages/*} test",
     "typecheck": "tsc",
+
     "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/packages/extension/dist/extension.vsix",
     "code-server-down": "docker compose -f test/docker-compose.yml down",
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down"

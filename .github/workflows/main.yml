@@ -39,3 +39,6 @@ jobs:
         with:
           name: test results
           path: test/test-results
+
+      - name: Unit tests
+        run: pnpm run test
