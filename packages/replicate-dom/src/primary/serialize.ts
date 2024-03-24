@@ -1,4 +1,4 @@
-import type { INode, IWindow } from 'happy-dom'
+import type { Window } from 'happy-dom'
 import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode, SpyableClass } from '../types'
 import { containsNode, findNestedAltRoots } from './contains-node-util'
 
@@ -121,8 +121,8 @@ export function serializeDomMutationArg(
 }
 
 export function serializeDomNode(
-  node: Node | INode,
-  win: typeof window | IWindow,
+  node: Node,
+  win: typeof window | Window,
 ): SerializedDomNode {
   if (node instanceof win.Text) {
     return ['Text', node.data]

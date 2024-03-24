@@ -31,15 +31,15 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { Element, HTMLTemplateElement, IDocument, IHTMLElement, IShadowRoot, IWindow } from 'happy-dom'
+import type { Document, Element, HTMLElement, HTMLTemplateElement, ShadowRoot } from 'happy-dom'
 import { initTestReplicaDom } from '../../test-setup'
 
 describe('document', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()
@@ -224,8 +224,8 @@ describe('document', () => {
 
   describe('get activeElement()', () => {
     it('returns the currently active element.', () => {
-      const div = <IHTMLElement>document.createElement('div')
-      const span = <IHTMLElement>document.createElement('span')
+      const div = <HTMLElement>document.createElement('div')
+      const span = <HTMLElement>document.createElement('span')
 
       document.appendChild(div)
       document.appendChild(span)
@@ -246,7 +246,7 @@ describe('document', () => {
     })
 
     it('unsets the active element when it gets disconnected.', () => {
-      const div = <IHTMLElement>document.createElement('div')
+      const div = <HTMLElement>document.createElement('div')
 
       document.appendChild(div)
 
@@ -269,7 +269,7 @@ describe('document', () => {
         }
 
         public connectedCallback(): void {
-          (<IShadowRoot> this.shadowRoot).innerHTML = `
+          (<ShadowRoot> this.shadowRoot).innerHTML = `
 						<div>
 							<custom-element-b></custom-element-b>
 						</div>
@@ -283,7 +283,7 @@ describe('document', () => {
         }
 
         public connectedCallback(): void {
-          (<IShadowRoot> this.shadowRoot).innerHTML = `
+          (<ShadowRoot> this.shadowRoot).innerHTML = `
 						<div>
 							<button tabindex="0"></button>
 						</div>
@@ -300,8 +300,8 @@ describe('document', () => {
 
       document.body.appendChild(div)
 
-      const button = <IHTMLElement>(
-				(<IHTMLElement>(
+      const button = <HTMLElement>(
+				(<HTMLElement>(
 					customElementA.shadowRoot.querySelector('custom-element-b')
 				)).shadowRoot.querySelector('button')
 			)

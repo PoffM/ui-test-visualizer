@@ -1,12 +1,12 @@
 import { DocumentFragment } from 'happy-dom'
-import type { IDocument, IHTMLElement, IWindow } from 'happy-dom'
+import type { Document, HTMLElement, Window as HWindow } from 'happy-dom'
 import { applyDomPatch, initPrimaryDom } from '../src'
 import { getNodePath } from '../src/primary/serialize'
 import { getNodeByPath } from '../src/replica/parse'
 
 export function initTestReplicaDom(
-  primaryWindow: IWindow | Window,
-  replicaWindow: IWindow | Window,
+  primaryWindow: Window | HWindow,
+  replicaWindow: Window | HWindow,
 ) {
   initPrimaryDom({
     onMutation(htmlPatch) {
@@ -23,23 +23,22 @@ export function initTestReplicaDom(
 
 type NodeCreateMethod = keyof {
   [
-  P in keyof IDocument as IDocument[P] extends ((arg: string) => any)
+  P in keyof Document as Document[P] extends ((arg: string) => any)
     ? P
     : never
-  ]: IDocument[P]
+  ]: Document[P]
 }
 
 export function addTestElement<
-  R = IHTMLElement,
+  R = HTMLElement,
   M extends NodeCreateMethod = 'createElement',
 >(
-  primaryDocument: IDocument,
-  replicaDocument: IDocument,
+  primaryDocument: Document,
+  replicaDocument: Document,
   arg: string,
   method: M = 'createElement' as M,
 ) {
   const numArgs = primaryDocument[method].length
-  // @ts-expect-error The methods call should be valid
   const testEl = numArgs ? primaryDocument[method](arg) : primaryDocument[method]()
 
   const primary = (() => {
@@ -51,7 +50,6 @@ export function addTestElement<
       return primaryDocument.body.firstElementChild
     }
     return primaryDocument.body.appendChild(
-      // @ts-expect-error The element should be valid
       testEl,
     )
   })()
@@ -74,9 +72,9 @@ export function addTestElement<
   }
 
   type Return =
-     M extends 'createElement' ? unknown extends R ? IHTMLElement : R
+     M extends 'createElement' ? unknown extends R ? HTMLElement : R
        : M extends 'createTextNode' ? Text
-         : ReturnType<IDocument[M]>
+         : ReturnType<Document[M]>
 
   return {
     primary: primary as unknown as Return,

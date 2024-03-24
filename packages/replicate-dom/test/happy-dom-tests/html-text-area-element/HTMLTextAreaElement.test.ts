@@ -31,15 +31,15 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { Event, IDocument, IHTMLTextAreaElement, IText, IWindow } from 'happy-dom'
+import type { Document, Event, IHTMLTextAreaElement, IText } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
-let window: IWindow
-let document: IDocument
+let window: Window
+let document: Document
 
-let replicaWindow: IWindow
-let replicaDocument: IDocument
+let replicaWindow: Window
+let replicaDocument: Document
 
 beforeEach(() => {
   window = new Window()

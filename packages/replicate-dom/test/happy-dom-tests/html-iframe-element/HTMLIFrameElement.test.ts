@@ -31,17 +31,17 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BrowserWindow, Window } from 'happy-dom'
-import type { IDocument, IHTMLIFrameElement, IResponse, IWindow } from 'happy-dom'
+import type { Document, IHTMLIFrameElement, IResponse, Window } from 'happy-dom'
 import type IRequestInfo from 'happy-dom/lib/fetch/types/IRequestInfo'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
 describe('hTMLIFrameElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()

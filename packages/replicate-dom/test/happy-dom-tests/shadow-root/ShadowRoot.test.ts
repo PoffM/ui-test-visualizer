@@ -31,17 +31,17 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { IDocument, IHTMLElement, IWindow } from 'happy-dom'
+import type { Document, HTMLElement, Window } from 'happy-dom'
 import CustomElement from '../CustomElement.js'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
 import { serializeDomNode } from '../../../src/index.js'
 
 describe('shadowRoot', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()
@@ -62,7 +62,7 @@ describe('shadowRoot', () => {
     expect(replicaSerialized).toEqual(primarySerialized)
   })
 
-  function testElement<T = IHTMLElement>(type: string) {
+  function testElement<T = HTMLElement>(type: string) {
     return addTestElement<T>(
       document,
       replicaDocument,
@@ -79,8 +79,8 @@ describe('shadowRoot', () => {
       shadowRoot.innerHTML = '<div attr1="value1" attr2="value2"><span>Test</span></div>'
       expect(replica.shadowRoot.childNodes.length).toBe(1)
       expect(replica.shadowRoot.childNodes[0]!.childNodes.length).toBe(1)
-      expect((<IHTMLElement>replica.shadowRoot.childNodes[0]).tagName).toBe('DIV')
-      expect((<IHTMLElement>replica.shadowRoot.childNodes[0]!.childNodes[0]).tagName).toBe('SPAN')
+      expect((<HTMLElement>replica.shadowRoot.childNodes[0]).tagName).toBe('DIV')
+      expect((<HTMLElement>replica.shadowRoot.childNodes[0]!.childNodes[0]).tagName).toBe('SPAN')
     })
   })
 
@@ -98,9 +98,9 @@ describe('shadowRoot', () => {
     it('returns the currently active element within the ShadowRoot.', () => {
       const customElement = document.createElement('custom-element')
       const shadowRoot = customElement.shadowRoot
-      const div = <IHTMLElement>document.createElement('div')
+      const div = <HTMLElement>document.createElement('div')
       div.id = 'div'
-      const span = <IHTMLElement>document.createElement('span')
+      const span = <HTMLElement>document.createElement('span')
       span.id = 'span'
 
       document.body.appendChild(customElement)
@@ -134,7 +134,7 @@ describe('shadowRoot', () => {
     it('unsets the active element when it gets disconnected.', () => {
       const customElement = document.createElement('custom-element')
       const shadowRoot = customElement.shadowRoot
-      const div = <IHTMLElement>document.createElement('div')
+      const div = <HTMLElement>document.createElement('div')
       div.id = 'div'
 
       document.body.appendChild(customElement)

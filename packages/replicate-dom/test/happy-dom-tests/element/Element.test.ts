@@ -31,7 +31,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Node, ShadowRoot, Window } from 'happy-dom'
-import type { Element, HTMLTemplateElement, IAttr, IDocument, IElement, IWindow, Text } from 'happy-dom'
+import type { Element, HTMLTemplateElement, IAttr, Document, Element, Window, Text } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
 import { serializeDomNode } from '../../../src'
@@ -44,11 +44,11 @@ const NamespaceURI = {
 }
 
 describe('element', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()
@@ -433,7 +433,7 @@ describe('element', () => {
       primary.insertAdjacentHTML('beforebegin', markup)
 
       expect(replica.childNodes.length).toBe(0)
-      expect((<IElement>replica.ownerDocument.body.childNodes[0]).outerHTML).toEqual(markup)
+      expect((<Element>replica.ownerDocument.body.childNodes[0]).outerHTML).toEqual(markup)
     })
 
     it('inserts the given HTML inside the reference element before the first child.', () => {
@@ -444,7 +444,7 @@ describe('element', () => {
       primary.appendChild(child)
       primary.insertAdjacentHTML('afterbegin', markup)
 
-      expect((<IElement>replica.childNodes[0]).outerHTML).toEqual(markup)
+      expect((<Element>replica.childNodes[0]).outerHTML).toEqual(markup)
       expect(replica.childNodes[1]).toBeTruthy()
     })
 
@@ -457,7 +457,7 @@ describe('element', () => {
       primary.insertAdjacentHTML('beforeend', markup)
 
       expect(replica.childNodes[0]).toBeTruthy()
-      expect((<IElement>replica.childNodes[1]).outerHTML).toEqual(markup)
+      expect((<Element>replica.childNodes[1]).outerHTML).toEqual(markup)
     })
 
     it('inserts the given HTML right after the reference element.', () => {
@@ -468,7 +468,7 @@ describe('element', () => {
 
       expect(replica.childNodes.length).toEqual(0)
       expect(replica.ownerDocument.body.childNodes[0]).toBeTruthy()
-      expect((<IElement>replica.ownerDocument.body.childNodes[1]).outerHTML).toEqual(markup)
+      expect((<Element>replica.ownerDocument.body.childNodes[1]).outerHTML).toEqual(markup)
     })
 
     it('inserts the given HTML right after the reference element if it has a sibling.', () => {
@@ -481,7 +481,7 @@ describe('element', () => {
 
       expect(replica.childNodes.length).toBe(0)
       expect(replica.ownerDocument.body.childNodes[0]).toBeTruthy()
-      expect((<IElement>replica.ownerDocument.body.childNodes[1]).outerHTML).toEqual(markup)
+      expect((<Element>replica.ownerDocument.body.childNodes[1]).outerHTML).toEqual(markup)
       expect(replica.ownerDocument.body.childNodes[2]).toBeTruthy()
     })
   })
@@ -627,8 +627,8 @@ describe('element', () => {
       element.className = 'active'
       primary.appendChild(element)
 
-      expect((replica.childNodes[0] as IElement).matches('div[role="status"] div.active')).toBe(true)
-      expect((replica.childNodes[0] as IElement).matches('div[role="article"] div.active')).toBe(false)
+      expect((replica.childNodes[0] as Element).matches('div[role="status"] div.active')).toBe(true)
+      expect((replica.childNodes[0] as Element).matches('div[role="article"] div.active')).toBe(false)
       expect(replica.matches('.nonexistent-class div[role="status"]')).toBe(false)
     })
 
@@ -853,8 +853,8 @@ describe('element', () => {
       primary.innerHTML
 				= '<span id="a"></span><span id="b"></span><span id="c"></span><span id="d"></span>'
 
-      const a = <IElement>primary.querySelector('#a')
-      const b = <IElement>primary.querySelector('#b')
+      const a = <Element>primary.querySelector('#a')
+      const b = <Element>primary.querySelector('#b')
 
       primary.insertBefore(a, b)
 

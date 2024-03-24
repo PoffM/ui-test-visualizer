@@ -31,17 +31,17 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { Event, IDocument, IHTMLOptionElement, IHTMLSelectElement, IWindow } from 'happy-dom'
+import type { Event, Document, IHTMLOptionElement, IHTMLSelectElement, Window } from 'happy-dom'
 import ValidityState from '../../../node_modules/happy-dom/lib/validity-state/ValidityState.js'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
 import { serializeDomNode } from '../../../src/index.js'
 
 describe('hTMLSelectElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()

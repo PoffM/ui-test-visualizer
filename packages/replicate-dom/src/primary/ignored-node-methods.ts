@@ -1,4 +1,4 @@
-import type { Document, IWindow } from 'happy-dom'
+import type { Document, Window } from 'happy-dom'
 
 type FunctionKeys<T> = {
   [P in keyof T]: T[P] extends Function ? P : never;
@@ -8,7 +8,11 @@ type FunctionKeys<T> = {
  * Map of Node names to their function keys.
  */
 type NodeFunctionKeysMap = {
-  [P in keyof IWindow as IWindow[P] extends IWindow['Node'] ? any extends IWindow[P] ? never : P : never]: FunctionKeys<IWindow[P]['prototype']>;
+  [
+  P in keyof Window as Window[P] extends Window['Node']
+    ? any extends Window[P] ? never : P
+    : never
+  ]: FunctionKeys<Window[P] extends { prototype: any } ? Window[P]['prototype'] : never>;
 }
 
 type ObjectKeys = 'constructor' |

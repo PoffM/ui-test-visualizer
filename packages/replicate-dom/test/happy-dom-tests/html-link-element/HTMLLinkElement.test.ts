@@ -31,17 +31,17 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
-import type { ErrorEvent, Event, IBrowserWindow, IDocument, IHTMLLinkElement, IWindow } from 'happy-dom'
+import type { Document, ErrorEvent, Event, IBrowserWindow, IHTMLLinkElement } from 'happy-dom'
 import ResourceFetch from '../../../node_modules/happy-dom/lib/fetch/ResourceFetch'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
 describe('hTMLLinkElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()

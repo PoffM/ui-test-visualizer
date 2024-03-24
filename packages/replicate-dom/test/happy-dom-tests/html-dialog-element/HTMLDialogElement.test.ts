@@ -31,16 +31,16 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { IDocument, IHTMLDialogElement, IWindow } from 'happy-dom'
+import type { Document, IHTMLDialogElement, Window } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
 describe('hTMLDialogElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()

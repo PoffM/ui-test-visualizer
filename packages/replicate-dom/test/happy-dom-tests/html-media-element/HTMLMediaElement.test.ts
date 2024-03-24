@@ -30,16 +30,16 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { type IDocument, type IHTMLMediaElement, type IWindow, Window } from 'happy-dom'
+import { type Document, type IHTMLMediaElement, type Window, Window } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
 import { serializeDomNode } from '../../../src/index.js'
 
 describe('hTMLMediaElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()

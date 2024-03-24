@@ -30,7 +30,7 @@
 */
 
 import { HTMLElement } from 'happy-dom'
-import type { IShadowRoot } from 'happy-dom'
+import type { ShadowRoot } from 'happy-dom'
 
 /**
  * CustomElement test class.
@@ -44,7 +44,7 @@ export default class CustomElement extends HTMLElement {
     newValue: string | null
   }> = []
 
-  private internalShadowRoot: IShadowRoot
+  private internalShadowRoot: ShadowRoot
 
   /**
    * Constructor.

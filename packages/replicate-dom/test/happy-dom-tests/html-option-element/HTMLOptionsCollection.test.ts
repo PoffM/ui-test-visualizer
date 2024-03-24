@@ -31,16 +31,16 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { DOMException, Window } from 'happy-dom'
-import type { HTMLOptionElement, IDocument, IHTMLOptionElement, IHTMLSelectElement, IWindow } from 'happy-dom'
+import type { Document, HTMLOptionElement, IHTMLOptionElement, IHTMLSelectElement } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
 import { serializeDomNode } from '../../../src/index.js'
 
 describe('hTMLOptionsCollection', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()

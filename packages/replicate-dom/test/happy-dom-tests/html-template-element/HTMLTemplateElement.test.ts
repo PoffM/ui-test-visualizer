@@ -30,18 +30,18 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { Window, XMLSerializer } from 'happy-dom'
-import type { IDocument, IHTMLTemplateElement, IWindow } from 'happy-dom'
+import { Window,  , XMLSerializer } from 'happy-dom'
+import type { Document, HTMLTemplateElement } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
 import { serializeDomNode } from '../../../src'
 
 describe('hTMLTemplateElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()
@@ -61,7 +61,7 @@ describe('hTMLTemplateElement', () => {
     expect(replicaSerialized).toEqual(primarySerialized)
   })
 
-  function testElement<T = IHTMLTemplateElement>(type: string) {
+  function testElement<T = HTMLTemplateElement>(type: string) {
     return addTestElement<T>(
       document,
       replicaDocument,
@@ -141,7 +141,7 @@ describe('hTMLTemplateElement', () => {
 
   describe('set outerHTML()', () => {
     it('replaces the template with a span.', () => {
-      const element = document.createElement('template') as IHTMLTemplateElement
+      const element = document.createElement('template') as HTMLTemplateElement
 
       element.innerHTML = '<div>Test</div>'
 

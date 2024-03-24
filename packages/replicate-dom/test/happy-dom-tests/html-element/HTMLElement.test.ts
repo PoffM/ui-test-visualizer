@@ -33,16 +33,16 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
-import type { HTMLElement, IDocument, IHTMLElement, IWindow } from 'happy-dom'
+import type { Document, HTMLElement } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
 describe(' HTMLElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()
@@ -305,19 +305,19 @@ describe(' HTMLElement', () => {
     it('creates dataset from "innerHTML" markup.', () => {
       const { primary, replica } = testElement('main')
       primary.innerHTML = `<button data-test="test"></button>`
-      const button = <IHTMLElement>replica.querySelector('button')
+      const button = <HTMLElement>replica.querySelector('button')
       expect(button.dataset.test).toBe('test')
     })
 
     // https://github.com/capricorn86/happy-dom/issues/493
     it('finds closest ancestor element by data attribute.', () => {
       const { primary, replica } = testElement('main')
-      const div = <IHTMLElement>document.createElement('div')
+      const div = <HTMLElement>document.createElement('div')
       div.id = 'test-div'
       div.dataset.test = 'test'
       div.innerHTML = '<button>label</button>'
       primary.append(div)
-      const button = <IHTMLElement>replica.querySelector('button')
+      const button = <HTMLElement>replica.querySelector('button')
       expect(button.closest('[data-test]').id).toBe('test-div')
     })
   })

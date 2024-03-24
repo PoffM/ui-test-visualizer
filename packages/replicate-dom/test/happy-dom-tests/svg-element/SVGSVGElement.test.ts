@@ -30,7 +30,7 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import type { IDocument, ISVGSVGElement, IWindow } from 'happy-dom'
+import type { Document, ISVGSVGElement } from 'happy-dom'
 import { Window } from 'happy-dom'
 import SVGTransform from '../../../node_modules/happy-dom/lib/nodes/svg-element/SVGTransform'
 import SVGRect from '../../../node_modules/happy-dom/lib/nodes/svg-element/SVGRect'
@@ -44,11 +44,11 @@ import SVGAnimatedRect from '../../../node_modules/happy-dom/lib/nodes/svg-eleme
 import { serializeDomNode } from '../../../src'
 
 describe('sVGSVGElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   let element: ISVGSVGElement
 

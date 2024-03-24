@@ -31,18 +31,18 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
-import type { IDocument, IHTMLElement, ISVGElement, ISVGSVGElement, IWindow } from 'happy-dom'
+import type { Document, HTMLElement, ISVGElement, ISVGSVGElement } from 'happy-dom'
 import NamespaceURI from '../../../node_modules/happy-dom/lib/config/NamespaceURI'
 import HTMLElementUtility from '../../../node_modules/happy-dom/lib/nodes/html-element/HTMLElementUtility'
 import { initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
 describe('sVGElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   let element: ISVGSVGElement
   let line: ISVGElement
@@ -154,7 +154,7 @@ describe('sVGElement', () => {
       let blurredElement: ISVGElement | null = null
 
       vi.spyOn(HTMLElementUtility, 'blur').mockImplementation(
-        (element: ISVGElement | IHTMLElement) => {
+        (element: ISVGElement | HTMLElement) => {
           blurredElement = <ISVGElement>element
         },
       )
@@ -170,7 +170,7 @@ describe('sVGElement', () => {
       let focusedElement: ISVGElement | null = null
 
       vi.spyOn(HTMLElementUtility, 'focus').mockImplementation(
-        (element: ISVGElement | IHTMLElement) => {
+        (element: ISVGElement | HTMLElement) => {
           focusedElement = <ISVGElement>element
         },
       )

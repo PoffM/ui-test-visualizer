@@ -31,22 +31,22 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Event, Node, Text, Window } from 'happy-dom'
-import type { ErrorEvent, HTMLTemplateElement, IDocument, IHTMLElement, IShadowRoot, IWindow } from 'happy-dom'
+import type { ErrorEvent, HTMLTemplateElement, Document, HTMLElement, ShadowRoot, Window } from 'happy-dom'
 import NodeFactory from '../../../node_modules/happy-dom/lib/nodes/NodeFactory'
 import EventPhaseEnum from '../../../node_modules/happy-dom/lib/event/EventPhaseEnum'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
-let window: IWindow
-let document: IDocument
+let window: Window
+let document: Document
 
-let replicaWindow: IWindow
-let replicaDocument: IDocument
+let replicaWindow: Window
+let replicaDocument: Document
 
 let customElementOutput: any
 
 function testElement(type: string) {
-  return addTestElement<IHTMLElement>(
+  return addTestElement<HTMLElement>(
     document,
     replicaDocument,
     type,
@@ -90,7 +90,7 @@ describe('node', () => {
        * Connected.
        */
       public connectedCallback(): void {
-        (<IShadowRoot> this.shadowRoot).innerHTML = '<div><span>Test</span></div>';
+        (<ShadowRoot> this.shadowRoot).innerHTML = '<div><span>Test</span></div>';
         (<typeof CustomCounterElement> this.constructor).output.push('Counter:connected')
       }
 
@@ -407,7 +407,7 @@ describe('node', () => {
 
       document.body.appendChild(customElement)
 
-      const rootNode = (<IShadowRoot>customElement.shadowRoot).querySelector('span')?.getRootNode()
+      const rootNode = (<ShadowRoot>customElement.shadowRoot).querySelector('span')?.getRootNode()
 
       expect(rootNode === customElement.shadowRoot).toBe(true)
     })
@@ -417,7 +417,7 @@ describe('node', () => {
 
       document.body.appendChild(customElement)
 
-      const rootNode = (<IShadowRoot>customElement.shadowRoot)
+      const rootNode = (<ShadowRoot>customElement.shadowRoot)
         .querySelector('span')
         ?.getRootNode({ composed: true })
 

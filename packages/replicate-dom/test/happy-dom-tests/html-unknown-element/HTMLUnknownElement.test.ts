@@ -31,17 +31,17 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { CustomElementRegistry, HTMLUnknownElement, IDocument, IWindow } from 'happy-dom'
+import type { CustomElementRegistry, HTMLUnknownElement, Document, Window } from 'happy-dom'
 import * as PropertySymbol from '../../../node_modules/happy-dom/lib/PropertySymbol.js'
 import { initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
 import { serializeDomNode } from '../../../src/index.js'
 
-let window: IWindow
-let document: IDocument
+let window: Window
+let document: Document
 
-let replicaWindow: IWindow
-let replicaDocument: IDocument
+let replicaWindow: Window
+let replicaDocument: Document
 
 beforeEach(() => {
   window = new Window()

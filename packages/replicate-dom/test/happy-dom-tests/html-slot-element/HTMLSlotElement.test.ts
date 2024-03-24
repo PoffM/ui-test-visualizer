@@ -31,18 +31,18 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { IDocument, IHTMLSlotElement, INodeList, IWindow } from 'happy-dom'
+import type { Document, IHTMLSlotElement, INodeList } from 'happy-dom'
 import { initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 import CustomElementWithNamedSlots from './CustomElementWithNamedSlots'
 import CustomElementWithSlot from './CustomElementWithSlot'
 
 describe('hTMLSlotElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   let customElementWithNamedSlots: CustomElementWithNamedSlots
   let customElementWithSlot: CustomElementWithSlot

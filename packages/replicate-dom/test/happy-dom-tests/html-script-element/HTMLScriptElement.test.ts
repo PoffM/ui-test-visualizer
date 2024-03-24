@@ -31,18 +31,18 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Window } from 'happy-dom'
-import type { ErrorEvent, Event, IBrowserWindow, IDocument, IResponse, IWindow } from 'happy-dom'
+import type { ErrorEvent, Event, IBrowserWindow, Document, IResponse, Window } from 'happy-dom'
 import type IHTMLScriptElement from 'happy-dom/lib/nodes/html-script-element/IHTMLScriptElement'
 import Fetch from '../../../node_modules/happy-dom/lib/fetch/Fetch'
 import ResourceFetch from '../../../node_modules/happy-dom/lib/fetch/ResourceFetch'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 
 describe('hTMLScriptElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window()

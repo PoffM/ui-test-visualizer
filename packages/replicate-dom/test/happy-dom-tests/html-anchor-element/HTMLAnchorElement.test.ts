@@ -31,18 +31,18 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Window } from 'happy-dom'
-import type { IDocument, IHTMLAnchorElement, IWindow } from 'happy-dom'
+import type { Document, IHTMLAnchorElement, Window } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
 const BLOB_URL = 'blob:https://mozilla.org'
 
 describe('hTMLAnchorElement', () => {
-  let window: IWindow
-  let document: IDocument
+  let window: Window
+  let document: Document
 
-  let replicaWindow: IWindow
-  let replicaDocument: IDocument
+  let replicaWindow: Window
+  let replicaDocument: Document
 
   beforeEach(() => {
     window = new Window({ url: 'https://www.somesite.com/test.html' })
