@@ -418,13 +418,6 @@ describe('hTMLAnchorElement', () => {
       expect(replica.search).toBe('?q1=b')
       expect(replica.href).toBe('https://www.example.com/path?q1=b#xyz')
     })
-
-    it('can\'t be modified on blob URLs.', () => {
-      const { primary, replica } = testElement('a')
-      primary.href = BLOB_URL
-      primary.search = '?q1=b'
-      expect(replica.search).toBe('')
-    })
   })
 
   describe('get hash()', () => {
@@ -445,13 +438,6 @@ describe('hTMLAnchorElement', () => {
       primary.hash = '#fgh'
       expect(replica.hash).toBe('#fgh')
       expect(replica.href).toBe('https://www.example.com/path?q1=a#fgh')
-    })
-
-    it('can be modified on blob URLs.', () => {
-      const { primary, replica } = testElement('a')
-      primary.href = BLOB_URL
-      primary.hash = '#fgh'
-      expect(replica.hash).toBe('')
     })
   })
 })

@@ -74,7 +74,6 @@ describe('hTMLFormElement', () => {
   for (const property of [
     'name',
     'target',
-    'action',
     'encoding',
     'enctype',
     'acceptCharset',
@@ -100,6 +99,27 @@ describe('hTMLFormElement', () => {
       })
     })
   }
+
+  describe('get action()', () => {
+    it('returns attribute value.', () => {
+      const { primary, replica } = testElement('form')
+
+      expect(replica.action).toBe('about:blank')
+
+      primary.setAttribute('action', '/test/')
+
+      expect(replica.action).toBe('')
+
+      window.happyDOM.setURL('https://localhost/path/')
+      replicaWindow.happyDOM.setURL('https://localhost/path/')
+
+      expect(replica.action).toBe('https://localhost/test/')
+
+      primary.setAttribute('action', 'https://example.com')
+
+      expect(replica.action).toBe('https://example.com/')
+    })
+  })
 
   describe('get noValidate()', () => {
     it('returns "true" if defined.', () => {
