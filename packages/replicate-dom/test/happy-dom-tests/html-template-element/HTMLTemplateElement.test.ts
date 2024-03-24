@@ -30,7 +30,7 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { Window,  , XMLSerializer } from 'happy-dom'
+import { Window, XMLSerializer } from 'happy-dom'
 import type { Document, HTMLTemplateElement } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import CustomElement from '../CustomElement'
