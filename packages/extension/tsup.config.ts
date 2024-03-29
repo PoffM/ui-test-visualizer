@@ -14,11 +14,11 @@ export default defineConfig(options => ({
     'extension': './src/extension/extension.ts',
     'inject-cli': './src/test-process/inject-cli.ts',
     'inject-test': './src/test-process/inject-test.ts',
-    'load-styles': './src/test-process/load-styles-worker.ts',
+    'load-styles': '../load-styles/src/load-styles-worker.ts',
   },
-  external: ['vscode', './load-styles', 'lightningcss', 'jest-resolve/build/default_resolver', 'ts-node'],
+  external: ['vscode', './load-styles', 'lightningcss', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],
   noExternal: [
-    /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jest-resolve\/build\/default\_resolver)|(ts-node)).)*$/,
+    /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jest-resolve\/build\/default\_resolver)|(ts-node)|(vite)).)*$/,
   ],
   // Vite handles the webview src watching
   ignoreWatch: ['src/web-view-vite'],
@@ -89,6 +89,38 @@ export default defineConfig(options => ({
         )
         await fs.writeFile(dest, newSvg)
         console.log('Green debug icon prepared')
+      }),
+    },
+    {
+      // The load-styles script requires its own node_modules directory.
+      // It uses Vite to preprocess the CSS files, which can't be bundled into one file
+      // because it expects some of its files to exist at relative paths.
+      name: 'copy-load-styles-deps',
+      buildStart: lodash.once(async () => {
+        console.log('Copying load-styles dependencies to dist/node_modules/')
+        const deps = [
+          'esbuild',
+          'vite',
+          'rollup',
+          '@rollup/rollup-linux-x64-gnu',
+          '@types/estree',
+          'postcss',
+          'nanoid',
+          'picocolors',
+          'source-map-js',
+        ]
+
+        const to = path.resolve(__dirname, './dist/node_modules/')
+
+        for (const dep of deps) {
+          const from = path.resolve(__dirname, '../load-styles/node_modules/', dep)
+          await fs.cp(
+            from,
+            path.resolve(to, dep),
+            { dereference: true, recursive: true, force: true },
+          )
+        }
+        console.log('Copied load-styles dependencies to dist/node_modules/')
       }),
     },
   ],

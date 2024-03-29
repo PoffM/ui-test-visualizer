@@ -1,5 +1,5 @@
 // import { exec } from 'node:child_process'
-import { chromium, test } from '@playwright/test'
+import { chromium, expect, test } from '@playwright/test'
 import { DebuggerHelper } from './debugger-helper'
 
 test('Steps through the Vitest+React Counter example', async () => {
@@ -38,6 +38,19 @@ test('Steps through the Vitest+React Counter example', async () => {
 
   await debugHelper.debugStep()
   await replicaPanel.getByText('Count: 1').waitFor()
+
+  // Enable the SCSS style
+  await replicaPanel.getByRole('button', { name: 'Enable your styles' }).click()
+  await replicaPanel.getByText('style.scss').click()
+  await replicaPanel.locator('vscode-button[title="Apply styles"]').click()
+
+  // Wait for the button to turn green because of the new styles
+  await expect.poll(
+    async () => await replicaPanel.getByRole('button', { name: 'Increment' })
+      .evaluate(
+        button => window.getComputedStyle(button).getPropertyValue('background-color'),
+      ),
+  ).toBe('rgb(22, 101, 52)')
 
   await debugHelper.debugStep()
   await replicaPanel.getByText('Count: 2').waitFor()
