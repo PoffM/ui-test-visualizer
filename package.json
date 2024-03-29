@@ -14,7 +14,7 @@
   "categories": [
     "Testing"
   ],
-  "main": "./packages/extension/dist/extension.js",
+  "main": "./build-prod/extension.js",
   "engines": {
     "vscode": "^1.77.0"
   },
@@ -49,12 +49,12 @@
     ]
   },
   "scripts": {
-    "build": "pnpm run -r \"/^build:.*/\" && (cd packages/extension/dist && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
-    "dev": "pnpm run -r \"/^dev:.*/\"",
+    "build": "pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
+    "dev": "pnpm run -r dev",
     "test": "pnpm run --filter {./packages/*} test",
     "typecheck": "tsc",
 
-    "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/packages/extension/dist/extension.vsix",
+    "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/build-prod/extension.vsix",
     "code-server-down": "docker compose -f test/docker-compose.yml down",
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down"
   },
