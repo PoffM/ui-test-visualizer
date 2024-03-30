@@ -138,6 +138,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      pathe:
+        specifier: ^1.1.2
+        version: 1.1.2
       replicate-dom:
         specifier: workspace:*
         version: link:../replicate-dom
@@ -187,6 +190,9 @@ importers:
       nanoid:
         specifier: ^3.3.7
         version: 3.3.7
+      pathe:
+        specifier: ^1.1.2
+        version: 1.1.2
       picocolors:
         specifier: ^1.0.0
         version: 1.0.0
@@ -204,7 +210,7 @@ importers:
         version: 0.9.0
       vite:
         specifier: ^5.2.4
-        version: 5.2.4
+        version: 5.2.4(@types/node@20.11.30)(sass@1.72.0)
 
   packages/replicate-dom:
     dependencies:
@@ -7758,7 +7764,6 @@ packages:
 
   /pathe@1.1.2:
     resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
-    dev: true
 
   /pathval@1.1.1:
     resolution: {integrity: sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==}
@@ -9146,41 +9151,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-
-  /vite@5.2.4:
-    resolution: {integrity: sha512-vjFghvHWidBTinu5TCymJk/lRHlR5ljqB83yugr0HA1xspUPdOZHqbqDLnZ8f9/jINrtFHTCYYyIUi+o+Q5iyg==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': ^18.0.0 || >=20.0.0
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
-    dependencies:
-      esbuild: 0.20.2
-      postcss: 8.4.38
-      rollup: 4.13.2
-    optionalDependencies:
-      fsevents: 2.3.3
-    dev: false
 
   /vite@5.2.4(@types/node@20.11.30)(sass@1.72.0):
     resolution: {integrity: sha512-vjFghvHWidBTinu5TCymJk/lRHlR5ljqB83yugr0HA1xspUPdOZHqbqDLnZ8f9/jINrtFHTCYYyIUi+o+Q5iyg==}

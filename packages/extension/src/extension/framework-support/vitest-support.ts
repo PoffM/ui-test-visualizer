@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import { findUp } from 'find-up'
 import type * as vscode from 'vscode'
 import { cleanTestNameForTerminal } from './util'

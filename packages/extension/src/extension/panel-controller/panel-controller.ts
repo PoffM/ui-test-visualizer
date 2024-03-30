@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'

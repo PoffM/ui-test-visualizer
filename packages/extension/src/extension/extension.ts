@@ -1,6 +1,6 @@
 import '@total-typescript/ts-reset'
 
-import path from 'node:path'
+import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod'
 import { hotReload } from './util/hot-reload'

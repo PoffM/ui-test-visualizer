@@ -1,6 +1,6 @@
 import fsSync from 'node:fs'
 import fs from 'node:fs/promises'
-import path from 'node:path'
+import path from 'pathe'
 import { defineConfig } from 'tsup'
 
 // eslint-disable-next-line import/no-named-default

@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import * as vscode from 'vscode'
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
