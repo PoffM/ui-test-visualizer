@@ -109,8 +109,6 @@ export default defineConfig((options) => {
           const deps = [
             'esbuild',
             'vite',
-            'rollup',
-            '@rollup/rollup-linux-x64-gnu',
             '@types/estree',
             'postcss',
             'nanoid',
@@ -128,6 +126,13 @@ export default defineConfig((options) => {
               { dereference: true, recursive: true, force: true },
             )
           }
+
+          // Use cross-platform @rollup/wasm-node instead of native per-platform Rollup packages
+          await fs.cp(
+            path.join(__dirname, '../load-styles/node_modules/@rollup/wasm-node'),
+            path.join(to, 'rollup'),
+            { dereference: true, recursive: true, force: true },
+          )
           console.log('Copied load-styles dependencies to build node_modules dir')
         }),
       },

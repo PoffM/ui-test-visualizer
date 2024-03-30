@@ -59,7 +59,7 @@ export async function startPanelController(
         // In dev mode, load the html from the live Vite app.
         if (process.env.NODE_ENV === 'development') {
           const viteResponse = await fetch(
-            `http://localhost:${viteDevServerPort}/`,
+            `http://[::1]:${viteDevServerPort}/`,
           )
           const devHtml = await viteResponse.text()
           return devHtml

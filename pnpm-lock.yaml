@@ -175,7 +175,7 @@ importers:
 
   packages/load-styles:
     dependencies:
-      '@rollup/rollup-linux-x64-gnu':
+      '@rollup/wasm-node':
         specifier: ^4.13.2
         version: 4.13.2
       '@types/estree':
@@ -196,9 +196,6 @@ importers:
       postcss-load-config:
         specifier: ^5.0.3
         version: 5.0.3(postcss@8.4.38)
-      rollup:
-        specifier: ^4.13.2
-        version: 4.13.2
       source-map-js:
         specifier: ^1.2.0
         version: 1.2.0
@@ -207,7 +204,7 @@ importers:
         version: 0.9.0
       vite:
         specifier: ^5.2.4
-        version: 5.2.4(@types/node@20.11.30)(sass@1.72.0)
+        version: 5.2.4
 
   packages/replicate-dom:
     dependencies:
@@ -3149,6 +3146,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    optional: true
 
   /@rollup/rollup-linux-x64-musl@4.13.0:
     resolution: {integrity: sha512-9RyNqoFNdF0vu/qqX63fKotBh43fJQeYC98hCaf89DYQpv+xu0D8QFSOS0biA7cGuqJFOc1bJ+m2rhhsKcw1hw==}
@@ -3209,6 +3207,16 @@ packages:
     os: [win32]
     requiresBuild: true
     optional: true
+
+  /@rollup/wasm-node@4.13.2:
+    resolution: {integrity: sha512-4JXYomW63fBnXseG2mFkZwaNMDK0PkNamj9WD6H96FqEEl9ov3VjG3MK9UcOAj7Ap9o2weqSSCVng+QsxBeKfw==}
+    engines: {node: '>=18.0.0', npm: '>=8.0.0'}
+    hasBin: true
+    dependencies:
+      '@types/estree': 1.0.5
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: false
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -9138,6 +9146,41 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /vite@5.2.4:
+    resolution: {integrity: sha512-vjFghvHWidBTinu5TCymJk/lRHlR5ljqB83yugr0HA1xspUPdOZHqbqDLnZ8f9/jINrtFHTCYYyIUi+o+Q5iyg==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^18.0.0 || >=20.0.0
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      esbuild: 0.20.2
+      postcss: 8.4.38
+      rollup: 4.13.2
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: false
 
   /vite@5.2.4(@types/node@20.11.30)(sass@1.72.0):
     resolution: {integrity: sha512-vjFghvHWidBTinu5TCymJk/lRHlR5ljqB83yugr0HA1xspUPdOZHqbqDLnZ8f9/jINrtFHTCYYyIUi+o+Q5iyg==}
