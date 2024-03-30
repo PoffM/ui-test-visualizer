@@ -33,7 +33,7 @@ async function loadStyles(filePath: string) {
   const preprocessResult = await preprocessCSS(
     sourceCode,
     filePath,
-    await resolveConfig({}, 'serve'),
+    await resolveConfig({ configFile: false }, 'serve'),
   )
 
   const css = preprocessResult.code
