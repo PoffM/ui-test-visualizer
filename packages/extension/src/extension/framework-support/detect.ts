@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import { findUp } from 'find-up'
 import { readInitialOptions } from 'jest-config'
 import { getJestBinPath } from './jest-support'

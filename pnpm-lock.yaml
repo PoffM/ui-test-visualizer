@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   jest-config@29.7.0:
-    hash: gfzw7c6hivsxtzazq2jfqq6y24
+    hash: 5q4zne3dppjvl767qjqno7xxiy
     path: patches/jest-config@29.7.0.patch
   jest-editor-support@31.1.2:
     hash: dc66q7lu7jffxqfsrhbnjgsbme
@@ -131,13 +131,16 @@ importers:
         version: 7.1.0
       jest-config:
         specifier: ^29.7.0
-        version: 29.7.0(patch_hash=gfzw7c6hivsxtzazq2jfqq6y24)(@types/node@20.11.30)(ts-node@10.9.2)
+        version: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.11.30)(ts-node@10.9.2)
       jest-editor-support:
         specifier: ^31.1.2
         version: 31.1.2(patch_hash=dc66q7lu7jffxqfsrhbnjgsbme)
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      pathe:
+        specifier: ^1.1.2
+        version: 1.1.2
       replicate-dom:
         specifier: workspace:*
         version: link:../replicate-dom
@@ -175,7 +178,7 @@ importers:
 
   packages/load-styles:
     dependencies:
-      '@rollup/rollup-linux-x64-gnu':
+      '@rollup/wasm-node':
         specifier: ^4.13.2
         version: 4.13.2
       '@types/estree':
@@ -196,9 +199,6 @@ importers:
       postcss-load-config:
         specifier: ^5.0.3
         version: 5.0.3(postcss@8.4.38)
-      rollup:
-        specifier: ^4.13.2
-        version: 4.13.2
       source-map-js:
         specifier: ^1.2.0
         version: 1.2.0
@@ -2647,7 +2647,7 @@ packages:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(patch_hash=gfzw7c6hivsxtzazq2jfqq6y24)(@types/node@20.11.30)(ts-node@10.9.2)
+      jest-config: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.11.30)(ts-node@10.9.2)
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -2866,7 +2866,6 @@ packages:
       '@jridgewell/set-array': 1.2.1
       '@jridgewell/sourcemap-codec': 1.4.15
       '@jridgewell/trace-mapping': 0.3.25
-    dev: true
 
   /@jridgewell/resolve-uri@3.1.1:
     resolution: {integrity: sha512-dSYZh7HhCDtCKm4QakX0xFpsRDqjjtZf/kjI/v3T3Nwt5r8/qz/M19F9ySyOqU94SXBmeG9ttTul+YnR4LOxFA==}
@@ -2875,7 +2874,6 @@ packages:
   /@jridgewell/resolve-uri@3.1.2:
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
     engines: {node: '>=6.0.0'}
-    dev: true
 
   /@jridgewell/set-array@1.1.2:
     resolution: {integrity: sha512-xnkseuNADM0gt2bs+BvhO0p78Mk762YnZdsuzFV018NoG1Sj1SCQvpSqa7XUaTam5vAGasABV9qXASMKnFMwMw==}
@@ -2884,7 +2882,6 @@ packages:
   /@jridgewell/set-array@1.2.1:
     resolution: {integrity: sha512-R8gLRTZeyp03ymzP/6Lil/28tGeGEzhx1q2k703KGWRAI1VdvPIXdG70VJc2pAMw3NA6JKL5hhFu1sJX0Mnn/A==}
     engines: {node: '>=6.0.0'}
-    dev: true
 
   /@jridgewell/sourcemap-codec@1.4.15:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
@@ -2900,7 +2897,6 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
-    dev: true
 
   /@jridgewell/trace-mapping@0.3.9:
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
@@ -3149,6 +3145,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    optional: true
 
   /@rollup/rollup-linux-x64-musl@4.13.0:
     resolution: {integrity: sha512-9RyNqoFNdF0vu/qqX63fKotBh43fJQeYC98hCaf89DYQpv+xu0D8QFSOS0biA7cGuqJFOc1bJ+m2rhhsKcw1hw==}
@@ -3209,6 +3206,16 @@ packages:
     os: [win32]
     requiresBuild: true
     optional: true
+
+  /@rollup/wasm-node@4.13.2:
+    resolution: {integrity: sha512-4JXYomW63fBnXseG2mFkZwaNMDK0PkNamj9WD6H96FqEEl9ov3VjG3MK9UcOAj7Ap9o2weqSSCVng+QsxBeKfw==}
+    engines: {node: '>=18.0.0', npm: '>=8.0.0'}
+    hasBin: true
+    dependencies:
+      '@types/estree': 1.0.5
+    optionalDependencies:
+      fsevents: 2.3.3
+    dev: false
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -4708,7 +4715,7 @@ packages:
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(patch_hash=gfzw7c6hivsxtzazq2jfqq6y24)(@types/node@20.11.30)(ts-node@10.9.2)
+      jest-config: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.11.30)(ts-node@10.9.2)
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -6490,7 +6497,7 @@ packages:
       create-jest: 29.7.0(@types/node@20.11.30)(ts-node@10.9.2)
       exit: 0.1.2
       import-local: 3.1.0
-      jest-config: 29.7.0(patch_hash=gfzw7c6hivsxtzazq2jfqq6y24)(@types/node@20.11.30)(ts-node@10.9.2)
+      jest-config: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.11.30)(ts-node@10.9.2)
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -6501,7 +6508,7 @@ packages:
       - ts-node
     dev: true
 
-  /jest-config@29.7.0(patch_hash=gfzw7c6hivsxtzazq2jfqq6y24)(@types/node@20.11.30)(ts-node@10.9.2):
+  /jest-config@29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.11.30)(ts-node@10.9.2):
     resolution: {integrity: sha512-uXbpfeQ7R6TZBqI3/TxCU4q4ttk3u0PJeC+E0zbfSoSjq6bJ7buBPxzQPL0ifrkY4DNu4JUdk0ImlBUYi840eQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     peerDependencies:
@@ -7750,7 +7757,6 @@ packages:
 
   /pathe@1.1.2:
     resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
-    dev: true
 
   /pathval@1.1.1:
     resolution: {integrity: sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==}
@@ -7836,7 +7842,7 @@ packages:
       camelcase-css: 2.0.1
       postcss: 8.4.38
 
-  /postcss-load-config@4.0.2(postcss@8.4.38):
+  /postcss-load-config@4.0.2(postcss@8.4.38)(ts-node@10.9.2):
     resolution: {integrity: sha512-bSVhyJGL00wMVoPUzAVAnbEoWyqRxkjv64tUl427SKnPrENtq6hJwUojroMz2VB+Q1edmi4IfrAPpami5VVgMQ==}
     engines: {node: '>= 14'}
     peerDependencies:
@@ -7850,6 +7856,7 @@ packages:
     dependencies:
       lilconfig: 3.0.0
       postcss: 8.4.38
+      ts-node: 10.9.2(@types/node@20.11.30)(typescript@5.4.3)
       yaml: 2.4.1
 
   /postcss-load-config@5.0.3(postcss@8.4.38):
@@ -7876,7 +7883,7 @@ packages:
       postcss: ^8.2.14
     dependencies:
       postcss: 8.4.38
-      postcss-selector-parser: 6.0.15
+      postcss-selector-parser: 6.0.16
 
   /postcss-selector-parser@6.0.15:
     resolution: {integrity: sha512-rEYkQOMUCEMhsKbK66tbEU9QVIxbhN18YiniAwA7XQYTVBqrBy+P2p5JcdqsHgKM2zWylp8d7J6eszocfds5Sw==}
@@ -7891,7 +7898,6 @@ packages:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
-    dev: true
 
   /postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
@@ -8597,7 +8603,7 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     hasBin: true
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.3
+      '@jridgewell/gen-mapping': 0.3.5
       commander: 4.1.1
       glob: 10.3.10
       lines-and-columns: 1.2.4
@@ -8686,7 +8692,7 @@ packages:
       postcss: 8.4.38
       postcss-import: 15.1.0(postcss@8.4.38)
       postcss-js: 4.0.1(postcss@8.4.38)
-      postcss-load-config: 4.0.2(postcss@8.4.38)
+      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2)
       postcss-nested: 6.0.1(postcss@8.4.38)
       postcss-selector-parser: 6.0.15
       resolve: 1.22.8
@@ -8889,7 +8895,7 @@ packages:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.2(postcss@8.4.38)
+      postcss-load-config: 4.0.2(postcss@8.4.38)(ts-node@10.9.2)
       resolve-from: 5.0.0
       rollup: 4.13.0
       source-map: 0.8.0-beta.0

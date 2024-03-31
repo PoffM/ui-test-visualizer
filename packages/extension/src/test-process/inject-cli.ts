@@ -1,5 +1,5 @@
-import path from 'node:path'
 import child_process, { type ForkOptions } from 'node:child_process'
+import path from 'pathe'
 
 // Inject this code Vitest's CLI process using the NodeJS "--require" arg.
 const origFork = child_process.fork

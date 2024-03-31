@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import * as vscode from 'vscode'
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
@@ -29,7 +29,7 @@ export const panelRouter = t.router({
 
       function getFileInfo(filePath: string, isExternal: boolean) {
         const displayPath = (() => {
-          const roots = vscode.workspace.workspaceFolders?.map(it => it.uri.path)
+          const roots = vscode.workspace.workspaceFolders?.map(it => it.uri.fsPath)
           for (const root of roots ?? []) {
             if (filePath.startsWith(root)) {
               return path.relative(root, filePath)
@@ -60,7 +60,7 @@ export const panelRouter = t.router({
         canSelectMany: true,
       })
 
-      const newPaths = selectedUris?.map(it => it.path)
+      const newPaths = selectedUris?.map(it => it.fsPath)
 
       if (newPaths?.length) {
         // Add the new files to the stored list of external files
