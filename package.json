@@ -49,8 +49,8 @@
     ]
   },
   "scripts": {
-    "build": "rm -r build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
-    "dev": "rm -r build-prod && pnpm run -r dev",
+    "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
+    "dev": "rm -rf build-dev && pnpm run -r dev",
     "test": "pnpm run --filter {./packages/*} test",
     "typecheck": "tsc",
     "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/build-prod/extension.vsix",
