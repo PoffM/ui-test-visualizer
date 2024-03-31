@@ -6,6 +6,6 @@ export async function workspaceCssFiles() {
     '**/node_modules/**',
   )
 
-  const workspacePaths = workspaceFiles.map(it => it.path)
+  const workspacePaths = workspaceFiles.map(it => it.fsPath)
   return workspacePaths
 }

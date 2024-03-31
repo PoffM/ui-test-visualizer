@@ -3,6 +3,7 @@ import { ItBlock, parse } from 'jest-editor-support'
 import type * as vscode from 'vscode'
 import { CodeLens, Range } from 'vscode'
 import get from 'lodash/get'
+import path from 'pathe'
 
 export const codeLensProvider: vscode.CodeLensProvider = {
   provideCodeLenses(document) {
@@ -43,7 +44,7 @@ export const codeLensProvider: vscode.CodeLensProvider = {
 
           codeLenses.push(
             new CodeLens(range, {
-              arguments: [node.file, node.name, startAndEndLines],
+              arguments: [path.resolve(node.file), node.name, startAndEndLines],
               title: 'Visually Debug UI',
               command: 'visual-ui-test-debugger.visuallyDebugUI',
             }),

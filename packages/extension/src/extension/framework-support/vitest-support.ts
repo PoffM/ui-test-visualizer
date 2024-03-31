@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import { findUp } from 'find-up'
 import type * as vscode from 'vscode'
 import { cleanTestNameForTerminal } from './util'
@@ -21,9 +21,9 @@ export async function vitestDebugConfig(
       '--pool',
       'forks',
       '--poolOptions.forks.minForks',
-      1,
+      '1',
       '--poolOptions.forks.maxForks',
-      1,
+      '1',
     ],
     autoAttachChildProcesses: true,
     // TODO use the config

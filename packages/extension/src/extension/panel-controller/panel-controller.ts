@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
@@ -59,7 +59,7 @@ export async function startPanelController(
         // In dev mode, load the html from the live Vite app.
         if (process.env.NODE_ENV === 'development') {
           const viteResponse = await fetch(
-            `http://localhost:${viteDevServerPort}/`,
+            `http://[::1]:${viteDevServerPort}/`,
           )
           const devHtml = await viteResponse.text()
           return devHtml

@@ -12,6 +12,7 @@
     "jest-config": "^29.7.0",
     "jest-editor-support": "^31.1.2",
     "lodash": "^4.17.21",
+    "pathe": "^1.1.2",
     "replicate-dom": "workspace:*",
     "synckit": "^0.9.0",
     "ws": "^8.16.0",
