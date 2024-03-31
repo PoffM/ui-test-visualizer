@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.17.0",
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.12.2",
     "@types/vscode": "^1.87.0",
     "@types/ws": "^8.5.10",
     "@vscode/codicons": "^0.0.35",

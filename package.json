@@ -49,24 +49,23 @@
     ]
   },
   "scripts": {
-    "build": "pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
-    "dev": "pnpm run -r dev",
+    "build": "rm -r build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
+    "dev": "rm -r build-prod && pnpm run -r dev",
     "test": "pnpm run --filter {./packages/*} test",
     "typecheck": "tsc",
-
     "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/build-prod/extension.vsix",
     "code-server-down": "docker compose -f test/docker-compose.yml down",
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.9.0",
+    "@antfu/eslint-config": "^2.11.6",
     "@playwright/test": "^1.42.1",
     "@total-typescript/ts-reset": "^0.5.1",
-    "@types/node": "^20.11.30",
+    "@types/node": "^20.12.2",
     "@vscode/vsce": "^2.24.0",
     "eslint": "^8.57.0",
     "tsup": "^8.0.2",
-    "type-fest": "^4.13.1",
+    "type-fest": "^4.14.0",
     "typescript": "^5.4.3",
     "vitest": "^1.4.0"
   },
