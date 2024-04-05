@@ -1,7 +1,8 @@
 {
-  "name": "visual-ui-test-debugger",
-  "displayName": "Visual UI Test Debugger",
+  "name": "ui-test-visualizer",
+  "displayName": "UI Test Visualizer",
   "version": "0.0.0",
+  "private": true,
   "description": "Debug UI tests while seeing the UI",
   "preview": true,
   "author": "poffm",
@@ -26,25 +27,25 @@
   ],
   "contributes": {
     "configuration": {
-      "title": "Visual UI Test Debugger",
+      "title": "UI Test Visualizer",
       "properties": {
-        "visual-ui-test-debugger.disableCodeLens": {
+        "ui-test-visualizer.disableCodeLens": {
           "type": "boolean",
           "default": false,
-          "description": "Disable the in-editor Visual UI Debugger buttons",
+          "description": "Disable the in-editor UI Test Visualizer buttons",
           "scope": "window"
         },
-        "visual-ui-test-debugger.codeLensSelector": {
+        "ui-test-visualizer.codeLensSelector": {
           "type": "string",
           "default": "**/*.{test,spec}.{jsx,tsx}",
-          "description": "Show the in-editor Visual UI Debugger buttons on files matching this pattern"
+          "description": "Show the in-editor UI Test Visualizer buttons on files matching this pattern"
         }
       }
     },
     "commands": [
       {
-        "command": "visual-ui-test-debugger.visuallyDebugUI",
-        "title": "Debug Jest"
+        "command": "ui-test-visualizer.visuallyDebugUI",
+        "title": "Visually Debug UI"
       }
     ]
   },

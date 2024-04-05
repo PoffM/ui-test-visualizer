@@ -40,7 +40,7 @@ export function createColorTheme(
 
       const defaultTheme = (() => {
         const storedTheme
-          = localStorage.getItem('visual-ui-test-debugger.theme') === 'dark'
+          = localStorage.getItem('ui-test-visualizer.theme') === 'dark'
             ? 'dark'
             : 'light'
 
@@ -68,7 +68,7 @@ export function createColorTheme(
         root()?.classList.add(_theme)
       }
 
-      localStorage.setItem('visual-ui-test-debugger.theme', _theme)
+      localStorage.setItem('ui-test-visualizer.theme', _theme)
     }
   })
 

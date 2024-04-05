@@ -46,7 +46,7 @@ export const codeLensProvider: vscode.CodeLensProvider = {
             new CodeLens(range, {
               arguments: [path.resolve(node.file), node.name, startAndEndLines],
               title: 'Visually Debug UI',
-              command: 'visual-ui-test-debugger.visuallyDebugUI',
+              command: 'ui-test-visualizer.visuallyDebugUI',
             }),
           )
         }

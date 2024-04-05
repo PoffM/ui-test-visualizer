@@ -33,7 +33,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   }
 
   const debugTest = vscode.commands.registerCommand(
-    'visual-ui-test-debugger.visuallyDebugUI',
+    'ui-test-visualizer.visuallyDebugUI',
     (testFile: unknown, testName: unknown, startAndEndLines: unknown) => visuallyDebugUI(
       testFile,
       testName,
@@ -42,10 +42,10 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
     ),
   )
 
-  if (!extensionSetting('visual-ui-test-debugger.disableCodeLens')) {
+  if (!extensionSetting('ui-test-visualizer.disableCodeLens')) {
     const docSelectors: vscode.DocumentFilter[] = [
       {
-        pattern: String(extensionSetting('visual-ui-test-debugger.codeLensSelector')),
+        pattern: String(extensionSetting('ui-test-visualizer.codeLensSelector')),
       },
     ]
     extensionContext.subscriptions.push(
