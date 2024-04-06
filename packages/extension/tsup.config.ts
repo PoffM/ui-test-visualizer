@@ -24,9 +24,9 @@ export default defineConfig((options) => {
       'load-styles': '../load-styles/src/load-styles-worker.ts',
     },
     outDir,
-    external: ['vscode', './load-styles', 'lightningcss', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],
+    external: ['vscode', './load-styles', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],
     noExternal: [
-      /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jest-resolve\/build\/default\_resolver)|(ts-node)|(vite)).)*$/,
+      /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jiti)|(jest-resolve\/build\/default\_resolver)|(ts-node)|(vite)).)*$/,
     ],
     // Vite handles the webview src watching
     ignoreWatch: ['src/web-view-vite'],
