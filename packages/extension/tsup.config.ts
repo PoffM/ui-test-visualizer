@@ -2,6 +2,8 @@ import fsSync from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'pathe'
 import { defineConfig } from 'tsup'
+import { globby } from 'globby'
+import { deleteAsync } from 'del'
 
 // eslint-disable-next-line import/no-named-default
 import { default as lodash } from 'lodash'
@@ -133,6 +135,14 @@ export default defineConfig((options) => {
             path.join(to, 'rollup'),
             { dereference: true, recursive: true, force: true },
           )
+
+          // Delete unused files
+          const toDelete = await globby(
+            ['**/bin/**/*', '**/.bin/**/*', '**/*.d.ts'],
+            { cwd: to },
+          )
+          await deleteAsync(toDelete.map(f => path.join(to, f)), { force: true })
+
           console.log('Copied load-styles dependencies to build node_modules dir')
         }),
       },
