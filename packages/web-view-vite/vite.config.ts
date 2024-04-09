@@ -19,6 +19,8 @@ export default defineConfig({
       'lucide-solid/icons': fileURLToPath(
         new URL(
           './node_modules/lucide-solid/dist/source/icons',
+          // eslint-disable-next-line ts/prefer-ts-expect-error
+          // @ts-ignore should work because this is a config file, doesn't run in the app
           import.meta.url,
         ),
       ),
