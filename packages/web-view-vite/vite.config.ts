@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
 
@@ -11,6 +12,16 @@ export default defineConfig({
         chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/[name].[ext]',
       },
+    },
+  },
+  resolve: {
+    alias: {
+      'lucide-solid/icons': fileURLToPath(
+        new URL(
+          './node_modules/lucide-solid/dist/source/icons',
+          import.meta.url,
+        ),
+      ),
     },
   },
 })

@@ -1,10 +1,11 @@
+import get from 'lodash/get'
+import Brush from 'lucide-solid/icons/brush'
+import X from 'lucide-solid/icons/x'
 import type { JSX } from 'solid-js'
 import { For, Show, createEffect, createResource, createSignal } from 'solid-js'
-import '../index.css'
-import get from 'lodash/get'
-import { Brush, X } from 'lucide-solid'
-import { client } from '../lib/panel-client'
 import { firstPatchReceived } from '../App'
+import '../index.css'
+import { client } from '../lib/panel-client'
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from './popover'
 
 export const StyleIcon = Brush

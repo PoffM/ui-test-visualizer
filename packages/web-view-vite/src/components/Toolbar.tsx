@@ -1,4 +1,6 @@
-import { Moon, RefreshCw, Sun } from 'lucide-solid'
+import Sun from 'lucide-solid/icons/sun'
+import Moon from 'lucide-solid/icons/moon'
+import RefreshCw from 'lucide-solid/icons/refresh-cw'
 import { firstPatchReceived, refreshShadow, theme, toggleTheme } from '../App'
 import { StyleIcon, StylePicker } from './StylePicker'
 
