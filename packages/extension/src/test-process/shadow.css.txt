@@ -1,5 +1,5 @@
 /*
- * Default color modes inside the mirror DOM.
+ * Default color modes inside the replica DOM.
  * Supports light and dark modes.
  */
 

@@ -38,7 +38,7 @@ export function App() {
           style={{ visibility: firstPatchReceived() ? 'hidden' : 'visible' }}
           class="absolute h-full w-full flex justify-center items-center"
         >
-          Listening for test DOM mutations...
+          Waiting for the test DOM...
         </div>
         <div
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
