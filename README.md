@@ -22,9 +22,9 @@ Since this extension hooks into the DOM API directly, you should be able to use 
 
 ## Enabling Your Styles
 
-Often UI tests are written without the styles that would normally be in the `<head>` of your actual application. However, this extension's UI has a menu to manually enable any additional stylesheets.
+Often UI tests run without the styles that would normally be in the `<head>` of your actual application. However, this extension's UI has a menu to manually enable any additional stylesheets.
 
-Styles are loaded using Vite's CSS processing API, so you can use any of the following:
+Styles are loaded using Vite's `preprocessCSS()` API, so you can use any of the following:
 
 - CSS
 - Sass
