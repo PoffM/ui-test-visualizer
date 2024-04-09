@@ -14,7 +14,7 @@ export function Toolbar() {
     >
       <ToolbarButton
         onClick={refreshShadow}
-        label="Refresh Html"
+        label="Refresh Panel HTML"
       >
         <RefreshCw />
       </ToolbarButton>

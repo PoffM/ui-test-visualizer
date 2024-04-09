@@ -32,7 +32,7 @@ test('Steps through the Vitest+React Counter example', async () => {
   await debugHelper.debugStep()
 
   // Refresh button should be visible
-  await replicaPanel.locator('vscode-button[title="Refresh Html"]').waitFor()
+  await replicaPanel.locator('vscode-button[aria-label="Refresh Panel HTML"]').waitFor()
 
   await replicaPanel.getByText('Count: 0').waitFor()
 
@@ -40,7 +40,7 @@ test('Steps through the Vitest+React Counter example', async () => {
   await replicaPanel.getByText('Count: 1').waitFor()
 
   // Enable the SCSS style
-  await replicaPanel.getByRole('button', { name: 'Enable your styles' }).click()
+  await replicaPanel.locator('vscode-button[aria-label="Enable your styles"]').click()
   await replicaPanel.getByText('style.scss').click()
   await replicaPanel.locator('vscode-button[title="Apply styles"]').click()
 
@@ -92,7 +92,7 @@ test('Steps through the Jest+React Counter example', async () => {
   await debugHelper.debugStep()
 
   // Refresh button should be visible
-  await replicaPanel.locator('vscode-button[title="Refresh Html"]').waitFor()
+  await replicaPanel.locator('vscode-button[aria-label="Refresh Panel HTML"]').waitFor()
 
   await replicaPanel.getByText('Count: 0').waitFor()
 
