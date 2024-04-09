@@ -1,8 +1,10 @@
 import Sun from 'lucide-solid/icons/sun'
 import Moon from 'lucide-solid/icons/moon'
 import RefreshCw from 'lucide-solid/icons/refresh-cw'
+import type { ParentProps } from 'solid-js'
 import { firstPatchReceived, refreshShadow, theme, toggleTheme } from '../App'
 import { StyleIcon, StylePicker } from './StylePicker'
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
 
 export function Toolbar() {
   return (
@@ -10,34 +12,54 @@ export function Toolbar() {
       class="flex gap-2 p-2"
       style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
     >
-      <vscode-button
-        appearance="secondary"
+      <ToolbarButton
         onClick={refreshShadow}
-        title="Refresh Html"
+        label="Refresh Html"
       >
         <RefreshCw />
-      </vscode-button>
-      <vscode-button
-        class="h-10 w-10"
-        appearance="secondary"
+      </ToolbarButton>
+      <ToolbarButton
         onClick={toggleTheme}
-        title={`Switch to ${theme() === 'dark' ? 'light' : 'dark'} mode`}
+        label={`Switch to ${theme() === 'dark' ? 'light' : 'dark'} mode`}
       >
         {theme() === 'dark' ? <Moon /> : <Sun />}
-      </vscode-button>
+      </ToolbarButton>
       <StylePicker
         button={isRefreshing => (
-          <vscode-button
-            class="h-10 w-10"
-            appearance="secondary"
-            title="Enable your styles"
+          <ToolbarButton
+            label="Enable your styles"
           >
             {isRefreshing
               ? <vscode-progress-ring class="w-[16px] h-[16px]" />
               : <StyleIcon />}
-          </vscode-button>
+          </ToolbarButton>
         )}
       />
     </div>
+  )
+}
+
+interface ToolbarButtonProps extends ParentProps {
+  label: string
+  onClick?: () => void
+}
+
+function ToolbarButton(props: ToolbarButtonProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <vscode-button
+          class="h-10 w-10"
+          appearance="secondary"
+          onClick={props.onClick}
+          aria-label={props.label}
+        >
+          {props.children}
+        </vscode-button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{props.label}</p>
+      </TooltipContent>
+    </Tooltip>
   )
 }
