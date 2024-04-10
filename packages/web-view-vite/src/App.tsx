@@ -36,7 +36,7 @@ export function App() {
       <div class="relative h-full w-full">
         <div
           style={{ visibility: firstPatchReceived() ? 'hidden' : 'visible' }}
-          class="absolute h-full w-full flex justify-center items-center"
+          class="fixed inset-0 flex justify-center items-center"
         >
           Waiting for the test DOM...
         </div>
