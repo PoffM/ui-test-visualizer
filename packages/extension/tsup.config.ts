@@ -21,8 +21,8 @@ export default defineConfig((options) => {
     treeshake: !options.watch,
     entry: {
       'extension': './src/extension/extension.ts',
-      'inject-cli': './src/test-process/inject-cli.ts',
-      'inject-test': './src/test-process/inject-test.ts',
+      'ui-test-visualizer-cli-setup': './src/test-process/vitest-cli-setup.ts',
+      'ui-test-visualizer-test-setup': './src/test-process/test-setup.ts',
       'load-styles': '../load-styles/src/load-styles-worker.ts',
     },
     outDir,

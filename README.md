@@ -34,9 +34,9 @@ Styles are loaded using Vite's `preprocessCSS()` API, so you can use any of the 
 
 ## How It Works
 
-- **Injects code before your test**: This extension injects a script at the beginning of your test process, which spies on mutable DOM method calls, like "appendChild", "removeChild", "setAttribute", etc, using [Tinyspy](https://github.com/tinylibs/tinyspy)
+- **Runs setup code before your test**: This extension inserts a script at the beginning of your test process, which listens for mutable DOM method calls, like "appendChild", "removeChild", "setAttribute", etc, using [Tinyspy](https://github.com/tinylibs/tinyspy)
 
-  The injection point depends on your test framework:
+  The insertion point into the test depends on your test framework:
 
   - Vitest:
     - Adds a `--require` argument to the Vitest command.
@@ -47,6 +47,6 @@ Styles are loaded using Vite's `preprocessCSS()` API, so you can use any of the 
 
 ## Caveats
 
-- **Can be slow to run until your first breakpoint**: Because of the code injected at startup for watching the DOM and optionally loading your styles, your test can be slower to startup than when debugging your tests normally with other test extensions.
+- **Can be slow to run until your first breakpoint**: Because of the code inserted at startup for watching the DOM and optionally loading your styles, your test can be slower to startup than when debugging your tests normally with other test extensions.
 
 - **Possible de-synchronization**: The visual DOM replica gets updated incrementally as your test runs, but accurate synchronization relies on this extension's code to correctly handle every possible DOM mutation that happens in your UI. The DOM replication code is pretty thorough, even accounting for weird cases involving nested Shadow DOMs and Web Component lifecycles, but it's still possible for the visual replica to get out of sync with your actual test DOM. If this happens, you can click the panel's Refresh button to re-sync it.

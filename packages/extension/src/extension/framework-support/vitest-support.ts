@@ -10,7 +10,7 @@ export async function vitestDebugConfig(
 ): Promise<Partial<vscode.DebugConfiguration>> {
   return {
     program: await getVitestBinPath(filePath),
-    runtimeArgs: ['--require', path.join(__dirname, 'inject-cli.js')],
+    runtimeArgs: ['--require', path.join(__dirname, 'ui-test-visualizer-cli-setup.js')],
     args: [
       // The Vitest "run" command
       'run',

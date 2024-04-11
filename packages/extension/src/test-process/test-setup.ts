@@ -1,4 +1,4 @@
-// Inject this code into the test process
+// Run this script at the beginning of the test process
 
 import { log, error as logError } from 'node:console'
 import { findUpSync } from 'find-up'

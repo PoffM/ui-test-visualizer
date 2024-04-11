@@ -1,7 +1,7 @@
 import child_process, { type ForkOptions } from 'node:child_process'
 import path from 'pathe'
 
-// Inject this code Vitest's CLI process using the NodeJS "--require" arg.
+// Run this script into Vitest's CLI process using the NodeJS "--require" arg.
 const origFork = child_process.fork
 child_process.fork = function (modulePath: string, ...args) {
   const options = args.at(-1) as ForkOptions | undefined
@@ -10,7 +10,7 @@ child_process.fork = function (modulePath: string, ...args) {
     options.execArgv = [
       ...(options.execArgv ?? []),
       '--require',
-      path.resolve(__dirname, 'inject-test.js'),
+      path.resolve(__dirname, 'ui-test-visualizer-test-setup.js'),
     ]
   }
 
