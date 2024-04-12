@@ -205,36 +205,5 @@ if (process.env.TEST_FRAMEWORK === 'vitest') {
   preTest()
 }
 
-if (process.env.TEST_FRAMEWORK === 'jest') {
-  // Require Jest version 28+
-  (() => {
-    const pkg = findUpSync('node_modules/jest/package.json', {
-      cwd: process.env.TEST_FILE_PATH,
-    })
-    if (!pkg) {
-      return
-    }
-    // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-    const jestPkg = require(pkg)
-    const version = jestPkg.version
-
-    if (!version) {
-      return
-    }
-
-    const [major] = jestPkg.version.split('.')
-
-    const majorNum = Number(major)
-
-    if (majorNum < 28) {
-      const msg = `Jest version must be 28 or higher, found ${jestPkg.version}.
-When using Jest, this extension relies on support for "setupFiles" to export an async function, introduced in Jest 28.
-https://github.com/jestjs/jest/releases/tag/v28.0.0-alpha.6`
-      logError(msg)
-      throw new Error(msg)
-    }
-  })()
-}
-
 // Jest runs the default async function in the setupFiles.
 module.exports = preTest
