@@ -1,6 +1,7 @@
 import path from 'pathe'
 import { findUp } from 'find-up'
 import type * as vscode from 'vscode'
+import { readInitialOptions } from 'jest-config'
 import { detectTestFramework } from './detect'
 import { cleanTestNameForTerminal } from './util'
 
@@ -9,6 +10,20 @@ export async function jestDebugConfig(
   testName: string,
 ): Promise<Partial<vscode.DebugConfiguration>> {
   const fw = await detectTestFramework(filePath)
+
+  const cwd = process.cwd()
+  const jestOptions = await (async () => {
+    try {
+      process.chdir(path.dirname(fw.configPath))
+      return await readInitialOptions(fw.configPath)
+    }
+    finally {
+      process.chdir(cwd)
+    }
+  })()
+
+  const setupFiles = ((jestOptions.config.setupFiles ?? []) as string[])
+    .map(file => path.resolve(file))
 
   return {
     program: fw.binPath,
@@ -24,7 +39,7 @@ export async function jestDebugConfig(
       '--silent=false',
       '--setupFiles',
       path.join(__dirname, 'ui-test-visualizer-test-setup.js'),
-      ...(fw.setupFiles ?? []),
+      ...setupFiles,
       '--detectOpenHandles',
       // TODO find out why Jest doesn't exit on its own
       '--forceExit',
