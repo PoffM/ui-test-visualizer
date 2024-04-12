@@ -112,6 +112,7 @@ export let visuallyDebugUI = async (
     name: DEBUG_NAME,
     request: 'launch',
     type: 'pwa-node',
+    outputCapture: 'std',
     ...(fwInfo.framework === 'jest'
       ? await jestDebugConfig(testFile, testName)
       : await vitestDebugConfig(testFile, testName)),

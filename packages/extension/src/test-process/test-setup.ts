@@ -189,10 +189,10 @@ function loadStylesIntoHead(win: typeof window, files: string[]) {
   const added = difference(newStyles, oldStyles)
   const removed = difference(oldStyles, newStyles)
   for (const style of added) {
-    log('Loaded stylesheet: ', style.dataset.src_filepath, style)
+    log('Enabled stylesheet: ', style.dataset.src_filepath)
   }
   for (const style of removed) {
-    log('Removed stylesheet: ', style.dataset.src_filepath, style)
+    log('Disabled stylesheet: ', style.dataset.src_filepath)
   }
 
   return cssSheets
