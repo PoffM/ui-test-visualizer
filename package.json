@@ -59,18 +59,18 @@
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.11.6",
-    "@playwright/test": "^1.42.1",
+    "@antfu/eslint-config": "^2.13.3",
+    "@playwright/test": "^1.43.1",
     "@total-typescript/ts-reset": "^0.5.1",
-    "@types/node": "^20.12.2",
-    "@vscode/vsce": "^2.24.0",
+    "@types/node": "^20.12.7",
+    "@vscode/vsce": "^2.25.0",
     "del": "^7.1.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "globby": "^14.0.1",
     "tsup": "^8.0.2",
-    "type-fest": "^4.14.0",
-    "typescript": "^5.4.3",
-    "vitest": "^1.4.0"
+    "type-fest": "^4.15.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0"
   },
   "pnpm": {
     "patchedDependencies": {

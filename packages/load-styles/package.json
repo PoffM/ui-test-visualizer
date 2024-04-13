@@ -1,7 +1,7 @@
 {
   "name": "load-styles",
   "dependencies": {
-    "@rollup/wasm-node": "^4.13.2",
+    "@rollup/wasm-node": "^4.14.2",
     "@types/estree": "^1.0.5",
     "esbuild": "^0.20.2",
     "nanoid": "3.3.7",
@@ -10,6 +10,6 @@
     "postcss-load-config": "^5.0.3",
     "source-map-js": "^1.2.0",
     "synckit": "^0.9.0",
-    "vite": "^5.2.7"
+    "vite": "^5.2.8"
   }
 }
