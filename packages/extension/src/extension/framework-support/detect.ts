@@ -1,5 +1,7 @@
 import path from 'pathe'
 import { findUp } from 'find-up'
+import { z } from 'zod'
+import { extensionSetting } from '../util/extension-setting'
 import { getJestBinPath } from './jest-support'
 import { getVitestBinPath } from './vitest-support'
 
@@ -7,29 +9,42 @@ export interface TestFrameworkInfo {
   framework: 'jest' | 'vitest'
   configPath: string
   binPath: string
-  setupFiles?: string[]
 }
 
 export async function detectTestFramework(
   testFilePath: string,
 ): Promise<TestFrameworkInfo> {
-  const vitestFile = await findUp(vitestConfigFiles, { cwd: testFilePath })
-  const jestFile = await findUp(
-    [
-      'jest.config.js',
-      'jest.config.ts',
-      'jest.config.cjs',
-      'jest.config.mjs',
-      'jest.config.json',
-    ],
-    { cwd: testFilePath },
-  )
+  const frameworkSetting = (() => {
+    const parsed = z.enum(['autodetect', 'vitest', 'jest'])
+      .safeParse(extensionSetting('ui-test-visualizer.testFramework'))
+    return parsed.success ? parsed.data : 'autodetect'
+  })()
+
+  // auto detect test config files
+
+  const vitestFile = (frameworkSetting === 'autodetect' || frameworkSetting === 'vitest')
+    ? await findUp(VITEST_CONFIG_FILES, { cwd: testFilePath })
+    : undefined
+
+  const jestFile = (frameworkSetting === 'autodetect' || frameworkSetting === 'jest')
+    ? await findUp(JEST_CONFIG_FILES, { cwd: testFilePath })
+    : undefined
 
   const configPath = vitestFile ?? jestFile
 
+  // throw error if no config file found
   if (!configPath) {
-    throw new Error('No Vitest or Jest config found')
+    switch (frameworkSetting) {
+      case 'autodetect':
+        throw new Error('No Vitest or Jest config found')
+      case 'vitest':
+        throw new Error('No Vitest config found')
+      case 'jest':
+        throw new Error('No Jest config found')
+    }
   }
+
+  // choose the config file with the deepest path
 
   const vitestCfgPathLength = vitestFile?.split(path.sep).length ?? 0
   const jestConfigPathLength = jestFile?.split(path.sep).length ?? 0
@@ -50,10 +65,18 @@ export async function detectTestFramework(
   }
 }
 
-const CONFIG_NAMES = ['vitest.config', 'vite.config']
+const JEST_CONFIG_FILES = [
+  'jest.config.js',
+  'jest.config.ts',
+  'jest.config.cjs',
+  'jest.config.mjs',
+  'jest.config.json',
+]
 
-const CONFIG_EXTENSIONS = ['.ts', '.mts', '.cts', '.js', '.mjs', '.cjs']
+const VITEST_CONFIG_NAMES = ['vitest.config', 'vite.config']
 
-export const vitestConfigFiles = CONFIG_NAMES.flatMap(name =>
-  CONFIG_EXTENSIONS.map(ext => name + ext),
+const VITEST_CONFIG_EXTENSIONS = ['.ts', '.mts', '.cts', '.js', '.mjs', '.cjs']
+
+const VITEST_CONFIG_FILES = VITEST_CONFIG_NAMES.flatMap(name =>
+  VITEST_CONFIG_EXTENSIONS.map(ext => name + ext),
 )
