@@ -34,18 +34,18 @@ export async function detectTestFramework(
   const vitestCfgPathLength = vitestFile?.split(path.sep).length ?? 0
   const jestConfigPathLength = jestFile?.split(path.sep).length ?? 0
 
-  if (jestConfigPathLength > vitestCfgPathLength) {
-    return {
-      framework: 'jest' as const,
-      configPath,
-      binPath: await getJestBinPath(testFilePath),
-    }
-  }
-  else {
+  if (vitestCfgPathLength > jestConfigPathLength) {
     return {
       framework: 'vitest' as const,
       configPath,
       binPath: await getVitestBinPath(testFilePath),
+    }
+  }
+  else {
+    return {
+      framework: 'jest' as const,
+      configPath,
+      binPath: await getJestBinPath(testFilePath),
     }
   }
 }
