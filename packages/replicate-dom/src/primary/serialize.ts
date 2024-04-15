@@ -189,7 +189,7 @@ export function serializeDomNode(
       specialProps,
     ]
   }
-  throw new Error(`Unhandled node type: ${node.nodeType}`)
+  throw new Error(`Unhandled node type: ${node.nodeName} (${node.nodeType})`)
 }
 
 const DEFAULT_NS = 'http://www.w3.org/1999/xhtml'

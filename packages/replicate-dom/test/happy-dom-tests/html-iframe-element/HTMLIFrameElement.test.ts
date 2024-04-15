@@ -33,6 +33,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BrowserWindow, Window } from 'happy-dom'
 import type { Document, IHTMLIFrameElement, IResponse, Window } from 'happy-dom'
 import type IRequestInfo from 'happy-dom/lib/fetch/types/IRequestInfo'
+import DOMTokenList from 'happy-dom/lib/dom-token-list/DOMTokenList.js'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'
 
@@ -72,7 +73,7 @@ describe('hTMLIFrameElement', () => {
     vi.restoreAllMocks()
   })
 
-  for (const property of ['src', 'allow', 'height', 'width', 'name', 'sandbox', 'srcdoc']) {
+  for (const property of ['src', 'allow', 'height', 'width', 'name', 'srcdoc']) {
     describe(`get ${property}()`, () => {
       it(`returns the "`, () => {
         const newIframe = document.createElement('iframe') as IHTMLIFrameElement
@@ -91,6 +92,101 @@ describe('hTMLIFrameElement', () => {
       })
     })
   }
+
+  describe('get sandbox()', () => {
+    it('returns DOMTokenList', () => {
+      const iframe = document.createElement('iframe') as IHTMLIFrameElement
+      document.body.appendChild(iframe)
+      const replicaIframe = replicaDocument.body.children[0] as IHTMLIFrameElement
+
+      expect(replicaIframe.sandbox).toBeInstanceOf(DOMTokenList)
+      iframe.sandbox.add('allow-forms', 'allow-scripts')
+      expect(replicaIframe.sandbox.toString()).toBe('allow-forms allow-scripts')
+    })
+
+    it('returns values from attribute', () => {
+      const iframe = document.createElement('iframe') as IHTMLIFrameElement
+      document.body.appendChild(iframe)
+      const replicaIframe = replicaDocument.body.children[0] as IHTMLIFrameElement
+
+      iframe.setAttribute('sandbox', 'allow-forms allow-scripts')
+      expect(replicaIframe.sandbox.toString()).toBe('allow-forms allow-scripts')
+    })
+  })
+
+  describe('set sandbox()', () => {
+    it('sets attribute', () => {
+      const iframe = document.createElement('iframe') as IHTMLIFrameElement
+      document.body.appendChild(iframe)
+      const replicaIframe = replicaDocument.body.children[0] as IHTMLIFrameElement
+
+      iframe.sandbox = 'allow-forms allow-scripts'
+      expect(replicaIframe.getAttribute('sandbox')).toBe('allow-forms allow-scripts')
+
+      iframe.sandbox
+				= 'allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation allow-top-navigation-to-custom-protocols'
+      expect(replicaIframe.sandbox.toString()).toBe(
+        'allow-downloads allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation allow-top-navigation-by-user-activation allow-top-navigation-to-custom-protocols',
+      )
+    })
+
+    it('updates the DOMTokenList indicies when setting the sandbox attribute', () => {
+      const iframe = document.createElement('iframe') as IHTMLIFrameElement
+      document.body.appendChild(iframe)
+      const replicaIframe = replicaDocument.body.children[0] as IHTMLIFrameElement
+
+      iframe.sandbox = 'allow-forms allow-scripts'
+      expect(replicaIframe.sandbox.length).toBe(2)
+      expect(replicaIframe.sandbox[0]).toBe('allow-forms')
+      expect(replicaIframe.sandbox[1]).toBe('allow-scripts')
+
+      iframe.sandbox = 'allow-scripts allow-forms'
+      expect(replicaIframe.sandbox.length).toBe(2)
+      expect(replicaIframe.sandbox[0]).toBe('allow-scripts')
+      expect(replicaIframe.sandbox[1]).toBe('allow-forms')
+
+      iframe.sandbox = 'allow-forms'
+      expect(replicaIframe.sandbox.length).toBe(1)
+      expect(replicaIframe.sandbox[0]).toBe('allow-forms')
+      expect(replicaIframe.sandbox[1]).toBe(undefined)
+
+      iframe.sandbox = ''
+
+      expect(replicaIframe.sandbox.length).toBe(0)
+      expect(replicaIframe.sandbox[0]).toBe(undefined)
+
+      iframe.sandbox = 'allow-forms allow-scripts allow-forms'
+      expect(replicaIframe.sandbox.length).toBe(2)
+      expect(replicaIframe.sandbox[0]).toBe('allow-forms')
+      expect(replicaIframe.sandbox[1]).toBe('allow-scripts')
+
+      iframe.sandbox = 'allow-forms allow-scripts allow-modals'
+      expect(replicaIframe.sandbox.length).toBe(3)
+      expect(replicaIframe.sandbox[0]).toBe('allow-forms')
+      expect(replicaIframe.sandbox[1]).toBe('allow-scripts')
+      expect(replicaIframe.sandbox[2]).toBe('allow-modals')
+    })
+
+    it('console error occurs when add an invalid sandbox flag', () => {
+      const iframe = document.createElement('iframe') as IHTMLIFrameElement
+      document.body.appendChild(iframe)
+      const replicaIframe = replicaDocument.body.children[0] as IHTMLIFrameElement
+
+      iframe.sandbox = 'invalid'
+      expect(window.happyDOM.virtualConsolePrinter.readAsString()).toBe(
+				`Error while parsing the 'sandbox' attribute: 'invalid' is an invalid sandbox flag.\n`,
+      )
+      expect(replicaIframe.sandbox.toString()).toBe('invalid')
+      expect(replicaIframe.getAttribute('sandbox')).toBe('invalid')
+
+      iframe.setAttribute('sandbox', 'first-invalid second-invalid')
+      expect(window.happyDOM.virtualConsolePrinter.readAsString()).toBe(
+				`Error while parsing the 'sandbox' attribute: 'first-invalid', 'second-invalid' are invalid sandbox flags.\n`,
+      )
+      expect(replicaIframe.sandbox.toString()).toBe('first-invalid second-invalid')
+      expect(replicaIframe.getAttribute('sandbox')).toBe('first-invalid second-invalid')
+    })
+  })
 
   describe('get contentWindow()', () => {
     it('returns content window for "about:blank".', () => {
