@@ -24,6 +24,17 @@
       "sourceMaps": true
     },
     {
+      "name": "Jest+React with package.json config Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "${workspaceFolder}/examples/jest-react-package-config"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
       "name": "tic tac toe",
       "type": "extensionHost",
       "request": "launch",
@@ -52,6 +63,39 @@
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
         "/home/mat/react-native-wordle-clone"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
+      "name": "nextjs vitest example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "/home/mat/vitest-vscode-ext/nextjs-with-vitest"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
+      "name": "nextjs-with-jest-app",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "/home/mat/vitest-vscode-ext/nextjs-with-jest-app"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
+      "name": "nextjs-with-jest-babel-app",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "/home/mat/vitest-vscode-ext/nextjs-with-jest-babel-app"
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true

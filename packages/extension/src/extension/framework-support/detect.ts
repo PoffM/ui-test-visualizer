@@ -1,6 +1,7 @@
 import path from 'pathe'
 import { findUp } from 'find-up'
 import { z } from 'zod'
+import { readInitialOptions } from 'jest-config'
 import { extensionSetting } from '../util/extension-setting'
 import { getJestBinPath } from './jest-support'
 import { getVitestBinPath } from './vitest-support'
@@ -27,7 +28,31 @@ export async function detectTestFramework(
     : undefined
 
   const jestFile = (frameworkSetting === 'autodetect' || frameworkSetting === 'jest')
-    ? await findUp(JEST_CONFIG_FILES, { cwd: testFilePath })
+    ? await (async () => {
+      const cwd = process.cwd()
+      try {
+        process.chdir(path.dirname(testFilePath))
+        const cfg = await readInitialOptions(undefined, {})
+        if (
+          cfg.configPath?.endsWith('/package.json')
+
+          // check for { rootDir: '/...' } ; the empty config placeholder
+          && Object.keys(cfg.config).length <= 1
+        ) {
+          // no jest config found in package.json
+          return undefined
+        }
+        return cfg.configPath
+      }
+      catch {
+        // readInitialOptions throws an error if it can't find jest.config.x or package.json
+        // ignore the error
+        return undefined
+      }
+      finally {
+        process.chdir(cwd)
+      }
+    })()
     : undefined
 
   const configPath = vitestFile ?? jestFile
@@ -64,14 +89,6 @@ export async function detectTestFramework(
     }
   }
 }
-
-const JEST_CONFIG_FILES = [
-  'jest.config.js',
-  'jest.config.ts',
-  'jest.config.cjs',
-  'jest.config.mjs',
-  'jest.config.json',
-]
 
 const VITEST_CONFIG_NAMES = ['vitest.config', 'vite.config']
 
