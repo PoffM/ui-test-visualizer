@@ -1,17 +1,16 @@
-import path from 'pathe'
 import { findUp } from 'find-up'
-import type * as vscode from 'vscode'
 import { readInitialOptions } from 'jest-config'
-import { detectTestFramework } from './detect'
+import path from 'pathe'
+import type * as vscode from 'vscode'
+import type { TestFrameworkInfo } from './detect'
 import { cleanTestNameForTerminal } from './util'
 
 export async function jestDebugConfig(
   filePath: string,
   testName: string,
+  fw: TestFrameworkInfo,
 ): Promise<Partial<vscode.DebugConfiguration>> {
   await assertCompatibleJestVersion(filePath)
-
-  const fw = await detectTestFramework(filePath)
 
   const cwd = process.cwd()
   const jestOptions = await (async () => {

@@ -3,16 +3,16 @@ import '@total-typescript/ts-reset'
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod'
-import { hotReload } from './util/hot-reload'
+import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
+import { codeLensProvider } from './code-lens-provider'
 import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
 import { vitestDebugConfig } from './framework-support/vitest-support'
-import { codeLensProvider } from './code-lens-provider'
-import { startPanelController } from './panel-controller/panel-controller'
-import { extensionSetting } from './util/extension-setting'
 import { myExtensionStorage } from './my-extension-storage'
+import { startPanelController } from './panel-controller/panel-controller'
 import { startDebugSessionTracker } from './util/debug-session-tracker'
-import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
+import { extensionSetting } from './util/extension-setting'
+import { hotReload } from './util/hot-reload'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -120,7 +120,7 @@ export let visuallyDebugUI = async (
     type: 'pwa-node',
     outputCapture: 'std',
     ...(fwInfo.framework === 'jest'
-      ? await jestDebugConfig(testFile, testName)
+      ? await jestDebugConfig(testFile, testName, fwInfo)
       : await vitestDebugConfig(testFile, testName)),
   }
 
