@@ -3,7 +3,7 @@
   "displayName": "UI Test Visualizer",
   "version": "0.0.0",
   "private": true,
-  "description": "Debug UI tests while seeing the UI",
+  "description": "Visually step through your UI tests while debugging.",
   "preview": true,
   "author": "poffm",
   "keywords": [
