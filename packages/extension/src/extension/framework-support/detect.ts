@@ -14,13 +14,8 @@ export interface TestFrameworkInfo {
 
 export async function detectTestFramework(
   testFilePath: string,
+  frameworkSetting: 'autodetect' | 'vitest' | 'jest',
 ): Promise<TestFrameworkInfo> {
-  const frameworkSetting = (() => {
-    const parsed = z.enum(['autodetect', 'vitest', 'jest'])
-      .safeParse(extensionSetting('ui-test-visualizer.testFramework'))
-    return parsed.success ? parsed.data : 'autodetect'
-  })()
-
   // auto detect test config files
 
   const vitestFile = (frameworkSetting === 'autodetect' || frameworkSetting === 'vitest')

@@ -3,6 +3,7 @@
   "main": "./src/extension.ts",
   "scripts": {
     "dev": "tsup --watch . --watch ../replicate-dom --sourcemap",
+    "test": "vitest --run",
     "build": "tsup --minify"
   },
   "dependencies": {
@@ -23,7 +24,10 @@
     "@types/node": "^20.12.7",
     "@types/vscode": "^1.88.0",
     "@types/ws": "^8.5.10",
+    "@vitest/expect": "^1.5.0",
     "@vscode/codicons": "^0.0.35",
-    "chokidar": "^3.6.0"
+    "chokidar": "^3.6.0",
+    "vite": "^5.2.8",
+    "vitest": "^1.5.0"
   }
 }

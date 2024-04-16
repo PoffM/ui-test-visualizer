@@ -29,7 +29,7 @@
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
-        "${workspaceFolder}/examples/jest-react-package-config"
+        "${workspaceFolder}/examples/jest-react-with-packagejson-config"
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true

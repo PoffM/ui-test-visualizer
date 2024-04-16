@@ -106,7 +106,13 @@ export let visuallyDebugUI = async (
     )
   })
 
-  const fwInfo = await detectTestFramework(testFile)
+  const frameworkSetting = (() => {
+    const parsed = z.enum(['autodetect', 'vitest', 'jest'])
+      .safeParse(extensionSetting('ui-test-visualizer.testFramework'))
+    return parsed.success ? parsed.data : 'autodetect'
+  })()
+
+  const fwInfo = await detectTestFramework(testFile, frameworkSetting)
 
   const debugConfig: vscode.DebugConfiguration = {
     name: DEBUG_NAME,
