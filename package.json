@@ -69,7 +69,7 @@
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.13.3",
+    "@antfu/eslint-config": "^2.14.0",
     "@playwright/test": "^1.43.1",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/node": "^20.12.7",
