@@ -1,22 +1,21 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import type { DOMWindow } from 'jsdom'
-import { JSDOM } from 'jsdom'
+import { Window } from 'happy-dom'
 import { initTestReplicaDom } from '../test-setup'
 import { serializeDomNode } from '../../src'
 
-let window: DOMWindow
+let window: Window
 let document: Document
 
-let replicaWindow: DOMWindow
+let replicaWindow: Window
 let replicaDocument: Document
 
 let customElementOutput: any
 
 beforeEach(() => {
-  window = new JSDOM().window
+  window = new Window()
   document = window.document
 
-  replicaWindow = new JSDOM().window
+  replicaWindow = new Window()
   replicaDocument = replicaWindow.document
 
   initTestReplicaDom(window as unknown as Window, replicaWindow as unknown as Window)
@@ -107,9 +106,7 @@ describe('connectedCallback()', () => {
       constructor() {
         super()
         this.attachShadow({ mode: 'open' })
-
-        // TODO maybe fix this. mutations on OTHER nodes in a custom element's constructor don't replicate when using JSDOM.
-        // textDiv1.textContent = 'Mutated by ExampleElement\'s constructor'
+        textDiv1.textContent = 'Mutated by ExampleElement\'s constructor'
       }
 
       public connectedCallback(): void {

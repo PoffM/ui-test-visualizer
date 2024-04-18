@@ -65,13 +65,13 @@ export function StylePicker(props: StylePickerProps) {
           <div class="space-y-2">
             <div>You can use this <StyleIcon size={18} class="inline" /> button to enable CSS files.</div>
             <div class="w-full flex justify-end">
-              <vscode-button
+              <ui-test-visualizer-button
                 onClick={dismissStylePrompt}
                 appearance="secondary"
                 title="Dismiss style prompt"
               >
                 OK
-              </vscode-button>
+              </ui-test-visualizer-button>
             </div>
           </div>
         </PopoverContent>
@@ -145,7 +145,7 @@ function StylePickerMenu(
                 <div class="" title={file.path}>
                   {file.displayPath}
                 </div>
-                <vscode-checkbox
+                <ui-test-visualizer-checkbox
                   checked={file.enabled}
                   onChange={(e: unknown) => {
                     const checked = Boolean(get(e, 'currentTarget.checked'))
@@ -153,38 +153,38 @@ function StylePickerMenu(
                   }}
                 />
               </label>
-              <vscode-button
+              <ui-test-visualizer-button
                 appearance="icon"
                 title="Remove"
                 onClick={() => removeExternalFile(file.path)}
                 style={{ visibility: file.isExternal ? 'visible' : 'hidden' }}
               >
                 <X />
-              </vscode-button>
+              </ui-test-visualizer-button>
             </div>
           )}
         </For>
         <Show when={files.loading}>
           <div>
-            <vscode-progress-ring />
+            <ui-test-visualizer-progress-ring />
           </div>
         </Show>
       </div>
       <div class="flex justify-between px-2">
-        <vscode-button
+        <ui-test-visualizer-button
           appearance="secondary"
           title="Link another file"
           onClick={addExternalFiles}
         >
           Add external file
-        </vscode-button>
-        <vscode-button
+        </ui-test-visualizer-button>
+        <ui-test-visualizer-button
           appearance="primary"
           title="Apply styles"
           onClick={ok}
         >
           OK
-        </vscode-button>
+        </ui-test-visualizer-button>
       </div>
     </div>
   )

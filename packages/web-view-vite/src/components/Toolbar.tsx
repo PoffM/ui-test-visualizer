@@ -30,7 +30,7 @@ export function Toolbar() {
             label="Enable your styles"
           >
             {isRefreshing
-              ? <vscode-progress-ring class="w-[16px] h-[16px]" />
+              ? <ui-test-visualizer-progress-ring class="w-[16px] h-[16px]" />
               : <StyleIcon />}
           </ToolbarButton>
         )}
@@ -48,14 +48,14 @@ function ToolbarButton(props: ToolbarButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <vscode-button
+        <ui-test-visualizer-button
           class="h-10 w-10"
           appearance="secondary"
           onClick={props.onClick}
           aria-label={props.label}
         >
           {props.children}
-        </vscode-button>
+        </ui-test-visualizer-button>
       </TooltipTrigger>
       <TooltipContent>
         <p>{props.label}</p>

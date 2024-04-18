@@ -89,8 +89,8 @@ export function spyOnDomNodes(
     }
   }
 
+  // Handle custom elements (web components)
   {
-    const elementClasses = new Map<string, Class<unknown>>()
     const origDefine = win.customElements.define
     Object.defineProperty(win.customElements, 'define', {
       set() {
@@ -148,36 +148,35 @@ export function spyOnDomNodes(
             )
           }
 
-          const GeneratedSubclass = class extends CustomElementClass {
-            constructor(...args: unknown[]) {
-              const originalRoot = currentCtx
-              currentCtx = {}
-              try {
-                super(...args)
-              }
-              finally {
-                currentCtx = originalRoot
-              }
-            }
-          }
-
-          elementClasses.set(name, CustomElementClass)
-          origDefine.call(this, name, GeneratedSubclass, options)
+          origDefine.call(this, name, CustomElementClass, options)
         }
       },
     })
 
-    Object.defineProperty(win.customElements, 'get', {
-      set() {
-        throw new Error('Cannot redefine customElements.set')
-      },
-      get() {
-        return function get(name: string) {
-          const cls = elementClasses.get(name)
-          return cls
-        }
-      },
-    })
+    // Allow side effects inside the web components' constructors
+    // where they might mutate other nodes. Very weird edge case.
+    {
+      // happy-dom calls the constructor inside createElementNS
+      const constructorSpy: SpyImpl<any[], any> = spyOn(
+        win.document,
+        'createElementNS',
+        function (this: Document, ...args: unknown[]) {
+          return runInNewCtx(() => constructorSpy.getOriginal().call(this, ...args))
+        },
+      )
+
+      // jsdom calls the constructor inside createElement
+      const constructorSpy2: SpyImpl<any[], any> = spyOn(
+        win.Document.prototype,
+        'createElement',
+        function (this: Document, ...args: unknown[]) {
+          return runInNewCtx(() => constructorSpy2.getOriginal().call(this, ...args))
+        },
+      )
+
+      // TODO handle when jsdom calls the custom element constructor inside 'set innerHTML'.
+      // Very very weird edge case.
+    }
   }
 
   const mutableDomProps = MUTABLE_DOM_PROPS(win)

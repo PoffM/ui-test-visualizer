@@ -20,21 +20,21 @@ import 'solid-js'
 declare module 'solid-js' {
   namespace JSX {
     interface IntrinsicElements {
-      'vscode-badge': any
-      'vscode-button': any
-      'vscode-checkbox': any
-      'vscode-data-grid': any
-      'vscode-divider': any
-      'vscode-dropdown': any
-      'vscode-link': any
-      'vscode-option': any
-      'vscode-panels': any
-      'vscode-progress-ring': any
-      'vscode-radio': any
-      'vscode-radio-group': any
-      'vscode-tag': any
-      'vscode-text-area': any
-      'vscode-text-field': any
+      'ui-test-visualizer-badge': any
+      'ui-test-visualizer-button': any
+      'ui-test-visualizer-checkbox': any
+      'ui-test-visualizer-data-grid': any
+      'ui-test-visualizer-divider': any
+      'ui-test-visualizer-dropdown': any
+      'ui-test-visualizer-link': any
+      'ui-test-visualizer-option': any
+      'ui-test-visualizer-panels': any
+      'ui-test-visualizer-progress-ring': any
+      'ui-test-visualizer-radio': any
+      'ui-test-visualizer-radio-group': any
+      'ui-test-visualizer-tag': any
+      'ui-test-visualizer-text-area': any
+      'ui-test-visualizer-text-field': any
     }
   }
 }

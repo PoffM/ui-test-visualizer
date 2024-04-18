@@ -9,11 +9,14 @@ import { Toolbar } from './components/Toolbar'
 // In order to use the Webview UI Toolkit web components they
 // must be registered with the browser (i.e. webview) using the
 // syntax below.
-webviewToolkit
-  .provideVSCodeDesignSystem()
-  .register(webviewToolkit.vsCodeButton())
-  .register(webviewToolkit.vsCodeCheckbox())
-  .register(webviewToolkit.vsCodeProgressRing())
+{
+  const prefix = 'ui-test-visualizer'
+  webviewToolkit
+    .provideVSCodeDesignSystem()
+    .register(webviewToolkit.vsCodeButton({ prefix }))
+    .register(webviewToolkit.vsCodeCheckbox({ prefix }))
+    .register(webviewToolkit.vsCodeProgressRing({ prefix }))
+}
 
 // TODO put these into a context provider
 

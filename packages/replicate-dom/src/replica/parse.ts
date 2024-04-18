@@ -131,11 +131,33 @@ export function parseDomNode(node: SerializedDomNode, doc: Document, win: typeof
         if (specialProps.shadowRoot) {
           const shadowRoot = element.attachShadow(specialProps.shadowRoot.init)
           const content = parseDomNode(specialProps.shadowRoot.content, doc, win)
+
+          shadowRoot.adoptedStyleSheets = specialProps.shadowRoot.adoptedStyleSheets.map(
+            (rules) => {
+              const sheet = new win.CSSStyleSheet()
+              for (const rule of rules) {
+                try {
+                  sheet.insertRule(rule)
+                }
+                catch (err) {
+                  // Ignore invalid rules, e.g. ::-moz-focus-inner which throw here in chromium
+                  sheet.insertRule('#placeholder-from-ui-test-visualizer {}')
+                }
+              }
+              return sheet
+            },
+          )
+
           shadowRoot.append(content)
         }
 
         for (const [name, value] of Object.entries(attributes)) {
-          element.setAttribute(name, value)
+          try {
+            element.setAttribute(name, value)
+          }
+          catch (err) {
+            console.warn(`setAttribute replication error:`, err)
+          }
         }
 
         // Don't execute scripts on the replica

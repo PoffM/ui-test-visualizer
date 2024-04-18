@@ -14,6 +14,7 @@ export interface NodeSpecialProps {
   shadowRoot?: {
     init: ShadowRootInit
     content: SerializedDomNode
+    adoptedStyleSheets: string[][]
   }
 }
 

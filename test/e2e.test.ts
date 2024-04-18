@@ -23,7 +23,7 @@ test('Steps through the Vitest+React Counter example', async () => {
     .frameLocator('iframe[title="Tested UI"]')
 
   // Click the OK button on the initial style prompt
-  await replicaPanel.locator('vscode-button[title="Dismiss style prompt"]').click()
+  await replicaPanel.locator('ui-test-visualizer-button[title="Dismiss style prompt"]').click()
 
   // Wait until the debugger is paused on breakpoint
   await page.getByText('Paused on breakpoint').waitFor()
@@ -32,7 +32,7 @@ test('Steps through the Vitest+React Counter example', async () => {
   await debugHelper.debugStep()
 
   // Refresh button should be visible
-  await replicaPanel.locator('vscode-button[aria-label="Refresh Panel HTML"]').waitFor()
+  await replicaPanel.locator('ui-test-visualizer-button[aria-label="Refresh Panel HTML"]').waitFor()
 
   await replicaPanel.getByText('Count: 0').waitFor()
 
@@ -40,9 +40,9 @@ test('Steps through the Vitest+React Counter example', async () => {
   await replicaPanel.getByText('Count: 1').waitFor()
 
   // Enable the SCSS style
-  await replicaPanel.locator('vscode-button[aria-label="Enable your styles"]').click()
+  await replicaPanel.locator('ui-test-visualizer-button[aria-label="Enable your styles"]').click()
   await replicaPanel.getByText('style.scss').click()
-  await replicaPanel.locator('vscode-button[title="Apply styles"]').click()
+  await replicaPanel.locator('ui-test-visualizer-button[title="Apply styles"]').click()
 
   // Wait for the button to turn green because of the new styles
   await expect.poll(
@@ -92,7 +92,7 @@ test('Steps through the Jest+React Counter example', async () => {
   await debugHelper.debugStep()
 
   // Refresh button should be visible
-  await replicaPanel.locator('vscode-button[aria-label="Refresh Panel HTML"]').waitFor()
+  await replicaPanel.locator('ui-test-visualizer-button[aria-label="Refresh Panel HTML"]').waitFor()
 
   await replicaPanel.getByText('Count: 0').waitFor()
 

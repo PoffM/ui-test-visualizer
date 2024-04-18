@@ -1,5 +1,5 @@
 import type { Window } from 'happy-dom'
-import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode, SpyableClass } from '../types'
+import type { DomNodePath, NodeSpecialProps, SerializedDomMutationArg, SerializedDomNode, SerializedShadowRoot, SpyableClass } from '../types'
 import { containsNode, findNestedAltRoots } from './contains-node-util'
 
 export function getNodePath(node: SpyableClass, root: Node, win: typeof window): DomNodePath | null {
@@ -161,6 +161,13 @@ export function serializeDomNode(
       const result: NodeSpecialProps = {}
 
       if (node.shadowRoot) {
+        const adoptedStyleSheets = (node.shadowRoot.adoptedStyleSheets ?? []).map(
+          (sheet) => {
+            const rules = Array.from(sheet.cssRules)
+            return rules.map((rule: CSSRule) => rule.cssText)
+          },
+        )
+
         result.shadowRoot = {
           init: {
             mode: 'open',
@@ -168,6 +175,7 @@ export function serializeDomNode(
             slotAssignment: node.shadowRoot.slotAssignment,
           },
           content: serializeDomNode(node.shadowRoot, win),
+          adoptedStyleSheets,
         }
       }
       // Special case for SVG elements or others that use a namespace.
