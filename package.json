@@ -32,13 +32,13 @@
         "ui-test-visualizer.disableCodeLens": {
           "type": "boolean",
           "default": false,
-          "description": "Disable the in-editor UI Test Visualizer buttons",
+          "description": "Disable the \"Visually Debug UI\" buttons",
           "scope": "window"
         },
         "ui-test-visualizer.codeLensSelector": {
           "type": "string",
           "default": "**/*.{test,spec}.{jsx,tsx}",
-          "description": "Show the in-editor UI Test Visualizer buttons on files matching this pattern"
+          "description": "Show the \"Visually Debug UI\" buttons on files matching this pattern"
         },
         "ui-test-visualizer.testFramework": {
           "type": "string",
