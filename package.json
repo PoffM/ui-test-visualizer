@@ -51,13 +51,7 @@
           "description": "Test Framework: Vitest or Jest. Auto-detects by default by walking up directories from your test file."
         }
       }
-    },
-    "commands": [
-      {
-        "command": "ui-test-visualizer.visuallyDebugUI",
-        "title": "Visually Debug UI"
-      }
-    ]
+    }
   },
   "scripts": {
     "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
