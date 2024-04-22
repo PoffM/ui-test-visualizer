@@ -28,6 +28,7 @@ export const {
   shadowHost,
   refreshShadow,
   firstPatchReceived,
+  flushHtmlPatches,
 } = createDomReplica()
 
 export function App() {
