@@ -7,7 +7,10 @@ export type DebugSessionTracker = ReturnType<typeof startDebugSessionTracker>
  * Tracks the active debug session, which frame it's paused on,
  * and provides a method to run debug expressions.
  */
-export function startDebugSessionTracker(rootSession: vscode.DebugSession) {
+export function startDebugSessionTracker(
+  rootSession: vscode.DebugSession,
+  onFrameChange: () => void,
+) {
   const sessions = new Set([rootSession])
 
   /** Tracks which frame each debug session is paused on. */
@@ -24,6 +27,7 @@ export function startDebugSessionTracker(rootSession: vscode.DebugSession) {
       const activeSession = vscode.debug.activeDebugSession
       if (activeSession && isChildSession(activeSession, rootSession)) {
         frameIds.set(activeSession, context.frameId)
+        onFrameChange()
       }
       return []
     },

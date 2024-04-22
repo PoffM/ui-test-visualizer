@@ -38,6 +38,9 @@ export async function startPanelController(
 
   return {
     htmlUpdaterPort,
+    flushPatches() {
+      panel?.webview.postMessage({ flushPatches: true })
+    },
     async openPanel(
       sessionTracker: DebugSessionTracker,
     ) {

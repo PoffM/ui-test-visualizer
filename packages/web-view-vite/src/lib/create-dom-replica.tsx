@@ -20,16 +20,24 @@ export function createDomReplica() {
     ).children[0]!,
   )
 
+  let patches: HTMLPatch[] = []
+
   makeEventListener(window, 'message', (event) => {
-    const { htmlPatch } = event.data
+    const { htmlPatch, flushPatches } = event.data
 
     if (htmlPatch) {
+      patches.push(htmlPatch as HTMLPatch)
       setFirstPatchReceived(true)
-      applyDomPatch(
-        shadow,
-        (event.data.htmlPatch as HTMLPatch),
-        window,
-      )
+    }
+    if (flushPatches) {
+      for (const patch of patches) {
+        applyDomPatch(
+          shadow,
+          patch,
+          window,
+        )
+      }
+      patches = []
     }
   })
 

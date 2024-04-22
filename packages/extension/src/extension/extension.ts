@@ -82,7 +82,10 @@ export let visuallyDebugUI = async (
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()
 
-    const sessionTracker = await startDebugSessionTracker(currentSession)
+    const sessionTracker = await startDebugSessionTracker(
+      currentSession,
+      () => panelController.flushPatches(),
+    )
 
     const breakpointInfoParsed = z.tuple([z.number(), z.number()])
       .safeParse(startAndEndLines)
