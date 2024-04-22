@@ -7,13 +7,19 @@
   "preview": true,
   "author": "poffm",
   "keywords": [
-    "vitest",
+    "react",
+    "solid",
     "test",
+    "vitest",
+    "jest",
+    "debug",
     "typescript",
     "javascript"
   ],
   "categories": [
-    "Testing"
+    "Testing",
+    "Debuggers",
+    "Visualization"
   ],
   "main": "./build-prod/extension.js",
   "engines": {
