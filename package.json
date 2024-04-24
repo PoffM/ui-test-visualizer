@@ -71,6 +71,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.14.0",
+    "@changesets/cli": "^2.27.1",
     "@playwright/test": "^1.43.1",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/node": "^20.12.7",
