@@ -1,6 +1,6 @@
 # UI Test Visualizer
 
-Visually step through your jsdom or happy-dom based UI tests.
+Visually step through your jsdom or happy-dom based UI tests with the debugger.
 
 This is a VSCode extension: no code changes should be required to watch your UI tests.
 

@@ -3,7 +3,7 @@
   "displayName": "UI Test Visualizer",
   "version": "0.0.0",
   "private": true,
-  "description": "Visually step through your UI tests while debugging.",
+  "description": "Visually step through your jsdom or happy-dom based UI tests with the debugger.",
   "preview": true,
   "author": "poffm",
   "keywords": [
