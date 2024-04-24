@@ -7,20 +7,24 @@
   :host {
     --background: #1e1e1e;
     --color: #fff;
+    --color-scheme: dark;
   }
 }
 
 [data-theme="dark"] {
   --background: #1e1e1e;
   --color: #fff;
+  --color-scheme: dark;
 }
 
 [data-theme="light"] {
   --background: #fff;
   --color: #000;
+  --color-scheme: light;
 }
 
 html {
   background-color: var(--background);
   color: var(--color);
+  color-scheme: var(--color-scheme);
 }
