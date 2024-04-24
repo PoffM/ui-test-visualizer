@@ -60,13 +60,18 @@ export default defineConfig((options) => {
         }),
       },
       {
-        name: 'add-readme',
+        name: 'copy-files',
         buildStart: lodash.once(async () => {
-          await fs.copyFile(
-            path.join(__dirname, '../../README.md'),
-            path.join(outDir, 'README.md'),
-          )
-          console.log('Created build README.md')
+          const root = path.join(__dirname, '../..')
+          const files = ['README.md', 'icon.png']
+          for (const file of files) {
+            await fs.copyFile(
+              path.join(root, file),
+              path.join(outDir, file),
+            )
+          }
+
+          console.log(`Copied files: ${files.join(', ')}`)
         }),
       },
       {
