@@ -4,7 +4,9 @@ Visually step through your jsdom or happy-dom based UI tests with the debugger.
 
 This is a VSCode extension: no code changes should be required to watch your UI tests.
 
-- TODO demo video
+## Demo
+
+https://github.com/PoffM/visual-ui-test-vscode/assets/14864076/4cdbf755-c9ff-42f3-8db9-508fd1d4ab74
 
 ## Workspace Requirements
 
