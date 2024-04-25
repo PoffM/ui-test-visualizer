@@ -1,5 +1,6 @@
 {
   "name": "replicate-dom",
+  "private": true,
   "main": "./src/index.ts",
   "scripts": {
     "test": "TZ=UTC vitest --run"

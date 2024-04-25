@@ -2,10 +2,8 @@
   "publisher": "poffm",
   "name": "ui-test-visualizer",
   "displayName": "UI Test Visualizer",
-  "version": "0.0.0",
   "private": true,
   "description": "Visually step through your jsdom or happy-dom based UI tests with the debugger.",
-  "preview": true,
   "author": "poffm",
   "keywords": [
     "react",
@@ -68,7 +66,8 @@
     "typecheck": "tsc",
     "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/build-prod/extension.vsix",
     "code-server-down": "docker compose -f test/docker-compose.yml down",
-    "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down"
+    "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down",
+    "publish": "(cd ./build-prod/ && pnpm vsce publish --packagePath ./extension.vsix --allow-missing-repository --skip-license)"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.14.0",

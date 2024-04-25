@@ -1,5 +1,6 @@
 {
   "name": "web-view-vite",
+  "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build"

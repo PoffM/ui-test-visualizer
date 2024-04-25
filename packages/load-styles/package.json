@@ -1,5 +1,6 @@
 {
   "name": "load-styles",
+  "private": true,
   "dependencies": {
     "@rollup/wasm-node": "^4.14.3",
     "@types/estree": "^1.0.5",
