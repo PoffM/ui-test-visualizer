@@ -2,7 +2,7 @@
   "publisher": "poffm",
   "name": "ui-test-visualizer",
   "displayName": "UI Test Visualizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Visually step through your jsdom or happy-dom based UI tests with the debugger.",
   "author": "poffm",
