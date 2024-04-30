@@ -1,4 +1,3 @@
-// import { exec } from 'node:child_process'
 import { chromium, expect, test } from '@playwright/test'
 import { DebuggerHelper } from './debugger-helper'
 
