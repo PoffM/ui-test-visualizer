@@ -6,6 +6,9 @@
   "private": true,
   "description": "Visually step through your jsdom or happy-dom based UI tests with the debugger.",
   "author": "poffm",
+  "bugs": {
+    "url": "https://github.com/PoffM/ui-test-visualizer/issues"
+  },
   "keywords": [
     "react",
     "solid",

@@ -63,7 +63,7 @@ export default defineConfig((options) => {
         name: 'copy-files',
         buildStart: lodash.once(async () => {
           const root = path.join(__dirname, '../..')
-          const files = ['README.md', 'icon.png']
+          const files = ['README.md', 'icon.png', 'CHANGELOG.md']
           for (const file of files) {
             await fs.copyFile(
               path.join(root, file),
