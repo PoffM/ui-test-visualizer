@@ -41,8 +41,26 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm run build
 
+      # E2E tests
+
+      # # Install playwright binaries
+      - name: Get installed Playwright version
+        run: echo "PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test | grep @playwright | sed 's/.* //')" >> $GITHUB_ENV
+      - name: Cache playwright binaries
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ env.PLAYWRIGHT_VERSION }}
       - run: npx playwright install --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Build + cache the test code-server Docker image
+        run: docker buildx build -t test-code-server --cache-to type=gha --cache-from type=gha ./test/
+
+      # # Run the tests
       - run: pnpm run test:e2e
+
       - name: Upload test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
