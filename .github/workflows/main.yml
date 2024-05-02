@@ -60,7 +60,7 @@ jobs:
       - name: Build + cache the test code-server Docker image
         uses: docker/build-push-action@v5
         with:
-          push: false
+          load: true
           context: ./test/
           tags: test-code-server
           cache-from: type=gha
