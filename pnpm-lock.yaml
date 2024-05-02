@@ -292,8 +292,8 @@ importers:
   packages/web-view-vite:
     dependencies:
       '@kobalte/core':
-        specifier: ^0.13.0
-        version: 0.13.0(solid-js@1.8.17)
+        specifier: 0.12.6
+        version: 0.12.6(solid-js@1.8.17)
       '@kobalte/utils':
         specifier: ^0.9.0
         version: 0.9.0(solid-js@1.8.17)
@@ -1783,8 +1783,8 @@ packages:
     resolution: {integrity: sha512-f5DRIOZf7wxogefH03RjMPMdBF7ADTWUMoOs9kaJo06EfwF+aFhMZMDZxHg/Xe12hptN9xoZjGso2fdjapBRIA==}
     engines: {node: '>=10'}
 
-  '@kobalte/core@0.13.0':
-    resolution: {integrity: sha512-wTdcmdqjF9FJeJYMBC3YpbC3s7SUZY3gDLlVGbA+vWQRYL/FtqBhmvWDEGNYVvpaB/HoLHbFe0wVxhgXiPil5g==}
+  '@kobalte/core@0.12.6':
+    resolution: {integrity: sha512-+Ta2o2wEqZ2fCqLMkvjT40VHNmcFKdGe8TNDVQbbMPk66qoU6g/DDRFR/Ib7eAjb+C95VoIyk6zaafos2VOo0w==}
     peerDependencies:
       solid-js: ^1.8.15
 
@@ -7657,7 +7657,7 @@ snapshots:
       string-argv: 0.3.2
       type-detect: 4.0.8
 
-  '@kobalte/core@0.13.0(solid-js@1.8.17)':
+  '@kobalte/core@0.12.6(solid-js@1.8.17)':
     dependencies:
       '@floating-ui/dom': 1.6.4
       '@internationalized/date': 3.5.3

@@ -6,7 +6,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@kobalte/core": "^0.13.0",
+    "@kobalte/core": "0.12.6",
     "@kobalte/utils": "^0.9.0",
     "@solid-primitives/event-listener": "^2.3.3",
     "@trpc/client": "^10.45.2",
