@@ -69,7 +69,11 @@ jobs:
         run: pnpm run test
   # More minimal job for Windows/Mac to test specific features that might not work the same
   other-os-tests:
-    runs-on: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+          os: [windows-latest, macos-latest]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
