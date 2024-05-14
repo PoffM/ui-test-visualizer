@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.0.2
+
+### Patch Changes
+
+- 6c8de74: Fix config path detection on Windows
+
 ## 1.0.1
 
 ### Patch Changes
