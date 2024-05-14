@@ -67,9 +67,9 @@ jobs:
 
       - name: Unit tests
         run: pnpm run test
-  # More minimal job for Windows to test specific things that might not work the same
-  windows-tests:
-    runs-on: windows-latest
+  # More minimal job for Windows/Mac to test specific features that might not work the same
+  other-os-tests:
+    runs-on: [windows-latest, macos-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
