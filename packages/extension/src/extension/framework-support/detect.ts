@@ -18,9 +18,10 @@ export async function detectTestFramework(
 ): Promise<TestFrameworkInfo> {
   // auto detect test config files
 
-  const vitestFile = (frameworkSetting === 'autodetect' || frameworkSetting === 'vitest')
+  let vitestFile = (frameworkSetting === 'autodetect' || frameworkSetting === 'vitest')
     ? await findUp(VITEST_CONFIG_FILES, { cwd: testFilePath })
     : undefined
+  vitestFile &&= path.resolve(vitestFile)
 
   const jestFile = (frameworkSetting === 'autodetect' || frameworkSetting === 'jest')
     ? await (async () => {
@@ -29,7 +30,7 @@ export async function detectTestFramework(
         process.chdir(path.dirname(testFilePath))
         const cfg = await readInitialOptions(undefined, {})
         if (
-          cfg.configPath?.endsWith('/package.json')
+          cfg.configPath && path.resolve(cfg.configPath).endsWith('/package.json')
 
           // check for { rootDir: '/...' } ; the empty config placeholder
           && Object.keys(cfg.config).length <= 1
@@ -37,7 +38,7 @@ export async function detectTestFramework(
           // no jest config found in package.json
           return undefined
         }
-        return cfg.configPath
+        return cfg.configPath && path.resolve(cfg.configPath)
       }
       catch {
         // readInitialOptions throws an error if it can't find jest.config.x or package.json
@@ -73,14 +74,14 @@ export async function detectTestFramework(
     return {
       framework: 'vitest' as const,
       configPath,
-      binPath: await getVitestBinPath(testFilePath),
+      binPath: path.resolve(await getVitestBinPath(testFilePath)),
     }
   }
   else {
     return {
       framework: 'jest' as const,
       configPath,
-      binPath: await getJestBinPath(testFilePath),
+      binPath: path.resolve(await getJestBinPath(testFilePath)),
     }
   }
 }

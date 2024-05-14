@@ -55,7 +55,7 @@ export async function getJestBinPath(filepath: string) {
   for (const lookupPath of lookupPaths) {
     jestPath = await findUp(lookupPath, { cwd: filepath })
     if (jestPath) {
-      return jestPath
+      return path.resolve(jestPath)
     }
   }
 
