@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   jest-config@29.7.0:
-    hash: 5q4zne3dppjvl767qjqno7xxiy
+    hash: 73jog4xzsscqavj7ysnq7abk54
     path: patches/jest-config@29.7.0.patch
   jest-editor-support@31.1.2:
     hash: dc66q7lu7jffxqfsrhbnjgsbme
@@ -177,7 +177,7 @@ importers:
         version: 7.1.0
       jest-config:
         specifier: 29.7.0
-        version: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
+        version: 29.7.0(patch_hash=73jog4xzsscqavj7ysnq7abk54)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
       jest-editor-support:
         specifier: 31.1.2
         version: 31.1.2(patch_hash=dc66q7lu7jffxqfsrhbnjgsbme)
@@ -7446,7 +7446,7 @@ snapshots:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
+      jest-config: 29.7.0(patch_hash=73jog4xzsscqavj7ysnq7abk54)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -8871,7 +8871,7 @@ snapshots:
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
+      jest-config: 29.7.0(patch_hash=73jog4xzsscqavj7ysnq7abk54)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -10194,7 +10194,7 @@ snapshots:
       create-jest: 29.7.0(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
       exit: 0.1.2
       import-local: 3.1.0
-      jest-config: 29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
+      jest-config: 29.7.0(patch_hash=73jog4xzsscqavj7ysnq7abk54)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -10204,7 +10204,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-config@29.7.0(patch_hash=5q4zne3dppjvl767qjqno7xxiy)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5)):
+  jest-config@29.7.0(patch_hash=73jog4xzsscqavj7ysnq7abk54)(@types/node@20.12.8)(ts-node@10.9.2(@types/node@20.12.8)(typescript@5.4.5)):
     dependencies:
       '@babel/core': 7.24.3
       '@jest/test-sequencer': 29.7.0

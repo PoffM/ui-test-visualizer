@@ -117,13 +117,22 @@ describe('detectTestFramework', () => {
     ).rejects.toThrow('No Vitest config found')
   })
 
-  it('throws when jest detection fails', async () => {
+  it('throws when jest detection fails (in project with package.json)', async () => {
     await expect(
       detectTestFramework(
         path.join(
           examplesPath,
           'vitest-react/test/basic.test.tsx',
         ),
+        'jest',
+      ),
+    ).rejects.toThrow('No Jest config found')
+  })
+
+  it('throws when jest detection fails (in project without package.json)', async () => {
+    await expect(
+      detectTestFramework(
+        path.resolve('/'),
         'jest',
       ),
     ).rejects.toThrow('No Jest config found')

@@ -1,8 +1,6 @@
 import path from 'pathe'
 import { findUp } from 'find-up'
-import { z } from 'zod'
 import { readInitialOptions } from 'jest-config'
-import { extensionSetting } from '../util/extension-setting'
 import { getJestBinPath } from './jest-support'
 import { getVitestBinPath } from './vitest-support'
 
@@ -40,10 +38,12 @@ export async function detectTestFramework(
         }
         return cfg.configPath && path.resolve(cfg.configPath)
       }
-      catch {
-        // readInitialOptions throws an error if it can't find jest.config.x or package.json
-        // ignore the error
-        return undefined
+      catch (e) {
+        // readInitialOptions throws an error if it can't find jest.config.x or package.json; ignore this error
+        if (e instanceof Error && e.message?.includes?.('Could not find a config file')) {
+          return undefined
+        }
+        throw e
       }
       finally {
         process.chdir(cwd)
