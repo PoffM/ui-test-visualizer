@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.0.3
+
+### Patch Changes
+
+- a7eb835: Fix some errors that could happen when loading Jest config files, and show better error messages when they do occur.
+
 ## 1.0.2
 
 ### Patch Changes
