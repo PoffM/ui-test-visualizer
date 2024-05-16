@@ -25,7 +25,13 @@ export async function detectTestFramework(
     ? await (async () => {
       const cwd = process.cwd()
       try {
-        process.chdir(path.dirname(testFilePath))
+        const pkgPath = await findUp('package.json', { cwd: testFilePath })
+        if (!pkgPath) {
+          throw new Error(`Could not find related package.json for test file ${testFilePath}`)
+        }
+
+        // Change cwd to package root so Jest can find the right config file
+        process.chdir(path.dirname(pkgPath))
         const cfg = await readInitialOptions(undefined, {})
         if (
           cfg.configPath && path.resolve(cfg.configPath).endsWith('/package.json')

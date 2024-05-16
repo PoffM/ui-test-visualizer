@@ -1,0 +1,5 @@
+{
+  // Disable extensions/settings that can create startup popups that can steal focus
+  "git.enabled": false,
+  "workbench.startupEditor": "none"
+}

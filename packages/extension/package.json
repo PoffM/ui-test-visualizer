@@ -21,7 +21,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.1",
+    "@types/lodash": "^4.17.3",
     "@types/node": "^20.12.12",
     "@types/vscode": "^1.89.0",
     "@types/ws": "^8.5.10",

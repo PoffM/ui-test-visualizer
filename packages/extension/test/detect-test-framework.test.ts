@@ -41,6 +41,21 @@ describe('detectTestFramework', () => {
     })
   })
 
+  it('detects Jest config in a Next.js project', async () => {
+    const result = await detectTestFramework(
+      path.join(
+        examplesPath,
+        'jest-nextjs/app/counter.test.tsx',
+      ),
+      'autodetect',
+    )
+    expect(result).toEqual({
+      binPath: path.join(examplesPath, 'jest-nextjs/node_modules/jest/bin/jest.js'),
+      configPath: path.join(examplesPath, 'jest-nextjs/jest.config.ts'),
+      framework: 'jest',
+    })
+  })
+
   it('detects vitest config file', async () => {
     const result = await detectTestFramework(
       path.join(
@@ -132,10 +147,10 @@ describe('detectTestFramework', () => {
   it('throws when jest detection fails (in project without package.json)', async () => {
     await expect(
       detectTestFramework(
-        path.resolve('/'),
+        path.resolve('/not-a-real-file'),
         'jest',
       ),
-    ).rejects.toThrow('No Jest config found')
+    ).rejects.toThrow('Could not find related package.json for test file /not-a-real-file')
   })
 
   it('throws when autodetect fails', async () => {

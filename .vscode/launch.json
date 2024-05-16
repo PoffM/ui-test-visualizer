@@ -35,34 +35,12 @@
       "sourceMaps": true
     },
     {
-      "name": "Lit",
+      "name": "Jest + Next.js Example",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
-        "/home/mat/vitest-vscode-ext/vitest-dev-vitest-autxvc"
-      ],
-      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
-      "sourceMaps": true
-    },
-    {
-      "name": "tic tac toe",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
-        "/home/mat/solid-tic-tac-toe"
-      ],
-      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
-      "sourceMaps": true
-    },
-    {
-      "name": "wordle",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
-        "/home/mat/solid-wordle-clone"
+        "${workspaceFolder}/examples/jest-nextjs"
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true
