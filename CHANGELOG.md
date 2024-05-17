@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.0.4
+
+### Patch Changes
+
+- 285bde6: Improve compatibility with Next.js projects that use "next/jest"
+
 ## 1.0.3
 
 ### Patch Changes
