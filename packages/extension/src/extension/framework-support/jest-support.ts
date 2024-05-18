@@ -1,9 +1,15 @@
-import { findUp } from 'find-up'
+import { findUp, findUpSync } from 'find-up'
 import { readInitialOptions } from 'jest-config'
 import path from 'pathe'
 import type * as vscode from 'vscode'
 import type { TestFrameworkInfo } from './detect'
 import { cleanTestNameForTerminal } from './util'
+
+function buildPath() {
+  return process.env.NODE_ENV === 'test'
+    ? String(findUpSync('build-prod/', { cwd: __dirname, type: 'directory' }))
+    : __dirname
+}
 
 export async function jestDebugConfig(
   filePath: string,
@@ -27,9 +33,8 @@ export async function jestDebugConfig(
     .map(file => path.resolve(file))
 
   return {
-    program: fw.binPath,
-    autoAttachChildProcesses: true,
     args: [
+      'jest',
       filePath,
       '--config',
       fw.configPath,
@@ -39,27 +44,14 @@ export async function jestDebugConfig(
       '--testTimeout=1000000000',
       '--silent=false',
       '--setupFiles',
-      path.join(__dirname, 'ui-test-visualizer-test-setup.js'),
+      path.join(buildPath(), 'ui-test-visualizer-test-setup.js'),
       ...setupFiles,
       '--detectOpenHandles',
       // TODO find out why Jest doesn't exit on its own
       '--forceExit',
     ],
+    autoAttachChildProcesses: true,
   }
-}
-
-const lookupPaths = ['node_modules/jest/bin/jest.js', 'node_modules/.bin/jest']
-
-export async function getJestBinPath(filepath: string) {
-  let jestPath: string | undefined
-  for (const lookupPath of lookupPaths) {
-    jestPath = await findUp(lookupPath, { cwd: filepath })
-    if (jestPath) {
-      return path.resolve(jestPath)
-    }
-  }
-
-  throw new Error(`Could not find Jest bin file in ${lookupPaths}`)
 }
 
 /** Require Jest version 28+ */

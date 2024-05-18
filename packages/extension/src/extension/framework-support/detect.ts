@@ -1,13 +1,10 @@
 import path from 'pathe'
 import { findUp } from 'find-up'
 import { readInitialOptions } from 'jest-config'
-import { getJestBinPath } from './jest-support'
-import { getVitestBinPath } from './vitest-support'
 
 export interface TestFrameworkInfo {
   framework: 'jest' | 'vitest'
   configPath: string
-  binPath: string
 }
 
 export async function detectTestFramework(
@@ -80,14 +77,12 @@ export async function detectTestFramework(
     return {
       framework: 'vitest' as const,
       configPath,
-      binPath: path.resolve(await getVitestBinPath(testFilePath)),
     }
   }
   else {
     return {
       framework: 'jest' as const,
       configPath,
-      binPath: path.resolve(await getJestBinPath(testFilePath)),
     }
   }
 }

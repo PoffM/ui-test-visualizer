@@ -5,16 +5,12 @@ import * as vscode from 'vscode'
 import { z } from 'zod'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
-import { detectTestFramework } from './framework-support/detect'
-import { jestDebugConfig } from './framework-support/jest-support'
-import { vitestDebugConfig } from './framework-support/vitest-support'
+import { makeDebugConfig } from './debug-config'
 import { myExtensionStorage } from './my-extension-storage'
 import { startPanelController } from './panel-controller/panel-controller'
 import { startDebugSessionTracker } from './util/debug-session-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
-
-const DEBUG_NAME = 'Visually Debug UI'
 
 export async function activate(extensionContext: vscode.ExtensionContext) {
   // Hot-reload the main 'visuallyDebugUI' command function in development
@@ -110,30 +106,20 @@ export let visuallyDebugUI = async (
   })
 
   const frameworkSetting = (() => {
-    const parsed = z.enum(['autodetect', 'vitest', 'jest'])
+    const parsed = zFrameworkSetting
       .safeParse(extensionSetting('ui-test-visualizer.testFramework'))
     return parsed.success ? parsed.data : 'autodetect'
   })()
 
-  const fwInfo = await detectTestFramework(testFile, frameworkSetting)
-
-  const debugConfig: vscode.DebugConfiguration = {
-    name: DEBUG_NAME,
-    request: 'launch',
-    type: 'pwa-node',
-    outputCapture: 'std',
-    ...(fwInfo.framework === 'jest'
-      ? await jestDebugConfig(testFile, testName, fwInfo)
-      : await vitestDebugConfig(testFile, testName)),
-  }
-
-  debugConfig.env = {
-    ...debugConfig.env,
-    TEST_FRAMEWORK: fwInfo.framework,
-    TEST_FILE_PATH: testFile,
-    HTML_UPDATER_PORT: String(panelController.htmlUpdaterPort),
-    TEST_CSS_FILES: JSON.stringify(await storage.get('enabledCssFiles')),
-  }
+  const debugConfig = await makeDebugConfig(
+    testFile,
+    testName,
+    frameworkSetting,
+    panelController.htmlUpdaterPort,
+    await storage.get('enabledCssFiles'),
+  )
 
   vscode.debug.startDebugging(undefined, debugConfig)
 }
+
+export const zFrameworkSetting = z.enum(['autodetect', 'vitest', 'jest'])

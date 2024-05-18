@@ -1,7 +1,13 @@
+import { findUpSync } from 'find-up'
 import path from 'pathe'
-import { findUp } from 'find-up'
 import type * as vscode from 'vscode'
 import { cleanTestNameForTerminal } from './util'
+
+function buildPath() {
+  return process.env.NODE_ENV === 'test'
+    ? String(findUpSync('build-prod/', { cwd: __dirname, type: 'directory' }))
+    : __dirname
+}
 
 /** Extra debug config to pass into the VSCode debug process when using Vitest. */
 export async function vitestDebugConfig(
@@ -9,10 +15,11 @@ export async function vitestDebugConfig(
   testName: string,
 ): Promise<Partial<vscode.DebugConfiguration>> {
   return {
-    program: await getVitestBinPath(filePath),
-    runtimeArgs: ['--require', path.join(__dirname, 'ui-test-visualizer-cli-setup.js')],
+    env: {
+      NODE_OPTIONS: `--require ${path.join(buildPath(), 'ui-test-visualizer-cli-setup.js')}`,
+    },
     args: [
-      // The Vitest "run" command
+      'vitest',
       'run',
       filePath,
       '-t',
@@ -35,22 +42,4 @@ export async function vitestDebugConfig(
     ],
     smartStep: true,
   }
-}
-
-const lookupPaths = [
-  'node_modules/vitest/vitest.mjs',
-  'node_modules/.bin/vitest.js',
-  'node_modules/.bin/vitest.cmd',
-]
-
-export async function getVitestBinPath(filepath: string) {
-  let vitestPath: string | undefined
-  for (const lookupPath of lookupPaths) {
-    vitestPath = await findUp(lookupPath, { cwd: filepath })
-    if (vitestPath) {
-      return vitestPath
-    }
-  }
-
-  throw new Error(`Could not find Vitest bin file in ${lookupPaths}`)
 }

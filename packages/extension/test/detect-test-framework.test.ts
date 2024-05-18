@@ -14,7 +14,6 @@ describe('detectTestFramework', () => {
       'autodetect',
     )
     expect(result).toEqual({
-      binPath: path.join(examplesPath, 'jest-react/node_modules/jest/bin/jest.js'),
       configPath: path.join(examplesPath, 'jest-react/jest.config.ts'),
       framework: 'jest',
     })
@@ -29,10 +28,6 @@ describe('detectTestFramework', () => {
       'autodetect',
     )
     expect(result).toEqual({
-      binPath: path.join(
-        examplesPath,
-        'jest-react-with-packagejson-config/node_modules/jest/bin/jest.js',
-      ),
       configPath: path.join(
         examplesPath,
         'jest-react-with-packagejson-config/package.json',
@@ -50,7 +45,6 @@ describe('detectTestFramework', () => {
       'autodetect',
     )
     expect(result).toEqual({
-      binPath: path.join(examplesPath, 'jest-nextjs/node_modules/jest/bin/jest.js'),
       configPath: path.join(examplesPath, 'jest-nextjs/jest.config.ts'),
       framework: 'jest',
     })
@@ -65,7 +59,6 @@ describe('detectTestFramework', () => {
       'autodetect',
     )
     expect(result).toEqual({
-      binPath: path.join(examplesPath, 'vitest-react/node_modules/vitest/vitest.mjs'),
       configPath: path.join(examplesPath, 'vitest-react/vitest.config.ts'),
       framework: 'vitest',
     })
@@ -80,7 +73,6 @@ describe('detectTestFramework', () => {
       'jest',
     )
     expect(result1).toEqual({
-      binPath: path.join(examplesPath, 'jest-react/node_modules/jest/bin/jest.js'),
       configPath: path.join(examplesPath, 'jest-react/jest.config.ts'),
       framework: 'jest',
     })
@@ -93,10 +85,6 @@ describe('detectTestFramework', () => {
       'jest',
     )
     expect(result2).toEqual({
-      binPath: path.join(
-        examplesPath,
-        'jest-react-with-packagejson-config/node_modules/jest/bin/jest.js',
-      ),
       configPath: path.join(
         examplesPath,
         'jest-react-with-packagejson-config/package.json',
@@ -114,7 +102,6 @@ describe('detectTestFramework', () => {
       'vitest',
     )
     expect(result).toEqual({
-      binPath: path.join(examplesPath, 'vitest-react/node_modules/vitest/vitest.mjs'),
       configPath: path.join(examplesPath, 'vitest-react/vitest.config.ts'),
       framework: 'vitest',
     })
