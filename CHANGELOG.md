@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.0.5
+
+### Patch Changes
+
+- 937f2d0: Improve compatibility with Jest + Babel projects by using 'npx jest' instead of running jest.js directly.
+
 ## 1.0.4
 
 ### Patch Changes
