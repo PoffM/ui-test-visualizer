@@ -74,18 +74,18 @@
     "publish": "(cd ./build-prod/ && pnpm vsce publish --packagePath ./extension.vsix --allow-missing-repository --skip-license)"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.18.0",
-    "@changesets/cli": "^2.27.1",
-    "@playwright/test": "^1.44.0",
+    "@antfu/eslint-config": "^2.19.1",
+    "@changesets/cli": "^2.27.5",
+    "@playwright/test": "^1.44.1",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/node": "^20.12.12",
     "@vitest/expect": "^1.6.0",
     "@vscode/vsce": "^2.26.1",
     "del": "^7.1.0",
-    "eslint": "^9.2.0",
+    "eslint": "^9.3.0",
     "globby": "^14.0.1",
     "tsup": "^8.0.2",
-    "type-fest": "^4.18.2",
+    "type-fest": "^4.18.3",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },
