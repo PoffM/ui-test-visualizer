@@ -17,4 +17,5 @@ export default defineConfig({
     viewport: { width: 1600, height: 800 },
   },
   timeout: 120_000,
+  retries: process.env.CI ? 1 : 0,
 })
