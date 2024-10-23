@@ -31,7 +31,7 @@ index e989961ba71bbea43eb293ebdc7739f00f6e85e7..f9932fdb074cfd86d222240d7764c61f
 +    if (process.platform === 'win32') {
 +      tsNodePath = `file:///${tsNodePath}`
 +    }
-+    const tsNode = await import(tsNodePath);
++    const tsNode = require(tsNodePath);
      return tsNode.register({
        compilerOptions: {
          module: 'CommonJS'
