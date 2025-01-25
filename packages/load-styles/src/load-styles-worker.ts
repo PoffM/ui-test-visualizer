@@ -2,7 +2,8 @@ import fs from 'node:fs/promises'
 import postcss from 'postcss'
 import postcssrc from 'postcss-load-config'
 import { runAsWorker } from 'synckit'
-import { preprocessCSS, resolveConfig } from 'vite'
+import { createServer, preprocessCSS, resolveConfig } from 'vite'
+import { findUpSync } from 'find-up'
 
 runAsWorker(loadStyles)
 
@@ -12,8 +13,8 @@ runAsWorker(loadStyles)
  * and PostCSS (Tailwind, ).
  * Replaces `:root` with `:root,:host` because the processed styles end up in the shadow DOM.
  */
-async function loadStyles(filePath: string) {
-  const sourceCode = await fs.readFile(filePath, 'utf8')
+async function loadStyles(cssFilePath: string) {
+  const sourceCode = await fs.readFile(cssFilePath, 'utf8')
 
   /** The parsed PostCSS config. */
   const postCssCfg = await (async () => {
@@ -25,18 +26,33 @@ async function loadStyles(filePath: string) {
         // Suppress this error because it's fine if there's no PostCSS config.
         return null
       }
-      console.warn(`Failed to parse PostCSS config found for file ${filePath}`, error)
+      console.warn(`Failed to parse PostCSS config found for file ${cssFilePath}`, error)
       return null
     }
   })()
 
-  const preprocessResult = await preprocessCSS(
-    sourceCode,
-    filePath,
-    await resolveConfig({ configFile: false }, 'serve'),
-  )
+  const css = await (async () => {
+    // First: Try to transform the CSS file using the user's Vite config.
+    const viteCfgPath = findUpSync(['vite.config.ts', 'vite.config.js'], { cwd: cssFilePath })
+    if (viteCfgPath) {
+      try {
+        const server = await createServer({ configFile: viteCfgPath })
+        const result = await server.transformRequest(`${cssFilePath}?direct`)
+        return result.code
+      }
+      catch (error) {
+        console.warn(`Failed to transform CSS file ${cssFilePath} using Vite config file ${viteCfgPath}`, error)
+      }
+    }
 
-  const css = preprocessResult.code
+    // Fallback: Try to transform the CSS file using Vite's 'preprocessCSS' function.
+    const preprocessResult = await preprocessCSS(
+      sourceCode,
+      cssFilePath,
+      await resolveConfig({ configFile: false }, 'serve'),
+    )
+    return preprocessResult.code
+  })()
 
   const result = await postcss([
     ...(postCssCfg?.plugins ?? []),
@@ -48,7 +64,7 @@ async function loadStyles(filePath: string) {
     },
   ]).process(css, {
     ...postCssCfg?.options,
-    from: filePath,
+    from: cssFilePath,
     map: false,
   })
 

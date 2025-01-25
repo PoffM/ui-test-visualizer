@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
-    "jsx": "react",
     "module": "Preserve",
     "moduleResolution": "bundler",
-    "types": ["vitest/globals"],
     "esModuleInterop": true
   }
 }
