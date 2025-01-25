@@ -113,29 +113,17 @@ export default defineConfig((options) => {
       // because it expects some of its files to exist at relative paths.
         name: 'copy-load-styles-deps',
         buildStart: lodash.once(async () => {
-          console.log('Copying load-styles dependencies to build node_modules dir')
-          const deps = [
-            'esbuild',
-            'vite',
-            '@types/estree',
-            'postcss',
-            'nanoid',
-            'picocolors',
-            'source-map-js',
-          ]
-
+          console.log('Copying node_modules folder required for the extension to use Vite')
+          const from = path.join(__dirname, '../load-styles/vite-package/node_modules/')
           const to = path.join(outDir, 'node_modules/')
-
-          for (const dep of deps) {
-            const from = path.join(__dirname, '../load-styles/node_modules/', dep)
-            await fs.cp(
-              from,
-              path.join(to, dep),
-              { dereference: true, recursive: true, force: true },
-            )
-          }
+          await fs.cp(
+            from,
+            to,
+            { recursive: true, force: true },
+          )
 
           // Use cross-platform @rollup/wasm-node instead of native per-platform Rollup packages
+          await deleteAsync(path.join(to, '@rollup'), { force: true })
           await fs.cp(
             path.join(__dirname, '../load-styles/node_modules/@rollup/wasm-node'),
             path.join(to, 'rollup'),

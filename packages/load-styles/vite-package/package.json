@@ -1,0 +1,8 @@
+{
+  "name": "vite-package",
+  "private": true,
+  "dependencies": {
+    "@rollup/wasm-node": "^4.32.0",
+    "vite": "^6.0.11"
+  }
+}
