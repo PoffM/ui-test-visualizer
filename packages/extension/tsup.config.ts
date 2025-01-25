@@ -125,7 +125,7 @@ export default defineConfig((options) => {
           // Use cross-platform @rollup/wasm-node instead of native per-platform Rollup packages
           await deleteAsync(path.join(to, '@rollup'), { force: true })
           await fs.cp(
-            path.join(__dirname, '../load-styles/node_modules/@rollup/wasm-node'),
+            path.join(__dirname, '../load-styles/vite-package/node_modules/@rollup/wasm-node'),
             path.join(to, 'rollup'),
             { dereference: true, recursive: true, force: true },
           )
