@@ -24,11 +24,12 @@ export default defineConfig((options) => {
       'ui-test-visualizer-cli-setup': './src/test-process/vitest-cli-setup.ts',
       'ui-test-visualizer-test-setup': './src/test-process/test-setup.ts',
       'load-styles': '../load-styles/src/load-styles-worker.ts',
+      'example-style': './src/test-process/example-style.css',
     },
     outDir,
     external: ['vscode', './load-styles', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],
     noExternal: [
-      /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jiti)|(jest-resolve\/build\/default\_resolver)|(ts-node)|(vite)).)*$/,
+      /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)).)*$/,
     ],
     // Vite handles the webview src watching
     ignoreWatch: ['src/web-view-vite'],

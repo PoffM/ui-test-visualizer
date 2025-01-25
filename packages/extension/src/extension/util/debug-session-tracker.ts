@@ -56,12 +56,17 @@ export function startDebugSessionTracker(
       throw new Error('Could not find UI test session')
     }
 
+    const frameId = frameIds.get(uiSession)
+    if (!frameId) {
+      throw new Error('Could not find debugger frame ID for UI test session')
+    }
+
     const evalResult: EvalResult = await uiSession.customRequest(
       'evaluate',
       {
         expression,
         context: 'clipboard',
-        frameId: frameIds.get(uiSession),
+        frameId,
       },
     )
 

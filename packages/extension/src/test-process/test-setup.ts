@@ -5,6 +5,7 @@ import { createSyncFn } from 'synckit'
 import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
 import { z } from 'zod'
 import difference from 'lodash/difference'
+import path from 'pathe'
 import shadowCss from './shadow.css.txt'
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
@@ -55,6 +56,17 @@ async function preTest() {
         testWindow,
         files.data,
       )
+
+      // Run the loadStyles worker as a 'warmup' before the test starts.
+      // Otherwise, for some reason the worker fails (running Vite's preprocessCss)
+      // when you run it during the user's UI test through a debug expression.
+      // This would freeze the test when the user tries to change the CSS files.
+      // TODO figure out why this happens, or find a better way to change the CSS files.
+      try {
+        loadStylesInWorker(path.join(__dirname, 'example-style.css'))
+      }
+      catch (error) {
+      }
     }
 
     // Hook into the window which is set by happy-dom or jsdom
