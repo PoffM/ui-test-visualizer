@@ -59,7 +59,7 @@ describe('detectTestFramework', () => {
       'autodetect',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'vitest-react/vitest.config.ts'),
+      configPath: path.join(examplesPath, 'vitest-react/vite.config.ts'),
       framework: 'vitest',
     })
   })
@@ -102,7 +102,7 @@ describe('detectTestFramework', () => {
       'vitest',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'vitest-react/vitest.config.ts'),
+      configPath: path.join(examplesPath, 'vitest-react/vite.config.ts'),
       framework: 'vitest',
     })
   })

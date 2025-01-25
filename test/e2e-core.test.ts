@@ -40,7 +40,7 @@ test('Steps through the Vitest+React Counter example', async () => {
 
   // Enable the SCSS style
   await replicaPanel.locator('ui-test-visualizer-button[aria-label="Enable your styles"]').click()
-  await replicaPanel.getByText('style.scss').click()
+  await replicaPanel.getByText('style.css').click()
   await replicaPanel.locator('ui-test-visualizer-button[title="Apply styles"]').click()
 
   // Wait for the button to turn green because of the new styles
