@@ -1,7 +1,0 @@
-{
-  "compilerOptions": {
-    "module": "Preserve",
-    "moduleResolution": "bundler",
-    "esModuleInterop": true
-  }
-}

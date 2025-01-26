@@ -72,7 +72,7 @@
     "code-server-down": "docker compose -f test/docker-compose.yml down",
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down",
     "publish": "(cd ./build-prod/ && pnpm vsce publish --packagePath ./extension.vsix --allow-missing-repository --skip-license)",
-    "prepare": "(cd packages/load-styles/vite-package && npm install)"
+    "prepare": "(cd packages/extension/vite-package && npm install)"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.19.1",

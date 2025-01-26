@@ -23,13 +23,12 @@ export default defineConfig((options) => {
       'extension': './src/extension/extension.ts',
       'ui-test-visualizer-cli-setup': './src/test-process/vitest-cli-setup.ts',
       'ui-test-visualizer-test-setup': './src/test-process/test-setup.ts',
-      'load-styles': '../load-styles/src/load-styles-worker.ts',
       'example-style': './src/test-process/example-style.css',
     },
     outDir,
-    external: ['vscode', './load-styles', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],
+    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],
     noExternal: [
-      /^((?!(vscode)|(\.\/load-styles)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)).)*$/,
+      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)).)*$/,
     ],
     // Vite handles the webview src watching
     ignoreWatch: ['src/web-view-vite'],
@@ -76,7 +75,7 @@ export default defineConfig((options) => {
         }),
       },
       {
-      // TODO simpler way to make an svg green
+        // TODO simpler way to make an svg green
         name: 'prepare-green-icon',
         buildStart: lodash.once(async () => {
           console.log('Preparing green debug icon')
@@ -101,20 +100,19 @@ export default defineConfig((options) => {
           const color = '#89D185'
           const newSvg = (await fs.readFile(src, 'utf-8')).replace(
             'fill="currentColor"',
-          `fill="${color}"`,
+            `fill="${color}"`,
           )
           await fs.writeFile(dest, newSvg)
           console.log('Green debug icon prepared')
         }),
       },
       {
-      // The load-styles script requires its own node_modules directory.
-      // It uses Vite to preprocess the CSS files, which can't be bundled into one file
-      // because it expects some of its files to exist at relative paths.
+        // Vite seems to require a node_modules directory to work,
+        // otherwise it can't find the required files to import/require.
         name: 'copy-vite-deps',
         buildStart: lodash.once(async () => {
           console.log('Copying node_modules folder required for the extension to use Vite')
-          const from = path.join(__dirname, '../load-styles/vite-package/node_modules/')
+          const from = path.join(__dirname, './vite-package/node_modules/')
           const to = path.join(outDir, 'node_modules/')
           await fs.cp(
             from,
@@ -125,7 +123,7 @@ export default defineConfig((options) => {
           // Use cross-platform @rollup/wasm-node instead of native per-platform Rollup packages
           await deleteAsync(path.join(to, '@rollup'), { force: true })
           await fs.cp(
-            path.join(__dirname, '../load-styles/vite-package/node_modules/@rollup/wasm-node'),
+            path.join(__dirname, './vite-package/node_modules/@rollup/wasm-node'),
             path.join(to, 'rollup'),
             { dereference: true, recursive: true, force: true },
           )
@@ -147,7 +145,7 @@ export default defineConfig((options) => {
           )).filter(f => !f.startsWith('esbuild/'))
           await deleteAsync(toDelete.map(f => path.join(to, f)), { force: true })
 
-          console.log('Copied load-styles dependencies to build node_modules dir')
+          console.log('Copied Vite and its dependencies to the built extension\'s node_modules dir')
         }),
       },
     ],

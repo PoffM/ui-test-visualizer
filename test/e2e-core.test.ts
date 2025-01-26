@@ -49,7 +49,7 @@ test('Steps through the Vitest+React Counter example', async () => {
       .evaluate(
         button => window.getComputedStyle(button).getPropertyValue('background-color'),
       ),
-  ).toBe('rgb(22, 101, 52)')
+  ).toBe('oklch(0.448 0.119 151.328)')
 
   await debugHelper.debugStep()
   await replicaPanel.getByText('Count: 2').waitFor()
