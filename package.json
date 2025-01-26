@@ -81,7 +81,7 @@
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/node": "^22.10.10",
     "@vitest/expect": "^3.0.4",
-    "@vscode/vsce": "^2.26.1",
+    "@vscode/vsce": "^3.2.1",
     "del": "^8.0.0",
     "eslint": "^9.19.0",
     "globby": "^14.0.2",
