@@ -1,7 +1,7 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import type { HTMLPatch } from 'replicate-dom'
 import { applyDomPatch, parseDomNode } from 'replicate-dom'
-import { createSignal } from 'solid-js'
+import { createResource, createSignal, onCleanup } from 'solid-js'
 import { setReplicaHtmlEl } from '../App'
 import { client } from './panel-client'
 
@@ -45,6 +45,37 @@ export function createDomReplica() {
     }
   })
 
+  // The user-selected style element is added as an empty style tag,
+  // so here we fetch the transformed CSS
+  const stylesAreLoading = (() => {
+    const [mutation, setMutation] = createSignal<MutationRecord[] | null>(null)
+    const [styleLoader] = createResource(mutation, async (mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          for (const addedNode of mutation.addedNodes) {
+            if (addedNode instanceof HTMLStyleElement && addedNode.tagName === 'STYLE') {
+              const src_filepath = addedNode.dataset.src_filepath
+              if (src_filepath) {
+                const css = await client.loadTransformedCss.query(src_filepath)
+                addedNode.textContent = css
+              }
+            }
+          }
+        }
+      }
+    })
+    const stylesAreLoading = () => styleLoader.loading
+
+    const styleObserver = new MutationObserver(setMutation)
+    styleObserver.observe(shadow.querySelector('head')!, {
+      childList: true,
+      subtree: true,
+    })
+    onCleanup(() => styleObserver.disconnect())
+
+    return stylesAreLoading
+  })()
+
   function initShadowContent(shadow: DocumentFragment, content: Node) {
     shadow.replaceChildren(content)
     const htmlEl = shadow.querySelector('html')!
@@ -84,5 +115,6 @@ export function createDomReplica() {
     refreshShadow,
     firstPatchReceived,
     flushHtmlPatches,
+    stylesAreLoading,
   }
 }

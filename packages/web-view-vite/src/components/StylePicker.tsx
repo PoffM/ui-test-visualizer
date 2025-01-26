@@ -3,7 +3,7 @@ import Brush from 'lucide-solid/icons/brush'
 import X from 'lucide-solid/icons/x'
 import type { JSX } from 'solid-js'
 import { For, Show, createEffect, createResource, createSignal } from 'solid-js'
-import { firstPatchReceived, flushHtmlPatches } from '../App'
+import { firstPatchReceived, flushHtmlPatches, stylesAreLoading } from '../App'
 import '../index.css'
 import { client } from '../lib/panel-client'
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from './popover'
@@ -31,16 +31,22 @@ export function StylePicker(props: StylePickerProps) {
   // When the style picker is closed, and the files were changed, replace the styles.
   const [refreshQuery] = createResource(
     () => !stylePickerIsOpen() && filesWereChanged(),
-    async (runQuery) => {
-      if (!runQuery) {
-        return
+    async () => {
+      const result = await client.replaceStyles.mutate()
+      if (result.type === 'error') {
+        console.error(result.message)
       }
-      await client.replaceStyles.mutate()
       flushHtmlPatches()
       setFilesWereChanged(false)
     },
   )
 
+  function stylePickerIsLoading() {
+    return refreshQuery.loading || stylesAreLoading()
+  }
+
+  // Permanently dismiss the style picker's popup when the user
+  // opens the style picker for the first time.
   createEffect(() => {
     if (stylePickerIsOpen() && showInitialStyleHint()) {
       dismissStylePrompt()
@@ -83,7 +89,7 @@ export function StylePicker(props: StylePickerProps) {
         open={stylePickerIsOpen()}
         onOpenChange={open => setStylePickerIsOpen(open)}
       >
-        <PopoverTrigger>{props.button(refreshQuery.loading)}</PopoverTrigger>
+        <PopoverTrigger>{props.button(stylePickerIsLoading())}</PopoverTrigger>
         <PopoverContent>
           <PopoverArrow />
           <StylePickerMenu

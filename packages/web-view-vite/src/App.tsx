@@ -29,6 +29,7 @@ export const {
   refreshShadow,
   firstPatchReceived,
   flushHtmlPatches,
+  stylesAreLoading,
 } = createDomReplica()
 
 export function App() {

@@ -5,15 +5,17 @@ import { z } from 'zod'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
+import { transformCss } from '../transform-css'
 
 export interface PanelRouterCtx {
   sessionTracker: DebugSessionTracker
   storage: MyStorageType
+  flushPatches: () => void
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
 
-/** Defines routes callable from the WebView to the VSCode Extension. */
+/** Defines RPCs callable from the WebView to the VSCode Extension. */
 export const panelRouter = t.router({
   serializeHtml: t.procedure
     .query(async ({ ctx }) => {
@@ -99,10 +101,40 @@ export const panelRouter = t.router({
     .mutation(async ({ ctx }) => {
       const files = await ctx.storage.get('enabledCssFiles') ?? []
       const filesAsString = JSON.stringify(files)
-      const result = await ctx.sessionTracker.runDebugExpression(
+      const resultStr = await ctx.sessionTracker.runDebugExpression(
         `globalThis.__replaceStyles(${filesAsString})`,
       )
-      return !!result
+      ctx.flushPatches()
+
+      const parsedResult = z.object({
+        added: z.array(z.string()),
+        removed: z.array(z.string()),
+      }).safeParse(JSON.parse(JSON.parse(resultStr) as string))
+
+      if (!parsedResult.success) {
+        const message = `Internal error: Invalid result from __replaceStyles: ${resultStr}`
+        vscode.window.showErrorMessage(message)
+        return {
+          type: 'error',
+          message,
+        } as const
+      }
+
+      const response = {
+        type: 'success',
+        ...parsedResult.data,
+      } as const
+
+      return response
+    }),
+
+  /** Transform the CSS file, given the filename, using Vite. */
+  loadTransformedCss: t.procedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      const cssFilePath = input
+      const transformedCss = await transformCss(cssFilePath)
+      return transformedCss
     }),
 
   /** Whether to show the one-time message asking you to enable styles. */

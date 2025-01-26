@@ -56,17 +56,6 @@ async function preTest() {
         testWindow,
         files.data,
       )
-
-      // Run the loadStyles worker as a 'warmup' before the test starts.
-      // Otherwise, for some reason the worker fails (running Vite's preprocessCss)
-      // when you run it during the user's UI test through a debug expression.
-      // This would freeze the test when the user tries to change the CSS files.
-      // TODO figure out why this happens, or find a better way to change the CSS files.
-      try {
-        loadStylesInWorker(path.join(__dirname, 'example-style.css'))
-      }
-      catch (error) {
-      }
     }
 
     // Hook into the window which is set by happy-dom or jsdom
@@ -114,7 +103,7 @@ async function preTest() {
           throw new Error(err)
         }
         const sheets = loadStylesIntoHead(testWindow, parsed.data)
-        return sheets
+        return JSON.stringify(sheets)
       },
     )
   }
@@ -124,43 +113,6 @@ async function preTest() {
 }
 
 function loadStylesIntoHead(win: typeof window, files: string[]) {
-  const cssSheets = (() => {
-    const results: ({ file: string } & (
-      | { status: 'fulfilled', value: string }
-      | { status: 'rejected', reason: unknown }
-    ))[] = files.map((file) => {
-      try {
-        const style = loadStylesInWorker(file)
-        if (typeof style !== 'string') {
-          throw new TypeError(
-            `Expected a string, but got ${typeof style} when parsing file "${file}"`,
-          )
-        }
-        return { file, status: 'fulfilled', value: style }
-      }
-      catch (error) {
-        logError(`Could not load CSS file "${file}" ${String(error)}`)
-        return { file, status: 'rejected', reason: error }
-      }
-    })
-
-    const sheets: { file: string, css: string }[] = []
-    for (const [idx, result] of Object.entries(results)) {
-      if (result.status === 'fulfilled') {
-        sheets.push({ file: result.file, css: result.value })
-      }
-      if (result.status === 'rejected') {
-        console.error(
-          `Could not load CSS file "${files[Number(idx)]}" ${String(
-            result.reason,
-          )}`,
-        )
-      }
-    }
-
-    return sheets
-  })()
-
   const oldStyles = [
     ...win.document.querySelectorAll(
       'head>style[data-debug_injected=true][data-debug_replaceable=true]',
@@ -168,22 +120,21 @@ function loadStylesIntoHead(win: typeof window, files: string[]) {
   ].filter((it): it is HTMLStyleElement => it instanceof win.HTMLStyleElement)
 
   // Add the new styles
-  const newStyles = cssSheets.map((sheet) => {
-    // If the style is already injected then re-use the element
+  const newStyles = files.map((file) => {
+    // If the style is already injected then keep the existing element and return early
     const existingStyle = oldStyles.find(it =>
       it instanceof win.HTMLStyleElement
-      && it.dataset.src_filepath === sheet.file,
+      && it.dataset.src_filepath === file,
     )
     if (existingStyle) {
-      existingStyle.textContent = sheet.css
+      // existingStyle.textContent = sheet.css
       return existingStyle
     }
 
     // Add a new style
     const newStyle = win.document.createElement('style')
     newStyle.type = 'text/css'
-    newStyle.textContent = sheet.css
-    newStyle.dataset.src_filepath = sheet.file
+    newStyle.dataset.src_filepath = file
     newStyle.dataset.debug_injected = 'true'
     newStyle.dataset.debug_replaceable = 'true'
     win.document.head.appendChild(newStyle)
@@ -206,10 +157,11 @@ function loadStylesIntoHead(win: typeof window, files: string[]) {
     log('Disabled stylesheet: ', style.dataset.src_filepath)
   }
 
-  return cssSheets
+  return {
+    added: added.map(it => String(it.dataset.src_filepath)),
+    removed: removed.map(it => String(it.dataset.src_filepath)),
+  }
 }
-
-const loadStylesInWorker = createSyncFn(require.resolve('./load-styles'))
 
 // For when this file is "--require"d before the Vitest tests: Run immediately.
 if (process.env.TEST_FRAMEWORK === 'vitest') {

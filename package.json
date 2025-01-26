@@ -83,7 +83,6 @@
     "@vitest/expect": "^2.0.4",
     "@vscode/vsce": "^2.26.1",
     "del": "^7.1.0",
-    "esbuild": "^0.24.2",
     "eslint": "^9.3.0",
     "globby": "^14.0.1",
     "tsup": "^8.3.5",

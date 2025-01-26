@@ -111,7 +111,7 @@ export default defineConfig((options) => {
       // The load-styles script requires its own node_modules directory.
       // It uses Vite to preprocess the CSS files, which can't be bundled into one file
       // because it expects some of its files to exist at relative paths.
-        name: 'copy-load-styles-deps',
+        name: 'copy-vite-deps',
         buildStart: lodash.once(async () => {
           console.log('Copying node_modules folder required for the extension to use Vite')
           const from = path.join(__dirname, '../load-styles/vite-package/node_modules/')
@@ -130,11 +130,21 @@ export default defineConfig((options) => {
             { dereference: true, recursive: true, force: true },
           )
 
+          // Use cross-platform esbuild-wasm instead of native per-platform esbuild packages
+          // This should be done in package.json's "overrides" section, but that has no effect.
+          // TODO try "overrides" again after this issue is solved: https://github.com/npm/cli/issues/5443l
+          await deleteAsync(path.join(to, 'esbuild'), { force: true })
+          await deleteAsync(path.join(to, '@esbuild'), { force: true })
+          await fs.rename(
+            path.join(to, 'esbuild-wasm'),
+            path.join(to, 'esbuild'),
+          )
+
           // Delete unused files
-          const toDelete = await globby(
+          const toDelete = (await globby(
             ['**/bin/**/*', '**/.bin/**/*', '**/*.d.ts'],
             { cwd: to },
-          )
+          )).filter(f => !f.startsWith('esbuild/'))
           await deleteAsync(toDelete.map(f => path.join(to, f)), { force: true })
 
           console.log('Copied load-styles dependencies to build node_modules dir')

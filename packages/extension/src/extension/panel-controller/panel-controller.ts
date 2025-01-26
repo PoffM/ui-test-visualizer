@@ -36,11 +36,13 @@ export async function startPanelController(
     htmlUpdaterServer.on('listening', res)
   })
 
+  function flushPatches() {
+    panel?.webview.postMessage({ flushPatches: true })
+  }
+
   return {
     htmlUpdaterPort,
-    flushPatches() {
-      panel?.webview.postMessage({ flushPatches: true })
-    },
+    flushPatches,
     async openPanel(
       sessionTracker: DebugSessionTracker,
     ) {
@@ -114,6 +116,7 @@ export async function startPanelController(
           const ctx: PanelRouterCtx = {
             sessionTracker,
             storage,
+            flushPatches,
           }
           const result = await callProcedure({
             procedures: panelRouter._def.procedures,
