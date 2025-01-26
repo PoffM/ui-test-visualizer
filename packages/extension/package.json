@@ -15,23 +15,23 @@
     "jest-editor-support": "31.1.2",
     "locate-path": "^7.2.0",
     "lodash": "^4.17.21",
-    "pathe": "^1.1.2",
+    "pathe": "^2.0.2",
     "postcss": "^8.5.1",
     "postcss-load-config": "^6.0.1",
     "replicate-dom": "workspace:*",
     "vite": "^6.0.11",
-    "ws": "^8.17.0",
-    "zod": "^3.23.8"
+    "ws": "^8.18.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.14",
     "@types/node": "^22.10.10",
     "@types/vscode": "^1.96.0",
     "@types/ws": "^8.5.14",
-    "@vitest/expect": "^2.0.4",
+    "@vitest/expect": "^3.0.4",
     "@vscode/codicons": "^0.0.36",
-    "chokidar": "^3.6.0",
+    "chokidar": "^4.0.3",
     "execa": "^9.5.2",
-    "vitest": "^2.0.4"
+    "vitest": "^3.0.4"
   }
 }

@@ -23,7 +23,6 @@ export default defineConfig((options) => {
       'extension': './src/extension/extension.ts',
       'ui-test-visualizer-cli-setup': './src/test-process/vitest-cli-setup.ts',
       'ui-test-visualizer-test-setup': './src/test-process/test-setup.ts',
-      'example-style': './src/test-process/example-style.css',
     },
     outDir,
     external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],

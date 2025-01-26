@@ -6,8 +6,8 @@
   },
   "dependencies": {
     "next": "latest",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "6.6.3",
@@ -19,6 +19,6 @@
     "identity-obj-proxy": "3.0.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "typescript": "5.4.5"
+    "typescript": "5.7.3"
   }
 }

@@ -46,6 +46,7 @@ export function MUTABLE_DOM_PROPS(
   )
   domClasses.unshift(win.Location)
 
+  // @ts-expect-error Cast the map to my type of map
   const map: MutableDomDescriptorMap = new Map()
 
   // Loop through Node and its subclasses to find all the mutable properties.
