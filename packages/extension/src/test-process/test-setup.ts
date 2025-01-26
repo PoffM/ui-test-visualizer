@@ -1,11 +1,9 @@
 // Run this script at the beginning of the test process
 
 import { log, error as logError } from 'node:console'
-import { createSyncFn } from 'synckit'
 import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
 import { z } from 'zod'
 import difference from 'lodash/difference'
-import path from 'pathe'
 import shadowCss from './shadow.css.txt'
 
 // Importing WebSocket directly from "ws" in a Jest process throws an error because
