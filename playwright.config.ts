@@ -11,7 +11,7 @@ export default defineConfig({
   // default 'list' when running locally
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    ...devices['Desktop Edge'],
+    ...devices['Desktop Chrome'],
     trace: 'retain-on-failure',
     headless: !!process.env.CI || !!process.env.PLAYWRIGHT_HEADLESS,
     viewport: { width: 1600, height: 800 },
