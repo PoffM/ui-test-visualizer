@@ -8,3 +8,5 @@ ENV NVM_DIR=/home/coder/.nvm
 RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+
+COPY --chown=coder ./.vscode/settings.json /home/coder/.local/share/code-server/User/settings.json
