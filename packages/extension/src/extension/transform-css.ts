@@ -4,7 +4,7 @@ import postcssrc from 'postcss-load-config'
 import { preprocessCSS, resolveConfig } from 'vite'
 import path from 'pathe'
 import { findUp } from 'find-up'
-import { execa } from 'execa'
+import * as vscode from 'vscode'
 
 /**
  * Loads and processes a CSS file using
@@ -29,7 +29,7 @@ export async function transformCss(cssFilePath: string) {
       await resolveConfig({ configFile: false }, 'serve'),
     )).code
 
-    /** The parsed PostCSS config. */
+    // Get the user's PostCSS config
     process.chdir(path.dirname(cssFilePath))
     const postCssCfg = await (async () => {
       try {
@@ -40,7 +40,7 @@ export async function transformCss(cssFilePath: string) {
           // Suppress this error because it's fine if there's no PostCSS config.
           return null
         }
-        console.warn(`Failed to parse PostCSS config found for file ${cssFilePath}`, error)
+        vscode.window.showWarningMessage(`Failed to parse PostCSS config found for file ${cssFilePath}: ${String(error)}`)
         return null
       }
     })()
@@ -48,6 +48,7 @@ export async function transformCss(cssFilePath: string) {
     if (postCssCfg) {
       process.chdir(path.dirname(postCssCfg.file))
     }
+    // Apply PostCSS plugins, e.g. for Tailwind v3
     code = (await postcss([
       ...(postCssCfg?.plugins ?? []),
       {
@@ -62,28 +63,39 @@ export async function transformCss(cssFilePath: string) {
       map: false,
     })).css
 
-    // Handle Tailwind v4 or up as a special case.
-    // const tailwindPath = (() => {
-    //   try {
-    //     return require.resolve('tailwindcss', { paths: [path.dirname(cssFilePath)] })
-    //   }
-    //   catch {
-    //     return null
-    //   }
-    // })()
-    // if (tailwindPath && getPackageVersion(tailwindPath)?.startsWith('4.')) {
-    //   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-    //   const { compile } = require(tailwindPath)
-    //   const out = (await compile(code, {
-    //     base: path.dirname(cssFilePath),
-    //     loadModule: (id, ...args) => {
-    //       const resolved = require.resolve(id, { paths: [cssFilePath] })
-    //       // eslint-disable-next-line ts/no-require-imports
-    //       return require(resolved)
-    //     },
-    //   })).build([])
-    //   console.log(out)
-    // }
+    // Handle Tailwind v4 as a special case.
+    const tailwindJs = (() => {
+      try {
+        return require.resolve('tailwindcss', { paths: [path.dirname(cssFilePath)] })
+      }
+      catch {
+        return null
+      }
+    })()
+    if (tailwindJs) {
+      const packageJsonPath = await findUp('package.json', { cwd: path.dirname(tailwindJs) })
+      if (packageJsonPath) {
+        if (tailwindJs && getPackageVersion(packageJsonPath)?.startsWith('4.')) {
+          try {
+            // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
+            const { compile } = require(tailwindJs)
+            const out = (await compile(code, {
+              base: path.dirname(cssFilePath),
+              // eslint-disable-next-line unused-imports/no-unused-vars
+              loadModule: (id: string, ...args: unknown[]) => {
+                const importPath = require.resolve(id, { paths: [cssFilePath] })
+                // eslint-disable-next-line ts/no-require-imports
+                return require(importPath)
+              },
+            })).build([])
+            code = out
+          }
+          catch (error) {
+            vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS found for file ${cssFilePath}: ${String(error)}`)
+          }
+        }
+      }
+    }
 
     return code
   }
@@ -92,10 +104,10 @@ export async function transformCss(cssFilePath: string) {
   }
 }
 
-function getPackageVersion(packageName: string): string | null {
+function getPackageVersion(packageJsonPath: string): string | null {
   try {
     // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-    return require(`${packageName}/package.json`).version
+    return require(packageJsonPath).version
   }
   catch (error) {
     return null
