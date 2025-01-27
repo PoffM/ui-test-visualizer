@@ -13,9 +13,9 @@ export default defineConfig({
   use: {
     ...devices['Desktop Chrome'],
     trace: 'retain-on-failure',
-    headless: !!process.env.CI || !!process.env.PLAYWRIGHT_HEADLESS,
+    headless: true, // !!process.env.CI || !!process.env.PLAYWRIGHT_HEADLESS,
     viewport: { width: 1600, height: 800 },
   },
-  timeout: 120_000,
+  timeout: 60_000,
   retries: process.env.CI ? 1 : 0,
 })
