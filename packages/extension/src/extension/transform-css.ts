@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises'
 import postcss from 'postcss'
 import postcssrc from 'postcss-load-config'
-import { createServer, preprocessCSS, resolveConfig } from 'vite'
-import { findUp } from 'find-up'
+import { preprocessCSS, resolveConfig } from 'vite'
 import path from 'pathe'
+import { findUp } from 'find-up'
+import { execa } from 'execa'
 
 /**
  * Loads and processes a CSS file using
@@ -17,69 +18,86 @@ import path from 'pathe'
  * Replaces `:root` with `:root,:host` because the processed styles end up in the shadow DOM.
  */
 export async function transformCss(cssFilePath: string) {
-  const sourceCode = await fs.readFile(cssFilePath, 'utf8')
+  const cwd = process.cwd()
+  try {
+    let code = await fs.readFile(cssFilePath, 'utf8')
 
-  /** The parsed PostCSS config. */
-  const postCssCfg = await (async () => {
-    try {
-      return await postcssrc()
-    }
-    catch (error) {
-      if (error instanceof Error && error.message.startsWith('No PostCSS Config found')) {
-        // Suppress this error because it's fine if there's no PostCSS config.
-        return null
-      }
-      console.warn(`Failed to parse PostCSS config found for file ${cssFilePath}`, error)
-      return null
-    }
-  })()
-
-  const css = await (async () => {
-    // First: Try to transform the CSS file using the user's Vite config.
-    const viteCfgPath = await findUp(['vite.config.ts', 'vite.config.js'], { cwd: cssFilePath })
-    if (viteCfgPath) {
-      try {
-        const server = await createServer({
-          configFile: viteCfgPath,
-          root: path.dirname(viteCfgPath),
-        })
-        const url = `${cssFilePath}?direct`
-        const result = await server.transformRequest(url)
-        if (result === null) {
-          console.warn(`Vite returned null when transforming CSS url ${url}.`)
-          console.warn(`Falling back to Vite's 'preprocessCSS' function without user's Vite config.`)
-        }
-        else {
-          return result.code
-        }
-      }
-      catch (error) {
-        console.warn(`Failed to transform CSS file ${cssFilePath} using Vite config file ${viteCfgPath}`, error)
-      }
-    }
-
-    // Fallback: Try to transform the CSS file using Vite's 'preprocessCSS' function.
-    const preprocessResult = await preprocessCSS(
-      sourceCode,
+    // Run preprocessors e.g. (less, sass, scss, styl, stylus) using Vite's auto-detection
+    code = (await preprocessCSS(
+      code,
       cssFilePath,
       await resolveConfig({ configFile: false }, 'serve'),
-    )
-    return preprocessResult.code
-  })()
+    )).code
 
-  const result = await postcss([
-    ...(postCssCfg?.plugins ?? []),
-    {
-      postcssPlugin: 'replace-root',
-      Rule(rule) {
-        rule.selector = rule.selector.replace(/:root/, ':root,:host')
+    /** The parsed PostCSS config. */
+    process.chdir(path.dirname(cssFilePath))
+    const postCssCfg = await (async () => {
+      try {
+        return await postcssrc()
+      }
+      catch (error) {
+        if (error instanceof Error && error.message.startsWith('No PostCSS Config found')) {
+          // Suppress this error because it's fine if there's no PostCSS config.
+          return null
+        }
+        console.warn(`Failed to parse PostCSS config found for file ${cssFilePath}`, error)
+        return null
+      }
+    })()
+
+    if (postCssCfg) {
+      process.chdir(path.dirname(postCssCfg.file))
+    }
+    code = (await postcss([
+      ...(postCssCfg?.plugins ?? []),
+      {
+        postcssPlugin: 'replace-root',
+        Rule(rule) {
+          rule.selector = rule.selector.replace(/:root/, ':root,:host')
+        },
       },
-    },
-  ]).process(css, {
-    ...postCssCfg?.options,
-    from: cssFilePath,
-    map: false,
-  })
+    ]).process(code, {
+      ...postCssCfg?.options,
+      from: cssFilePath,
+      map: false,
+    })).css
 
-  return result.css
+    // Handle Tailwind v4 or up as a special case.
+    // const tailwindPath = (() => {
+    //   try {
+    //     return require.resolve('tailwindcss', { paths: [path.dirname(cssFilePath)] })
+    //   }
+    //   catch {
+    //     return null
+    //   }
+    // })()
+    // if (tailwindPath && getPackageVersion(tailwindPath)?.startsWith('4.')) {
+    //   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
+    //   const { compile } = require(tailwindPath)
+    //   const out = (await compile(code, {
+    //     base: path.dirname(cssFilePath),
+    //     loadModule: (id, ...args) => {
+    //       const resolved = require.resolve(id, { paths: [cssFilePath] })
+    //       // eslint-disable-next-line ts/no-require-imports
+    //       return require(resolved)
+    //     },
+    //   })).build([])
+    //   console.log(out)
+    // }
+
+    return code
+  }
+  finally {
+    process.chdir(cwd)
+  }
+}
+
+function getPackageVersion(packageName: string): string | null {
+  try {
+    // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
+    return require(`${packageName}/package.json`).version
+  }
+  catch (error) {
+    return null
+  }
 }
