@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
-import { transformCss } from '../transform-css'
 
 export interface PanelRouterCtx {
   sessionTracker: DebugSessionTracker
@@ -133,6 +132,9 @@ export const panelRouter = t.router({
     .input(z.string())
     .query(async ({ input }) => {
       const cssFilePath = input
+
+      // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
+      const { transformCss } = require('./transform-css')
       const transformedCss = await transformCss(cssFilePath)
       return transformedCss
     }),

@@ -23,11 +23,12 @@ export default defineConfig((options) => {
       'extension': './src/extension/extension.ts',
       'ui-test-visualizer-cli-setup': './src/test-process/vitest-cli-setup.ts',
       'ui-test-visualizer-test-setup': './src/test-process/test-setup.ts',
+      'transform-css': './src/extension/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite'],
+    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', './transform-css'],
     noExternal: [
-      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)).)*$/,
+      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(.\/transform-css)).)*$/,
     ],
     // Vite handles the webview src watching
     ignoreWatch: ['src/web-view-vite'],
