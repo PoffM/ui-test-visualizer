@@ -1,9 +1,8 @@
-import { chromium, expect, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { DebuggerHelper } from './debugger-helper'
 
-test('Steps through the Vitest+React Counter example', async () => {
-  const chrome = await chromium.launch()
-  const page = await chrome.newPage()
+test('Steps through the Vitest+React Counter example', async ({ browser }) => {
+  const page = await browser.newPage()
 
   await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react')
 
@@ -67,9 +66,8 @@ test('Steps through the Vitest+React Counter example', async () => {
 
 // TODO figure out why segfaults happen when running Jest
 // The error is "Segmentation fault (core dumped)", and happens for me even when running the tests using the Jest VSCode extension.
-test.skip('Steps through the Jest+React Counter example', async () => {
-  const chrome = await chromium.launch()
-  const page = await chrome.newPage()
+test.skip('Steps through the Jest+React Counter example', async ({ browser }) => {
+  const page = await browser.newPage()
 
   await page.goto('http://localhost:8080/?folder=/source/examples/jest-react')
 

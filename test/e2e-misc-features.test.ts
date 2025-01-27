@@ -1,14 +1,13 @@
 import type { FrameLocator, Page } from '@playwright/test'
-import { chromium, expect, test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { DebuggerHelper } from './debugger-helper'
 
 let page: Page
 let replicaPanel: FrameLocator
 
 // Run the Counter example up to "Count: 1"
-test.beforeAll(async () => {
-  const chrome = await chromium.launch()
-  page = await chrome.newPage()
+test.beforeAll(async ({ browser }) => {
+  page = await browser.newPage()
 
   await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react')
 
