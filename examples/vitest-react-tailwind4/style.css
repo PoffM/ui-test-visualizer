@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "./tailwind.config.js";
 
 .green-button {
   @apply bg-green-800 text-white font-bold py-2 px-4 rounded;

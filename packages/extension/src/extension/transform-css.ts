@@ -85,16 +85,19 @@ export async function transformCss(cssFilePath: string) {
             const out = (await compile(code, {
               base: path.dirname(cssFilePath),
               // eslint-disable-next-line unused-imports/no-unused-vars
-              loadModule: (id: string, ...args: unknown[]) => {
-                const importPath = require.resolve(id, { paths: [cssFilePath] })
-                // eslint-disable-next-line ts/no-require-imports
-                return require(importPath)
+              loadModule: async (id: string, base: string, resourceHint: 'plugin' | 'config') => {
+                const importPath = path.join(path.dirname(cssFilePath), id)
+                const mod = await import(importPath)
+                return {
+                  base,
+                  module: mod,
+                }
               },
             })).build([])
             code = out
           }
           catch (error) {
-            vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS found for file ${cssFilePath}: ${String(error)}`)
+            vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS for file ${cssFilePath}: ${String(error)}`)
           }
         }
       }
