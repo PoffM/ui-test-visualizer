@@ -9,7 +9,7 @@ let replicaPanel: FrameLocator
 test.beforeAll(async ({ browser }) => {
   page = await browser.newPage()
 
-  await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react')
+  await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react-tailwind4')
 
   // Open basic.test.tsx
   await page.locator('.search-label').click()

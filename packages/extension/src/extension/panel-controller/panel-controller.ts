@@ -3,7 +3,7 @@ import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
-import { callProcedure } from '@trpc/server'
+import { TRPCError, callProcedure } from '@trpc/server'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
@@ -130,7 +130,13 @@ export async function startPanelController(
           panel?.webview.postMessage({ id, data: result })
         }
         catch (error) {
-          console.error(error)
+          console.log(error)
+          if (error instanceof TRPCError) {
+            vscode.window.showErrorMessage(error.message)
+          }
+          else {
+            vscode.window.showErrorMessage(String(error))
+          }
           panel?.webview.postMessage({
             id,
             error: error instanceof Error ? error.message : null,

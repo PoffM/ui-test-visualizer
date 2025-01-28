@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "types": ["vitest/globals"],
+    "esModuleInterop": true
+  }
+}

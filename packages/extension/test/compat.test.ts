@@ -46,7 +46,7 @@ describe('tool compatibility', async () => {
   it('works with Vitest + React', async () => {
     expect(
       (await runTest(
-        'vitest-react/test/basic.test.tsx',
+        'vitest-react-tailwind4/test/basic.test.tsx',
         'renders a heading',
       )).exitCode,
     ).toEqual(0)

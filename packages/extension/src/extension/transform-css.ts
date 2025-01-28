@@ -26,7 +26,10 @@ export async function transformCss(cssFilePath: string) {
     code = (await preprocessCSS(
       code,
       cssFilePath,
-      await resolveConfig({ configFile: false }, 'serve'),
+      await resolveConfig({
+        root: path.dirname(cssFilePath),
+        configFile: false,
+      }, 'serve'),
     )).code
 
     // Get the user's PostCSS config

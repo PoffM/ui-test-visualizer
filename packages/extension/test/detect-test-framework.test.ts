@@ -54,12 +54,12 @@ describe('detectTestFramework', () => {
     const result = await detectTestFramework(
       path.join(
         examplesPath,
-        'vitest-react/test/basic.test.tsx',
+        'vitest-react-tailwind4/test/basic.test.tsx',
       ),
       'autodetect',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'vitest-react/vite.config.ts'),
+      configPath: path.join(examplesPath, 'vitest-react-tailwind4/vite.config.ts'),
       framework: 'vitest',
     })
   })
@@ -97,12 +97,12 @@ describe('detectTestFramework', () => {
     const result = await detectTestFramework(
       path.join(
         examplesPath,
-        'vitest-react/test/basic.test.tsx',
+        'vitest-react-tailwind4/test/basic.test.tsx',
       ),
       'vitest',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'vitest-react/vite.config.ts'),
+      configPath: path.join(examplesPath, 'vitest-react-tailwind4/vite.config.ts'),
       framework: 'vitest',
     })
   })
@@ -124,7 +124,7 @@ describe('detectTestFramework', () => {
       detectTestFramework(
         path.join(
           examplesPath,
-          'vitest-react/test/basic.test.tsx',
+          'vitest-react-tailwind4/test/basic.test.tsx',
         ),
         'jest',
       ),
