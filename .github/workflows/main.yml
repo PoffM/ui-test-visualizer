@@ -56,7 +56,8 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
 
       # # Run the tests
-      - run: pnpm run test:e2e
+      - name: Run E2E tests
+        run: chmod -R o+rwx . && pnpm run test:e2e
 
       - name: Upload test results
         if: ${{ always() }}
