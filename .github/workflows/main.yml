@@ -57,7 +57,7 @@ jobs:
 
       # # Run the tests
       - name: Run E2E tests
-        run: chmod -R o+rwx . && pnpm run test:e2e
+        run: chmod -R o+rwx . && pnpm run test:e2e && chmod -R o+rwx .
 
       - name: Upload test results
         if: ${{ always() }}
