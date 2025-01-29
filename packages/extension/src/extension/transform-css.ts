@@ -23,12 +23,17 @@ export async function transformCss(cssFilePath: string) {
   try {
     let code = await fs.readFile(cssFilePath, 'utf8')
 
-    // Run preprocessors e.g. (less, sass, scss, styl, stylus) using Vite's auto-detection
+    // Run preprocessors e.g. (less, sass, scss, styl, stylus) using Vite's auto-detection.
+    // Use the user's CWD so Vite imports the user's preprocessor deps.
+    process.chdir(path.dirname(cssFilePath))
     code = (await preprocessCSS(
       code,
       cssFilePath,
       await resolveConfig({
-        root: path.dirname(cssFilePath),
+        css: {
+          // Disable postcss. Oddly 'preprocessCSS' runs Postcss by default.
+          postcss: {},
+        },
         configFile: false,
       }, 'serve'),
     )).code
