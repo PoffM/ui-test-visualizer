@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import { pathToFileURL } from 'node:url'
 import postcss from 'postcss'
 import postcssrc from 'postcss-load-config'
 import { preprocessCSS, resolveConfig } from 'vite'
@@ -86,8 +87,9 @@ export async function transformCss(cssFilePath: string) {
               base: path.dirname(cssFilePath),
               // eslint-disable-next-line unused-imports/no-unused-vars
               loadModule: async (id: string, base: string, resourceHint: 'plugin' | 'config') => {
-                const importPath = path.join(path.dirname(cssFilePath), id)
-                const mod = await import(importPath)
+                const filePath = path.join(path.dirname(cssFilePath), id)
+                const url = pathToFileURL(filePath).href
+                const mod = await import(url)
                 return {
                   base,
                   module: mod,
