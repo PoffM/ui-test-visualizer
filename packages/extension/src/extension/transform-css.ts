@@ -1,10 +1,11 @@
 import fs from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
+import { Scanner } from '@tailwindcss/oxide'
+import { findUp, findUpMultiple } from 'find-up'
+import path from 'pathe'
 import postcss from 'postcss'
 import postcssrc from 'postcss-load-config'
 import { preprocessCSS, resolveConfig } from 'vite'
-import path from 'pathe'
-import { findUp } from 'find-up'
 import * as vscode from 'vscode'
 
 /**
@@ -73,38 +74,68 @@ export async function transformCss(cssFilePath: string) {
     })).css
 
     // Handle Tailwind v4 as a special case.
-    const tailwindJs = (() => {
-      try {
-        return require.resolve('tailwindcss', { paths: [path.dirname(cssFilePath)] })
-      }
-      catch {
-        return null
-      }
-    })()
-    if (tailwindJs) {
-      const packageJsonPath = await findUp('package.json', { cwd: path.dirname(tailwindJs) })
-      if (packageJsonPath) {
-        if (tailwindJs && getPackageVersion(packageJsonPath)?.startsWith('4.')) {
-          try {
-            // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-            const { compile } = require(tailwindJs)
-            const out = (await compile(code, {
-              base: path.dirname(cssFilePath),
-              // eslint-disable-next-line unused-imports/no-unused-vars
-              loadModule: async (id: string, base: string, resourceHint: 'plugin' | 'config') => {
-                const filePath = path.join(path.dirname(cssFilePath), id)
-                const url = pathToFileURL(filePath).href
-                const mod = await import(url)
-                return {
-                  base,
-                  module: mod,
+    {
+      const tailwindJs = (() => {
+        try {
+          return require.resolve('tailwindcss', { paths: [path.dirname(cssFilePath)] })
+        }
+        catch {
+          return null
+        }
+      })()
+      if (tailwindJs) {
+        const packageJsonPath = await findUp('package.json', { cwd: path.dirname(tailwindJs) })
+        if (packageJsonPath) {
+          if (tailwindJs && getPackageVersion(packageJsonPath)?.startsWith('4.')) {
+            try {
+              // Find the user's package.json with Tailwind installed
+              const projectPkgJson = await (async () => {
+                const pkgJsonPaths = await findUpMultiple('package.json', { cwd: path.dirname(cssFilePath) })
+                for (const pkgJsonPath of pkgJsonPaths) {
+                  const hasTailwindInstalled = (() => {
+                    try {
+                      require.resolve('tailwindcss', { paths: [path.dirname(pkgJsonPath)] })
+                      return true
+                    }
+                    catch (error) {
+                      return false
+                    }
+                  })()
+                  if (hasTailwindInstalled) {
+                    return pkgJsonPath
+                  }
                 }
-              },
-            })).build([])
-            code = out
-          }
-          catch (error) {
-            vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS for file ${cssFilePath}: ${String(error)}`)
+                return null
+              })()
+
+              const scanner = new Scanner({
+                sources: [{
+                  base: path.dirname(projectPkgJson ?? cssFilePath),
+                  pattern: '**/*.{html,js,ts,jsx,tsx,svelte,vue}',
+                }],
+              })
+
+              const candidates = scanner.scan()
+
+              // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
+              const { compile } = require(tailwindJs)
+              code = (await compile(code, {
+                base: path.dirname(cssFilePath),
+                // eslint-disable-next-line unused-imports/no-unused-vars
+                loadModule: async (id: string, base: string, resourceHint: 'plugin' | 'config') => {
+                  const filePath = path.join(path.dirname(cssFilePath), id)
+                  const url = pathToFileURL(filePath).href
+                  const mod = await import(url)
+                  return {
+                    base,
+                    module: mod,
+                  }
+                },
+              })).build(candidates)
+            }
+            catch (error) {
+              vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS for file ${cssFilePath}: ${String(error)}`)
+            }
           }
         }
       }

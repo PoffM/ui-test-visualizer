@@ -26,9 +26,9 @@ export default defineConfig((options) => {
       'transform-css': './src/extension/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', './transform-css'],
+    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', '@tailwindcss/oxide', './transform-css'],
     noExternal: [
-      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(.\/transform-css)).)*$/,
+      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(@tailwindcss\/oxide)|(.\/transform-css)).)*$/,
     ],
     // Vite handles the webview src watching
     ignoreWatch: ['src/web-view-vite'],

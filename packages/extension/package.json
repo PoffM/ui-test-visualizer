@@ -8,6 +8,7 @@
     "build": "tsup --minify"
   },
   "dependencies": {
+    "@tailwindcss/oxide": "^4.0.1",
     "@trpc/server": "^10.45.2",
     "find-up": "^7.0.0",
     "get-port": "^7.1.0",
