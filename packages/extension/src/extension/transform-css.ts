@@ -1,12 +1,15 @@
 import fs from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
-import { Scanner } from '@tailwindcss/oxide'
 import { findUp, findUpMultiple } from 'find-up'
+import { globby } from 'globby'
 import path from 'pathe'
 import postcss from 'postcss'
 import postcssrc from 'postcss-load-config'
 import { preprocessCSS, resolveConfig } from 'vite'
 import * as vscode from 'vscode'
+
+// @ts-expect-error copied js file from old tailwind version
+import { defaultExtractor } from './tailwind-extractor/defaultExtractor'
 
 /**
  * Loads and processes a CSS file using
@@ -108,14 +111,21 @@ export async function transformCss(cssFilePath: string) {
                 return null
               })()
 
-              const scanner = new Scanner({
-                sources: [{
-                  base: path.dirname(projectPkgJson ?? cssFilePath),
-                  pattern: '**/*.{html,js,ts,jsx,tsx,svelte,vue}',
-                }],
-              })
-
-              const candidates = scanner.scan()
+              const twCandidates = await (async () => {
+                const searchPath = path.dirname(projectPkgJson ?? cssFilePath)
+                const filesToScan = await globby(
+                  ['**/*.{html,js,ts,jsx,tsx,svelte,vue}', '!**/node_modules/**/*'],
+                  { cwd: searchPath },
+                )
+                const results: string[] = []
+                for (const file of filesToScan) {
+                  const filePath = path.join(searchPath, file)
+                  const content = await fs.readFile(filePath, 'utf8')
+                  const fileCandidates = defaultExtractor({ tailwindConfig: { separator: ':' } })(content)
+                  results.push(...fileCandidates)
+                }
+                return results
+              })()
 
               // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
               const { compile } = require(tailwindJs)
@@ -131,7 +141,7 @@ export async function transformCss(cssFilePath: string) {
                     module: mod,
                   }
                 },
-              })).build(candidates)
+              })).build(twCandidates)
             }
             catch (error) {
               vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS for file ${cssFilePath}: ${String(error)}`)

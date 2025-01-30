@@ -15,7 +15,7 @@ export function Counter() {
     <div className="counter-app">
       <h1>Counter</h1>
       <p>Count: {count}</p>
-      <button onClick={increment} className="green-button">Increment</button>
+      <button onClick={increment} className="green-button !visible">Increment</button>
       <button onClick={decrement}>Decrement</button>
     </div>
   )

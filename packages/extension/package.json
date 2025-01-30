@@ -8,10 +8,10 @@
     "build": "tsup --minify"
   },
   "dependencies": {
-    "@tailwindcss/oxide": "^4.0.1",
     "@trpc/server": "^10.45.2",
     "find-up": "^7.0.0",
     "get-port": "^7.1.0",
+    "globby": "^14.0.2",
     "jest-config": "29.7.0",
     "jest-editor-support": "31.1.2",
     "locate-path": "^7.2.0",

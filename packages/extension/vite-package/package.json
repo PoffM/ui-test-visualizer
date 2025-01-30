@@ -3,7 +3,6 @@
   "private": true,
   "dependencies": {
     "@rollup/wasm-node": "^4.32.0",
-    "@tailwindcss/oxide": "^4.0.1",
     "esbuild-wasm": "^0.24.2",
     "vite": "^6.0.11"
   }
