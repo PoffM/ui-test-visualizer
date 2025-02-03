@@ -81,7 +81,6 @@ export function createDomReplica() {
   // Observe the head for style changes. THe head is a signal that changes when the user clicks the refresh button.
   createEffect(() => {
     const styleObserver = new MutationObserver((mutationsList) => {
-      console.log('Style mutations: ', mutationsList)
       const nodes: HTMLStyleElement[] = []
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
