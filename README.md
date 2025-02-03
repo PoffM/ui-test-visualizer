@@ -34,6 +34,8 @@ Styles are loaded using Vite's `preprocessCSS()` API, so you can use any of the 
 - Stylus
 - PostCSS (e.g. Tailwind)
 
+This extension could fail to auto-build your source CSS files, in which case you could try pointing the extension to your built CSS files.
+
 ## How It Works
 
 - **Runs setup code before your test**: This extension inserts a script at the beginning of your test process, which listens for mutable DOM method calls, like "appendChild", "removeChild", "setAttribute", etc, using [Tinyspy](https://github.com/tinylibs/tinyspy)
