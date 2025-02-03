@@ -1,5 +1,15 @@
 # ui-test-visualizer
 
+## 1.1.0
+
+### Minor Changes
+
+- 745f43f: Support tailwind v4 for the user-selected styles
+
+### Patch Changes
+
+- 745f43f: Dependency updates
+
 ## 1.0.6
 
 ### Patch Changes
