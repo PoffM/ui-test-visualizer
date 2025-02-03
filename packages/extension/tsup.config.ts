@@ -29,6 +29,7 @@ export default defineConfig((options) => {
     external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', '@tailwindcss/oxide', './transform-css'],
     noExternal: [
       /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(@tailwindcss\/oxide)|(.\/transform-css)).)*$/,
+      '@vscode/extension-telemetry',
     ],
     // Vite handles the webview src watching
     ignoreWatch: ['src/web-view-vite'],

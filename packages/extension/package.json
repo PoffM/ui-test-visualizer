@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@trpc/server": "^10.45.2",
+    "@vscode/extension-telemetry": "^0.9.8",
     "find-up": "^7.0.0",
     "get-port": "^7.1.0",
     "globby": "^14.0.2",

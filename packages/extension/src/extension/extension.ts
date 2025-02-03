@@ -1,5 +1,6 @@
 import '@total-typescript/ts-reset'
 
+import TelemetryReporter from '@vscode/extension-telemetry'
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod'
@@ -11,6 +12,15 @@ import { startPanelController } from './panel-controller/panel-controller'
 import { startDebugSessionTracker } from './util/debug-session-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
+
+const reporter = (() => {
+  try {
+    return new TelemetryReporter('InstrumentationKey=ffa9ad6b-9974-4d5c-9247-9ff01c0a4cc8;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=55f0d25f-492a-4af3-8487-d8abce8a41f6')
+  }
+  catch (error) {
+    return null
+  }
+})()
 
 export async function activate(extensionContext: vscode.ExtensionContext) {
   // Hot-reload the main 'visuallyDebugUI' command function in development
@@ -120,6 +130,11 @@ export let visuallyDebugUI = async (
   )
 
   vscode.debug.startDebugging(undefined, debugConfig)
+
+  try {
+    reporter?.sendTelemetryEvent('visually-debug-ui.started')
+  }
+  catch {}
 }
 
 export const zFrameworkSetting = z.enum(['autodetect', 'vitest', 'jest'])
