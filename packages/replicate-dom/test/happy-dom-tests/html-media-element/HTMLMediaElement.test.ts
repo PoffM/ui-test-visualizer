@@ -30,7 +30,7 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { type Document, type IHTMLMediaElement, type Window, Window } from 'happy-dom'
+import { DOMException, type Document, type IHTMLMediaElement, Window } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup.js'
 import { serializeDomNode } from '../../../src/index.js'
 
@@ -252,7 +252,7 @@ describe('hTMLMediaElement', () => {
         }).toThrowError(
           new DOMException(
 						`Failed to set the 'volume' property on 'HTMLMediaElement': The volume provided (${volume}) is outside the range [0, 1].`,
-						'indexSizeError',
+						'IndexSizeError',
           ),
         )
       })

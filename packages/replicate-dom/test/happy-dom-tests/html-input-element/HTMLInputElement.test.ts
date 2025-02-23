@@ -30,7 +30,7 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { File, Window } from 'happy-dom'
+import { DOMException, File, Window } from 'happy-dom'
 import type { Document, IHTMLInputElement, INodeList, Window } from 'happy-dom'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
 import { serializeDomNode } from '../../../src'

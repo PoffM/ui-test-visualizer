@@ -30,8 +30,8 @@
 */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { Event, Node, Text, Window } from 'happy-dom'
-import type { ErrorEvent, HTMLTemplateElement, Document, HTMLElement, ShadowRoot, Window } from 'happy-dom'
+import { DOMException, Event, Node, Text, Window } from 'happy-dom'
+import type { Document, ErrorEvent, HTMLElement, HTMLTemplateElement, ShadowRoot, Window } from 'happy-dom'
 import NodeFactory from '../../../node_modules/happy-dom/lib/nodes/NodeFactory'
 import EventPhaseEnum from '../../../node_modules/happy-dom/lib/event/EventPhaseEnum'
 import { addTestElement, initTestReplicaDom } from '../../test-setup'
@@ -495,7 +495,7 @@ describe('node', () => {
         expect(error).toEqual(
           new DOMException(
             'Failed to execute \'appendChild\' on \'Node\': The new node is a parent of the node to insert to.',
-            'domException',
+            'DOMException',
           ),
         )
       }
@@ -647,7 +647,7 @@ describe('node', () => {
         expect(error).toEqual(
           new DOMException(
             'Failed to execute \'insertBefore\' on \'Node\': The new node is a parent of the node to insert to.',
-            'domException',
+            'DOMException',
           ),
         )
       }
