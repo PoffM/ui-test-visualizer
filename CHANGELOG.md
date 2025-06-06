@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.1.1
+
+### Patch Changes
+
+- 7a6e257: Support monorepos where the Jest config is in the root package
+
 ## 1.1.0
 
 ### Minor Changes
