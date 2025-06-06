@@ -129,7 +129,7 @@ test('Steps through the Vitest+React+Tailwind@3 Counter example', async ({ brows
 
 // TODO figure out why segfaults happen when running Jest
 // The error is "Segmentation fault (core dumped)", and happens for me even when running the tests using the Jest VSCode extension.
-test.skip('Steps through the Jest+React Counter example', async ({ browser }) => {
+test('Steps through the Jest+React Counter example', async ({ browser }) => {
   const page = await browser.newPage()
 
   await page.goto('http://localhost:8080/?folder=/source/examples/jest-react')
