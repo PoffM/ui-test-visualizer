@@ -18,7 +18,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^2.19.1
-        version: 2.19.1(@vue/compiler-sfc@3.4.34)(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2))
+        version: 2.19.1(@vue/compiler-sfc@3.4.34)(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2))
       '@changesets/cli':
         specifier: ^2.27.12
         version: 2.27.12
@@ -57,7 +57,7 @@ importers:
         version: 5.7.3
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
+        version: 3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
 
   examples/jest-babel-nextjs:
     dependencies:
@@ -101,6 +101,31 @@ importers:
       typescript:
         specifier: 5.7.3
         version: 5.7.3
+
+  examples/jest-monorepo:
+    dependencies:
+      react:
+        specifier: ^19.0.0
+        version: 19.0.0
+    devDependencies:
+      '@testing-library/react':
+        specifier: ^16.2.0
+        version: 16.2.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/react':
+        specifier: ^19.0.8
+        version: 19.0.8
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.13.1)(ts-node@10.9.2(@types/node@22.13.1)(typescript@5.7.3))
+      jest-environment-jsdom:
+        specifier: ^29.7.0
+        version: 29.7.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.13.1)(typescript@5.7.3)
 
   examples/jest-nextjs:
     dependencies:
@@ -245,7 +270,7 @@ importers:
         version: 5.4.14(@types/node@22.13.1)(lightningcss@1.29.1)(sass@1.84.0)
       vitest:
         specifier: 2.1.8
-        version: 2.1.8(@types/node@22.13.1)(happy-dom@14.12.3)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)
+        version: 2.1.8(@types/node@22.13.1)(happy-dom@14.12.3)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)
 
   examples/vitest-react-tailwind4:
     dependencies:
@@ -279,7 +304,7 @@ importers:
         version: 6.0.11(@types/node@22.13.1)(jiti@2.4.2)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
       vitest:
         specifier: 2.1.8
-        version: 2.1.8(@types/node@22.13.1)(happy-dom@14.12.3)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)
+        version: 2.1.8(@types/node@22.13.1)(happy-dom@14.12.3)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)
 
   packages/extension:
     dependencies:
@@ -358,7 +383,7 @@ importers:
         version: 9.5.2
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
+        version: 3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
 
   packages/replicate-dom:
     dependencies:
@@ -4795,11 +4820,11 @@ packages:
       canvas:
         optional: true
 
-  jsdom@24.1.1:
-    resolution: {integrity: sha512-5O1wWV99Jhq4DV7rCLIoZ/UIhyQeDR7wHVyZAHAshbrvZsLs+Xzz7gtwnlJTJDjleiTKh54F4dXrX70vJQTyJQ==}
+  jsdom@26.1.0:
+    resolution: {integrity: sha512-Cvc9WUhxSMEo4McES3P7oK3QaXldCfNWp7pl2NNeiIFlCoLr3kfq9kb1fxftiwk1FLV7CvpvDfonxtzUDeSOPg==}
     engines: {node: '>=18'}
     peerDependencies:
-      canvas: ^2.11.2
+      canvas: ^3.0.0
     peerDependenciesMeta:
       canvas:
         optional: true
@@ -5741,9 +5766,6 @@ packages:
   rrweb-cssom@0.7.0:
     resolution: {integrity: sha512-KlSv0pm9kgQSRxXEMgtivPJ4h826YHsuob8pSHcfSZsSXGtvpEAie8S0AnXuObEJ7nhikOb4ahwxDm0H2yW17g==}
 
-  rrweb-cssom@0.7.1:
-    resolution: {integrity: sha512-TrEMa7JGdVm0UThDJSx7ddw5nVm3UJS9o9CCIZ72B1vSyEZoziDqBYP3XIoi/12lKrJR8rE3jeFHMok2F/Mnsg==}
-
   rrweb-cssom@0.8.0:
     resolution: {integrity: sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==}
 
@@ -6116,6 +6138,13 @@ packages:
     resolution: {integrity: sha512-n1cw8k1k0x4pgA2+9XrOkFydTerNcJ1zWCO5Nn9scWHTD+5tp8dghT2x1uduQePZTZgd3Tupf+x9BxJjeJi77Q==}
     engines: {node: '>=14.0.0'}
 
+  tldts-core@6.1.86:
+    resolution: {integrity: sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==}
+
+  tldts@6.1.86:
+    resolution: {integrity: sha512-WMi/OQ2axVTf/ykqCQgXiIct+mSQDFdH2fkwhPwgEwvJ1kSzZRiinb0zF2Xb8u4+OqPChmyI6MEu4EezNJz+FQ==}
+    hasBin: true
+
   tmp@0.0.33:
     resolution: {integrity: sha512-jRCJlojKnZ3addtTOjdIqoRuPEKBvNXcGYqzO6zWZX8KfKEpnGY5jfggJQ3EjKuu8D4bJRr0y+cYJFmYbImXGw==}
     engines: {node: '>=0.6.0'}
@@ -6147,6 +6176,10 @@ packages:
     resolution: {integrity: sha512-Loo5UUvLD9ScZ6jh8beX1T6sO1w2/MpCRpEP7V280GKMVUQ0Jzar2U3UJPsrdbziLEMMhu3Ujnq//rhiFuIeag==}
     engines: {node: '>=6'}
 
+  tough-cookie@5.1.2:
+    resolution: {integrity: sha512-FVDYdxtnj0G6Qm/DhNPSb8Ju59ULcup3tuJxkFb5K8Bv2pUXILbf0xZWU8PX8Ov19OXljbUyveOFwRMwkXzO+A==}
+    engines: {node: '>=16'}
+
   tr46@1.0.1:
     resolution: {integrity: sha512-dTpowEjclQ7Kgx5SdBkqRzVhERQXov8/l9Ft9dVM9fmg0W0KQSVaXX9T4i6twCPNtYiZM53lpSSUAwJbFPOHxA==}
 
@@ -6156,6 +6189,10 @@ packages:
 
   tr46@5.0.0:
     resolution: {integrity: sha512-tk2G5R2KRwBd+ZN0zaEXpmzdKyOYksXwywulIX95MBODjSzMIuQnQ3m8JxgbhnL1LeVo7lqQKsYa1O3Htl7K5g==}
+    engines: {node: '>=18'}
+
+  tr46@5.1.1:
+    resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
 
   tree-kill@1.2.2:
@@ -6595,6 +6632,10 @@ packages:
     resolution: {integrity: sha512-jlf/foYIKywAt3x/XWKZ/3rz8OSJPiWktjmk891alJUEjiVxKX9LEO92qH3hv4aJ0mN3MWPvGMCy8jQi95xK4w==}
     engines: {node: '>=18'}
 
+  whatwg-url@14.2.0:
+    resolution: {integrity: sha512-De72GdQZzNTUBBChsXueQUnPKDkg/5A5zp7pFDuQAj5UFoENpiACU0wlCvzpAGnTkj++ihpKwKyYewn/XNUbKw==}
+    engines: {node: '>=18'}
+
   whatwg-url@7.1.0:
     resolution: {integrity: sha512-WUu7Rg1DroM7oQvGWfOiAK21n74Gg+T4elXEQYkOhtyLeWiJFoOGLXPKI/9gzIie9CtwVLm8wtw6YJdKyxSjeg==}
 
@@ -6729,7 +6770,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@2.19.1(@vue/compiler-sfc@3.4.34)(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2))':
+  '@antfu/eslint-config@2.19.1(@vue/compiler-sfc@3.4.34)(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2))':
     dependencies:
       '@antfu/install-pkg': 0.3.3
       '@clack/prompts': 0.7.0
@@ -6754,7 +6795,7 @@ snapshots:
       eslint-plugin-toml: 0.11.0(eslint@9.20.0(jiti@2.4.2))
       eslint-plugin-unicorn: 53.0.0(eslint@9.20.0(jiti@2.4.2))
       eslint-plugin-unused-imports: 3.2.0(@typescript-eslint/eslint-plugin@7.11.0(@typescript-eslint/parser@7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))
-      eslint-plugin-vitest: 0.5.4(@typescript-eslint/eslint-plugin@7.11.0(@typescript-eslint/parser@7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2))
+      eslint-plugin-vitest: 0.5.4(@typescript-eslint/eslint-plugin@7.11.0(@typescript-eslint/parser@7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2))
       eslint-plugin-vue: 9.26.0(eslint@9.20.0(jiti@2.4.2))
       eslint-plugin-yml: 1.14.0(eslint@9.20.0(jiti@2.4.2))
       eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.34)(eslint@9.20.0(jiti@2.4.2))
@@ -10726,13 +10767,13 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.11.0(@typescript-eslint/parser@7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)
 
-  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.11.0(@typescript-eslint/parser@7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)):
+  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.11.0(@typescript-eslint/parser@7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)(vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)):
     dependencies:
       '@typescript-eslint/utils': 7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)
       eslint: 9.20.0(jiti@2.4.2)
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.11.0(@typescript-eslint/parser@7.11.0(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3))(eslint@9.20.0(jiti@2.4.2))(typescript@5.7.3)
-      vitest: 3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
+      vitest: 3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -11936,27 +11977,26 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  jsdom@24.1.1:
+  jsdom@26.1.0:
     dependencies:
       cssstyle: 4.2.1
       data-urls: 5.0.0
       decimal.js: 10.5.0
-      form-data: 4.0.1
       html-encoding-sniffer: 4.0.0
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
       is-potential-custom-element-name: 1.0.1
       nwsapi: 2.2.16
       parse5: 7.2.1
-      rrweb-cssom: 0.7.1
+      rrweb-cssom: 0.8.0
       saxes: 6.0.0
       symbol-tree: 3.2.4
-      tough-cookie: 4.1.4
+      tough-cookie: 5.1.2
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 7.0.0
       whatwg-encoding: 3.1.1
       whatwg-mimetype: 4.0.0
-      whatwg-url: 14.1.0
+      whatwg-url: 14.2.0
       ws: 8.18.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
@@ -12872,9 +12912,6 @@ snapshots:
 
   rrweb-cssom@0.7.0: {}
 
-  rrweb-cssom@0.7.1:
-    optional: true
-
   rrweb-cssom@0.8.0:
     optional: true
 
@@ -13271,6 +13308,14 @@ snapshots:
 
   tinyspy@3.0.2: {}
 
+  tldts-core@6.1.86:
+    optional: true
+
+  tldts@6.1.86:
+    dependencies:
+      tldts-core: 6.1.86
+    optional: true
+
   tmp@0.0.33:
     dependencies:
       os-tmpdir: 1.0.2
@@ -13303,6 +13348,11 @@ snapshots:
       universalify: 0.2.0
       url-parse: 1.5.10
 
+  tough-cookie@5.1.2:
+    dependencies:
+      tldts: 6.1.86
+    optional: true
+
   tr46@1.0.1:
     dependencies:
       punycode: 2.3.1
@@ -13314,6 +13364,11 @@ snapshots:
   tr46@5.0.0:
     dependencies:
       punycode: 2.3.1
+
+  tr46@5.1.1:
+    dependencies:
+      punycode: 2.3.1
+    optional: true
 
   tree-kill@1.2.2: {}
 
@@ -13585,7 +13640,7 @@ snapshots:
     optionalDependencies:
       vite: 6.0.11(@types/node@22.13.1)(jiti@2.4.2)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
 
-  vitest@2.1.8(@types/node@22.13.1)(happy-dom@14.12.3)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0):
+  vitest@2.1.8(@types/node@22.13.1)(happy-dom@14.12.3)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0):
     dependencies:
       '@vitest/expect': 2.1.8
       '@vitest/mocker': 2.1.8(vite@5.4.14(@types/node@22.13.1)(lightningcss@1.29.1)(sass@1.84.0))
@@ -13610,7 +13665,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.13.1
       happy-dom: 14.12.3
-      jsdom: 24.1.1
+      jsdom: 26.1.0
     transitivePeerDependencies:
       - less
       - lightningcss
@@ -13622,7 +13677,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@24.1.1)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2):
+  vitest@3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2):
     dependencies:
       '@vitest/expect': 3.0.5
       '@vitest/mocker': 3.0.5(vite@6.1.0(@types/node@22.13.1)(jiti@2.4.2)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2))
@@ -13647,7 +13702,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 22.13.1
       happy-dom: 14.12.3
-      jsdom: 24.1.1
+      jsdom: 26.1.0
     transitivePeerDependencies:
       - jiti
       - less
@@ -13757,6 +13812,12 @@ snapshots:
     dependencies:
       tr46: 5.0.0
       webidl-conversions: 7.0.0
+
+  whatwg-url@14.2.0:
+    dependencies:
+      tr46: 5.1.1
+      webidl-conversions: 7.0.0
+    optional: true
 
   whatwg-url@7.1.0:
     dependencies:

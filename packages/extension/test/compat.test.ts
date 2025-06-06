@@ -52,6 +52,15 @@ describe('tool compatibility', async () => {
     ).toEqual(0)
   }, 30_000)
 
+  it('works with Monorepo with top-level Jest config', async () => {
+    expect(
+      (await runTest(
+        'jest-monorepo/packages/inner-package/test/basic.test.tsx',
+        'simple react testing library test',
+      )).exitCode,
+    ).toEqual(0)
+  }, 30_000)
+
   // Avoids import errors when importing in Vitest
   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
   const Server = require('../node_modules/ws/lib/websocket-server') as typeof WsServer

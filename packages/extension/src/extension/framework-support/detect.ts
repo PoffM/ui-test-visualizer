@@ -1,5 +1,5 @@
 import path from 'pathe'
-import { findUp } from 'find-up'
+import { findUp, findUpMultiple } from 'find-up'
 import { readInitialOptions } from 'jest-config'
 
 export interface TestFrameworkInfo {
@@ -22,31 +22,46 @@ export async function detectTestFramework(
     ? await (async () => {
       const cwd = process.cwd()
       try {
-        const pkgPath = await findUp('package.json', { cwd: testFilePath })
-        if (!pkgPath) {
+        const pkgPaths = await findUpMultiple('package.json', { cwd: testFilePath })
+        if (!pkgPaths.length) {
           throw new Error(`Could not find related package.json for test file ${testFilePath}`)
         }
 
-        // Change cwd to package root so Jest can find the right config file
-        process.chdir(path.dirname(pkgPath))
-        const cfg = await readInitialOptions(undefined, {})
-        if (
-          cfg.configPath && path.resolve(cfg.configPath).endsWith('/package.json')
+        for (const pkgPath of pkgPaths) {
+          // Change cwd to package root so Jest can find the right config file
+          process.chdir(path.dirname(pkgPath))
 
-          // check for { rootDir: '/...' } ; the empty config placeholder
-          && Object.keys(cfg.config).length <= 1
-        ) {
-          // no jest config found in package.json
-          return undefined
+          const cfg = await (async () => {
+            try {
+              // Call Jest's built-in function to read the jest config file for the current working dir
+              return await readInitialOptions(undefined, {})
+            }
+            catch (e) {
+              // readInitialOptions throws an error if it can't find jest.config.x or package.json; ignore this error
+              if (e instanceof Error && e.message?.includes?.('Could not find a config file')) {
+                return undefined
+              }
+              throw e
+            }
+          })()
+
+          if (!cfg) {
+            // no jest config found in package.json; try going up to the next parent package
+            continue
+          }
+
+          if (
+            cfg.configPath && path.resolve(cfg.configPath).endsWith('/package.json')
+
+            // check for { rootDir: '/...' } ; the empty config placeholder
+            && Object.keys(cfg.config).length <= 1
+          ) {
+            // no jest config found in package.json; try going up to the next parent package
+            continue
+          }
+          // Return the config for the first valid jest config
+          return cfg.configPath && path.resolve(cfg.configPath)
         }
-        return cfg.configPath && path.resolve(cfg.configPath)
-      }
-      catch (e) {
-        // readInitialOptions throws an error if it can't find jest.config.x or package.json; ignore this error
-        if (e instanceof Error && e.message?.includes?.('Could not find a config file')) {
-          return undefined
-        }
-        throw e
       }
       finally {
         process.chdir(cwd)
