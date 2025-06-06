@@ -20,10 +20,10 @@ export default defineConfig((options) => {
   return {
     treeshake: !options.watch,
     entry: {
-      'extension': './src/extension/extension.ts',
-      'ui-test-visualizer-cli-setup': './src/test-process/vitest-cli-setup.ts',
-      'ui-test-visualizer-test-setup': './src/test-process/test-setup.ts',
-      'transform-css': './src/extension/transform-css.ts',
+      'extension': './src/extension.ts',
+      'ui-test-visualizer-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
+      'ui-test-visualizer-test-setup': '../test-setup/src/test-setup.ts',
+      'transform-css': './src/transform-css.ts',
     },
     outDir,
     external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', '@tailwindcss/oxide', './transform-css'],

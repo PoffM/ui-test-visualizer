@@ -3,7 +3,7 @@ import { TRPCClientError, createTRPCProxyClient } from '@trpc/client'
 import { observable } from '@trpc/server/observable'
 
 import { makeEventListener } from '@solid-primitives/event-listener'
-import type { PanelRouter } from '../../../extension/src/extension/panel-controller/panel-router'
+import type { PanelRouter } from '../../../extension/src/panel-controller/panel-router'
 import { vscode } from './vscode'
 
 /** TRPC link for calling from the VSCode webview to the VSCode Extension. */

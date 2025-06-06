@@ -4,7 +4,7 @@ import getPort from 'get-port'
 import path from 'pathe'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { Server as WsServer } from 'ws'
-import { makeDebugConfig } from '../src/extension/debug-config'
+import { makeDebugConfig } from '../src/debug-config'
 
 describe('tool compatibility', async () => {
   it('works with Jest + SWC + Nextjs', async () => {

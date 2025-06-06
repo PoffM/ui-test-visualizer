@@ -350,9 +350,6 @@ importers:
       vite:
         specifier: ^6.0.11
         version: 6.0.11(@types/node@22.13.1)(jiti@2.4.2)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
-      ws:
-        specifier: ^8.18.0
-        version: 8.18.0
       zod:
         specifier: ^3.24.1
         version: 3.24.1
@@ -384,6 +381,9 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/node@22.13.1)(happy-dom@14.12.3)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
 
   packages/replicate-dom:
     dependencies:
@@ -412,6 +412,31 @@ importers:
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/node@22.13.1)(happy-dom@14.6.2)(jiti@2.4.2)(jsdom@24.1.0)(lightningcss@1.29.1)(sass@1.84.0)(yaml@2.4.2)
+
+  packages/test-setup:
+    dependencies:
+      find-up:
+        specifier: ^7.0.0
+        version: 7.0.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
+      pathe:
+        specifier: ^2.0.2
+        version: 2.0.2
+      replicate-dom:
+        specifier: workspace:*
+        version: link:../replicate-dom
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.0
+      zod:
+        specifier: ^3.24.1
+        version: 3.24.1
+    devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.15
+        version: 4.17.15
 
   packages/web-view-vite:
     dependencies:

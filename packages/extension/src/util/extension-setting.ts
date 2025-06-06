@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import type pkg from '../../../../../package.json'
+import type pkg from '../../../../package.json'
 
 export type ExtensionSettingsKey = keyof (
   typeof pkg.contributes.configuration.properties

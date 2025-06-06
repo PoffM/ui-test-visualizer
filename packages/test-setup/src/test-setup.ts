@@ -11,7 +11,7 @@ import shadowCss from './shadow.css.txt'
 // directly instead to bypass that check.
 const WebSocket
   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-  = require('../../node_modules/ws/index.js') as typeof globalThis.WebSocket
+  = require('../node_modules/ws/index.js') as typeof globalThis.WebSocket
 
 async function preTest() {
   try {

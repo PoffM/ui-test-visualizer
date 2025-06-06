@@ -10,7 +10,7 @@ import { type PanelRouterCtx, panelRouter } from './panel-router'
 
 // Avoids import errors when importing in Vitest
 // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-const Server = require('../../../node_modules/ws/lib/websocket-server') as typeof WsServer
+const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
