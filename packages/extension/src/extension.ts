@@ -48,14 +48,36 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
     ),
   )
 
-  if (!extensionSetting('ui-test-visualizer.disableCodeLens')) {
-    const docSelectors: vscode.DocumentFilter[] = [
-      {
-        pattern: String(extensionSetting('ui-test-visualizer.codeLensSelector')),
-      },
-    ]
+  // Code Lens setup
+  {
+    let codeLensSub: vscode.Disposable | null = null
+    extensionContext.subscriptions.push({ dispose: () => codeLensSub?.dispose() })
+
+    function setupCodeLens() {
+      if (extensionSetting('ui-test-visualizer.disableCodeLens')) {
+        codeLensSub?.dispose()
+        codeLensSub = null
+        return
+      }
+
+      const docSelectors: vscode.DocumentFilter[] = [
+        {
+          pattern: String(extensionSetting('ui-test-visualizer.codeLensSelector')),
+        },
+      ]
+
+      codeLensSub = vscode.languages.registerCodeLensProvider(docSelectors, codeLensProvider)
+    }
+
+    setupCodeLens()
+
     extensionContext.subscriptions.push(
-      vscode.languages.registerCodeLensProvider(docSelectors, codeLensProvider),
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration('ui-test-visualizer.codeLensSelector') || e.affectsConfiguration('ui-test-visualizer.disableCodeLens')) {
+          codeLensSub?.dispose()
+          setupCodeLens()
+        }
+      }),
     )
   }
 
