@@ -4,12 +4,12 @@
   "dependencies": {
     "find-up": "^7.0.0",
     "lodash": "^4.17.21",
-    "pathe": "^2.0.2",
+    "pathe": "^2.0.3",
     "replicate-dom": "workspace:*",
-    "ws": "^8.18.0",
-    "zod": "^3.24.1"
+    "ws": "^8.18.2",
+    "zod": "^3.25.56"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.15"
+    "@types/lodash": "^4.17.17"
   }
 }

@@ -3,7 +3,7 @@ import getPort from 'get-port'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { HTMLPatch } from 'replicate-dom'
-import { TRPCError, callProcedure } from '@trpc/server'
+import { TRPCError, callTRPCProcedure } from '@trpc/server'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
@@ -118,13 +118,14 @@ export async function startPanelController(
             storage,
             flushPatches,
           }
-          const result = await callProcedure({
-            procedures: panelRouter._def.procedures,
+          const result = await callTRPCProcedure({
+            router: panelRouter,
             ctx,
             path,
-            rawInput: input,
+            getRawInput: () => input,
             input,
             type,
+            signal: undefined,
           })
 
           panel?.webview.postMessage({ id, data: result })

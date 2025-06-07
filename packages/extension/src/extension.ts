@@ -1,6 +1,6 @@
 import '@total-typescript/ts-reset'
 
-import TelemetryReporter from '@vscode/extension-telemetry'
+import { TelemetryReporter } from '@vscode/extension-telemetry'
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod'
@@ -62,7 +62,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   extensionContext.subscriptions.push(debugTest)
 }
 
-export function deactivate() {}
+export function deactivate() { }
 
 // eslint-disable-next-line import/no-mutable-exports
 export let visuallyDebugUI = async (
@@ -134,7 +134,7 @@ export let visuallyDebugUI = async (
   try {
     reporter?.sendTelemetryEvent('visually-debug-ui.started')
   }
-  catch {}
+  catch { }
 }
 
 export const zFrameworkSetting = z.enum(['autodetect', 'vitest', 'jest'])

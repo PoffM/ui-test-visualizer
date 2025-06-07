@@ -76,19 +76,19 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.19.1",
-    "@changesets/cli": "^2.27.12",
-    "@playwright/test": "^1.50.1",
+    "@changesets/cli": "^2.29.4",
+    "@playwright/test": "^1.52.0",
     "@total-typescript/ts-reset": "^0.6.1",
-    "@types/node": "^22.13.1",
-    "@vitest/expect": "^3.0.5",
-    "@vscode/vsce": "^3.2.2",
+    "@types/node": "^22.15.30",
+    "@vitest/expect": "^3.2.2",
+    "@vscode/vsce": "^3.5.0",
     "del": "^8.0.0",
-    "eslint": "^9.20.0",
-    "globby": "^14.0.2",
-    "tsup": "^8.3.6",
-    "type-fest": "^4.33.0",
-    "typescript": "^5.7.3",
-    "vitest": "^3.0.5"
+    "eslint": "^9.28.0",
+    "globby": "^14.1.0",
+    "tsup": "^8.5.0",
+    "type-fest": "^4.41.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.2"
   },
   "pnpm": {
     "patchedDependencies": {

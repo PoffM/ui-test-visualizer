@@ -5,18 +5,18 @@
     "test": "vitest"
   },
   "dependencies": {
-    "react": "^19.0.0"
+    "react": "^19.1.0"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.2.0",
-    "@types/react": "^19.0.8",
-    "@vitejs/plugin-react": "4.3.4",
-    "autoprefixer": "^10.4.20",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.1.6",
+    "@vitejs/plugin-react": "4.5.1",
+    "autoprefixer": "^10.4.21",
     "happy-dom": "^14.11.4",
-    "postcss": "^8.4.47",
-    "sass": "^1.84.0",
+    "postcss": "^8.5.4",
+    "sass": "^1.89.1",
     "tailwindcss": "3.4.17",
-    "vite": "^5.4.14",
+    "vite": "^5.4.19",
     "vitest": "2.1.8"
   }
 }

@@ -158,7 +158,7 @@ describe('connectedCallback()', () => {
     expect(replicaSerialized).toEqual(primarySerialized)
 
     // Make sure the adopted styles are in the serialized output
-    expect(JSON.stringify(primarySerialized)).includes('adopted-class')
-    expect(JSON.stringify(replicaSerialized)).includes('adopted-class')
+    expect(JSON.stringify(primarySerialized)).toContain('adopted-class')
+    expect(JSON.stringify(replicaSerialized)).toContain('adopted-class')
   })
 })

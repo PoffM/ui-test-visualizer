@@ -8,32 +8,32 @@
     "build": "tsup --minify"
   },
   "dependencies": {
-    "@trpc/server": "^10.45.2",
-    "@vscode/extension-telemetry": "^0.9.8",
+    "@trpc/server": "^11.3.1",
+    "@vscode/extension-telemetry": "^1.0.0",
     "find-up": "^7.0.0",
     "get-port": "^7.1.0",
-    "globby": "^14.0.2",
+    "globby": "^14.1.0",
     "jest-config": "29.7.0",
     "jest-editor-support": "31.1.2",
     "locate-path": "^7.2.0",
     "lodash": "^4.17.21",
-    "pathe": "^2.0.2",
-    "postcss": "^8.5.1",
+    "pathe": "^2.0.3",
+    "postcss": "^8.5.4",
     "postcss-load-config": "^6.0.1",
     "replicate-dom": "workspace:*",
-    "vite": "^6.0.11",
-    "zod": "^3.24.1"
+    "vite": "^6.3.5",
+    "zod": "^3.25.56"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.15",
-    "@types/node": "^22.13.1",
-    "@types/vscode": "^1.97.0",
-    "@types/ws": "^8.5.14",
-    "@vitest/expect": "^3.0.5",
+    "@types/lodash": "^4.17.17",
+    "@types/node": "^22.15.30",
+    "@types/vscode": "^1.100.0",
+    "@types/ws": "^8.18.1",
+    "@vitest/expect": "^3.2.2",
     "@vscode/codicons": "^0.0.36",
     "chokidar": "^4.0.3",
-    "execa": "^9.5.2",
-    "vitest": "^3.0.5",
-    "ws": "^8.18.0"
+    "execa": "^9.6.0",
+    "vitest": "^3.2.2",
+    "ws": "^8.18.2"
   }
 }
