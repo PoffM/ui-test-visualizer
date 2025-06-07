@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.1.2
+
+### Patch Changes
+
+- b7ed022: Allow updating the test file patterns (Code Lens Selector) in the configuration without having to restart VSCode
+
 ## 1.1.1
 
 ### Patch Changes
