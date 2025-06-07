@@ -38,9 +38,9 @@ This extension could fail to auto-build your source CSS files, in which case you
 
 ## How It Works
 
-- **Runs setup code before your test**: This extension inserts a script at the beginning of your test process, which listens for mutable DOM method calls, like "appendChild", "removeChild", "setAttribute", etc, using [Tinyspy](https://github.com/tinylibs/tinyspy)
+- **Runs setup code before your test**: This extension hooks a script to the beginning of your test process, which adds listeners to mutable DOM method calls, like "appendChild", "removeChild", "setAttribute", etc.
 
-  The insertion point into the test depends on your test framework:
+  The hooking point into the test depends on your test framework:
 
   - Vitest:
     - Adds a `--require` argument to the Vitest command.
@@ -54,3 +54,7 @@ This extension could fail to auto-build your source CSS files, in which case you
 - **Can be slow to run until your first breakpoint**: Because of the code inserted at startup for watching the DOM and optionally loading your styles, your test can be slower to startup than when debugging your tests normally with other test extensions.
 
 - **Possible de-synchronization**: The visual DOM replica gets updated incrementally as your test runs, but accurate synchronization relies on this extension's code to correctly handle every possible DOM mutation that happens in your UI. The DOM replication code is pretty thorough, even accounting for weird cases involving nested Shadow DOMs and Web Component lifecycles, but it's still possible for the visual replica to get out of sync with your actual test DOM. If this happens, you can click the panel's Refresh button to re-sync it.
+
+## Contributing / Extension Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md)
