@@ -8,7 +8,7 @@
     "build": "tsup --minify"
   },
   "dependencies": {
-    "@trpc/server": "^11.3.1",
+    "@trpc/server": "^11.4.3",
     "@vscode/extension-telemetry": "^1.0.0",
     "find-up": "^7.0.0",
     "get-port": "^7.1.0",
@@ -18,22 +18,22 @@
     "locate-path": "^7.2.0",
     "lodash": "^4.17.21",
     "pathe": "^2.0.3",
-    "postcss": "^8.5.4",
+    "postcss": "^8.5.6",
     "postcss-load-config": "^6.0.1",
     "replicate-dom": "workspace:*",
     "vite": "^6.3.5",
-    "zod": "^3.25.56"
+    "zod": "^3.25.75"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.17",
-    "@types/node": "^22.15.30",
-    "@types/vscode": "^1.100.0",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.0.10",
+    "@types/vscode": "^1.101.0",
     "@types/ws": "^8.18.1",
-    "@vitest/expect": "^3.2.2",
+    "@vitest/expect": "^3.2.4",
     "@vscode/codicons": "^0.0.36",
     "chokidar": "^4.0.3",
     "execa": "^9.6.0",
-    "vitest": "^3.2.2",
-    "ws": "^8.18.2"
+    "vitest": "^3.2.4",
+    "ws": "^8.18.3"
   }
 }
