@@ -1,5 +1,12 @@
 # ui-test-visualizer
 
+## 1.1.3
+
+### Patch Changes
+
+- fb6970f: Bugfix: allow package names in Jest's setupFiles
+- 043a605: Fix test setup error with Jest v30 / JSDOM (`Cannot redefine property: window`)
+
 ## 1.1.2
 
 ### Patch Changes
