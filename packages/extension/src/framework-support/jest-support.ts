@@ -30,7 +30,17 @@ export async function jestDebugConfig(
   })()
 
   const setupFiles = ((jestOptions.config.setupFiles ?? []) as string[])
-    .map(file => path.resolve(file))
+    .map((file) => {
+      // Convert relative paths to absolute paths, but keep package names as-is.
+      // Examples:
+      //   './jest.setup.ts' -> '/path/to/my-project/jest.setup.ts'
+      //   '<rootDir>/jest.setup.ts' -> '<rootDir>/jest.setup.ts'
+      //   'jest-canvas-mock' -> 'jest-canvas-mock'
+      const adjustedPath = (file.startsWith('./') || file.startsWith('../') || path.isAbsolute(file))
+        ? path.join(path.dirname(fw.configPath), file)
+        : file
+      return adjustedPath
+    })
 
   return {
     args: [

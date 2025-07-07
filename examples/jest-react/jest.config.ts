@@ -10,6 +10,10 @@ const config: Config = {
   transform: {
     '^.+\\.(ts|tsx)$': 'babel-jest',
   },
+  setupFiles: [
+    'jest-canvas-mock',
+    './jest.setup.ts',
+  ],
 }
 
 export default config
