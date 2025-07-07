@@ -57,18 +57,29 @@ async function preTest() {
     }
 
     // Hook into the window which is set by happy-dom or jsdom
-    Object.defineProperty(globalThis, 'window', {
-      get() {
-        return testWindow
-      },
-      set(newWindow: typeof window) {
-        if (newWindow !== testWindow) {
-          testWindow = newWindow
-          initDom()
-        }
-      },
-      configurable: true,
-    })
+    try {
+      Object.defineProperty(globalThis, 'window', {
+        get() {
+          return testWindow
+        },
+        set(newWindow: typeof window) {
+          if (newWindow !== testWindow) {
+            testWindow = newWindow
+            initDom()
+          }
+        },
+        configurable: true,
+      })
+    }
+    catch (error) {
+      if (error instanceof Error && error.message.includes('Cannot redefine property')) {
+        // After updating to Jest v30, calling defineProperty on globalThis.window fails.
+        // This should not be a problem, because initDom should already have been called at this point.
+      }
+      else {
+        throw error
+      }
+    }
 
     if (testWindow) {
       initDom()
