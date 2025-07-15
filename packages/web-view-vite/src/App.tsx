@@ -3,6 +3,7 @@ import { createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { Toolbar } from './components/Toolbar'
+import { Inspector } from './components/Inspector'
 
 // Importing the router type from the server file
 
@@ -32,9 +33,11 @@ export const {
   stylesAreLoading,
 } = createDomReplica()
 
+export const [showInspector, setShowInspector] = createSignal(false)
+
 export function App() {
   return (
-    <div class="fixed inset-0">
+    <div class="fixed inset-0 flex flex-col">
       <div style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}>
         <Toolbar />
       </div>
@@ -47,9 +50,12 @@ export function App() {
         </div>
         <div
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
-          class="absolute h-full w-full"
+          class="absolute h-full w-full flex flex-col"
         >
-          {shadowHost}
+          <div class={`flex-grow ${showInspector() ? 'h-2/3' : 'h-full'}`}>
+            {shadowHost}
+          </div>
+          {showInspector() && <Inspector />}
         </div>
       </div>
     </div>
