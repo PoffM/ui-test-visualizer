@@ -33,40 +33,26 @@ function parseDOMTree(node: Element): DOMTree {
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
-  const [domTree, setDomTree] = createSignal<DOMTree | null>(null, { equals: false })
+
+  function getNewDomTree() {
+    const shadowRoot = shadowHost?.shadowRoot
+    if (!shadowRoot) {
+      return null
+    }
+
+    const tree = parseDOMTree(shadowRoot.querySelector('body')!)
+    return tree
+  }
+
+  const [domTree, setDomTree] = createSignal<DOMTree | null>(getNewDomTree(), { equals: false })
   const collapsedStates = new ReactiveWeakMap<Element, boolean>()
 
   // Listen for the 'flushPatches' event (fired when the debugger steps to a new line),
   // and update the DOM tree
   makeEventListener(window, 'message', (event) => {
     if (event.data.flushPatches) {
-      const shadowRoot = shadowHost?.shadowRoot
-      if (!shadowRoot) { return }
-
-      const tree = parseDOMTree(shadowRoot.querySelector('body')!)
-      setDomTree(tree)
+      setDomTree(getNewDomTree())
     }
-  })
-
-  createEffect(() => {
-    const shadowRoot = shadowHost?.shadowRoot
-    if (!shadowRoot) { return }
-
-    const observer = new MutationObserver(() => {
-      const tree = parseDOMTree(shadowRoot.querySelector('body')!)
-      setDomTree(tree)
-    })
-
-    observer.observe(shadowRoot, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      characterData: true,
-    })
-
-    setDomTree(parseDOMTree(shadowRoot.querySelector('body')!))
-
-    onCleanup(() => observer.disconnect())
   })
 
   return (
