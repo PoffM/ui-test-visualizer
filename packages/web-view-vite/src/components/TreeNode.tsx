@@ -1,23 +1,31 @@
-import { For, createSignal } from 'solid-js'
+import type { ReactiveWeakMap } from '@solid-primitives/map'
+import { For, Show } from 'solid-js'
 
 export interface DOMTree {
   tagName: string
   textNodes: string | undefined
   attributes: { name: string, value: string }[]
   childTrees: DOMTree[]
+  shadowTrees: DOMTree[] | null
   getBoundingClientRect: () => DOMRect
+  node: Element
 }
 
 interface TreeNodeProps extends DOMTree {
   depth?: number
   onHover: (rect: DOMRect | null) => void
+  collapsedStates: ReactiveWeakMap<Element, boolean>
 }
 
 export function TreeNode(props: TreeNodeProps) {
-  const [isCollapsed, setIsCollapsed] = createSignal(false)
+  const isCollapsed = () => props.collapsedStates.get(props.node) ?? false
+  function setIsCollapsed(value: boolean) {
+    props.collapsedStates.set(props.node, value)
+  }
+
   const depth = props.depth || 0
   const indent = '  '.repeat(depth)
-  const hasChildren = props.childTrees.length > 0
+  const hasChildren = (props.childTrees.length + (props.shadowTrees?.length ?? 0)) > 0
 
   const renderAttributes = () => {
     return props.attributes.map(attr => (
@@ -66,12 +74,30 @@ export function TreeNode(props: TreeNodeProps) {
       {!isCollapsed() && hasChildren && (
         <>
           <div class="ml-4">
+            <Show when={props.shadowTrees}>
+              {shadowTrees => (
+                <div class="ml-4">
+                  <div class="text-[var(--vscode-symbolIcon-fieldForeground)]">#shadow-root</div>
+                  <For each={shadowTrees()}>
+                    {child => (
+                      <TreeNode
+                        {...child}
+                        depth={depth + 1}
+                        onHover={props.onHover}
+                        collapsedStates={props.collapsedStates}
+                      />
+                    )}
+                  </For>
+                </div>
+              )}
+            </Show>
             <For each={props.childTrees}>
               {child => (
                 <TreeNode
                   {...child}
                   depth={depth + 1}
                   onHover={props.onHover}
+                  collapsedStates={props.collapsedStates}
                 />
               )}
             </For>

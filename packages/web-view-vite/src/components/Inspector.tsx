@@ -1,4 +1,6 @@
 import { Show, createEffect, createSignal, onCleanup } from 'solid-js'
+import { makeEventListener } from '@solid-primitives/event-listener'
+import { ReactiveWeakMap } from '@solid-primitives/map'
 import { shadowHost } from '../App'
 import type { DOMTree } from './TreeNode'
 import { TreeNode } from './TreeNode'
@@ -21,17 +23,31 @@ function parseDOMTree(node: Element): DOMTree {
   return {
     tagName: node.tagName.toLowerCase(),
     childTrees: Array.from(node.children).map(child => parseDOMTree(child)),
+    shadowTrees: node.shadowRoot ? Array.from(node.shadowRoot.children).map(child => parseDOMTree(child)) : null,
     textNodes,
     attributes,
     getBoundingClientRect: () => node.getBoundingClientRect(),
+    node,
   }
 }
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
   const [domTree, setDomTree] = createSignal<DOMTree | null>(null, { equals: false })
+  const collapsedStates = new ReactiveWeakMap<Element, boolean>()
 
-  // Set up mutation observer to track DOM changes
+  // Listen for the 'flushPatches' event (fired when the debugger steps to a new line),
+  // and update the DOM tree
+  makeEventListener(window, 'message', (event) => {
+    if (event.data.flushPatches) {
+      const shadowRoot = shadowHost?.shadowRoot
+      if (!shadowRoot) { return }
+
+      const tree = parseDOMTree(shadowRoot.querySelector('body')!)
+      setDomTree(tree)
+    }
+  })
+
   createEffect(() => {
     const shadowRoot = shadowHost?.shadowRoot
     if (!shadowRoot) { return }
@@ -55,12 +71,13 @@ export function Inspector() {
 
   return (
     <>
-      <div class="bg-[var(--vscode-editor-background)] text-[var(--vscode-editor-foreground)] h-1/3 w-full overflow-auto p-4 border-t border-[var(--vscode-panel-border)]">
-        <Show when={domTree()}>
+      <div class="bg-[var(--vscode-editor-background)] text-[var(--vscode-editor-foreground)] h-full w-full overflow-scroll p-4">
+        <Show when={domTree()} keyed={true}>
           {tree => (
             <TreeNode
-              {...tree()}
+              {...tree}
               onHover={setHoveredRect}
+              collapsedStates={collapsedStates}
             />
           )}
         </Show>

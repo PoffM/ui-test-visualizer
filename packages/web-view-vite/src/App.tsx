@@ -1,5 +1,5 @@
 import * as webviewToolkit from '@vscode/webview-ui-toolkit'
-import { createSignal } from 'solid-js'
+import { Show, createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { Toolbar } from './components/Toolbar'
@@ -52,10 +52,14 @@ export function App() {
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
           class="absolute h-full w-full flex flex-col"
         >
-          <div class={`flex-grow ${showInspector() ? 'h-2/3' : 'h-full'}`}>
+          <div class="flex-2">
             {shadowHost}
           </div>
-          {showInspector() && <Inspector />}
+          <Show when={showInspector()}>
+            <div class="flex-1 overflow-y-hidden border-t border-[var(--vscode-panel-border)]">
+              <Inspector />
+            </div>
+          </Show>
         </div>
       </div>
     </div>

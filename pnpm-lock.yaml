@@ -455,6 +455,9 @@ importers:
       '@solid-primitives/event-listener':
         specifier: ^2.4.3
         version: 2.4.3(solid-js@1.9.7)
+      '@solid-primitives/map':
+        specifier: ^0.7.2
+        version: 0.7.2(solid-js@1.9.7)
       '@trpc/client':
         specifier: ^11.4.3
         version: 11.4.3(@trpc/server@11.4.3(typescript@5.8.3))(typescript@5.8.3)
@@ -3110,6 +3113,11 @@ packages:
     peerDependencies:
       solid-js: ^1.6.12
 
+  '@solid-primitives/map@0.7.2':
+    resolution: {integrity: sha512-sXK/rS68B4oq3XXNyLrzVhLtT1pnimmMUahd2FqhtYUuyQsCfnW058ptO1s+lWc2k8F/3zQSNVkZ2ifJjlcNbQ==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
   '@solid-primitives/media@2.3.0':
     resolution: {integrity: sha512-7+C3wfbWnGE/WPoNsqcp/EeOP2aNNB92RCpsWhBth8E5lZo/J+rK6jMb7umVsK0zguT8HBpeXp1pFyFbcsHStA==}
     peerDependencies:
@@ -3157,6 +3165,11 @@ packages:
 
   '@solid-primitives/trigger@1.2.0':
     resolution: {integrity: sha512-sW4/3cDXSjYQampn8CIFZ11BlxgNf2li8r2fXnb3b3YWE6RdZZCl8PhvpPF38Gzl0CnryrbTPJWM7OIkseCDgQ==}
+    peerDependencies:
+      solid-js: ^1.6.12
+
+  '@solid-primitives/trigger@1.2.2':
+    resolution: {integrity: sha512-IWoptVc0SWYgmpBPpCMehS5b07+tpFcvw15tOQ3QbXedSYn6KP8zCjPkHNzMxcOvOicTneleeZDP7lqmz+PQ6g==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -10719,6 +10732,11 @@ snapshots:
       '@solid-primitives/trigger': 1.2.0(solid-js@1.9.7)
       solid-js: 1.9.7
 
+  '@solid-primitives/map@0.7.2(solid-js@1.9.7)':
+    dependencies:
+      '@solid-primitives/trigger': 1.2.2(solid-js@1.9.7)
+      solid-js: 1.9.7
+
   '@solid-primitives/media@2.3.0(solid-js@1.9.7)':
     dependencies:
       '@solid-primitives/event-listener': 2.4.3(solid-js@1.9.7)
@@ -10773,6 +10791,11 @@ snapshots:
   '@solid-primitives/trigger@1.2.0(solid-js@1.9.7)':
     dependencies:
       '@solid-primitives/utils': 6.3.0(solid-js@1.9.7)
+      solid-js: 1.9.7
+
+  '@solid-primitives/trigger@1.2.2(solid-js@1.9.7)':
+    dependencies:
+      '@solid-primitives/utils': 6.3.2(solid-js@1.9.7)
       solid-js: 1.9.7
 
   '@solid-primitives/utils@6.3.0(solid-js@1.9.7)':
