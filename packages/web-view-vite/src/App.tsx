@@ -52,11 +52,16 @@ export function App() {
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
           class="absolute h-full w-full flex flex-col"
         >
-          <div class="flex-2">
+          <div
+            classList={{
+              'h-full': !showInspector(),
+              'h-2/3': showInspector(),
+            }}
+          >
             {shadowHost}
           </div>
           <Show when={showInspector()}>
-            <div class="flex-1 overflow-y-hidden border-t border-[var(--vscode-panel-border)]">
+            <div class="h-1/3 overflow-y-hidden border-t border-[var(--vscode-panel-border)]">
               <Inspector />
             </div>
           </Show>

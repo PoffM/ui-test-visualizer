@@ -1,4 +1,4 @@
-import { Show, createEffect, createSignal, onCleanup } from 'solid-js'
+import { Show, createSignal } from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { ReactiveWeakMap } from '@solid-primitives/map'
 import { shadowHost } from '../App'
@@ -32,8 +32,6 @@ function parseDOMTree(node: Element): DOMTree {
 }
 
 export function Inspector() {
-  const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
-
   function getNewDomTree() {
     const shadowRoot = shadowHost?.shadowRoot
     if (!shadowRoot) {
@@ -44,6 +42,7 @@ export function Inspector() {
     return tree
   }
 
+  const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
   const [domTree, setDomTree] = createSignal<DOMTree | null>(getNewDomTree(), { equals: false })
   const collapsedStates = new ReactiveWeakMap<Element, boolean>()
 
