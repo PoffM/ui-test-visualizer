@@ -2,6 +2,7 @@ import * as webviewToolkit from '@vscode/webview-ui-toolkit'
 import { Show, createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
+import { createInspectorHeight } from './lib/inspector-height'
 import { Toolbar } from './components/Toolbar'
 import { Inspector } from './components/Inspector'
 import { Resizer } from './components/Resizer'
@@ -34,8 +35,7 @@ export const {
   stylesAreLoading,
 } = createDomReplica()
 
-export const [showInspector, setShowInspector] = createSignal(false)
-export const [inspectorHeight, setInspectorHeight] = createSignal(300) // Default height of 300px
+export const inspector = createInspectorHeight()
 
 export function App() {
   return (
@@ -56,16 +56,16 @@ export function App() {
         >
           <div
             style={{
-              height: showInspector() ? `calc(100% - ${inspectorHeight()}px)` : '100%',
+              height: inspector.isVisible() ? `calc(100% - ${inspector.height()}px)` : '100%',
             }}
           >
             {shadowHost}
           </div>
-          <Show when={showInspector()}>
-            <Resizer onResize={setInspectorHeight} />
+          <Show when={inspector.isVisible()}>
+            <Resizer onResize={inspector.setHeight} />
             <div
               class="overflow-y-hidden"
-              style={{ height: `${inspectorHeight()}px` }}
+              style={{ height: `${inspector.height()}px` }}
             >
               <Inspector />
             </div>

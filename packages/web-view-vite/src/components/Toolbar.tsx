@@ -3,7 +3,7 @@ import Moon from 'lucide-solid/icons/moon'
 import RefreshCw from 'lucide-solid/icons/refresh-cw'
 import Code from 'lucide-solid/icons/code'
 import type { ParentProps } from 'solid-js'
-import { firstPatchReceived, refreshShadow, setShowInspector, showInspector, theme, toggleTheme } from '../App'
+import { firstPatchReceived, inspector, refreshShadow, theme, toggleTheme } from '../App'
 import { StyleIcon, StylePicker } from './StylePicker'
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
 
@@ -14,7 +14,7 @@ export function Toolbar() {
       style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
     >
       <ToolbarButton
-        onClick={() => setShowInspector(!showInspector())}
+        onClick={inspector.toggle}
         label="Toggle Inspector"
       >
         <Code />
