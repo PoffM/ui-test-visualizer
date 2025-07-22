@@ -4,6 +4,7 @@ import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { Toolbar } from './components/Toolbar'
 import { Inspector } from './components/Inspector'
+import { Resizer } from './components/Resizer'
 
 // Importing the router type from the server file
 
@@ -34,6 +35,7 @@ export const {
 } = createDomReplica()
 
 export const [showInspector, setShowInspector] = createSignal(false)
+export const [inspectorHeight, setInspectorHeight] = createSignal(300) // Default height of 300px
 
 export function App() {
   return (
@@ -53,15 +55,18 @@ export function App() {
           class="absolute h-full w-full flex flex-col"
         >
           <div
-            classList={{
-              'h-full': !showInspector(),
-              'h-2/3': showInspector(),
+            style={{
+              height: showInspector() ? `calc(100% - ${inspectorHeight()}px)` : '100%',
             }}
           >
             {shadowHost}
           </div>
           <Show when={showInspector()}>
-            <div class="h-1/3 overflow-y-hidden border-t border-[var(--vscode-panel-border)]">
+            <Resizer onResize={setInspectorHeight} />
+            <div
+              class="overflow-y-hidden"
+              style={{ height: `${inspectorHeight()}px` }}
+            >
               <Inspector />
             </div>
           </Show>

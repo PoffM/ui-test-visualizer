@@ -56,7 +56,7 @@ export function Inspector() {
 
   return (
     <>
-      <div class="bg-[var(--vscode-editor-background)] text-[var(--vscode-editor-foreground)] h-full w-full overflow-scroll p-4">
+      <div class="bg-[var(--vscode-panel-background)] text-[var(--vscode-panel-foreground)] h-full w-full overflow-scroll p-4">
         <Show when={domTree()} keyed={true}>
           {tree => (
             <TreeNode
