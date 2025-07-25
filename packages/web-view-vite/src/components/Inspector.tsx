@@ -1,68 +1,14 @@
 import { Show, createSignal } from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { ReactiveWeakMap } from '@solid-primitives/map'
-import isEqual from 'lodash/isEqual'
 import { shadowHost } from '../App'
-import type { DOMTree } from './TreeNode'
+import { type DOMTree, getNewDomTree } from '../lib/inspector-dom-tree'
 import { TreeNode } from './TreeNode'
-
-function parseDOMTree(node: Element, previousTree: DOMTree | null): DOMTree {
-  // Get all direct text nodes, excluding whitespace-only nodes
-  const textNodes = Array.from(node.childNodes)
-    .filter(child =>
-      child.nodeType === Node.TEXT_NODE
-      && child.textContent?.trim() !== '',
-    )
-    .map(node => node.textContent?.trim())
-    .filter(Boolean)
-    .join(' ')
-
-  // Get all attributes
-  const attributes = Array.from(node.attributes || [])
-    .map(attr => ({ name: attr.name, value: attr.value }))
-
-  const childTrees = Array.from(node.children)
-    .map((child, idx) => parseDOMTree(child, previousTree?.childTrees?.[idx] ?? null))
-  const shadowTrees = node.shadowRoot
-    ? Array.from(node.shadowRoot.children).map((child, idx) => parseDOMTree(child, previousTree?.shadowTrees?.[idx] ?? null))
-    : null
-
-  let isChanged = !!previousTree && !isEqual(previousTree, {
-    childTrees,
-    shadowTrees,
-    textNodes,
-    attributes,
-  })
-
-  return {
-    tagName: node.tagName.toLowerCase(),
-    childTrees,
-    shadowTrees,
-    textNodes,
-    attributes,
-    node,
-    isChanged: () => {
-      const changed = isChanged
-      isChanged = false
-      return changed
-    },
-    getBoundingClientRect: () => node.getBoundingClientRect(),
-  }
-}
-
-function getNewDomTree(previousTree: DOMTree | null) {
-  const shadowRoot = shadowHost?.shadowRoot
-  if (!shadowRoot) {
-    return null
-  }
-
-  const tree = parseDOMTree(shadowRoot.querySelector('body')!, previousTree)
-  return tree
-}
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
   const [domTree, setDomTree] = createSignal<DOMTree | null>(getNewDomTree(null), { equals: false })
+  const [selectedElement, setSelectedElement] = createSignal<Element | null>(null)
   const collapsedStates = new ReactiveWeakMap<Element, boolean>()
 
   // Listen for the 'flushPatches' event (fired when the debugger steps to a new line),
@@ -73,8 +19,22 @@ export function Inspector() {
     }
   })
 
+  // highlight the element under the mouse
+  makeEventListener(shadowHost, 'mousemove', (e) => {
+    const el = shadowHost?.shadowRoot?.elementFromPoint(e.clientX, e.clientY)
+    setHoveredRect(el?.getBoundingClientRect() ?? null)
+  })
+
+  // select the element under the mouse
+  makeEventListener(shadowHost, 'click', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const el = shadowHost?.shadowRoot?.elementFromPoint(e.clientX, e.clientY)
+    setSelectedElement(el ?? null)
+  })
+
   return (
-    <>
+    <div class="h-full w-full flex flex-col">
       <div class="bg-[var(--vscode-panel-background)] text-[var(--vscode-panel-foreground)] h-full w-full overflow-scroll pt-4 pb-4">
         <div class="font-(family-name:--theme-font-family) font-(--theme-font-weight) text-(length:--theme-font-size) leading-(--theme-line-height)">
           <Show when={domTree()} keyed={true}>
@@ -83,6 +43,8 @@ export function Inspector() {
                 {...tree}
                 onHover={setHoveredRect}
                 collapsedStates={collapsedStates}
+                selectedNode={selectedElement()}
+                onSelect={setSelectedElement}
               />
             )}
           </Show>
@@ -99,6 +61,6 @@ export function Inspector() {
           }}
         />
       )}
-    </>
+    </div>
   )
 }

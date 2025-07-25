@@ -1,28 +1,34 @@
 import type { ReactiveWeakMap } from '@solid-primitives/map'
-import { For, Show } from 'solid-js'
-
-export interface DOMTree {
-  tagName: string
-  textNodes: string | undefined
-  attributes: { name: string, value: string }[]
-  childTrees: DOMTree[]
-  shadowTrees: DOMTree[] | null
-  getBoundingClientRect: () => DOMRect
-  node: Element
-  isChanged: () => boolean
-}
+import { For, Show, createEffect, on } from 'solid-js'
+import { type DOMTree, containsNode } from '../lib/inspector-dom-tree'
 
 interface TreeNodeProps extends DOMTree {
   depth?: number
   onHover: (rect: DOMRect | null) => void
   collapsedStates: ReactiveWeakMap<Element, boolean>
+  selectedNode: Element | null
+  onSelect: (node: Element | null) => void
 }
 
 export function TreeNode(props: TreeNodeProps) {
+  let container: HTMLDivElement | undefined
+
   const isCollapsed = () => props.collapsedStates.get(props.node) ?? false
   function setIsCollapsed(value: boolean) {
     props.collapsedStates.set(props.node, value)
   }
+
+  createEffect(on(() => props.selectedNode, (el) => {
+    if (el && isCollapsed() && (containsNode(props.childTrees, el) || containsNode(props.shadowTrees, el))) {
+      setIsCollapsed(false)
+    }
+  }))
+
+  createEffect(() => {
+    if (props.node === props.selectedNode) {
+      container?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
+    }
+  })
 
   const depth = (props.depth || 0) + 2
   const paddingLeft = `calc(${depth * 1.5} * var(--spacing))`
@@ -43,11 +49,19 @@ export function TreeNode(props: TreeNodeProps) {
   }
 
   return (
-    <div classList={{ 'animate-highlight': props.isChanged() }}>
+    <div
+      classList={{ 'animate-highlight': props.isChanged() }}
+    >
       <div
-        class="relative hover:bg-(--vscode-list-hoverBackground) min-w-9/10 box-content hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]"
+        ref={container}
+        class="relative min-w-9/10 box-content scroll-m-10"
+        classList={{
+          'bg-(--vscode-editor-selectionBackground) shadow-[100vw_0_0_var(--vscode-editor-selectionBackground)]': props.node === props.selectedNode,
+          'hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]': props.node !== props.selectedNode,
+        }}
         onMouseEnter={() => props.onHover(props.getBoundingClientRect())}
         onMouseLeave={() => props.onHover(null)}
+        onClick={() => props.onSelect(props.node !== props.selectedNode ? props.node : null)}
         style={{ 'padding-left': paddingLeft }}
       >
         {hasChildren && props.depth && (
@@ -89,6 +103,8 @@ export function TreeNode(props: TreeNodeProps) {
                       depth={depth + 1}
                       onHover={props.onHover}
                       collapsedStates={props.collapsedStates}
+                      selectedNode={props.selectedNode}
+                      onSelect={props.onSelect}
                     />
                   )}
                 </For>
@@ -102,6 +118,8 @@ export function TreeNode(props: TreeNodeProps) {
                 depth={depth + 1}
                 onHover={props.onHover}
                 collapsedStates={props.collapsedStates}
+                selectedNode={props.selectedNode}
+                onSelect={props.onSelect}
               />
             )}
           </For>
