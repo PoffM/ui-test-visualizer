@@ -9,6 +9,7 @@ export interface DOMTree {
   shadowTrees: DOMTree[] | null
   getBoundingClientRect: () => DOMRect
   node: Element
+  isChanged: () => boolean
 }
 
 interface TreeNodeProps extends DOMTree {
@@ -23,89 +24,96 @@ export function TreeNode(props: TreeNodeProps) {
     props.collapsedStates.set(props.node, value)
   }
 
-  const depth = props.depth || 0
-  const indent = '  '.repeat(depth)
+  const depth = (props.depth || 0) + 2
+  const paddingLeft = `calc(${depth * 1.5} * var(--spacing))`
   const hasChildren = (props.childTrees.length + (props.shadowTrees?.length ?? 0)) > 0
 
   const renderAttributes = () => {
     return props.attributes.map(attr => (
-      <span class="text-[var(--vscode-symbolIcon-propertyForeground)] whitespace-nowrap">
-        <span class="ml-1 ">{attr.name}</span>
+      <span data-highlight>
+        <span class="ml-1 text-[var(--theme-entity-other-attribute-name)]">{attr.name}</span>
         {attr.value !== '' && (
-          <span>="<span class="text-[var(--vscode-symbolIcon-stringForeground)]">{attr.value.trim()}</span>"</span>
+          <>
+            <span class="text-[var(--theme-punctuation)]">=</span>
+            <span class="text-[var(--theme-string)]">"{attr.value.trim()}"</span>
+          </>
         )}
       </span>
     ))
   }
 
   return (
-    <div class="font-mono">
+    <div classList={{ 'animate-highlight': props.isChanged() }}>
       <div
-        class="flex items-center hover:bg-[var(--vscode-list-hoverBackground)] cursor-pointer"
+        class="relative hover:bg-(--vscode-list-hoverBackground) min-w-9/10 box-content hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]"
         onMouseEnter={() => props.onHover(props.getBoundingClientRect())}
         onMouseLeave={() => props.onHover(null)}
+        style={{ 'padding-left': paddingLeft }}
       >
-        <span class="inline-flex items-center">
-          {indent}
-          {hasChildren && (
-            <span
-              class="cursor-pointer inline-block w-4 select-none text-[var(--vscode-editor-foreground)] opacity-60"
-              onClick={() => setIsCollapsed(!isCollapsed())}
-            >
-              {isCollapsed() ? '▶' : '▼'}
-            </span>
-          )}
-          {!hasChildren && <span class="w-4" />}
-          <span class="text-[var(--vscode-symbolIcon-classForeground)]">&lt;{props.tagName}</span>
-          {props.attributes.length > 0 && renderAttributes()}
-          <span class="text-[var(--vscode-symbolIcon-classForeground)]">&gt;</span>
-          {(props.textNodes?.length ?? 0) < 20 && (
-            <span class="text-[var(--vscode-editor-foreground)] whitespace-nowrap">{props.textNodes?.trim()}</span>
-          )}
-          {(props.textNodes?.length ?? 0) >= 20 && (
-            <div class="text-[var(--vscode-editor-foreground)]">{props.textNodes?.trim()}</div>
-          )}
-          {isCollapsed() && <span>&hellip;</span>}
-          {((!hasChildren && props.textNodes) || isCollapsed()) && (
-            <span class="text-[var(--vscode-symbolIcon-classForeground)]">&lt;/{props.tagName}&gt;</span>
-          )}
-        </span>
+        {hasChildren && props.depth && (
+          <button
+            class="cursor-pointer text-[var(--vscode-editor-foreground)] opacity-60 absolute top-0 -ml-3"
+            style={{ left: paddingLeft }}
+            onClick={() => setIsCollapsed(!isCollapsed())}
+          >
+            {isCollapsed() ? '▶' : '▼'}
+          </button>
+        )}
+        {!hasChildren && <b class="shrink-0 w-3" />}
+        <span class="rounded-l-sm text-[var(--theme-punctuation)]" data-highlight>&lt;</span>
+        <span class="text-[var(--theme-entity-name-tag)]" data-highlight>{props.tagName}</span>
+        {props.attributes.length > 0 && renderAttributes()}
+        <span class="rounded-r-sm text-[var(--theme-punctuation)]" data-highlight>&gt;</span>
+        {props.textNodes && (
+          <span class="text-[var(--theme-text)]">{props.textNodes.trim()}</span>
+        )}
+        {isCollapsed() && <span class="rounded-sm pl-1 pr-1 bg-(--theme-entity-name-tag) text-(--theme-punctuation)">⋯</span>}
+        {((!hasChildren && props.textNodes) || isCollapsed()) && (
+          <>
+            <span class="rounded-l-sm text-[var(--theme-punctuation)]">&lt;/</span>
+            <span class="text-[var(--theme-entity-name-tag)]">{props.tagName}</span>
+            <span class="rounded-r-sm text-[var(--theme-punctuation)]">&gt;</span>
+          </>
+        )}
       </div>
       {!isCollapsed() && hasChildren && (
         <>
-          <div class="ml-4">
-            <Show when={props.shadowTrees}>
-              {shadowTrees => (
-                <div class="ml-4">
-                  <div class="text-[var(--vscode-symbolIcon-fieldForeground)]">#shadow-root</div>
-                  <For each={shadowTrees()}>
-                    {child => (
-                      <TreeNode
-                        {...child}
-                        depth={depth + 1}
-                        onHover={props.onHover}
-                        collapsedStates={props.collapsedStates}
-                      />
-                    )}
-                  </For>
-                </div>
-              )}
-            </Show>
-            <For each={props.childTrees}>
-              {child => (
-                <TreeNode
-                  {...child}
-                  depth={depth + 1}
-                  onHover={props.onHover}
-                  collapsedStates={props.collapsedStates}
-                />
-              )}
-            </For>
-          </div>
-          <div>
-            {indent}
-            <span class="w-4 inline-block" />
-            <span class="text-[var(--vscode-symbolIcon-classForeground)]">&lt;/{props.tagName}&gt;</span>
+          <Show when={props.shadowTrees}>
+            {shadowTrees => (
+              <div>
+                <div class="text-[var(--vscode-symbolIcon-fieldForeground)]">#shadow-root</div>
+                <For each={shadowTrees()}>
+                  {child => (
+                    <TreeNode
+                      {...child}
+                      depth={depth + 1}
+                      onHover={props.onHover}
+                      collapsedStates={props.collapsedStates}
+                    />
+                  )}
+                </For>
+              </div>
+            )}
+          </Show>
+          <For each={props.childTrees}>
+            {child => (
+              <TreeNode
+                {...child}
+                depth={depth + 1}
+                onHover={props.onHover}
+                collapsedStates={props.collapsedStates}
+              />
+            )}
+          </For>
+          <div
+            class="flex hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]"
+            onMouseEnter={() => props.onHover(props.getBoundingClientRect())}
+            onMouseLeave={() => props.onHover(null)}
+            style={{ 'padding-left': paddingLeft }}
+          >
+            <span class="text-[var(--theme-punctuation)]">&lt;/</span>
+            <span class="text-[var(--theme-entity-name-tag)]">{props.tagName}</span>
+            <span class="text-[var(--theme-punctuation)]">&gt;</span>
           </div>
         </>
       )}

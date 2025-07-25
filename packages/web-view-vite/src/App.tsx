@@ -1,11 +1,12 @@
 import * as webviewToolkit from '@vscode/webview-ui-toolkit'
-import { Show, createSignal } from 'solid-js'
+import { Show, createResource, createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { createInspectorHeight } from './lib/inspector-height'
 import { Toolbar } from './components/Toolbar'
 import { Inspector } from './components/Inspector'
 import { Resizer } from './components/Resizer'
+import { client } from './lib/panel-client'
 
 // Importing the router type from the server file
 
@@ -38,8 +39,15 @@ export const {
 export const inspector = createInspectorHeight()
 
 export function App() {
+  const [themeColors] = createResource(
+    () => client.getVSCodeThemeAsCss.query(),
+  )
+
   return (
     <div class="fixed inset-0 flex flex-col">
+      <style>
+        {`:root { ${themeColors()} }`}
+      </style>
       <div style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}>
         <Toolbar />
       </div>

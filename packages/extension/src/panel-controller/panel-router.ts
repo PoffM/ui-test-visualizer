@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
+import { getThemeColors } from '../util/theme-colors'
 
 export interface PanelRouterCtx {
   sessionTracker: DebugSessionTracker
@@ -20,6 +21,24 @@ export const panelRouter = t.router({
     .query(async ({ ctx }) => {
       const html = await ctx.sessionTracker.runDebugExpression('globalThis.__serializeHtml()')
       return html
+    }),
+
+  getVSCodeThemeAsCss: t.procedure
+    .query(async () => {
+      const colors = await getThemeColors()
+      const editorConfig = vscode.workspace.getConfiguration('editor')
+      const fontFamily = editorConfig.get<string>('fontFamily')
+      const fontSize = editorConfig.get<number>('fontSize')
+      const fontWeight = editorConfig.get<number>('fontWeight')
+      const lineHeight = editorConfig.get<number>('lineHeight')
+
+      return Object.entries(colors || {})
+        .map(([key, value]) => `--theme-${key.replace(/\./g, '-')}: ${value};`)
+        .concat(fontFamily ? [`--theme-font-family: ${fontFamily};`] : [])
+        .concat(fontSize ? [`--theme-font-size: ${fontSize}px;`] : [])
+        .concat(fontWeight ? [`--theme-font-weight: ${fontWeight};`] : [])
+        .concat(lineHeight ? [`--theme-line-height: ${lineHeight}px;`] : [])
+        .join('\n')
     }),
 
   availableCssFiles: t.procedure
