@@ -115,7 +115,10 @@ export async function transformCss(cssFilePath: string) {
                 const searchPath = path.dirname(projectPkgJson ?? cssFilePath)
                 const filesToScan = await globby(
                   ['**/*.{html,js,ts,jsx,tsx,svelte,vue}', '!**/node_modules/**/*'],
-                  { cwd: searchPath },
+                  {
+                    cwd: searchPath,
+                    gitignore: true,
+                  },
                 )
                 const results: string[] = []
                 for (const file of filesToScan) {
