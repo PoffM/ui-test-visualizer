@@ -2,6 +2,8 @@ import type { ReactiveWeakMap } from '@solid-primitives/map'
 import { For, Show, createEffect, on } from 'solid-js'
 import { type DOMTree, containsNode } from '../lib/inspector-dom-tree'
 
+import { search } from './Inspector'
+
 interface TreeNodeProps extends DOMTree {
   depth?: number
   onHover: (rect: DOMRect | null) => void
@@ -14,6 +16,9 @@ export function TreeNode(props: TreeNodeProps) {
   let container: HTMLDivElement | undefined
 
   const isCollapsed = () => props.collapsedStates.get(props.node) ?? false
+  const isMatching = () => search.matchedNodes().includes(props.node)
+  const isSelected = () => props.node === props.selectedNode
+
   function setIsCollapsed(value: boolean) {
     props.collapsedStates.set(props.node, value)
   }
@@ -56,12 +61,13 @@ export function TreeNode(props: TreeNodeProps) {
         ref={container}
         class="relative min-w-9/10 box-content scroll-m-10"
         classList={{
-          'bg-(--vscode-editor-selectionBackground) shadow-[100vw_0_0_var(--vscode-editor-selectionBackground)]': props.node === props.selectedNode,
-          'hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]': props.node !== props.selectedNode,
+          'bg-(--vscode-editor-selectionBackground) shadow-[100vw_0_0_var(--vscode-editor-selectionBackground)]': isSelected(),
+          'bg-(--vscode-searchEditor-findMatchBackground) shadow-[100vw_0_0_var(--vscode-searchEditor-findMatchBackground)]': isMatching() && !isSelected(),
+          'hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]': !isSelected() && !isMatching(),
         }}
         onMouseEnter={() => props.onHover(props.getBoundingClientRect())}
         onMouseLeave={() => props.onHover(null)}
-        onClick={() => props.onSelect(props.node !== props.selectedNode ? props.node : null)}
+        onClick={() => props.onSelect(isSelected() ? null : props.node)}
         style={{ 'padding-left': paddingLeft }}
       >
         {hasChildren && props.depth && (

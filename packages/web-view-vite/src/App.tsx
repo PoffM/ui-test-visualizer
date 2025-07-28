@@ -20,6 +20,7 @@ import { client } from './lib/panel-client'
     .register(webviewToolkit.vsCodeButton({ prefix }))
     .register(webviewToolkit.vsCodeCheckbox({ prefix }))
     .register(webviewToolkit.vsCodeProgressRing({ prefix }))
+    .register(webviewToolkit.vsCodeTextField({ prefix }))
 }
 
 // TODO put these into a context provider
