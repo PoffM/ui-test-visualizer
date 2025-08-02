@@ -11,6 +11,7 @@
     "@kobalte/utils": "^0.9.1",
     "@solid-primitives/event-listener": "^2.4.3",
     "@solid-primitives/map": "^0.7.2",
+    "@solid-primitives/mutation-observer": "^1.2.2",
     "@trpc/client": "^11.4.3",
     "@trpc/server": "^11.4.3",
     "@vscode/webview-ui-toolkit": "^1.4.0",

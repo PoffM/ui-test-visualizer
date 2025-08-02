@@ -1,5 +1,7 @@
 import { Show, createEffect, createSignal } from 'solid-js'
+import { createStore, reconcile } from 'solid-js/store'
 import { makeEventListener } from '@solid-primitives/event-listener'
+import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { ReactiveWeakMap } from '@solid-primitives/map'
 import { shadowHost } from '../App'
 import { type DOMTree, getNewDomTree } from '../lib/inspector-dom-tree'
@@ -11,17 +13,28 @@ export const search = createInspectorSearch()
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
-  const [domTree, setDomTree] = createSignal<DOMTree | null>(getNewDomTree(), { equals: false })
+  const [domTree, setDomTree] = createStore<{ tree: DOMTree | null }>({ tree: getNewDomTree() })
   const [selectedElement, setSelectedElement] = createSignal<Element | null>(null)
   const collapsedStates = new ReactiveWeakMap<Element, boolean>()
 
-  // Listen for the 'flushPatches' event (fired when the debugger steps to a new line),
-  // and update the DOM tree
-  makeEventListener(window, 'message', (event) => {
-    if (event.data.flushPatches) {
-      setDomTree(getNewDomTree())
+  // Update the DOM tree to reflect DOM changes when:
+  // The 'flushPatches' event is fired (when the debugger steps to a new line),
+  // Or the shadow root itself updates (e.g. on Refresh button clicked)
+  {
+    function updateDomTree() {
+      setDomTree(reconcile({ tree: getNewDomTree() }, { key: 'node' }))
     }
-  })
+    makeEventListener(window, 'message', (event) => {
+      if (event.data.flushPatches) {
+        updateDomTree()
+      }
+    })
+    createMutationObserver(
+      () => [shadowHost.shadowRoot].filter(Boolean),
+      { childList: true },
+      updateDomTree,
+    )
+  }
 
   // highlight the element under the mouse
   makeEventListener(shadowHost, 'mousemove', (e) => {
@@ -52,7 +65,7 @@ export function Inspector() {
 
   return (
     <div class="h-full w-full flex flex-col">
-      <Show when={domTree()} keyed={true}>
+      <Show when={domTree.tree} keyed={true}>
         {tree => (
           <>
             <SearchToolbar tree={tree} />

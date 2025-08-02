@@ -16,10 +16,10 @@ interface TreeNodeProps {
 export function TreeNode(props: TreeNodeProps) {
   let container: HTMLDivElement | undefined
 
+  const treeNode = () => props.treeNode
   const isCollapsed = () => isCollapsible() ? props.collapsedStates.get(treeNode().node) : false
   const isMatching = () => search.matchedNodes().includes(treeNode().node)
   const isSelected = () => treeNode().node === props.selectedNode
-  const treeNode = () => props.treeNode
 
   function setCollapsed(value: boolean) {
     props.collapsedStates.set(treeNode().node, value)
