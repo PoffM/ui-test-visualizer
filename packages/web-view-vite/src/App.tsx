@@ -40,15 +40,8 @@ export const {
 export const inspector = createInspectorHeight()
 
 export function App() {
-  const [themeColors] = createResource(
-    () => client.getVSCodeThemeAsCss.query(),
-  )
-
   return (
     <div class="fixed inset-0 flex flex-col">
-      <style>
-        {`:root { ${themeColors()} }`}
-      </style>
       <div style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}>
         <Toolbar />
       </div>

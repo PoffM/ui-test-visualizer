@@ -57,7 +57,7 @@ export function Inspector() {
           <>
             <SearchToolbar tree={tree} />
             <div class="bg-(--vscode-panel-background) text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4">
-              <div class="font-(family-name:--theme-font-family) font-(--theme-font-weight) text-(length:--theme-font-size) leading-(--theme-line-height)">
+              <div class="font-[consolas]">
                 <TreeNode
                   {...tree}
                   onHover={setHoveredRect}

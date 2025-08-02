@@ -42,11 +42,16 @@ export function TreeNode(props: TreeNodeProps) {
   const renderAttributes = () => {
     return props.attributes.map(attr => (
       <span data-highlight>
-        <span class="ml-1 text-[var(--theme-entity-other-attribute-name)]">{attr.name}</span>
+        <span class="ml-1 text-html-attribute-name">{attr.name}</span>
         {attr.value !== '' && (
           <>
-            <span class="text-[var(--theme-punctuation)]">=</span>
-            <span class="text-[var(--theme-string)]">"{attr.value.trim()}"</span>
+            <span class="text-html-tag">=</span>
+            <span class="text-html-tag">"
+              <span class="text-html-attribute-value">
+                {attr.value.trim()}
+              </span>
+              "
+            </span>
           </>
         )}
       </span>
@@ -72,7 +77,7 @@ export function TreeNode(props: TreeNodeProps) {
       >
         {hasChildren && props.depth && (
           <button
-            class="cursor-pointer text-[var(--vscode-editor-foreground)] opacity-60 absolute top-0 -ml-3"
+            class="cursor-pointer text-html-collapser-arrow opacity-60 absolute top-0 -ml-3"
             style={{ left: paddingLeft }}
             onClick={() => setIsCollapsed(!isCollapsed())}
           >
@@ -80,19 +85,18 @@ export function TreeNode(props: TreeNodeProps) {
           </button>
         )}
         {!hasChildren && <b class="shrink-0 w-3" />}
-        <span class="rounded-l-sm text-[var(--theme-punctuation)]" data-highlight>&lt;</span>
-        <span class="text-[var(--theme-entity-name-tag)]" data-highlight>{props.tagName}</span>
+        <span class="text-html-tag" data-highlight>&lt;{props.tagName}</span>
         {props.attributes.length > 0 && renderAttributes()}
-        <span class="rounded-r-sm text-[var(--theme-punctuation)]" data-highlight>&gt;</span>
+        <span class="rounded-r-sm text-html-tag" data-highlight>&gt;</span>
         {props.textNodes && (
-          <span class="text-[var(--theme-text)]">{props.textNodes.trim()}</span>
+          <span class="">{props.textNodes.trim()}</span>
         )}
-        {isCollapsed() && <span class="rounded-sm pl-1 pr-1 bg-(--theme-entity-name-tag) text-(--theme-punctuation)">⋯</span>}
+        {isCollapsed() && <span class="rounded-sm pl-1 pr-1">⋯</span>}
         {((!hasChildren && props.textNodes) || isCollapsed()) && (
           <>
-            <span class="rounded-l-sm text-[var(--theme-punctuation)]">&lt;/</span>
-            <span class="text-[var(--theme-entity-name-tag)]">{props.tagName}</span>
-            <span class="rounded-r-sm text-[var(--theme-punctuation)]">&gt;</span>
+            <span class="rounded-l-sm text-html-tag">&lt;/</span>
+            <span class="text-html-tag">{props.tagName}</span>
+            <span class="rounded-r-sm text-html-tag">&gt;</span>
           </>
         )}
       </div>
@@ -101,12 +105,12 @@ export function TreeNode(props: TreeNodeProps) {
           <Show when={props.shadowTrees}>
             {shadowTrees => (
               <div>
-                <div class="text-[var(--vscode-symbolIcon-fieldForeground)]">#shadow-root</div>
+                <div style={{ 'padding-left': `calc(${(depth + 3) * 1.5} * var(--spacing))` }}>#shadow-root</div>
                 <For each={shadowTrees()}>
                   {child => (
                     <TreeNode
                       {...child}
-                      depth={depth + 1}
+                      depth={depth + 3}
                       onHover={props.onHover}
                       collapsedStates={props.collapsedStates}
                       selectedNode={props.selectedNode}
@@ -135,9 +139,7 @@ export function TreeNode(props: TreeNodeProps) {
             onMouseLeave={() => props.onHover(null)}
             style={{ 'padding-left': paddingLeft }}
           >
-            <span class="text-[var(--theme-punctuation)]">&lt;/</span>
-            <span class="text-[var(--theme-entity-name-tag)]">{props.tagName}</span>
-            <span class="text-[var(--theme-punctuation)]">&gt;</span>
+            <span class="text-html-tag">&lt;/{props.tagName}&gt;</span>
           </div>
         </>
       )}

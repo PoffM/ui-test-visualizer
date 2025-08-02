@@ -55,6 +55,20 @@
   }
 }
 
+@theme {
+  --color-html-tag: rgb(142 0 75/100%);
+  --color-html-attribute-name: rgb(142 0 75/100%);
+  --color-html-attribute-value: rgb(8 66 160/100%);
+  --color-html-collapser-arrow: rgb(71 71 71/100%);
+}
+
+[data-vscode-theme-kind="vscode-dark"] {
+  --color-html-tag: rgb(124 172 248/100%);
+  --color-html-attribute-name: rgb(168 199 250/100%);
+  --color-html-attribute-value: rgb(254 141 89/100%);
+  --color-html-collapser-arrow: rgb(199 199 199/100%);
+}
+
 @layer utilities {
   .animate-highlight > div > span[data-highlight] {
     animation: highlight 1.5s cubic-bezier(0.55, 0, 1, 0.45);
