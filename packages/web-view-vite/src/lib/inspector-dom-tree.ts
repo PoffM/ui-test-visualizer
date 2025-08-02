@@ -4,26 +4,29 @@ export interface DOMTree {
   tagName: string
   attributes: { name: string, value: string }[]
   childNodes: (DOMTree | string)[]
-  shadowTrees: DOMTree[] | null
+  shadowChildNodes: (DOMTree | string)[] | null
   getBoundingClientRect: () => DOMRect
   node: Element
 }
 
-export function parseDOMTree(node: Element): DOMTree {
+function parseDOMTree(node: Element): DOMTree {
   // Get all attributes
   const attributes = Array.from(node.attributes || [])
     .map(attr => ({ name: attr.name, value: attr.value }))
 
   const childNodes = Array.from(node.childNodes)
-    .map(child => child instanceof Element ? parseDOMTree(child) : child.textContent?.trim()).filter(Boolean)
-  const shadowTrees = node.shadowRoot
-    ? Array.from(node.shadowRoot.children).map(child => parseDOMTree(child))
+    .map(child => child instanceof Element ? parseDOMTree(child) : child.textContent?.trim())
+    .filter(Boolean)
+  const shadowChildNodes = node.shadowRoot
+    ? Array.from(node.shadowRoot.childNodes)
+      .map(child => child instanceof Element ? parseDOMTree(child) : child.textContent?.trim())
+      .filter(Boolean)
     : null
 
   return {
     tagName: node.tagName.toLowerCase(),
     childNodes,
-    shadowTrees,
+    shadowChildNodes,
     attributes,
     node,
     getBoundingClientRect: () => node.getBoundingClientRect(),
@@ -45,7 +48,7 @@ export function containsNode(trees: (DOMTree | string)[] | null, node: Element):
 
     if (tree.node === node) { return true }
     if (tree.childNodes?.length && containsNode(tree.childNodes, node)) { return true }
-    if (tree.shadowTrees?.length && containsNode(tree.shadowTrees, node)) { return true }
+    if (tree.shadowChildNodes?.length && containsNode(tree.shadowChildNodes, node)) { return true }
   }
   return false
 }

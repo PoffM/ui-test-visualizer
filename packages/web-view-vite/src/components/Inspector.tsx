@@ -59,7 +59,7 @@ export function Inspector() {
             <div class="bg-(--vscode-panel-background) text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4">
               <div class="font-[consolas]">
                 <TreeNode
-                  {...tree}
+                  treeNode={tree}
                   onHover={setHoveredRect}
                   collapsedStates={collapsedStates}
                   selectedNode={selectedElement()}
