@@ -65,12 +65,12 @@ export function App() {
         >
           <div
             style={{
-              height: inspector.isVisible() ? `calc(100% - ${inspector.height()}px)` : '100%',
+              height: inspector.isOpen() ? `calc(100% - ${inspector.height()}px)` : '100%',
             }}
           >
             {shadowHost}
           </div>
-          <Show when={inspector.isVisible()}>
+          <Show when={inspector.isOpen()}>
             <Resizer onResize={inspector.setHeight} />
             <div
               class="overflow-y-hidden"
