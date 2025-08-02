@@ -15,17 +15,17 @@ interface TreeNodeProps extends DOMTree {
 export function TreeNode(props: TreeNodeProps) {
   let container: HTMLDivElement | undefined
 
-  const isCollapsed = () => props.collapsedStates.get(props.node) ?? false
+  const isCollapsed = () => isCollapsible() ? props.collapsedStates.get(props.node) : false
   const isMatching = () => search.matchedNodes().includes(props.node)
   const isSelected = () => props.node === props.selectedNode
 
-  function setIsCollapsed(value: boolean) {
+  function setCollapsed(value: boolean) {
     props.collapsedStates.set(props.node, value)
   }
 
   createEffect(on(() => props.selectedNode, (el) => {
-    if (el && isCollapsed() && (containsNode(props.childTrees, el) || containsNode(props.shadowTrees, el))) {
-      setIsCollapsed(false)
+    if (el && isCollapsed() && (containsNode(props.childNodes, el) || containsNode(props.shadowTrees, el))) {
+      setCollapsed(false)
     }
   }))
 
@@ -37,31 +37,24 @@ export function TreeNode(props: TreeNodeProps) {
 
   const depth = (props.depth || 0) + 2
   const paddingLeft = `calc(${depth * 1.5} * var(--spacing))`
-  const hasChildren = (props.childTrees.length + (props.shadowTrees?.length ?? 0)) > 0
+  const hasChildren = (props.childNodes.length + (props.shadowTrees?.length ?? 0)) > 0
 
-  const renderAttributes = () => {
-    return props.attributes.map(attr => (
-      <span data-highlight>
-        <span class="ml-1 text-html-attribute-name">{attr.name}</span>
-        {attr.value !== '' && (
-          <>
-            <span class="text-html-tag">=</span>
-            <span class="text-html-tag">"
-              <span class="text-html-attribute-value">
-                {attr.value.trim()}
-              </span>
-              "
-            </span>
-          </>
-        )}
-      </span>
-    ))
+  function isCollapsible() {
+    if (props.shadowTrees) { return true }
+    if (props.childNodes.length === 0) { return false }
+    if (props.childNodes.length === 1 && typeof props.childNodes[0] === 'string') { return false }
+    return true
+  }
+
+  function rendersInline() {
+    if (props.shadowTrees) { return false }
+    if (props.childNodes.length === 0) { return true }
+    if (props.childNodes.length === 1 && typeof props.childNodes[0] === 'string') { return true }
   }
 
   return (
-    <div
-      classList={{ 'animate-highlight': props.isChanged() }}
-    >
+    <div>
+      {/* Highlightable container around the node */}
       <div
         ref={container}
         class="relative min-w-9/10 box-content scroll-m-10"
@@ -75,32 +68,67 @@ export function TreeNode(props: TreeNodeProps) {
         onClick={() => props.onSelect(isSelected() ? null : props.node)}
         style={{ 'padding-left': paddingLeft }}
       >
-        {hasChildren && props.depth && (
+        {/* Collapser button */}
+        <Show when={isCollapsible()}>
           <button
             class="cursor-pointer text-html-collapser-arrow opacity-60 absolute top-0 -ml-3"
             style={{ left: paddingLeft }}
-            onClick={() => setIsCollapsed(!isCollapsed())}
+            onClick={() => setCollapsed(!isCollapsed())}
           >
             {isCollapsed() ? '▶' : '▼'}
           </button>
-        )}
+        </Show>
+
         {!hasChildren && <b class="shrink-0 w-3" />}
+
+        {/* Opening tag */}
         <span class="text-html-tag" data-highlight>&lt;{props.tagName}</span>
-        {props.attributes.length > 0 && renderAttributes()}
+
+        {/* Attributes */}
+        <For each={props.attributes}>
+          {attr => (
+            <span data-highlight>
+              <span class="ml-1 text-html-attribute-name">{attr.name}</span>
+              {attr.value !== '' && (
+                <>
+                  <span class="text-html-tag">=</span>
+                  <span class="text-html-tag">"
+                    <span class="text-html-attribute-value">
+                      {attr.value.trim()}
+                    </span>
+                    "
+                  </span>
+                </>
+              )}
+            </span>
+          )}
+        </For>
+
+        {/* '>' End of opening tag */}
         <span class="rounded-r-sm text-html-tag" data-highlight>&gt;</span>
-        {props.textNodes && (
-          <span class="">{props.textNodes.trim()}</span>
-        )}
-        {isCollapsed() && <span class="rounded-sm pl-1 pr-1">⋯</span>}
-        {((!hasChildren && props.textNodes) || isCollapsed()) && (
+
+        {/* Show an ellipsis when the node is collapsed */}
+        <Show when={isCollapsed()}>
+          <span class="rounded-sm pl-1 pr-1">⋯</span>
+        </Show>
+
+        {/* Show text inline when it's the only child node */}
+        <Show when={rendersInline() && props.childNodes.length === 1 && typeof props.childNodes[0] === 'string'}>
+          <span class="">{props.childNodes[0] as string}</span>
+        </Show>
+
+        {/* Inline closing tag */}
+        <Show when={isCollapsed() || props.childNodes.length === 1 && typeof props.childNodes[0] === 'string' || rendersInline()}>
           <>
             <span class="rounded-l-sm text-html-tag">&lt;/</span>
             <span class="text-html-tag">{props.tagName}</span>
             <span class="rounded-r-sm text-html-tag">&gt;</span>
           </>
-        )}
+        </Show>
       </div>
-      {!isCollapsed() && hasChildren && (
+
+      {/* Render children */}
+      <Show when={!isCollapsed() && !rendersInline()}>
         <>
           <Show when={props.shadowTrees}>
             {shadowTrees => (
@@ -121,17 +149,26 @@ export function TreeNode(props: TreeNodeProps) {
               </div>
             )}
           </Show>
-          <For each={props.childTrees}>
-            {child => (
-              <TreeNode
-                {...child}
-                depth={depth + 1}
-                onHover={props.onHover}
-                collapsedStates={props.collapsedStates}
-                selectedNode={props.selectedNode}
-                onSelect={props.onSelect}
-              />
-            )}
+          <For each={props.childNodes}>
+            {(child) => {
+              if (typeof child === 'string') {
+                return (
+                  <div style={{ 'padding-left': `calc(${(depth + 3) * 1.5} * var(--spacing))` }}>
+                    {child}
+                  </div>
+                )
+              }
+              return (
+                <TreeNode
+                  {...child}
+                  depth={depth + 1}
+                  onHover={props.onHover}
+                  collapsedStates={props.collapsedStates}
+                  selectedNode={props.selectedNode}
+                  onSelect={props.onSelect}
+                />
+              )
+            }}
           </For>
           <div
             class="flex hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]"
@@ -142,7 +179,7 @@ export function TreeNode(props: TreeNodeProps) {
             <span class="text-html-tag">&lt;/{props.tagName}&gt;</span>
           </div>
         </>
-      )}
+      </Show>
     </div>
   )
 }

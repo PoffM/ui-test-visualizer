@@ -1,74 +1,50 @@
-import isEqual from 'lodash/isEqual'
 import { shadowHost } from '../App'
 
 export interface DOMTree {
   tagName: string
-  textNodes: string | undefined
   attributes: { name: string, value: string }[]
-  childTrees: DOMTree[]
+  childNodes: (DOMTree | string)[]
   shadowTrees: DOMTree[] | null
   getBoundingClientRect: () => DOMRect
   node: Element
-  isChanged: () => boolean
 }
 
-export function parseDOMTree(node: Element, previousTree: DOMTree | null): DOMTree {
-  // Get all direct text nodes, excluding whitespace-only nodes
-  const textNodes = Array.from(node.childNodes)
-    .filter(child =>
-      child.nodeType === Node.TEXT_NODE
-      && child.textContent?.trim() !== '',
-    )
-    .map(node => node.textContent?.trim())
-    .filter(Boolean)
-    .join(' ')
-
+export function parseDOMTree(node: Element): DOMTree {
   // Get all attributes
   const attributes = Array.from(node.attributes || [])
     .map(attr => ({ name: attr.name, value: attr.value }))
 
-  const childTrees = Array.from(node.children)
-    .map((child, idx) => parseDOMTree(child, previousTree?.childTrees?.[idx] ?? null))
+  const childNodes = Array.from(node.childNodes)
+    .map(child => child instanceof Element ? parseDOMTree(child) : child.textContent?.trim()).filter(Boolean)
   const shadowTrees = node.shadowRoot
-    ? Array.from(node.shadowRoot.children).map((child, idx) => parseDOMTree(child, previousTree?.shadowTrees?.[idx] ?? null))
+    ? Array.from(node.shadowRoot.children).map(child => parseDOMTree(child))
     : null
-
-  let isChanged = !!previousTree && !isEqual(previousTree, {
-    childTrees,
-    shadowTrees,
-    textNodes,
-    attributes,
-  })
 
   return {
     tagName: node.tagName.toLowerCase(),
-    childTrees,
+    childNodes,
     shadowTrees,
-    textNodes,
     attributes,
     node,
-    isChanged: () => {
-      const changed = isChanged
-      isChanged = false
-      return changed
-    },
     getBoundingClientRect: () => node.getBoundingClientRect(),
   }
 }
 
-export function getNewDomTree(previousTree: DOMTree | null) {
+export function getNewDomTree() {
   const shadowRoot = shadowHost?.shadowRoot
   if (!shadowRoot) {
     return null
   }
-  const tree = parseDOMTree(shadowRoot.querySelector('body')!, previousTree)
+  const tree = parseDOMTree(shadowRoot.querySelector('body')!)
   return tree
 }
 
-export function containsNode(trees: DOMTree[] | null, node: Element): boolean {
+export function containsNode(trees: (DOMTree | string)[] | null, node: Element): boolean {
   for (const tree of trees || []) {
+    if (typeof tree === 'string') { continue }
+
     if (tree.node === node) { return true }
-    if (tree.childTrees?.length && containsNode(tree.childTrees, node)) { return true }
+    if (tree.childNodes?.length && containsNode(tree.childNodes, node)) { return true }
     if (tree.shadowTrees?.length && containsNode(tree.shadowTrees, node)) { return true }
   }
   return false

@@ -11,7 +11,7 @@ export const search = createInspectorSearch()
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
-  const [domTree, setDomTree] = createSignal<DOMTree | null>(getNewDomTree(null), { equals: false })
+  const [domTree, setDomTree] = createSignal<DOMTree | null>(getNewDomTree(), { equals: false })
   const [selectedElement, setSelectedElement] = createSignal<Element | null>(null)
   const collapsedStates = new ReactiveWeakMap<Element, boolean>()
 
@@ -19,7 +19,7 @@ export function Inspector() {
   // and update the DOM tree
   makeEventListener(window, 'message', (event) => {
     if (event.data.flushPatches) {
-      setDomTree(prev => getNewDomTree(prev))
+      setDomTree(getNewDomTree())
     }
   })
 
