@@ -24,6 +24,10 @@ export function Resizer(props: ResizerProps) {
     setIsDragging(false)
   })
 
+  makeEventListener(document, 'mouseleave', () => {
+    setIsDragging(false)
+  })
+
   return (
     <div
       class="relative z-1 h-2 cursor-ns-resize -mt-1 -mb-1"
