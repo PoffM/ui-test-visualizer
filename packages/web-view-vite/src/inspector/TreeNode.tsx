@@ -78,15 +78,24 @@ export function TreeNode(props: TreeNodeProps) {
 
   // Plays the highlight animation when the tag or attribute name changes
   function playHighlightAnimation(element: Element) {
-    const highlightColor = getComputedStyle(element).getPropertyValue('--vscode-editor-stackFrameHighlightBackground')
     element.animate(
       [
-        { backgroundColor: highlightColor },
-        { backgroundColor: 'transparent' },
+        {
+          backgroundColor: 'var(--color-html-tag)',
+          color: 'var(--vscode-panel-background)',
+        },
+        {
+          offset: 0.8,
+          backgroundColor: 'var(--vscode-panel-background)',
+          color: 'inherit',
+        },
+        {
+          backgroundColor: 'inherit',
+        },
       ],
       {
-        duration: 1500,
-        easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
+        duration: 1400,
+        easing: 'cubic-bezier(0, 0, 0.2, 1)',
         fill: 'forwards',
       },
     )
@@ -175,7 +184,11 @@ export function TreeNode(props: TreeNodeProps) {
               <>
                 {/* Opening tag */}
                 <span class="text-html-tag">&lt;</span>
-                <span class="text-html-tag" ref={setupTagHighlights}>{node().tagName}</span>
+                <span class="text-html-tag">
+                  <span ref={setupTagHighlights}>
+                    {node().tagName}
+                  </span>
+                </span>
 
                 {/* Attributes */}
                 <For each={node().attributes}>
@@ -186,11 +199,10 @@ export function TreeNode(props: TreeNodeProps) {
                         <>
                           <span class="text-html-tag">=</span>
                           <span class="text-html-tag">"
-                            <span
-                              class="text-html-attribute-value"
-                              ref={attrNode => setupAttributeHighlights(attrNode, attr.name)}
-                            >
-                              {attr.value}
+                            <span class="text-html-attribute-value">
+                              <span ref={attrNode => setupAttributeHighlights(attrNode, attr.name)}>
+                                {attr.value}
+                              </span>
                             </span>
                             "
                           </span>

@@ -80,7 +80,7 @@ export function Inspector() {
         {tree => (
           <>
             <SearchToolbar tree={tree} />
-            <div class="bg-(--vscode-panel-background) text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4">
+            <div class="bg-(--vscode-panel-background) text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4 pl-1">
               <div class="font-[consolas]">
                 <TreeNode
                   node={tree}
