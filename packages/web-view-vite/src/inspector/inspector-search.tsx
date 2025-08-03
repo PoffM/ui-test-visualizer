@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js'
 import { shadowHost } from '../App'
-import type { InspectedNode } from './inspector-dom-tree'
+import type { InspectedNode } from '../inspector/inspector-dom-tree'
 
 function searchTextInsideTree(tree: InspectedNode, query: string): Element[] {
   const nodes: Element[] = []

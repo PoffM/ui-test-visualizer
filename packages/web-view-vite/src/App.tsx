@@ -2,10 +2,10 @@ import * as webviewToolkit from '@vscode/webview-ui-toolkit'
 import { Show, createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
-import { createInspectorHeight } from './lib/inspector-height'
+import { createInspectorHeight } from './inspector/inspector-height'
 import { Toolbar } from './components/Toolbar'
-import { Inspector } from './components/Inspector'
-import { Resizer } from './components/Resizer'
+import { Inspector } from './inspector/Inspector'
+import { Resizer } from './inspector/Resizer'
 
 // Importing the router type from the server file
 

@@ -5,7 +5,7 @@ import Code from 'lucide-solid/icons/code'
 import type { ParentProps } from 'solid-js'
 import { firstPatchReceived, inspector, refreshShadow, theme, toggleTheme } from '../App'
 import { StyleIcon, StylePicker } from './StylePicker'
-import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './solid-ui/tooltip'
 
 export function Toolbar() {
   return (

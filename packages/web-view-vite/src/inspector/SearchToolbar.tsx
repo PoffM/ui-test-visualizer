@@ -4,7 +4,7 @@ import X from 'lucide-solid/icons/x'
 import Search from 'lucide-solid/icons/search'
 
 import { Show, createEffect } from 'solid-js'
-import type { InspectedNode } from '../lib/inspector-dom-tree'
+import type { InspectedNode } from './inspector-dom-tree'
 import { search } from './Inspector'
 
 export function SearchToolbar(props: { tree: InspectedNode }) {

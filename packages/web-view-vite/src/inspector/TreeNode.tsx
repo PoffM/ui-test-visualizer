@@ -1,7 +1,7 @@
 import type { ReactiveWeakMap } from '@solid-primitives/map'
 import { For, Match, Show, Switch, createEffect, on, onCleanup, onMount } from 'solid-js'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
-import { type InspectedNode, containsNode } from '../lib/inspector-dom-tree'
+import { type InspectedNode, containsNode } from './inspector-dom-tree'
 import { inspectorMounted, search } from './Inspector'
 
 interface TreeNodeProps {
