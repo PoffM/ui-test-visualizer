@@ -156,7 +156,7 @@ export function TreeNode(props: TreeNodeProps) {
       {/* Highlightable container around the node */}
       <div
         ref={container}
-        class="relative min-w-9/10 box-content scroll-m-10"
+        class="relative box-content scroll-m-10"
         classList={{
           'bg-(--vscode-editor-selectionBackground) shadow-[100vw_0_0_var(--vscode-editor-selectionBackground)]': isSelected(),
           'bg-(--vscode-searchEditor-findMatchBackground) shadow-[100vw_0_0_var(--vscode-searchEditor-findMatchBackground)]': isMatching() && !isSelected(),
