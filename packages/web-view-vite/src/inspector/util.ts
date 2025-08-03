@@ -1,5 +1,3 @@
-import { makeEventListener } from '@solid-primitives/event-listener'
-
 /**
  * Returns the element for the specified x coordinate and the specified y coordinate.
  * Works like `elementFromPoint` but also looks for elements in shadow roots.
@@ -19,14 +17,4 @@ export function deepElementFromPoint(root: DocumentOrShadowRoot, x: number, y: n
   }
 
   return element
-}
-
-export function makeMouseEnterAndLeaveListeners(
-  element: HTMLElement,
-  enterFn: () => void,
-  leaveFn: () => void,
-) {
-  makeEventListener(element, 'mouseenter', enterFn)
-  makeEventListener(element, 'mouseout', leaveFn)
-  makeEventListener(element, 'mouseleave', leaveFn)
 }

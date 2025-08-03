@@ -8,16 +8,16 @@ import { type InspectedNode, getNewDomTree } from './inspector-dom-tree'
 import { createInspectorSearch } from './inspector-search'
 import { TreeNode } from './TreeNode'
 import { SearchToolbar } from './SearchToolbar'
-import { deepElementFromPoint, makeMouseEnterAndLeaveListeners } from './util'
+import { deepElementFromPoint } from './util'
 
 export const search = createInspectorSearch()
 
 export const disableHighlightAnimation = { val: true }
 
 export function Inspector() {
-  const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
   const [domTree, setDomTree] = createStore<{ tree: InspectedNode | null }>({ tree: getNewDomTree() })
   const [selectedNode, setSelectedNode] = createSignal<Node | null>(null)
+  const [hoveredNode, setHoveredNode] = createSignal<Node | null>(null)
   const collapsedStates = new ReactiveWeakMap<Node, boolean>()
 
   // Update the DOM tree to reflect DOM changes when:
@@ -41,15 +41,16 @@ export function Inspector() {
 
   // highlight the element under the mouse
   makeEventListener(shadowHost, 'mousemove', (e) => {
-    const el = shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)
+    const newNode = shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)
     if (
       // Don't select the inspected UI's 'body' element
-      (el?.closest('body') || (el?.getRootNode() instanceof ShadowRoot && el?.getRootNode() !== shadowHost.shadowRoot))
+      (newNode?.closest('body') || (newNode?.getRootNode() instanceof ShadowRoot && newNode?.getRootNode() !== shadowHost.shadowRoot))
       // Ignore elements outside the tested UI e.g. the top toolbar
-      && !document.body.contains(el)
+      && !document.body.contains(newNode)
+      && newNode !== hoveredNode()
     ) {
-      setHoveredRect(null) // Set to null first so there is no smooth animation when hovering with the mouse
-      setHoveredRect(el?.getBoundingClientRect() ?? null)
+      setHoveredNode(null) // Set to null first so there is no smooth animation when hovering with the mouse
+      setHoveredNode(newNode)
     }
   })
 
@@ -61,28 +62,13 @@ export function Inspector() {
     setSelectedNode(el ?? null)
   })
 
-  makeMouseEnterAndLeaveListeners(
-    shadowHost,
-    () => {},
-    () => {
-      setHoveredRect(null)
-    },
-  )
+  makeEventListener(shadowHost, 'mouseleave', () => setHoveredNode(null))
 
   // select and highlight the current element matching the search query
   createEffect(() => {
     if (search.matchedNodes().size > 0) {
       const el = [...search.matchedNodes()][search.currentNodeIndex()]
       setSelectedNode(el ?? null)
-      if (el) {
-        setHoveredRect(
-          el instanceof Element
-            ? el.getBoundingClientRect()
-            : el instanceof Text
-              ? el.parentElement?.getBoundingClientRect() ?? null
-              : null,
-        )
-      }
     }
   })
 
@@ -104,7 +90,7 @@ export function Inspector() {
               <div class="font-[consolas]">
                 <TreeNode
                   node={tree}
-                  onHover={setHoveredRect}
+                  onHover={setHoveredNode}
                   collapsedStates={collapsedStates}
                   selectedNode={selectedNode()}
                   onSelect={setSelectedNode}
@@ -114,18 +100,30 @@ export function Inspector() {
           </div>
         )}
       </Show>
-      <Show when={hoveredRect()}>
-        {rect => (
-          <div
-            class="fixed z-50 pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 min-h-[1px] min-w-[1px]"
-            style={{
-              top: `${rect().top}px`,
-              left: `${rect().left}px`,
-              width: `${rect().width}px`,
-              height: `${rect().height}px`,
-            }}
-          />
-        )}
+      <Show when={hoveredNode() ?? selectedNode()} keyed>
+        {(node) => {
+          const rect = node instanceof Text
+            ? (() => {
+                const range = document.createRange()
+                range.selectNodeContents(node)
+                return range.getBoundingClientRect()
+              })()
+            : node instanceof Element
+              ? node.getBoundingClientRect()
+              : node.parentElement?.getBoundingClientRect()
+
+          return (
+            <div
+              class="fixed z-50 pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 min-h-[1px] min-w-[1px]"
+              style={{
+                top: `${rect?.top}px`,
+                left: `${rect?.left}px`,
+                width: `${rect?.width}px`,
+                height: `${rect?.height}px`,
+              }}
+            />
+          )
+        }}
       </Show>
     </div>
   )

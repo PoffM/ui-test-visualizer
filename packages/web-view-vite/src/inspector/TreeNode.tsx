@@ -7,7 +7,7 @@ import { disableHighlightAnimation, search } from './Inspector'
 interface TreeNodeProps {
   node: InspectedNode
   depth?: number
-  onHover: (rect: DOMRect | null) => void
+  onHover: (node: Node | null) => void
   collapsedStates: ReactiveWeakMap<Node, boolean>
   selectedNode: Node | null
   onSelect: (node: Node | null) => void
@@ -162,7 +162,7 @@ export function TreeNode(props: TreeNodeProps) {
           'bg-(--vscode-searchEditor-findMatchBackground) shadow-[100vw_0_0_var(--vscode-searchEditor-findMatchBackground)]': isMatching() && !isSelected(),
           'hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]': !isSelected() && !isMatching(),
         }}
-        onMouseEnter={() => props.onHover(props.node.getBoundingClientRect())}
+        onMouseEnter={() => props.onHover(props.node.node)}
         onMouseLeave={() => props.onHover(null)}
         onClick={() => props.onSelect(isSelected() ? null : props.node.node)}
         style={{ 'padding-left': paddingLeft }}
@@ -277,7 +277,7 @@ export function TreeNode(props: TreeNodeProps) {
               // Closing tag for elements
               <div
                 class="flex hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]"
-                onMouseEnter={() => props.onHover(node().getBoundingClientRect())}
+                onMouseEnter={() => props.onHover(node().node)}
                 onMouseLeave={() => props.onHover(null)}
                 style={{ 'padding-left': paddingLeft }}
               >
