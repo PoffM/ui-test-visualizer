@@ -63,11 +63,8 @@ export function App() {
             {shadowHost}
           </div>
           <Show when={inspector.isOpen()}>
-            <Resizer onResize={inspector.setHeight} />
-            <div
-              class="overflow-y-hidden"
-              style={{ height: `${inspector.height()}px` }}
-            >
+            <div style={{ height: `${inspector.height()}px` }}>
+              <Resizer onResize={inspector.setHeight} />
               <ErrorBoundary fallback={error => (
                 <div class="text-error-foreground p-4">
                   Error showing the inspector{error instanceof Error ? `: ${error.message}` : ''}

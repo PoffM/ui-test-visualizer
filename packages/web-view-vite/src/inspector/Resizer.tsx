@@ -29,12 +29,15 @@ export function Resizer(props: ResizerProps) {
   })
 
   return (
+    // invisible line to divide the 2 sections
     <div
-      class="relative z-1 h-2 cursor-ns-resize -mt-1 -mb-1"
-      onMouseDown={handleMouseDown}
+      class="relative z-70 h-0"
       style={{ 'background-color': 'transparent' }}
     >
-      <hr class="mt-1 border-t border-[var(--vscode-panel-border)]" />
+      {/* invisible drag handle with bigger hitbox than the visible line */}
+      <div class="absolute w-full h-3 -top-1.5 cursor-ns-resize flex flex-col justify-center" onMouseDown={handleMouseDown} />
+      {/* visible drag handle line */}
+      <hr class="h-[3px] bg-[var(--vscode-panel-border)]" />
     </div>
   )
 }
