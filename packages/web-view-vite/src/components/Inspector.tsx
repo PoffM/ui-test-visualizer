@@ -4,7 +4,7 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { ReactiveWeakMap } from '@solid-primitives/map'
 import { shadowHost } from '../App'
-import { type DOMTree, getNewDomTree } from '../lib/inspector-dom-tree'
+import { type InspectedNode, getNewDomTree } from '../lib/inspector-dom-tree'
 import { createInspectorSearch } from '../lib/inspector-search'
 import { TreeNode } from './TreeNode'
 import { SearchToolbar } from './SearchToolbar'
@@ -13,9 +13,9 @@ export const search = createInspectorSearch()
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
-  const [domTree, setDomTree] = createStore<{ tree: DOMTree | null }>({ tree: getNewDomTree() })
+  const [domTree, setDomTree] = createStore<{ tree: InspectedNode | null }>({ tree: getNewDomTree() })
   const [selectedElement, setSelectedElement] = createSignal<Element | null>(null)
-  const collapsedStates = new ReactiveWeakMap<Element, boolean>()
+  const collapsedStates = new ReactiveWeakMap<Node, boolean>()
 
   // Update the DOM tree to reflect DOM changes when:
   // The 'flushPatches' event is fired (when the debugger steps to a new line),
@@ -72,7 +72,7 @@ export function Inspector() {
             <div class="bg-(--vscode-panel-background) text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4">
               <div class="font-[consolas]">
                 <TreeNode
-                  treeNode={tree}
+                  node={tree}
                   onHover={setHoveredRect}
                   collapsedStates={collapsedStates}
                   selectedNode={selectedElement()}

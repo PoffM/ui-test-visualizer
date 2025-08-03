@@ -1,15 +1,22 @@
 import { createSignal } from 'solid-js'
 import { shadowHost } from '../App'
-import type { DOMTree } from './inspector-dom-tree'
+import type { InspectedNode } from './inspector-dom-tree'
 
-function searchTextInsideTree(tree: DOMTree, query: string): Element[] {
+function searchTextInsideTree(tree: InspectedNode, query: string): Element[] {
   const nodes: Element[] = []
-  if (tree.textNodes?.toLowerCase().includes(query.toLowerCase())) {
-    nodes.push(tree.node)
+
+  const textNodes = tree.childNodes.filter(it => it.type === 'text')
+  for (const textNode of textNodes) {
+    if (textNode.text.toLowerCase().includes(query.toLowerCase()) && textNode.node.parentElement) {
+      nodes.push(textNode.node.parentElement)
+    }
   }
-  for (const child of tree.childTrees) {
+
+  const elementNodes = tree.childNodes.filter(it => it.type === 'element')
+  for (const child of elementNodes) {
     nodes.push(...searchTextInsideTree(child, query))
   }
+
   return nodes
 }
 
@@ -18,7 +25,7 @@ export function createInspectorSearch() {
   const [matchedNodes, setMatchedNodes] = createSignal<Element[]>([])
   const [currentNodeIndex, setCurrentNodeIndex] = createSignal(0)
 
-  const handleSearch = (query: string, tree: DOMTree | null) => {
+  const handleSearch = (query: string, tree: InspectedNode | null) => {
     setSearchQuery(query)
 
     if (!query || !shadowHost.shadowRoot || !tree) {

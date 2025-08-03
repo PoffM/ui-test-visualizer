@@ -4,10 +4,10 @@ import X from 'lucide-solid/icons/x'
 import Search from 'lucide-solid/icons/search'
 
 import { Show, createEffect } from 'solid-js'
-import type { DOMTree } from '../lib/inspector-dom-tree'
+import type { InspectedNode } from '../lib/inspector-dom-tree'
 import { search } from './Inspector'
 
-export function SearchToolbar(props: { tree: DOMTree }) {
+export function SearchToolbar(props: { tree: InspectedNode }) {
   // update the search results when the tree changes
   createEffect(() => {
     search.handleSearch(search.searchQuery(), props.tree)
@@ -23,7 +23,12 @@ export function SearchToolbar(props: { tree: DOMTree }) {
         }}
         onKeyDown={(e: KeyboardEvent) => {
           if (e.key === 'Enter') {
-            search.handleNext()
+            if (e.shiftKey) {
+              search.handlePrev()
+            }
+            else {
+              search.handleNext()
+            }
           }
         }}
         value={search.searchQuery()}
