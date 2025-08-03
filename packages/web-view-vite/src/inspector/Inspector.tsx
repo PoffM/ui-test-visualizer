@@ -91,7 +91,10 @@ export function Inspector() {
         {tree => (
           <div class="relative z-60 h-full w-full flex flex-col bg-(--vscode-panel-background)">
             <SearchToolbar tree={tree} />
-            <div class="text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4 pl-1">
+            <div
+              class="text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4 pl-1"
+              data-testid="Inspector scroll container"
+            >
               <div class="font-[consolas]">
                 <TreeNode
                   node={tree}
