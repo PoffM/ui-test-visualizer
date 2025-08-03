@@ -29,6 +29,7 @@ export interface InspectedText {
 export interface InspectedShadowRoot {
   type: 'shadow-root'
   node: ShadowRoot
+  shadowMode: 'open' | 'closed'
   childNodes: InspectedNode[]
   getBoundingClientRect: () => null
 }
@@ -47,6 +48,7 @@ function parseDOMTree(node: Node): InspectedNode {
       ? {
           type: 'shadow-root',
           node: node.shadowRoot,
+          shadowMode: node.shadowRoot.mode,
           childNodes: Array.from(node.shadowRoot.childNodes || [])
             .map(child => parseDOMTree(child))
             .filter(Boolean),
