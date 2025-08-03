@@ -1,4 +1,5 @@
 import { createSignal } from 'solid-js'
+import { querySelectorAll as deepQuerySelectorAll } from 'kagekiri'
 import { shadowHost } from '../App'
 import type { InspectedNode } from '../inspector/inspector-dom-tree'
 
@@ -15,6 +16,13 @@ function searchTextInsideTree(tree: InspectedNode, query: string): Element[] {
   const elementNodes = tree.childNodes.filter(it => it.type === 'element')
   for (const child of elementNodes) {
     nodes.push(...searchTextInsideTree(child, query))
+  }
+
+  if (tree.type === 'element' && tree.shadowRoot) {
+    const shadowChildren = tree.shadowRoot.childNodes.filter(it => it.type === 'element')
+    for (const child of shadowChildren) {
+      nodes.push(...searchTextInsideTree(child, query))
+    }
   }
 
   return nodes
@@ -37,7 +45,7 @@ export function createInspectorSearch() {
     let nodes: Element[] = []
     // First try to find nodes by CSS selector
     try {
-      nodes = Array.from(shadowHost.shadowRoot.querySelectorAll(query))
+      nodes = deepQuerySelectorAll(query, shadowHost.shadowRoot)
     }
     catch (e) {}
     // If no nodes found, try to find nodes by text content

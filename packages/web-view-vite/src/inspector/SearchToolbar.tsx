@@ -32,10 +32,23 @@ export function SearchToolbar(props: { tree: InspectedNode }) {
           }
         }}
         value={search.searchQuery()}
+        name="inspector-search-input"
       >
         <span slot="start"><Search class="h-4 w-4 text-muted-foreground" /></span>
+        <ui-test-visualizer-button
+          slot="end"
+          appearance="icon"
+          aria-label="Clear search"
+          title="Clear search"
+          onClick={() => search.handleClearSearch()}
+        >
+          <X class="h-4 w-4" />
+        </ui-test-visualizer-button>
       </ui-test-visualizer-text-field>
-      <div class="flex items-center gap-2">
+      <div
+        class="flex items-center gap-2"
+        classList={{ invisible: !search.searchQuery() }}
+      >
         <ui-test-visualizer-button
           appearance="icon"
           aria-label="Previous result"
@@ -52,19 +65,12 @@ export function SearchToolbar(props: { tree: InspectedNode }) {
         >
           <ChevronDown class="h-4 w-4" />
         </ui-test-visualizer-button>
-        <Show when={search.matchedNodes().length > 0}>
-          <span class="px-2 text-sm text-muted-foreground text-center">
-            {`${search.currentNodeIndex() + 1} of ${search.matchedNodes().length}`}
-          </span>
-        </Show>
-        <ui-test-visualizer-button
-          appearance="icon"
-          aria-label="Clear search"
-          onClick={() => search.handleClearSearch()}
-          disabled={!search.searchQuery()}
+        <span
+          class="text-sm text-muted-foreground text-center"
+          classList={{ invisible: !search.matchedNodes().length }}
         >
-          <X class="h-4 w-4" />
-        </ui-test-visualizer-button>
+          {`${search.currentNodeIndex() + 1} of ${search.matchedNodes().length}`}
+        </span>
       </div>
     </div>
   )
