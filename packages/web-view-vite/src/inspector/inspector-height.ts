@@ -15,7 +15,7 @@ export function createInspectorHeight() {
   // Wrapper for setHeight that also persists to storage
   function updateHeight(newHeight: number) {
     // Clamp height between 0 and 80% of viewport height
-    const clampedHeight = Math.max(0, Math.min(newHeight, window.innerHeight * 0.8))
+    const clampedHeight = Math.max(50, Math.min(newHeight, window.innerHeight * 0.8))
     setHeight(clampedHeight)
     localStorage.setItem(STORAGE_KEY_INSPECTOR_HEIGHT, clampedHeight.toString())
   }
