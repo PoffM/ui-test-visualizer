@@ -97,7 +97,7 @@ export function Inspector() {
       <Show when={hoveredRect()}>
         {rect => (
           <div
-            class="fixed pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 z-50"
+            class="fixed pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 z-50 min-h-[1px] min-w-[1px]"
             style={{
               top: `${rect().top}px`,
               left: `${rect().left}px`,
