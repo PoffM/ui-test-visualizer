@@ -41,7 +41,11 @@ export function Inspector() {
   // highlight the element under the mouse
   makeEventListener(shadowHost, 'mousemove', (e) => {
     const el = shadowHost.shadowRoot?.elementFromPoint(e.clientX, e.clientY)
-    if (el?.closest('body')) {
+    if (
+      el?.closest('body')
+      // Ignore elements outside the tested UI e.g. the top toolbar
+      && !document.body.contains(el)
+    ) {
       setHoveredRect(el?.getBoundingClientRect() ?? null)
     }
   })
