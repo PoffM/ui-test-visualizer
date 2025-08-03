@@ -2,7 +2,7 @@ import type { ReactiveWeakMap } from '@solid-primitives/map'
 import { For, Match, Show, Switch, createEffect, on, onCleanup, onMount } from 'solid-js'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { type InspectedNode, containsNode } from './inspector-dom-tree'
-import { inspectorMounted, search } from './Inspector'
+import { disableHighlightAnimation, search } from './Inspector'
 
 interface TreeNodeProps {
   node: InspectedNode
@@ -28,7 +28,9 @@ export function TreeNode(props: TreeNodeProps) {
   const isSelected = () => props.node.node === props.selectedNode
 
   function setCollapsed(value: boolean) {
+    disableHighlightAnimation.val = true
     props.collapsedStates.set(props.node.node, value)
+    setTimeout(() => disableHighlightAnimation.val = false, 0)
   }
 
   // Uncollapse when the selected node is a child of this node
@@ -78,6 +80,8 @@ export function TreeNode(props: TreeNodeProps) {
 
   // Plays the highlight animation when the tag or attribute name changes
   function playHighlightAnimation(element: Element) {
+    if (disableHighlightAnimation.val) { return }
+
     element.animate(
       [
         {
@@ -106,7 +110,7 @@ export function TreeNode(props: TreeNodeProps) {
     highlightPlayers.set(props.node.node, () => playHighlightAnimation(inspectorEl))
     // Play the highlight animation when a new node is mounted,
     // Check if the inspector is mounted first to avoid flashing everything at once when you first open the inspector
-    if (inspectorMounted.val) {
+    if (!disableHighlightAnimation.val) {
       onMount(() => playHighlightAnimation(inspectorEl))
     }
 

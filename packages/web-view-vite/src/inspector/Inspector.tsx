@@ -12,7 +12,7 @@ import { deepElementFromPoint, makeMouseEnterAndLeaveListeners } from './util'
 
 export const search = createInspectorSearch()
 
-export const inspectorMounted = { val: false }
+export const disableHighlightAnimation = { val: true }
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
@@ -80,10 +80,10 @@ export function Inspector() {
     }
   })
 
-  // Track whether the inspector is mounted; used for the highlight animation
-  inspectorMounted.val = false
-  onMount(() => (inspectorMounted.val = true))
-  onCleanup(() => (inspectorMounted.val = false))
+  // Track whether the inspector is mounted; used for the update highlight animation
+  disableHighlightAnimation.val = true
+  onMount(() => (disableHighlightAnimation.val = false))
+  onCleanup(() => (disableHighlightAnimation.val = true))
 
   return (
     <div class="h-full w-full">
