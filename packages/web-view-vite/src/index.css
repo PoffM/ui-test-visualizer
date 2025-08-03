@@ -69,17 +69,3 @@
   --color-html-collapser-arrow: rgb(199 199 199/100%);
 }
 
-@layer utilities {
-  .animate-highlight > div > span[data-highlight] {
-    animation: highlight 1.5s cubic-bezier(0.55, 0, 1, 0.45);
-  }
-
-  @keyframes highlight {
-    from {
-      background-color: var(--vscode-editor-stackFrameHighlightBackground);
-    }
-    to {
-      background-color: transparent;
-    }
-  }
-}

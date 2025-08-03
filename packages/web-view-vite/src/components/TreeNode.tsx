@@ -1,7 +1,8 @@
 import type { ReactiveWeakMap } from '@solid-primitives/map'
-import { For, Match, Show, Switch, createEffect, on } from 'solid-js'
+import { For, Match, Show, Switch, createEffect, on, onCleanup, onMount } from 'solid-js'
+import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { type InspectedNode, containsNode } from '../lib/inspector-dom-tree'
-import { search } from './Inspector'
+import { inspectorMounted, search } from './Inspector'
 
 interface TreeNodeProps {
   node: InspectedNode
@@ -72,6 +73,57 @@ export function TreeNode(props: TreeNodeProps) {
     return false
   }
 
+  // Plays the highlight animation when the tag or attribute name changes
+  function playHighlightAnimation(element: HTMLElement) {
+    const highlightColor = getComputedStyle(element).getPropertyValue('--vscode-editor-stackFrameHighlightBackground')
+    element.animate(
+      [
+        { backgroundColor: highlightColor },
+        { backgroundColor: 'transparent' },
+      ],
+      {
+        duration: 1500,
+        easing: 'cubic-bezier(0.55, 0, 1, 0.45)',
+        fill: 'forwards',
+      },
+    )
+  }
+
+  // Listen for changes to the target node; play highlight on change
+  function setupTagHighlights(tagElement: HTMLElement) {
+    // Play the highlight animation when a new node is mounted,
+    // Check if the inspector is mounted first to avoid flashing everything at once when you first open the inspector
+    if (inspectorMounted.val) {
+      onMount(() => playHighlightAnimation(tagElement))
+    }
+    createMutationObserver(
+      () => props.node.type === 'element' ? props.node.node : [],
+      { characterData: true, childList: true },
+      () => playHighlightAnimation(tagElement),
+    )
+  }
+
+  // Listen for changes to the target node's attributes; play highlight on change
+  const attrNodeMap = new Map<string, HTMLElement>()
+  function setupAttributeHighlights(attrElement: HTMLElement, attrName: string) {
+    attrNodeMap.set(attrName, attrElement)
+    onCleanup(() => attrNodeMap.delete(attrName))
+  }
+  createMutationObserver(
+    () => props.node.type === 'element' ? props.node.node : [],
+    { attributes: true },
+    (muts) => {
+      for (const mut of muts) {
+        if (mut.type === 'attributes' && mut.attributeName) {
+          const attrElement = attrNodeMap.get(mut.attributeName)
+          if (attrElement) {
+            playHighlightAnimation(attrElement)
+          }
+        }
+      }
+    },
+  )
+
   return (
     <div>
       {/* Highlightable container around the node */}
@@ -104,18 +156,22 @@ export function TreeNode(props: TreeNodeProps) {
             {node => (
               <>
                 {/* Opening tag */}
-                <span class="text-html-tag" data-highlight>&lt;{node().tagName}</span>
+                <span class="text-html-tag">&lt;</span>
+                <span class="text-html-tag" ref={setupTagHighlights}>{node().tagName}</span>
 
                 {/* Attributes */}
                 <For each={node().attributes}>
                   {attr => (
-                    <span data-highlight>
+                    <span>
                       <span class="ml-1 text-html-attribute-name">{attr.name}</span>
                       <Show when={attr.value}>
                         <>
                           <span class="text-html-tag">=</span>
                           <span class="text-html-tag">"
-                            <span class="text-html-attribute-value">
+                            <span
+                              class="text-html-attribute-value"
+                              ref={attrNode => setupAttributeHighlights(attrNode, attr.name)}
+                            >
                               {attr.value}
                             </span>
                             "
@@ -127,7 +183,7 @@ export function TreeNode(props: TreeNodeProps) {
                 </For>
 
                 {/* '>' End of opening tag */}
-                <span class="rounded-r-sm text-html-tag" data-highlight>&gt;</span>
+                <span class="rounded-r-sm text-html-tag">&gt;</span>
 
                 {/* Show an ellipsis when the node is collapsed */}
                 <Show when={isCollapsed()}>

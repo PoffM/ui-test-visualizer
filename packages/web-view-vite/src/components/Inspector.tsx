@@ -1,4 +1,4 @@
-import { Show, createEffect, createSignal } from 'solid-js'
+import { Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
 import { createStore, reconcile } from 'solid-js/store'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
@@ -10,6 +10,8 @@ import { TreeNode } from './TreeNode'
 import { SearchToolbar } from './SearchToolbar'
 
 export const search = createInspectorSearch()
+
+export const inspectorMounted = { val: false }
 
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
@@ -63,6 +65,11 @@ export function Inspector() {
     }
   })
 
+  // Track whether the inspector is mounted; used for the highlight animation
+  inspectorMounted.val = false
+  onMount(() => (inspectorMounted.val = true))
+  onCleanup(() => (inspectorMounted.val = false))
+
   return (
     <div class="h-full w-full flex flex-col">
       <Show when={domTree.tree} keyed={true}>
@@ -83,17 +90,19 @@ export function Inspector() {
           </>
         )}
       </Show>
-      {hoveredRect() && (
-        <div
-          class="fixed pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 z-50"
-          style={{
-            top: `${hoveredRect()!.top}px`,
-            left: `${hoveredRect()!.left}px`,
-            width: `${hoveredRect()!.width}px`,
-            height: `${hoveredRect()!.height}px`,
-          }}
-        />
-      )}
+      <Show when={hoveredRect()}>
+        {rect => (
+          <div
+            class="fixed pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 z-50"
+            style={{
+              top: `${rect().top}px`,
+              left: `${rect().left}px`,
+              width: `${rect().width}px`,
+              height: `${rect().height}px`,
+            }}
+          />
+        )}
+      </Show>
     </div>
   )
 }
