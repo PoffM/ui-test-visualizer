@@ -8,6 +8,7 @@ import { type InspectedNode, getNewDomTree } from './inspector-dom-tree'
 import { createInspectorSearch } from './inspector-search'
 import { TreeNode } from './TreeNode'
 import { SearchToolbar } from './SearchToolbar'
+import { deepElementFromPoint, makeMouseEnterAndLeaveListeners } from './util'
 
 export const search = createInspectorSearch()
 
@@ -40,12 +41,14 @@ export function Inspector() {
 
   // highlight the element under the mouse
   makeEventListener(shadowHost, 'mousemove', (e) => {
-    const el = shadowHost.shadowRoot?.elementFromPoint(e.clientX, e.clientY)
+    const el = shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)
     if (
-      el?.closest('body')
+      // Don't select the inspected UI's 'body' element
+      (el?.closest('body') || (el?.getRootNode() instanceof ShadowRoot && el?.getRootNode() !== shadowHost.shadowRoot))
       // Ignore elements outside the tested UI e.g. the top toolbar
       && !document.body.contains(el)
     ) {
+      setHoveredRect(null) // Set to null first so there is no smooth animation when hovering with the mouse
       setHoveredRect(el?.getBoundingClientRect() ?? null)
     }
   })
@@ -54,9 +57,17 @@ export function Inspector() {
   makeEventListener(shadowHost, 'click', (e) => {
     e.preventDefault()
     e.stopPropagation()
-    const el = shadowHost.shadowRoot?.elementFromPoint(e.clientX, e.clientY)
+    const el = shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)
     setSelectedElement(el ?? null)
   })
+
+  makeMouseEnterAndLeaveListeners(
+    shadowHost,
+    () => {},
+    () => {
+      setHoveredRect(null)
+    },
+  )
 
   // select and highlight the current element matching the search query
   createEffect(() => {
