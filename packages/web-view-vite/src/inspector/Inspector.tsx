@@ -86,12 +86,12 @@ export function Inspector() {
   onCleanup(() => (inspectorMounted.val = false))
 
   return (
-    <div class="h-full w-full flex flex-col">
+    <div class="h-full w-full">
       <Show when={domTree.tree} keyed={true}>
         {tree => (
-          <>
+          <div class="relative z-60 h-full w-full flex flex-col bg-(--vscode-panel-background)">
             <SearchToolbar tree={tree} />
-            <div class="bg-(--vscode-panel-background) text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4 pl-1">
+            <div class="text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4 pl-1">
               <div class="font-[consolas]">
                 <TreeNode
                   node={tree}
@@ -102,13 +102,13 @@ export function Inspector() {
                 />
               </div>
             </div>
-          </>
+          </div>
         )}
       </Show>
       <Show when={hoveredRect()}>
         {rect => (
           <div
-            class="fixed pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 z-50 min-h-[1px] min-w-[1px]"
+            class="fixed z-50 pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 min-h-[1px] min-w-[1px]"
             style={{
               top: `${rect().top}px`,
               left: `${rect().left}px`,
