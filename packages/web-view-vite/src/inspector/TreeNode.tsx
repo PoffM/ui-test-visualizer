@@ -13,6 +13,9 @@ interface TreeNodeProps {
   onSelect: (node: Node | null) => void
 }
 
+/** Map of elements to functions that play the highlight animation for that element in the inspector. */
+const highlightPlayers = new WeakMap<Node, () => void>()
+
 export function TreeNode(props: TreeNodeProps) {
   let container: HTMLDivElement | undefined
 
@@ -74,7 +77,7 @@ export function TreeNode(props: TreeNodeProps) {
   }
 
   // Plays the highlight animation when the tag or attribute name changes
-  function playHighlightAnimation(element: HTMLElement) {
+  function playHighlightAnimation(element: Element) {
     const highlightColor = getComputedStyle(element).getPropertyValue('--vscode-editor-stackFrameHighlightBackground')
     element.animate(
       [
@@ -90,16 +93,31 @@ export function TreeNode(props: TreeNodeProps) {
   }
 
   // Listen for changes to the target node; play highlight on change
-  function setupTagHighlights(tagElement: HTMLElement) {
+  function setupTagHighlights(inspectorEl: HTMLElement) {
+    highlightPlayers.set(props.node.node, () => playHighlightAnimation(inspectorEl))
     // Play the highlight animation when a new node is mounted,
     // Check if the inspector is mounted first to avoid flashing everything at once when you first open the inspector
     if (inspectorMounted.val) {
-      onMount(() => playHighlightAnimation(tagElement))
+      onMount(() => playHighlightAnimation(inspectorEl))
     }
+
+    // For Elements
     createMutationObserver(
       () => props.node.type === 'element' ? props.node.node : [],
       { characterData: true, childList: true },
-      () => playHighlightAnimation(tagElement),
+      () => playHighlightAnimation(inspectorEl),
+    )
+    // For Text nodes
+    createMutationObserver(
+      () => props.node.type === 'text' ? props.node.node : [],
+      { characterData: true },
+      () => {
+        const parent = props.node.node.parentElement
+        if (parent) {
+          highlightPlayers.get(parent)?.()
+        }
+        playHighlightAnimation(inspectorEl)
+      },
     )
   }
 
@@ -210,8 +228,13 @@ export function TreeNode(props: TreeNodeProps) {
             )}
           </Match>
           <Match when={props.node.type === 'shadow-root' && props.node}>
-            {_shadowRoot => (
-              <div>#shadow-root</div>
+            {shadowRoot => (
+              <div>#shadow-root ({shadowRoot().shadowMode})</div>
+            )}
+          </Match>
+          <Match when={props.node.type === 'text' && props.node}>
+            {textNode => (
+              <span ref={setupTagHighlights}>{textNode().text}</span>
             )}
           </Match>
         </Switch>
@@ -226,25 +249,16 @@ export function TreeNode(props: TreeNodeProps) {
             ...props.node.childNodes,
           ].filter(Boolean)}
           >
-            {(child) => {
-              if (child.type === 'text') {
-                return (
-                  <div style={{ 'padding-left': `calc(${(depth + 3) * 1.5} * var(--spacing))` }}>
-                    {child.text}
-                  </div>
-                )
-              }
-              return (
-                <TreeNode
-                  node={child}
-                  depth={depth + 1}
-                  onHover={props.onHover}
-                  collapsedStates={props.collapsedStates}
-                  selectedNode={props.selectedNode}
-                  onSelect={props.onSelect}
-                />
-              )
-            }}
+            {child => (
+              <TreeNode
+                node={child}
+                depth={depth + 1}
+                onHover={props.onHover}
+                collapsedStates={props.collapsedStates}
+                selectedNode={props.selectedNode}
+                onSelect={props.onSelect}
+              />
+            )}
           </For>
           <Show when={props.node.type === 'element' && props.node}>
             {node => (
