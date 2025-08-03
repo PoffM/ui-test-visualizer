@@ -71,8 +71,8 @@ export function Inspector() {
 
   // select and highlight the current element matching the search query
   createEffect(() => {
-    if (search.matchedNodes().length > 0) {
-      const el = search.matchedNodes()[search.currentNodeIndex()]
+    if (search.matchedNodes().size > 0) {
+      const el = [...search.matchedNodes()][search.currentNodeIndex()]
       if (el) {
         setSelectedElement(el)
         setHoveredRect(el.getBoundingClientRect())

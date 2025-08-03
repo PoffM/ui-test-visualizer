@@ -30,27 +30,27 @@ function searchTextInsideTree(tree: InspectedNode, query: string): Element[] {
 
 export function createInspectorSearch() {
   const [searchQuery, setSearchQuery] = createSignal('')
-  const [matchedNodes, setMatchedNodes] = createSignal<Element[]>([])
+  const [matchedNodes, setMatchedNodes] = createSignal<Set<Element>>(new Set())
   const [currentNodeIndex, setCurrentNodeIndex] = createSignal(0)
 
   const handleSearch = (query: string, tree: InspectedNode | null) => {
     setSearchQuery(query)
 
     if (!query || !shadowHost.shadowRoot || !tree) {
-      setMatchedNodes([])
+      setMatchedNodes(new Set<Element>())
       setCurrentNodeIndex(0)
       return
     }
 
-    let nodes: Element[] = []
+    let nodes: Set<Element> = new Set()
     // First try to find nodes by CSS selector
     try {
-      nodes = deepQuerySelectorAll(query, shadowHost.shadowRoot)
+      nodes = new Set(deepQuerySelectorAll(query, shadowHost.shadowRoot))
     }
     catch (e) {}
     // If no nodes found, try to find nodes by text content
-    if (nodes.length === 0) {
-      nodes = searchTextInsideTree(tree, query)
+    if (nodes.size === 0) {
+      nodes = new Set(searchTextInsideTree(tree, query))
     }
     setMatchedNodes(nodes)
     setCurrentNodeIndex(0)
@@ -61,14 +61,14 @@ export function createInspectorSearch() {
   }
 
   const handleNext = () => {
-    if (matchedNodes().length === 0) { return }
-    const nextIndex = (currentNodeIndex() + 1) % matchedNodes().length
+    if (matchedNodes().size === 0) { return }
+    const nextIndex = (currentNodeIndex() + 1) % matchedNodes().size
     setCurrentNodeIndex(nextIndex)
   }
 
   const handlePrev = () => {
-    if (matchedNodes().length === 0) { return }
-    const prevIndex = (currentNodeIndex() - 1 + matchedNodes().length) % matchedNodes().length
+    if (matchedNodes().size === 0) { return }
+    const prevIndex = (currentNodeIndex() - 1 + matchedNodes().size) % matchedNodes().size
     setCurrentNodeIndex(prevIndex)
   }
 

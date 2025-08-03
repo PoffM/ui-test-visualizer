@@ -23,7 +23,7 @@ export function TreeNode(props: TreeNodeProps) {
   const isMatching = () => {
     const node = props.node
     const element = node.type === 'element' ? node.node : node.node.parentElement
-    return !!(element && search.matchedNodes().includes(element))
+    return !!(element && search.matchedNodes().has(element))
   }
   const isSelected = () => props.node.node === props.selectedNode
 

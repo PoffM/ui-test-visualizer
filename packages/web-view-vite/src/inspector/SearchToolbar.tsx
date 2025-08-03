@@ -53,7 +53,7 @@ export function SearchToolbar(props: { tree: InspectedNode }) {
           appearance="icon"
           aria-label="Previous result"
           onClick={() => search.handlePrev()}
-          disabled={search.matchedNodes().length < 2}
+          disabled={search.matchedNodes().size < 2}
         >
           <ChevronUp class="h-4 w-4" />
         </ui-test-visualizer-button>
@@ -61,15 +61,15 @@ export function SearchToolbar(props: { tree: InspectedNode }) {
           appearance="icon"
           aria-label="Next result"
           onClick={() => search.handleNext()}
-          disabled={search.matchedNodes().length < 2}
+          disabled={search.matchedNodes().size < 2}
         >
           <ChevronDown class="h-4 w-4" />
         </ui-test-visualizer-button>
         <span
           class="text-sm text-muted-foreground text-center"
-          classList={{ invisible: !search.matchedNodes().length }}
+          classList={{ invisible: !search.matchedNodes().size }}
         >
-          {`${search.currentNodeIndex() + 1} of ${search.matchedNodes().length}`}
+          {`${search.currentNodeIndex() + 1} of ${search.matchedNodes().size}`}
         </span>
       </div>
     </div>
