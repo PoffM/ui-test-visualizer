@@ -3,13 +3,13 @@ import { querySelectorAll as deepQuerySelectorAll } from 'kagekiri'
 import { shadowHost } from '../App'
 import type { InspectedNode } from '../inspector/inspector-dom-tree'
 
-function searchTextInsideTree(tree: InspectedNode, query: string): Element[] {
-  const nodes: Element[] = []
+function searchTextInsideTree(tree: InspectedNode, query: string): Node[] {
+  const nodes: Node[] = []
 
   const textNodes = tree.childNodes.filter(it => it.type === 'text')
   for (const textNode of textNodes) {
     if (textNode.text.toLowerCase().includes(query.toLowerCase()) && textNode.node.parentElement) {
-      nodes.push(textNode.node.parentElement)
+      nodes.push(textNode.node)
     }
   }
 
@@ -30,7 +30,7 @@ function searchTextInsideTree(tree: InspectedNode, query: string): Element[] {
 
 export function createInspectorSearch() {
   const [searchQuery, setSearchQuery] = createSignal('')
-  const [matchedNodes, setMatchedNodes] = createSignal<Set<Element>>(new Set())
+  const [matchedNodes, setMatchedNodes] = createSignal<Set<Node>>(new Set())
   const [currentNodeIndex, setCurrentNodeIndex] = createSignal(0)
 
   const handleSearch = (query: string, tree: InspectedNode | null) => {
@@ -42,7 +42,7 @@ export function createInspectorSearch() {
       return
     }
 
-    let nodes: Set<Element> = new Set()
+    let nodes: Set<Node> = new Set()
     // First try to find nodes by CSS selector
     try {
       nodes = new Set(deepQuerySelectorAll(query, shadowHost.shadowRoot))

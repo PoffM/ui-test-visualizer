@@ -17,7 +17,7 @@ export const disableHighlightAnimation = { val: true }
 export function Inspector() {
   const [hoveredRect, setHoveredRect] = createSignal<DOMRect | null>(null)
   const [domTree, setDomTree] = createStore<{ tree: InspectedNode | null }>({ tree: getNewDomTree() })
-  const [selectedElement, setSelectedElement] = createSignal<Element | null>(null)
+  const [selectedNode, setSelectedNode] = createSignal<Node | null>(null)
   const collapsedStates = new ReactiveWeakMap<Node, boolean>()
 
   // Update the DOM tree to reflect DOM changes when:
@@ -58,7 +58,7 @@ export function Inspector() {
     e.preventDefault()
     e.stopPropagation()
     const el = shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)
-    setSelectedElement(el ?? null)
+    setSelectedNode(el ?? null)
   })
 
   makeMouseEnterAndLeaveListeners(
@@ -73,9 +73,15 @@ export function Inspector() {
   createEffect(() => {
     if (search.matchedNodes().size > 0) {
       const el = [...search.matchedNodes()][search.currentNodeIndex()]
+      setSelectedNode(el ?? null)
       if (el) {
-        setSelectedElement(el)
-        setHoveredRect(el.getBoundingClientRect())
+        setHoveredRect(
+          el instanceof Element
+            ? el.getBoundingClientRect()
+            : el instanceof Text
+              ? el.parentElement?.getBoundingClientRect() ?? null
+              : null,
+        )
       }
     }
   })
@@ -100,8 +106,8 @@ export function Inspector() {
                   node={tree}
                   onHover={setHoveredRect}
                   collapsedStates={collapsedStates}
-                  selectedNode={selectedElement()}
-                  onSelect={setSelectedElement}
+                  selectedNode={selectedNode()}
+                  onSelect={setSelectedNode}
                 />
               </div>
             </div>

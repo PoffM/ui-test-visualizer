@@ -20,11 +20,7 @@ export function TreeNode(props: TreeNodeProps) {
   let container: HTMLDivElement | undefined
 
   const isCollapsed = () => isCollapsible() ? props.collapsedStates.get(props.node.node) : false
-  const isMatching = () => {
-    const node = props.node
-    const element = node.type === 'element' ? node.node : node.node.parentElement
-    return !!(element && search.matchedNodes().has(element))
-  }
+  const isMatching = () => search.matchedNodes().has(props.node.node)
   const isSelected = () => props.node.node === props.selectedNode
 
   function setCollapsed(value: boolean) {
