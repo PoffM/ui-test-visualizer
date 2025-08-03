@@ -1,4 +1,5 @@
 import { createSignal } from 'solid-js'
+import debounce from 'lodash/debounce'
 
 const STORAGE_KEY_INSPECTOR_HEIGHT = 'ui-test-visualizer.inspector-height'
 const STORAGE_KEY_INSPECTOR_IS_OPEN = 'ui-test-visualizer.inspector-is-open'
@@ -17,7 +18,7 @@ export function createInspectorHeight() {
     // Clamp height between 0 and 80% of viewport height
     const clampedHeight = Math.max(50, Math.min(newHeight, window.innerHeight * 0.8))
     setHeight(clampedHeight)
-    localStorage.setItem(STORAGE_KEY_INSPECTOR_HEIGHT, clampedHeight.toString())
+    persistHeight(clampedHeight)
   }
 
   function toggle() {
@@ -28,7 +29,11 @@ export function createInspectorHeight() {
   return {
     isOpen,
     height,
-    setHeight: updateHeight,
+    updateHeight,
     toggle,
   }
 }
+
+const persistHeight = debounce((height: number) => {
+  localStorage.setItem(STORAGE_KEY_INSPECTOR_HEIGHT, height.toString())
+}, 200)

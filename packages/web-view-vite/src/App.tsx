@@ -64,7 +64,7 @@ export function App() {
           </div>
           <Show when={inspector.isOpen()}>
             <div style={{ height: `${inspector.height()}px` }}>
-              <Resizer onResize={inspector.setHeight} />
+              <Resizer onResize={inspector.updateHeight} />
               <ErrorBoundary fallback={error => (
                 <div class="text-error-foreground p-4">
                   Error showing the inspector{error instanceof Error ? `: ${error.message}` : ''}
