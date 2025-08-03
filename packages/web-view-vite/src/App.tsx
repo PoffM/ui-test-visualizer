@@ -1,5 +1,5 @@
 import * as webviewToolkit from '@vscode/webview-ui-toolkit'
-import { Show, createSignal } from 'solid-js'
+import { ErrorBoundary, Show, createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { createInspectorHeight } from './inspector/inspector-height'
@@ -68,7 +68,14 @@ export function App() {
               class="overflow-y-hidden"
               style={{ height: `${inspector.height()}px` }}
             >
-              <Inspector />
+              <ErrorBoundary fallback={error => (
+                <div class="text-error-foreground p-4">
+                  Error showing the inspector{error instanceof Error ? `: ${error.message}` : ''}
+                </div>
+              )}
+              >
+                <Inspector />
+              </ErrorBoundary>
             </div>
           </Show>
         </div>
