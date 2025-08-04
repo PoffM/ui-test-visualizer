@@ -1,8 +1,11 @@
 import * as webviewToolkit from '@vscode/webview-ui-toolkit'
-import { createSignal } from 'solid-js'
+import { ErrorBoundary, Show, createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
+import { createInspectorHeight } from './inspector/inspector-height'
 import { Toolbar } from './components/Toolbar'
+import { Inspector } from './inspector/Inspector'
+import { Resizer } from './inspector/Resizer'
 
 // Importing the router type from the server file
 
@@ -16,6 +19,7 @@ import { Toolbar } from './components/Toolbar'
     .register(webviewToolkit.vsCodeButton({ prefix }))
     .register(webviewToolkit.vsCodeCheckbox({ prefix }))
     .register(webviewToolkit.vsCodeProgressRing({ prefix }))
+    .register(webviewToolkit.vsCodeTextField({ prefix }))
 }
 
 // TODO put these into a context provider
@@ -32,10 +36,12 @@ export const {
   stylesAreLoading,
 } = createDomReplica()
 
+export const inspector = createInspectorHeight()
+
 export function App() {
   return (
-    <div class="fixed inset-0">
-      <div style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}>
+    <div class="fixed inset-0 flex flex-col">
+      <div class="z-60" style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}>
         <Toolbar />
       </div>
       <div class="relative h-full w-full">
@@ -47,9 +53,28 @@ export function App() {
         </div>
         <div
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
-          class="absolute h-full w-full"
+          class="absolute h-full w-full flex flex-col"
         >
-          {shadowHost}
+          <div
+            style={{
+              height: inspector.isOpen() ? `calc(100% - ${inspector.height()}px)` : '100%',
+            }}
+          >
+            {shadowHost}
+          </div>
+          <Show when={inspector.isOpen()}>
+            <div style={{ height: `${inspector.height()}px` }}>
+              <Resizer onResize={inspector.updateHeight} />
+              <ErrorBoundary fallback={error => (
+                <div class="text-error-foreground p-4">
+                  Error showing the inspector{error instanceof Error ? `: ${error.message}` : ''}
+                </div>
+              )}
+              >
+                <Inspector />
+              </ErrorBoundary>
+            </div>
+          </Show>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import { For, Show, createEffect, createResource, createSignal } from 'solid-js'
 import { firstPatchReceived, flushHtmlPatches, stylesAreLoading } from '../App'
 import '../index.css'
 import { client } from '../lib/panel-client'
-import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from './popover'
+import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from './solid-ui/popover'
 
 export const StyleIcon = Brush
 

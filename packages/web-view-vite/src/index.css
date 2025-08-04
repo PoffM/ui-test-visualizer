@@ -47,10 +47,29 @@
     --warning-foreground: 25 95% 53%;
 
     --error: 0 93% 94%;
-    --error-foreground: 0 84% 60%;
+    --error-foreground: var(--vscode-list-errorForeground);
 
     --ring: 240 4.9% 83.9%;
 
     --radius: 0.5rem;
   }
 }
+
+@theme {
+  /* Colors copied from chrome devtools */
+  --color-html-tag: rgb(142 0 75/100%);
+  --color-html-attribute-name: rgb(142 0 75/100%);
+  --color-html-attribute-value: rgb(8 66 160/100%);
+  --color-html-collapser-arrow: rgb(71 71 71/100%);
+
+}
+
+[data-vscode-theme-kind="vscode-dark"] {
+  /* Colors copied from chrome devtools */
+  --color-html-tag: rgb(124 172 248/100%);
+  --color-html-attribute-name: rgb(168 199 250/100%);
+  --color-html-attribute-value: rgb(254 141 89/100%);
+  --color-html-collapser-arrow: rgb(199 199 199/100%);
+
+}
+

@@ -175,3 +175,64 @@ test('Steps through the Vitest+React+Tailwind@3 Counter example', async ({ brows
     () => !document.querySelector('Tested UI'),
   )
 })
+
+test('Inspector panel basic usage', async ({ browser }) => {
+  const page = await browser.newPage()
+
+  await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react-tailwind4')
+
+  // Open basic.test.tsx
+  await page.locator('.search-label').click()
+  await page.locator('.monaco-findInput > .monaco-inputbox > .ibwrapper > .input').clear()
+  await page.locator('.monaco-findInput > .monaco-inputbox > .ibwrapper > .input').type('inspector-demo.test')
+  await page.locator('.highlight').first().click()
+
+  // Start the visual debug
+  await page.getByRole('button', { name: 'Visually Debug UI' }).click()
+  await page.getByText('Tested UI').waitFor()
+
+  const replicaPanel = page
+    .frameLocator('iframe.webview.ready')
+    .frameLocator('iframe[title="Tested UI"]')
+
+  // Click the OK button on the initial style prompt
+  await replicaPanel.locator('ui-test-visualizer-button[title="Dismiss style prompt"]').click()
+
+  // Wait until the debugger is paused on breakpoint
+  await page.getByText('Paused on breakpoint').waitFor()
+
+  // Open inspector
+  await replicaPanel.getByRole('button', { name: 'Toggle Inspector' }).first().click()
+
+  // Debug step to call the setupUi function
+  const debugHelper = new DebuggerHelper(page)
+  await debugHelper.debugStep()
+
+  // Click the tag inside the inspector for the decrement button inside the nested shadow DOM
+  await replicaPanel.getByText('<buttonid="nested-decrement">').waitFor()
+
+  // Scroll to the bottom of the inspector panel
+  await replicaPanel.getByTestId('Inspector scroll container')
+    .evaluate((container) => {
+      container.scrollTop = container.scrollHeight
+    })
+
+  // Select the decrement button's inspector tag
+  await replicaPanel.getByText('<buttonid="nested-decrement">').click()
+
+  // Search for the buttons in the insepctor UI
+  await replicaPanel.locator(`[name='inspector-search-input']`).type('button')
+
+  // There should be 6 results, including shadow DOMs
+  await replicaPanel.getByText('1 of 6').waitFor()
+
+  // Clear search
+  await replicaPanel.getByTitle('Clear search').click()
+
+  // Search by selector (search for the nested 'Increment' button)
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  await replicaPanel.locator(`[name='inspector-search-input']`).type('#nested-increment')
+
+  // There should be 1 result
+  await replicaPanel.getByText('1 of 1').waitFor()
+})

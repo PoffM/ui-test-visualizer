@@ -1,17 +1,24 @@
 import Sun from 'lucide-solid/icons/sun'
 import Moon from 'lucide-solid/icons/moon'
 import RefreshCw from 'lucide-solid/icons/refresh-cw'
+import Code from 'lucide-solid/icons/code'
 import type { ParentProps } from 'solid-js'
-import { firstPatchReceived, refreshShadow, theme, toggleTheme } from '../App'
+import { firstPatchReceived, inspector, refreshShadow, theme, toggleTheme } from '../App'
 import { StyleIcon, StylePicker } from './StylePicker'
-import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './solid-ui/tooltip'
 
 export function Toolbar() {
   return (
     <div
-      class="flex gap-2 p-2"
+      class="flex gap-2 p-2 bg-(--vscode-panel-background)"
       style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
     >
+      <ToolbarButton
+        onClick={inspector.toggle}
+        label="Toggle Inspector"
+      >
+        <Code />
+      </ToolbarButton>
       <ToolbarButton
         onClick={refreshShadow}
         label="Refresh Panel HTML"

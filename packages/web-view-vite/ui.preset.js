@@ -45,7 +45,7 @@ module.exports = {
         },
         error: {
           DEFAULT: 'hsl(var(--error))',
-          foreground: 'hsl(var(--error-foreground))',
+          foreground: 'var(--error-foreground)',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',

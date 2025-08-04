@@ -3,7 +3,7 @@ import { splitProps } from 'solid-js'
 
 import type { PolymorphicProps } from '@kobalte/core/polymorphic'
 import * as TooltipPrimitive from '@kobalte/core/tooltip'
-import { cn } from '../lib/utils'
+import { cn } from './utils'
 
 const Tooltip: Component<TooltipPrimitive.TooltipRootProps> = (props) => {
   return (

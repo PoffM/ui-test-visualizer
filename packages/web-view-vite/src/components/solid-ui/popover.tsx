@@ -3,7 +3,7 @@ import { onMount, splitProps } from 'solid-js'
 
 import type { PolymorphicProps } from '@kobalte/core/polymorphic'
 import * as PopoverPrimitive from '@kobalte/core/popover'
-import { cn } from '../lib/utils'
+import { cn } from './utils'
 
 const Popover: Component<PopoverPrimitive.PopoverRootProps> = (props) => {
   return <PopoverPrimitive.Root gutter={4} {...props} />
