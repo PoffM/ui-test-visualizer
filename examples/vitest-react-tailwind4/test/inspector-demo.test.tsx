@@ -78,11 +78,10 @@ it('kitchen sink test for inspector development', async () => {
   // === Step 6: Add many attributes to the same element
   const attrsDiv = document.createElement('div')
   attrsDiv.textContent = 'Many attributes on this div'
-  for (let i = 0; i < 100; i++) {
-    const attr = document.createAttribute(`data-attr-${i}`)
-    attr.value = `value-${i}`
-    attrsDiv.setAttributeNode(attr)
-  }
   document.body.appendChild(attrsDiv)
+  for (let i = 0; i < 100; i++) {
+    attrsDiv.setAttribute(`data-attr-${i}`, `value`)
+    attrsDiv.setAttribute(`data-attr-${i}`, `value-${i}`)
+  }
   attrsDiv.appendChild(document.createElement('div'))
 })

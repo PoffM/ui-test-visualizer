@@ -145,6 +145,10 @@ export function TreeNode(props: TreeNodeProps) {
   function setupAttributeHighlights(attrElement: HTMLElement, attrName: string) {
     attrNodeMap.set(attrName, attrElement)
     onCleanup(() => attrNodeMap.delete(attrName))
+
+    if (!disableHighlightAnimation.val) {
+      onMount(() => playHighlightAnimation(attrElement))
+    }
   }
   createMutationObserver(
     () => props.node.type === 'element' ? props.node.node : [],
