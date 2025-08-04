@@ -168,9 +168,9 @@ export function TreeNode(props: TreeNodeProps) {
         ref={container}
         class="relative box-content scroll-m-10 min-w-[200px]"
         classList={{
-          'bg-(--vscode-editor-selectionBackground) shadow-[100vw_0_0_var(--vscode-editor-selectionBackground)]': isSelected(),
-          'bg-(--vscode-searchEditor-findMatchBackground) shadow-[100vw_0_0_var(--vscode-searchEditor-findMatchBackground)]': isMatching() && !isSelected(),
-          'hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]': !isSelected() && !isMatching(),
+          'bg-(--vscode-editor-selectionBackground) shadow-[90vw_0_0_var(--vscode-editor-selectionBackground)]': isSelected(),
+          'bg-(--vscode-searchEditor-findMatchBackground) shadow-[90vw_0_0_var(--vscode-searchEditor-findMatchBackground)]': isMatching() && !isSelected(),
+          'hover:bg-(--vscode-list-hoverBackground) hover:shadow-[90vw_0_0_var(--vscode-list-hoverBackground)]': !isSelected() && !isMatching(),
         }}
         onMouseEnter={() => props.onHover(props.node.node)}
         onMouseLeave={() => props.onHover(null)}
@@ -286,7 +286,7 @@ export function TreeNode(props: TreeNodeProps) {
             {node => (
               // Closing tag for elements
               <div
-                class="flex hover:bg-(--vscode-list-hoverBackground) hover:shadow-[100vw_0_0_var(--vscode-list-hoverBackground)]"
+                class="flex hover:bg-(--vscode-list-hoverBackground) hover:shadow-[90vw_0_0_var(--vscode-list-hoverBackground)]"
                 onMouseEnter={() => props.onHover(node().node)}
                 onMouseLeave={() => props.onHover(null)}
                 style={{ 'padding-left': paddingLeft }}
