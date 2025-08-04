@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './solid-ui/tooltip'
 export function Toolbar() {
   return (
     <div
-      class="flex gap-2 p-2"
+      class="flex gap-2 p-2 bg-(--vscode-panel-background)"
       style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
     >
       <ToolbarButton

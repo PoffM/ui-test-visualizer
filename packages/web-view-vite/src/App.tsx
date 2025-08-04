@@ -41,7 +41,7 @@ export const inspector = createInspectorHeight()
 export function App() {
   return (
     <div class="fixed inset-0 flex flex-col">
-      <div style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}>
+      <div class="z-60" style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}>
         <Toolbar />
       </div>
       <div class="relative h-full w-full">
