@@ -72,6 +72,8 @@ export function Inspector() {
     }
   })
 
+  makeEventListener(window, 'blur', () => setSelectedNode(null))
+
   // Track whether the inspector is mounted; used for the update highlight animation
   disableHighlightAnimation.val = true
   onMount(() => (disableHighlightAnimation.val = false))
