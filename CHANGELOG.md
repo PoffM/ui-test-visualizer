@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.2.0
+
+### Minor Changes
+
+- 86a40b1: Added Inspector UI
+
 ## 1.1.3
 
 ### Patch Changes
