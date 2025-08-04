@@ -1,5 +1,5 @@
 import type { ReactiveWeakMap } from '@solid-primitives/map'
-import { For, Match, Show, Switch, createEffect, on, onCleanup, onMount } from 'solid-js'
+import { For, Match, Show, Switch, createEffect, createMemo, on, onCleanup, onMount } from 'solid-js'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { type InspectedNode, containsNode } from './inspector-dom-tree'
 import { disableHighlightAnimation, search } from './Inspector'
@@ -19,9 +19,32 @@ const highlightPlayers = new WeakMap<Node, () => void>()
 export function TreeNode(props: TreeNodeProps) {
   let container: HTMLDivElement | undefined
 
+  const rendersInline = createMemo(() => {
+    // Has a shadow root -> false
+    if (props.node.type === 'element' && props.node.shadowRoot) { return false }
+
+    // Has no children -> true
+    if (props.node.childNodes.length === 0) { return true }
+
+    // Has a single text child -> true
+    if (props.node.childNodes.length === 1 && props.node.childNodes[0]?.type === 'text') { return true }
+
+    return false
+  })
+
   const isCollapsed = () => isCollapsible() ? props.collapsedStates.get(props.node.node) : false
-  const isMatching = () => search.matchedNodes().has(props.node.node)
-  const isSelected = () => props.node.node === props.selectedNode
+  const isMatching = () => {
+    // When the node is matching
+    return search.matchedNodes().has(props.node.node)
+      // When the only child text node is matching, highlight the whole line with the tag and the text
+      || (rendersInline() && search.matchedNodes().has(props.node.node.childNodes[0]!))
+  }
+  const isSelected = () => {
+    // When the node is matching
+    return props.node.node === props.selectedNode
+      // When the only child text node is selected, highlight the whole line with the tag and the text
+      || (rendersInline() && props.node.node.childNodes[0] === props.selectedNode)
+  }
 
   function setCollapsed(value: boolean) {
     disableHighlightAnimation.val = true
@@ -45,7 +68,7 @@ export function TreeNode(props: TreeNodeProps) {
   }))
 
   createEffect(() => {
-    if (props.node.node === props.selectedNode) {
+    if (isSelected()) {
       container?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
     }
   })
@@ -59,19 +82,6 @@ export function TreeNode(props: TreeNodeProps) {
     if (props.node.type === 'element' && props.node.shadowRoot) { return true }
     if (rendersInline()) { return false }
     return true
-  }
-
-  function rendersInline() {
-    // Has a shadow root -> false
-    if (props.node.type === 'element' && props.node.shadowRoot) { return false }
-
-    // Has no children -> true
-    if (props.node.childNodes.length === 0) { return true }
-
-    // Has a single text child -> true
-    if (props.node.childNodes.length === 1 && props.node.childNodes[0]?.type === 'text') { return true }
-
-    return false
   }
 
   // Plays the highlight animation when the tag or attribute name changes
