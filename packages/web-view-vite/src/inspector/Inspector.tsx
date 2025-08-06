@@ -92,7 +92,7 @@ export function Inspector() {
               class="text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4 pl-1"
               data-testid="Inspector scroll container"
             >
-              <div class="font-[consolas] w-fit">
+              <div class="font-[consolas] min-w-full w-fit">
                 <TreeNode
                   node={tree}
                   onHover={setHoveredNode}
