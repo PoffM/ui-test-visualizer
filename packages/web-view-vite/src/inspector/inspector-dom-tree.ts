@@ -79,10 +79,11 @@ function parseDOMTree(node: Node): InspectedNode {
 
 export function getNewDomTree() {
   const shadowRoot = shadowHost?.shadowRoot
-  if (!shadowRoot) {
+  const body = shadowRoot?.querySelector('body')
+  if (!body) {
     return null
   }
-  const tree = parseDOMTree(shadowRoot.querySelector('body')!)
+  const tree = parseDOMTree(body)
   return tree
 }
 

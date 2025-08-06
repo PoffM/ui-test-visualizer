@@ -172,9 +172,9 @@ export function TreeNode(props: TreeNodeProps) {
         ref={container}
         class="relative box-content scroll-m-10 min-w-[200px]"
         classList={{
-          'bg-(--vscode-editor-selectionBackground) shadow-[90vw_0_0_var(--vscode-editor-selectionBackground)]': isSelected(),
-          'bg-(--vscode-searchEditor-findMatchBackground) shadow-[90vw_0_0_var(--vscode-searchEditor-findMatchBackground)]': isMatching() && !isSelected(),
-          'hover:bg-(--vscode-list-hoverBackground) hover:shadow-[90vw_0_0_var(--vscode-list-hoverBackground)]': !isSelected() && !isMatching(),
+          'bg-(--vscode-editor-selectionBackground)': isSelected(),
+          'bg-(--vscode-searchEditor-findMatchBackground)': isMatching() && !isSelected(),
+          'hover:bg-(--vscode-list-hoverBackground)': !isSelected() && !isMatching(),
         }}
         onMouseEnter={() => props.onHover(props.node.node)}
         onMouseLeave={() => props.onHover(null)}
@@ -235,10 +235,34 @@ export function TreeNode(props: TreeNodeProps) {
                 </Show>
 
                 {/* Show text inline when it's the only child node */}
-                <Show when={rendersInline() && node().childNodes.length === 1 && node().childNodes[0]?.type === 'text' && node().childNodes[0]}>
-                  {(textChild) => {
-                    const textNode = textChild()
-                    return textNode.type === 'text' && <span class="">{textNode.text}</span>
+                <Show when={rendersInline() && node().childNodes.length === 1 && node().childNodes[0]?.type === 'text' && node().childNodes[0]} keyed>
+                  {(textNode) => {
+                    function setupInlineTextHighlights(span: HTMLSpanElement) {
+                      highlightPlayers.set(textNode.node, () => playHighlightAnimation(span))
+
+                      if (!disableHighlightAnimation.val) {
+                        onMount(() => playHighlightAnimation(span))
+                      }
+
+                      createMutationObserver(
+                        () => textNode.node,
+                        { characterData: true },
+                        () => {
+                          // Highlight the inline text
+                          playHighlightAnimation(span)
+
+                          // Also Highlight the parent tag when the text node changes
+                          const parent = textNode.node.parentElement
+                          if (parent) {
+                            highlightPlayers.get(parent)?.()
+                          }
+                        },
+                      )
+                    }
+
+                    return textNode.type === 'text' && (
+                      <span ref={setupInlineTextHighlights}>{textNode.text}</span>
+                    )
                   }}
                 </Show>
 

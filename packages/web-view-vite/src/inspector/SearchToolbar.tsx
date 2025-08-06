@@ -3,16 +3,10 @@ import ChevronUp from 'lucide-solid/icons/chevron-up'
 import X from 'lucide-solid/icons/x'
 import Search from 'lucide-solid/icons/search'
 
-import { Show, createEffect } from 'solid-js'
 import type { InspectedNode } from './inspector-dom-tree'
 import { search } from './Inspector'
 
 export function SearchToolbar(props: { tree: InspectedNode }) {
-  // update the search results when the tree changes
-  createEffect(() => {
-    search.handleSearch(search.searchQuery(), props.tree)
-  })
-
   return (
     <div class="flex items-center gap-2 p-2">
       <ui-test-visualizer-text-field

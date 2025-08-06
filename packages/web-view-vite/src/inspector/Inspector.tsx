@@ -26,6 +26,9 @@ export function Inspector() {
   {
     function updateDomTree() {
       setDomTree(reconcile({ tree: getNewDomTree() }, { key: 'node' }))
+
+      // update the search results when the tree changes
+      search.handleSearch(search.searchQuery(), domTree?.tree)
     }
     makeEventListener(window, 'message', (event) => {
       if (event.data.flushPatches) {
@@ -89,7 +92,7 @@ export function Inspector() {
               class="text-(--vscode-panel-foreground) h-full w-full overflow-scroll pt-2 pb-4 pl-1"
               data-testid="Inspector scroll container"
             >
-              <div class="font-[consolas]">
+              <div class="font-[consolas] w-fit">
                 <TreeNode
                   node={tree}
                   onHover={setHoveredNode}
