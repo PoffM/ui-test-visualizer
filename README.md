@@ -38,7 +38,7 @@ This extension could fail to auto-build your source CSS files, in which case you
 
 ## How It Works
 
-- **Runs setup code before your test**: This extension hooks a script to the beginning of your test process, which adds listeners to mutable DOM method calls, like "appendChild", "removeChild", "setAttribute", etc.
+- **Runs setup code before your test**: This extension hooks a script to the beginning of your test process, adding listeners to mutable DOM method calls, like "appendChild", "removeChild", "setAttribute", etc.
 
   The hooking point into the test depends on your test framework:
 
