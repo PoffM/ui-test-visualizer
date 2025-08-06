@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.2.1
+
+### Patch Changes
+
+- 654c343: Visual tweaks
+
 ## 1.2.0
 
 ### Minor Changes
