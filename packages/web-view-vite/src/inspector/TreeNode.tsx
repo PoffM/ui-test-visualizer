@@ -314,9 +314,10 @@ export function TreeNode(props: TreeNodeProps) {
             {node => (
               // Closing tag for elements
               <div
-                class="flex hover:bg-(--vscode-list-hoverBackground) hover:shadow-[90vw_0_0_var(--vscode-list-hoverBackground)]"
+                class="hover:bg-(--vscode-list-hoverBackground)"
                 onMouseEnter={() => props.onHover(node().node)}
                 onMouseLeave={() => props.onHover(null)}
+                onClick={() => props.onSelect(isSelected() ? null : props.node.node)}
                 style={{ 'padding-left': paddingLeft }}
               >
                 <span class="text-html-tag">&lt;/{node().tagName}&gt;</span>
