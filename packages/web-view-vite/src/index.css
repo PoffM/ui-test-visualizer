@@ -58,7 +58,7 @@
 @theme {
   /* Colors copied from chrome devtools */
   --color-html-tag: rgb(142 0 75/100%);
-  --color-html-attribute-name: rgb(142 0 75/100%);
+  --color-html-attribute-name: rgb(159 67 18/100%);
   --color-html-attribute-value: rgb(8 66 160/100%);
   --color-html-collapser-arrow: rgb(71 71 71/100%);
 
