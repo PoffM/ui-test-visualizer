@@ -46,18 +46,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - run: pnpm run build
-
-      - name: Create Release Pull Request or Publish
+      - name: Check if ready to publish
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: |
-            EXIT_CODE=0
-            pnpm run publish:vscode || EXIT_CODE=1
-            pnpm run publish:ovsx || EXIT_CODE=1
-            exit $EXIT_CODE
-
+          publish: echo "Ready to publish!"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: pnpm run build
+
+      - name: Publish to VSCode Marketplace
+        if: steps.changesets.outputs.published == 'true'
+        run: pnpm run publish:vscode
+        env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Publish to Open VSX marketplace
+        if: steps.changesets.outputs.published == 'true'
+        run: pnpm run publish:ovsx
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
