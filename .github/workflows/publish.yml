@@ -52,7 +52,12 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm run publish
+          publish: |
+            EXIT_CODE=0
+            pnpm run publish:vscode || EXIT_CODE=1
+            pnpm run publish:ovsx || EXIT_CODE=1
+            exit $EXIT_CODE
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

@@ -75,7 +75,8 @@
     "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/build-prod/extension.vsix",
     "code-server-down": "docker compose -f test/docker-compose.yml down",
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down",
-    "publish": "(cd ./build-prod/ && pnpm vsce publish --packagePath ./extension.vsix --allow-missing-repository --skip-license)",
+    "publish:vscode": "pnpm vsce publish --packagePath ./build-prod/extension.vsix --allow-missing-repository --skip-license",
+    "publish:ovsx": "pnpm ovsx publish ./build-prod/extension.vsix",
     "prepare": "(cd packages/extension/vite-package && npm install)"
   },
   "devDependencies": {
@@ -89,6 +90,7 @@
     "del": "^8.0.0",
     "eslint": "^9.30.1",
     "globby": "^14.1.0",
+    "ovsx": "^0.10.5",
     "tsup": "^8.5.0",
     "type-fest": "^4.41.0",
     "typescript": "^5.8.3",
