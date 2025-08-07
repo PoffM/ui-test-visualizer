@@ -50,20 +50,22 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: echo "Ready to publish!"
+          publish: |
+            echo "Ready to publish!"
+            echo "ready-to-publish=true" >> "$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: pnpm run build
 
       - name: Publish to VSCode Marketplace
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.changesets.outputs.ready-to-publish == 'true'
         run: pnpm run publish:vscode
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
       - name: Publish to Open VSX marketplace
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.changesets.outputs.ready-to-publish == 'true'
         run: pnpm run publish:ovsx
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
