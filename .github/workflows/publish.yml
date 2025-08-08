@@ -50,7 +50,7 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: echo "ready-to-publish=true" >> "$GITHUB_OUTPUT"; echo "Ready to publish!"
+          publish: echo "ready-to-publish=true">>"$GITHUB_OUTPUT"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
