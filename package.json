@@ -68,16 +68,23 @@
     }
   },
   "scripts": {
-    "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
+    "prepare": "(cd packages/extension/vite-package && npm install)",
+
     "dev": "rm -rf build-dev && pnpm run -r dev",
-    "test": "pnpm run --filter {./packages/*} test",
+
+    "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
+
     "lint": "tsc",
+
+    "test": "pnpm run --filter {./packages/*} test",
+
     "code-server-up": "docker compose -f test/docker-compose.yml up -d && docker exec vscodeExtension code-server --install-extension /source/build-prod/extension.vsix",
     "code-server-down": "docker compose -f test/docker-compose.yml down",
     "test:e2e": "pnpm run code-server-up && playwright test && pnpm run code-server-down",
+
+    "publish:all": "( pnpm run publish:vscode || P1=$?; pnpm run publish:ovsx || P2=$?; exit $((P1||P2)) )",
     "publish:vscode": "pnpm vsce publish --packagePath ./build-prod/extension.vsix --allow-missing-repository --skip-license",
-    "publish:ovsx": "pnpm ovsx publish ./build-prod/extension.vsix",
-    "prepare": "(cd packages/extension/vite-package && npm install)"
+    "publish:ovsx": "pnpm ovsx publish ./build-prod/extension.vsix"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.19.1",
