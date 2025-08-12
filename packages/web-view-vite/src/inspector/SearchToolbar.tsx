@@ -1,10 +1,10 @@
 import ChevronDown from 'lucide-solid/icons/chevron-down'
 import ChevronUp from 'lucide-solid/icons/chevron-up'
-import X from 'lucide-solid/icons/x'
 import Search from 'lucide-solid/icons/search'
-
-import type { InspectedNode } from './inspector-dom-tree'
+import X from 'lucide-solid/icons/x'
+import { inspector } from '../App'
 import { search } from './Inspector'
+import type { InspectedNode } from './inspector-dom-tree'
 
 export function SearchToolbar(props: { tree: InspectedNode }) {
   return (
@@ -66,6 +66,14 @@ export function SearchToolbar(props: { tree: InspectedNode }) {
           {`${search.currentNodeIndex() + 1} of ${search.matchedNodes().size}`}
         </span>
       </div>
+      <ui-test-visualizer-button
+        appearance="icon"
+        aria-label="Close inspector"
+        title="Close inspector"
+        onClick={() => inspector.toggle()}
+      >
+        <X class="h-4 w-4" />
+      </ui-test-visualizer-button>
     </div>
   )
 }

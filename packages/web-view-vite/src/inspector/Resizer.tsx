@@ -37,7 +37,7 @@ export function Resizer(props: ResizerProps) {
       {/* invisible drag handle with bigger hitbox than the visible line */}
       <div class="absolute w-full h-3 -top-1.5 cursor-ns-resize flex flex-col justify-center" onMouseDown={handleMouseDown} />
       {/* visible drag handle line */}
-      <hr class="h-[3px] bg-[var(--vscode-panel-border)]" />
+      <hr class="h-[2px] bg-[var(--vscode-panel-border)]" />
     </div>
   )
 }
