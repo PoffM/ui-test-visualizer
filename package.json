@@ -105,7 +105,6 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "jest-editor-support@31.1.2": "patches/jest-editor-support@31.1.2.patch",
       "jest-config@29.7.0": "patches/jest-config@29.7.0.patch"
     }
   }
