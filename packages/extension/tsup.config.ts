@@ -2,6 +2,7 @@ import fsSync from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'pathe'
 import { defineConfig } from 'tsup'
+import { build as esbuild } from 'esbuild'
 import { globby } from 'globby'
 import { deleteAsync } from 'del'
 
@@ -26,13 +27,13 @@ export default defineConfig((options) => {
       'transform-css': './src/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', '@tailwindcss/oxide', './transform-css'],
+    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', './transform-css'],
     noExternal: [
-      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(@tailwindcss\/oxide)|(.\/transform-css)).)*$/,
+      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(.\/transform-css)).)*$/,
       '@vscode/extension-telemetry',
     ],
     // Vite handles the webview src watching
-    ignoreWatch: ['src/web-view-vite'],
+    ignoreWatch: ['src/web-view-vite', outDir],
     target: 'esnext',
     env: {
       NODE_ENV: options.watch ? 'development' : 'production',
@@ -147,6 +148,27 @@ export default defineConfig((options) => {
           await deleteAsync(toDelete.map(f => path.join(to, f)), { force: true })
 
           console.log('Copied Vite and its dependencies to the built extension\'s node_modules dir')
+        }),
+      },
+      {
+        name: 'copy-tailwind-wasm',
+        buildEnd: lodash.once(async () => {
+          console.log('Copying tailwind wasm file to the built extension\'s node_modules dir')
+          await fs.cp(
+            path.join(__dirname, './node_modules/@tailwindcss/oxide-wasm32-wasi/tailwindcss-oxide.wasm32-wasi.wasm'),
+            path.join(outDir, 'tailwindcss-oxide.wasm32-wasi.wasm'),
+          )
+
+          console.log('Copying tailwind wasi-worker.mjs to the build dir')
+          await esbuild({
+            entryPoints: ['./src/tailwind-wasi-worker.mjs'],
+            bundle: true,
+            treeShaking: true,
+            outfile: path.join(outDir, 'wasi-worker.mjs'),
+            format: 'esm',
+            target: 'esnext',
+            external: ['node:*'],
+          })
         }),
       },
     ],
