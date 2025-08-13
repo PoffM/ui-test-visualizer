@@ -159,7 +159,7 @@ export default defineConfig((options) => {
             path.join(outDir, 'tailwindcss-oxide.wasm32-wasi.wasm'),
           )
 
-          console.log('Copying tailwind wasi-worker file to the build dir')
+          console.log('Copying tailwind wasi-worker.mjs to the build dir')
           await esbuild({
             entryPoints: ['./src/tailwind-wasi-worker.mjs'],
             bundle: true,
@@ -167,7 +167,7 @@ export default defineConfig((options) => {
             outfile: path.join(outDir, 'wasi-worker.mjs'),
             format: 'esm',
             target: 'esnext',
-            external: ['node:fs', 'node:module', 'node:path', 'node:wasi', 'node:worker_threads'],
+            external: ['node:*'],
           })
         }),
       },

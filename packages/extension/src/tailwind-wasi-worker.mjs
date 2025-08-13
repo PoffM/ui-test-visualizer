@@ -1,4 +1,5 @@
-import fs from 'node:fs'
+/// This file is copied and adapted from the wasi-worker.mjs file at https://github.com/napi-rs/napi-rs/blob/7625570cb2f9b99234addbc6d5dca0b16f294b8d/examples/napi/wasi-worker.mjs.
+
 import { createRequire } from 'node:module'
 import { parse } from 'node:path'
 import { WASI } from 'node:wasi'
@@ -17,9 +18,6 @@ Object.assign(globalThis, {
   self: globalThis,
   require,
   Worker,
-  importScripts(f) {
-    ;(0, eval)(`${fs.readFileSync(f, 'utf8')}//# sourceURL=${f}`)
-  },
   postMessage(msg) {
     if (parentPort) {
       parentPort.postMessage(msg)
