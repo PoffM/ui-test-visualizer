@@ -19,7 +19,6 @@ export default defineConfig((options) => {
   )
 
   return {
-    metafile: true,
     treeshake: !options.watch,
     entry: {
       'extension': './src/extension.ts',
@@ -131,15 +130,22 @@ export default defineConfig((options) => {
             { dereference: true, recursive: true, force: true },
           )
 
-          // Use cross-platform esbuild-wasm instead of native per-platform esbuild packages
-          // This should be done in package.json's "overrides" section, but that has no effect.
-          // TODO try "overrides" again after this issue is solved: https://github.com/npm/cli/issues/5443l
-          await deleteAsync(path.join(to, 'esbuild'), { force: true })
-          await deleteAsync(path.join(to, '@esbuild'), { force: true })
-          await fs.rename(
-            path.join(to, 'esbuild-wasm'),
-            path.join(to, 'esbuild'),
-          )
+          // TODO find a better way to do this:
+          // We only use Vite for the 'preprocessCSS' function, but Vite needs to have an 'esbuild' package in node_modules to work.
+          // esbuild seems to never actually be used through the extension, so we delete the esbuild binary anyway to reduce bundle size.
+          //
+          // eslint-disable-next-line no-lone-blocks
+          {
+            // Use cross-platform esbuild-wasm instead of native per-platform esbuild packages
+            await deleteAsync(path.join(to, 'esbuild'), { force: true })
+            await deleteAsync(path.join(to, '@esbuild'), { force: true })
+            await fs.rename(
+              path.join(to, 'esbuild-wasm'),
+              path.join(to, 'esbuild'),
+            )
+            // Then delete the wasm file anyway...
+            await deleteAsync(path.join(to, 'esbuild/esbuild.wasm'), { force: true })
+          }
 
           // Delete unused files
           const toDelete = (await globby(
