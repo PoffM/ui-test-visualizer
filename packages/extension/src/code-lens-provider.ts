@@ -9,6 +9,7 @@ import { CodeLens, Range } from 'vscode'
 interface TestBlock {
   name: string
   span: [number, number]
+  firstStatementStartIdx: number | null
 }
 
 const AcornTsParser = AcornParser.extend(acornTsPlugin({ jsx: true }))
@@ -37,17 +38,26 @@ export const codeLensProvider: vscode.CodeLensProvider = {
         enter(node) {
           if (node.type === 'CallExpression' && ['it', 'fit', 'test'].includes(node?.callee.name)) {
             const name = node?.arguments?.[0]?.value
+            let firstStatementStartIdx: number | null = Number(node?.arguments?.[1]?.body?.body?.[0]?.start ?? undefined)
+            if (Number.isNaN(firstStatementStartIdx)) {
+              firstStatementStartIdx = null
+            }
+
             if (typeof name === 'string') {
-              testBlocks.push({ name, span: [node.start, node.end] })
+              testBlocks.push({
+                name,
+                span: [node.start, node.end],
+                firstStatementStartIdx,
+              })
             }
           }
         },
       })
 
-      for (const { name, range } of spansToVsCodeRanges(code, testBlocks)) {
+      for (const { name, range, firstStatementStartLine } of spansToVsCodeRanges(code, testBlocks)) {
         codeLenses.push(
           new CodeLens(range, {
-            arguments: [path.resolve(document.fileName), name, [range.start.line, range.end.line]],
+            arguments: [path.resolve(document.fileName), name, [range.start.line, range.end.line], firstStatementStartLine],
             title: 'Visually Debug UI',
             command: 'ui-test-visualizer.visuallyDebugUI',
           }),
@@ -66,7 +76,11 @@ export const codeLensProvider: vscode.CodeLensProvider = {
 function spansToVsCodeRanges(
   code: string,
   testBlocks: TestBlock[],
-): { name: string, range: Range }[] {
+): {
+    name: string
+    range: Range
+    firstStatementStartLine: number | null
+  }[] {
   // Find newline indices using regex
   const newlineIndices: number[] = []
   for (const match of code.matchAll(/\n/g)) {
@@ -89,11 +103,15 @@ function spansToVsCodeRanges(
     return [line, col]
   }
 
-  return testBlocks.map(({ name, span: [start, end] }) => ({
-    name,
-    range: new Range(
-      ...findLineAndColumn(start),
-      ...findLineAndColumn(end),
-    ),
-  }))
+  return testBlocks.map((testBlock) => {
+    const [start, end] = testBlock.span
+    return ({
+      name: testBlock.name,
+      range: new Range(
+        ...findLineAndColumn(start),
+        ...findLineAndColumn(end),
+      ),
+      firstStatementStartLine: testBlock.firstStatementStartIdx ? findLineAndColumn(testBlock.firstStatementStartIdx)[0] : null,
+    })
+  })
 }
