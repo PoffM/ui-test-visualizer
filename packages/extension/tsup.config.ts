@@ -19,6 +19,7 @@ export default defineConfig((options) => {
   )
 
   return {
+    metafile: true,
     treeshake: !options.watch,
     entry: {
       'extension': './src/extension.ts',
@@ -27,9 +28,9 @@ export default defineConfig((options) => {
       'transform-css': './src/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', './transform-css'],
+    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', './transform-css', 'babel-jest', '@babel/core'],
     noExternal: [
-      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(.\/transform-css)).)*$/,
+      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(.\/transform-css)|(babel-jest)|(@babel\/core)).)*$/,
       '@vscode/extension-telemetry',
     ],
     // Vite handles the webview src watching

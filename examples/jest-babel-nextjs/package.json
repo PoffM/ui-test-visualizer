@@ -10,6 +10,7 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@babel/runtime": "^7.28.2",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "14.6.1",
@@ -19,6 +20,7 @@
     "identity-obj-proxy": "3.0.0",
     "jest": "30.0.4",
     "jest-environment-jsdom": "30.0.4",
+    "ts-node": "^10.9.2",
     "typescript": "5.8.3"
   }
 }
