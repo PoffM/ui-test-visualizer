@@ -158,17 +158,23 @@ export default defineConfig((options) => {
         }),
       },
       {
-        name: 'copy-tailwind-wasm',
+        name: 'copy-wasm-files',
         buildEnd: lodash.once(async () => {
-          console.log('Copying tailwind wasm file to the built extension\'s node_modules dir')
+          console.log('Copying Tailwind wasm file to the build dir')
           await fs.cp(
             path.join(__dirname, './node_modules/@tailwindcss/oxide-wasm32-wasi/tailwindcss-oxide.wasm32-wasi.wasm'),
             path.join(outDir, 'tailwindcss-oxide.wasm32-wasi.wasm'),
           )
 
-          console.log('Copying tailwind wasi-worker.mjs to the build dir')
+          console.log('Copying Oxc parser wasm file to the build dir')
+          await fs.cp(
+            path.join(__dirname, './node_modules/@oxc-parser/binding-wasm32-wasi/parser.wasm32-wasi.wasm'),
+            path.join(outDir, 'parser.wasm32-wasi.wasm'),
+          )
+
+          console.log('Copying wasi-worker.mjs to the build dir')
           await esbuild({
-            entryPoints: ['./src/tailwind-wasi-worker.mjs'],
+            entryPoints: ['./src/wasi-worker.mjs'],
             bundle: true,
             treeShaking: true,
             outfile: path.join(outDir, 'wasi-worker.mjs'),

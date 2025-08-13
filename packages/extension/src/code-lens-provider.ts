@@ -1,7 +1,4 @@
 import { walk } from 'estree-walker'
-// import { parseSync as oxcParse } from 'oxc-parser'
-import { Parser as AcornParser } from 'acorn'
-import { tsPlugin as acornTsPlugin } from '@sveltejs/acorn-typescript'
 import path from 'pathe'
 import type * as vscode from 'vscode'
 import { CodeLens, Range } from 'vscode'
@@ -9,45 +6,49 @@ import { CodeLens, Range } from 'vscode'
 interface TestBlock {
   name: string
   span: [number, number]
-  firstStatementStartIdx: number | null
+  firstStatementStartChar: number | null
 }
 
-const AcornTsParser = AcornParser.extend(acornTsPlugin({ jsx: true }))
+interface ProcessedTestBlock {
+  name: string
+  range: Range
+  firstStatementStartLine: number | null
+}
 
 export const codeLensProvider: vscode.CodeLensProvider = {
-  provideCodeLenses(document) {
+  async provideCodeLenses(document) {
     try {
       const codeLenses: vscode.CodeLens[] = []
 
       const code = document.getText()
 
-      // const parsed = oxcParse(document.fileName, code, {})
-      const parsed = AcornTsParser.parse(code, {
-        ecmaVersion: 'latest',
-        // sourceType: 'module',
-        allowAwaitOutsideFunction: true,
-        allowHashBang: true,
-        allowImportExportEverywhere: true,
-        allowReserved: true,
-        allowReturnOutsideFunction: true,
-        allowSuperOutsideMethod: true,
-      })
+      // @ts-expect-error normally we don't import directly from the wasm package,
+      // but bundling is easier this way because the main oxc-parser package tries to import the native modules first,
+      // which fails during build.
+
+      // Also use 'await import' here to wait until a test file is opened before loading the wasm file.
+      // Idk if this really makes a difference.
+      const { parseSync } = await import('@oxc-parser/binding-wasm32-wasi')
+
+      const parsed = parseSync(document.fileName, code, {})
+      const programJson = parsed.program
+      const program = JSON.parse(programJson)
 
       const testBlocks: TestBlock[] = []
-      walk(parsed, {
+      walk(program, {
         enter(node) {
           if (node.type === 'CallExpression' && ['it', 'fit', 'test'].includes(node?.callee.name)) {
             const name = node?.arguments?.[0]?.value
-            let firstStatementStartIdx: number | null = Number(node?.arguments?.[1]?.body?.body?.[0]?.start ?? undefined)
-            if (Number.isNaN(firstStatementStartIdx)) {
-              firstStatementStartIdx = null
+            let firstStatementStartChar: number | null = Number(node?.arguments?.[1]?.body?.body?.[0]?.start ?? undefined)
+            if (Number.isNaN(firstStatementStartChar)) {
+              firstStatementStartChar = null
             }
 
             if (typeof name === 'string') {
               testBlocks.push({
                 name,
                 span: [node.start, node.end],
-                firstStatementStartIdx,
+                firstStatementStartChar,
               })
             }
           }
@@ -68,7 +69,7 @@ export const codeLensProvider: vscode.CodeLensProvider = {
     }
     catch (e) {
       // Ignore error and keep showing Run/Debug buttons at same position
-      console.error('jest-editor-support parser threw error', e)
+      console.error('Oxc wasm parser parser threw error', e)
     }
   },
 }
@@ -76,11 +77,7 @@ export const codeLensProvider: vscode.CodeLensProvider = {
 function spansToVsCodeRanges(
   code: string,
   testBlocks: TestBlock[],
-): {
-    name: string
-    range: Range
-    firstStatementStartLine: number | null
-  }[] {
+): ProcessedTestBlock[] {
   // Find newline indices using regex
   const newlineIndices: number[] = []
   for (const match of code.matchAll(/\n/g)) {
@@ -111,7 +108,7 @@ function spansToVsCodeRanges(
         ...findLineAndColumn(start),
         ...findLineAndColumn(end),
       ),
-      firstStatementStartLine: testBlock.firstStatementStartIdx ? findLineAndColumn(testBlock.firstStatementStartIdx)[0] : null,
+      firstStatementStartLine: testBlock.firstStatementStartChar ? findLineAndColumn(testBlock.firstStatementStartChar)[0] : null,
     })
   })
 }
