@@ -143,7 +143,7 @@ export default defineConfig((options) => {
               path.join(to, 'esbuild-wasm'),
               path.join(to, 'esbuild'),
             )
-            // Then delete the wasm file anyway...
+            // Then delete the wasm file anyway, because esbuild is never used during extension usage
             await deleteAsync(path.join(to, 'esbuild/esbuild.wasm'), { force: true })
           }
 
