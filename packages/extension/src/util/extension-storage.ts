@@ -1,6 +1,6 @@
-import type { z } from 'zod'
-import type * as vscode from 'vscode'
 import type { JsonValue } from 'type-fest'
+import type * as vscode from 'vscode'
+import type { z } from 'zod'
 
 export interface SafeStorage<T> {
   get: <P extends (keyof T & string)>(key: P) => Promise<T[P] | undefined>
@@ -26,7 +26,7 @@ export function extensionStorage<T extends Record<string, JsonValue>>(
         throw new Error(`Property ${prop.toString()} not defined in schema`)
       }
 
-      const validator = schema[prop]
+      const validator: z.ZodType<T[typeof prop]> = schema[prop]
       if (!validator) {
         throw new Error(`No validator for Extension globalState property ${prop.toString()}`)
       }

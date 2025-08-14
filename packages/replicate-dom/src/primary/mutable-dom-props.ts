@@ -27,6 +27,7 @@ type ExtractMethods<T> = {
 
 type MethodKeys<T> = keyof ExtractMethods<Exclude<T, null | undefined>>
 
+// @ts-expect-error allow it
 export interface MutableDomDescriptorMap extends Map<unknown, unknown> {
   get: <E extends Node>(key: new () => E) => DOMNodeSpyConfig<E> | undefined
   set: <E extends Node>(key: new () => E, value: DOMNodeSpyConfig<E>) => this
@@ -46,7 +47,7 @@ export function MUTABLE_DOM_PROPS(
   )
   domClasses.unshift(win.Location)
 
-  // @ts-expect-error Cast the map to my type of map
+  // @ts-expect-error allow it
   const map: MutableDomDescriptorMap = new Map()
 
   // Loop through Node and its subclasses to find all the mutable properties.
