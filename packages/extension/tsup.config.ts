@@ -17,7 +17,6 @@ export default defineConfig((options) => {
   )
 
   return {
-    metafile: true,
     treeshake: !options.watch,
     entry: {
       'extension': './src/extension.ts',
