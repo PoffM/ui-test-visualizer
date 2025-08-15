@@ -176,23 +176,24 @@ function StylePickerMenu(
             search(e.currentTarget.value)
           }}
         />
-        <Show when={(files()?.filter(file => file.enabled)?.length ?? 0) > 0}>
-          <div class="flex gap-2">
-            <div class="flex items-center">
-              {enabledFiles().length} style{enabledFiles().length > 1 ? 's' : ''} enabled
-            </div>
-            <ui-test-visualizer-button
-              appearance="secondary"
-              onClick={disableAllFiles}
-            >
-              <X class="h-4 w-4" />
-              Deselect All
-            </ui-test-visualizer-button>
+        <div
+          class="flex gap-2"
+          style={{ visibility: (files()?.filter(file => file.enabled)?.length ?? 0) > 0 ? 'visible' : 'hidden' }}
+        >
+          <div class="flex items-center">
+            {enabledFiles().length} style{enabledFiles().length > 1 ? 's' : ''} enabled
           </div>
-        </Show>
+          <ui-test-visualizer-button
+            appearance="secondary"
+            onClick={disableAllFiles}
+          >
+            <X class="h-4 w-4" />
+            Disable All
+          </ui-test-visualizer-button>
+        </div>
       </div>
       <div class="overflow-y-auto max-h-[400px] pb-4">
-        <div class="w-fit">
+        <div class="w-fit min-w-full">
           <div class="space-y-2">
             <Show when={filteredFiles()?.length === 0}>
               <div>No CSS files found in workspace</div>
@@ -200,8 +201,8 @@ function StylePickerMenu(
             <For each={Object.entries(groupedFiles())}>{([directory, files]) => (
               <div class="w-full space-y-1 pr-2">
                 <div class="flex items-start space-x-2 py-1 border-b border-border">
-                  <Folder class="h-4 w-4 shrink-0 mt-[1px] text-muted-foreground" />
-                  <span class="text-sm font-medium text-muted-foreground font-mono">
+                  <Folder class="h-4 w-4 shrink-0 mt-[1px] opacity-90" />
+                  <span class="text-sm font-medium font-mono opacity-90">
                     {directory
                       ? directory.split('/').map((part, i) => (
                         <>
@@ -218,8 +219,9 @@ function StylePickerMenu(
                       const filename = file.displayPath.split('/').pop() || file.displayPath
                       return (
                         <label class="px-2 py-1 flex items-center gap-3 cursor-pointer select-none hover:bg-accent">
-                          <div class="flex gap-2">
+                          <div class="flex gap-2 items-start">
                             <ui-test-visualizer-checkbox
+                              class="mt-[2px]"
                               checked={file.enabled}
                               onChange={(e: unknown) => {
                                 const checked = Boolean(get(e, 'currentTarget.checked'))
@@ -253,7 +255,6 @@ function StylePickerMenu(
                     }}
                   </For>
                 </div>
-
               </div>
             )}
             </For>
@@ -294,11 +295,15 @@ function groupFilesByDirectory(files: CssFile[]) {
   const groups: { [key: string]: CssFile[] } = {}
 
   for (const file of files) {
-    const directory = file.displayPath.split('/').slice(0, -1).join('/')
+    let directory = file.displayPath.split('/').slice(0, -1).join('/')
+    if (file.displayPath.startsWith('/')) {
+      directory = `/${directory}`
+    }
+
     if (!groups[directory]) {
       groups[directory] = []
     }
-    groups[directory].push(file)
+    groups[directory]?.push(file)
   }
 
   // Sort directories and files within each directory
