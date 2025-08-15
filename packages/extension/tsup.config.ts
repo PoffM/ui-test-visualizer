@@ -3,8 +3,6 @@ import fs from 'node:fs/promises'
 import path from 'pathe'
 import { defineConfig } from 'tsup'
 import { build as esbuild } from 'esbuild'
-import { globby } from 'globby'
-import { deleteAsync } from 'del'
 
 // eslint-disable-next-line import/no-named-default
 import { default as lodash } from 'lodash'
@@ -27,12 +25,12 @@ export default defineConfig((options) => {
       'transform-css': './src/transform-css/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', './transform-css', 'babel-jest', '@babel/core'],
+    external: ['vscode', 'jest-resolve/build/default_resolver', './transform-css'],
     noExternal: [
-      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(.\/transform-css)|(babel-jest)|(@babel\/core)).)*$/,
+      /^((?!(vscode)|(jest-resolve\/build\/default_resolver)|(.\/transform-css)).)*$/,
       '@vscode/extension-telemetry',
     ],
-    // Vite handles the webview src watching
+    // Vite handles the webview's hot reload
     ignoreWatch: ['src/web-view-vite', outDir],
     target: 'esnext',
     env: {
@@ -123,7 +121,7 @@ export default defineConfig((options) => {
             path.join(outDir, 'parser.wasm32-wasi.wasm'),
           )
 
-          console.log('Copying wasi-worker.mjs to the build dir')
+          console.log('Building wasi-worker.mjs')
           await esbuild({
             entryPoints: ['./src/wasi-worker.mjs'],
             bundle: true,
