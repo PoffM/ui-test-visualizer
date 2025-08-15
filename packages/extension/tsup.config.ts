@@ -17,6 +17,7 @@ export default defineConfig((options) => {
   )
 
   return {
+    metafile: true,
     treeshake: !options.watch,
     entry: {
       'extension': './src/extension.ts',
@@ -25,9 +26,9 @@ export default defineConfig((options) => {
       'transform-css': './src/transform-css/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'jest-resolve/build/default_resolver', './transform-css'],
+    external: ['vscode', 'jest-resolve/build/default_resolver', 'jiti', './transform-css', 'babel-jest', '@babel/core'],
     noExternal: [
-      /^((?!(vscode)|(jest-resolve\/build\/default_resolver)|(.\/transform-css)).)*$/,
+      /^((?!(vscode)|(jest-resolve\/build\/default_resolver)|(jiti)|(babel-jest)|(@babel\/core)|(.\/transform-css)).)*$/,
       '@vscode/extension-telemetry',
     ],
     // Vite handles the webview's hot reload
