@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { Counter } from '../components/Counter'
 
 it('simple react testing library test', () => {
-  render(<Counter />)
+  setupUi() // For some reason with Vitest 3, you need to press the Step Over button 3 times if you call 'render' directly here.
 
   fireEvent.click(screen.getByText('Increment'))
   fireEvent.click(screen.getByText('Increment'))
@@ -11,3 +11,7 @@ it('simple react testing library test', () => {
 
   expect(screen.getByText('Count: 1')).toBeTruthy()
 })
+
+function setupUi() {
+  render(<Counter />)
+}
