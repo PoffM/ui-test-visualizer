@@ -68,7 +68,6 @@
     }
   },
   "scripts": {
-    "prepare": "(cd packages/extension/vite-package && npm install)",
     "dev": "rm -rf build-dev && pnpm run -r dev",
     "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
     "lint": "tsc",
