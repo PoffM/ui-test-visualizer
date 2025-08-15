@@ -1,5 +1,12 @@
 # ui-test-visualizer
 
+## 1.2.2
+
+### Patch Changes
+
+- ef26905: Improve style picker UI
+- b2c250d: Improve performance, reduce bundle size
+
 ## 1.2.1
 
 ### Patch Changes
