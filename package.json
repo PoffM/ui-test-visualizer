@@ -91,8 +91,7 @@
     "ovsx": "^0.10.5",
     "tsup": "^8.5.0",
     "type-fest": "^4.41.0",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "typescript": "^5.9.2"
   },
   "pnpm": {
     "patchedDependencies": {
