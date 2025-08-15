@@ -7,25 +7,25 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@kobalte/core": "0.13.10",
+    "@kobalte/core": "0.13.11",
     "@kobalte/utils": "^0.9.1",
     "@solid-primitives/event-listener": "^2.4.3",
     "@solid-primitives/map": "^0.7.2",
     "@solid-primitives/mutation-observer": "^1.2.2",
-    "@trpc/client": "^11.4.3",
-    "@trpc/server": "^11.4.3",
+    "@trpc/client": "^11.4.4",
+    "@trpc/server": "^11.4.4",
     "@vscode/webview-ui-toolkit": "^1.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "csstype": "^3.1.3",
     "kagekiri": "^2.0.0",
     "lodash": "^4.17.21",
-    "lucide-solid": "^0.525.0",
+    "lucide-solid": "^0.539.0",
     "replicate-dom": "workspace:*",
-    "solid-js": "^1.9.7",
+    "solid-js": "^1.9.9",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "vite": "^6.3.5",
+    "vite": "^7.1.2",
     "ws": "^8.18.3"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "@types/lodash": "^4.17.20",
     "@types/vscode-webview": "^1.57.5",
     "@types/ws": "^8.18.1",
-    "tailwindcss": "^4.1.8",
-    "vite-plugin-solid": "^2.11.7"
+    "tailwindcss": "^4.1.11",
+    "vite-plugin-solid": "^2.11.8"
   }
 }

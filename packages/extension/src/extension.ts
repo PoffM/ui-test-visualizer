@@ -40,10 +40,11 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 
   const debugTest = vscode.commands.registerCommand(
     'ui-test-visualizer.visuallyDebugUI',
-    (testFile: unknown, testName: unknown, startAndEndLines: unknown) => visuallyDebugUI(
+    (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => visuallyDebugUI(
       testFile,
       testName,
       startAndEndLines,
+      firstStatementStartLine,
       extensionContext,
     ),
   )
@@ -91,6 +92,7 @@ export let visuallyDebugUI = async (
   testFile: unknown,
   testName: unknown,
   startAndEndLines: unknown,
+  firstStatementStartLine: unknown,
   extensionContext: vscode.ExtensionContext,
 ) => {
   const storage = myExtensionStorage(extensionContext)
@@ -115,11 +117,16 @@ export let visuallyDebugUI = async (
       () => panelController.flushPatches(),
     )
 
-    const breakpointInfoParsed = z.tuple([z.number(), z.number()])
-      .safeParse(startAndEndLines)
-    const autoBreakpoint = breakpointInfoParsed.success
-      ? autoSetFirstBreakpoint(testFile, breakpointInfoParsed.data)
-      : null
+    const autoBreakpoint = (() => {
+      try {
+        return autoSetFirstBreakpoint(
+          testFile,
+          z.tuple([z.number(), z.number()]).parse(startAndEndLines),
+          z.number().nullable().parse(firstStatementStartLine),
+        )
+      }
+      catch {}
+    })()
 
     await panelController.openPanel(sessionTracker)
 

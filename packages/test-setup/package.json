@@ -6,8 +6,7 @@
     "lodash": "^4.17.21",
     "pathe": "^2.0.3",
     "replicate-dom": "workspace:*",
-    "ws": "^8.18.3",
-    "zod": "^3.25.75"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20"

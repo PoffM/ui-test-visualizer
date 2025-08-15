@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+/* To make sure imports from another file also work */
+@import './imported-style.css';
+
 .green-button {
   /* Hide the button by default.
      It should have the 'visible' class in the JSX to make

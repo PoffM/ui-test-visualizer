@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path from 'pathe'
 import type vscode from 'vscode'
 import type { z } from 'zod'
 import { findUp } from 'find-up'

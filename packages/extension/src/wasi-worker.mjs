@@ -1,9 +1,9 @@
 /// This file is copied and adapted from the wasi-worker.mjs file at https://github.com/napi-rs/napi-rs/blob/7625570cb2f9b99234addbc6d5dca0b16f294b8d/examples/napi/wasi-worker.mjs.
 
 import { createRequire } from 'node:module'
-import { parse } from 'node:path'
 import { WASI } from 'node:wasi'
 import { Worker, parentPort } from 'node:worker_threads'
+import { parse } from 'pathe'
 import { MessageHandler, getDefaultContext, instantiateNapiModuleSync } from '@napi-rs/wasm-runtime'
 
 const require = createRequire(import.meta.url)

@@ -3,8 +3,6 @@ import fs from 'node:fs/promises'
 import path from 'pathe'
 import { defineConfig } from 'tsup'
 import { build as esbuild } from 'esbuild'
-import { globby } from 'globby'
-import { deleteAsync } from 'del'
 
 // eslint-disable-next-line import/no-named-default
 import { default as lodash } from 'lodash'
@@ -24,15 +22,15 @@ export default defineConfig((options) => {
       'extension': './src/extension.ts',
       'ui-test-visualizer-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
       'ui-test-visualizer-test-setup': '../test-setup/src/test-setup.ts',
-      'transform-css': './src/transform-css.ts',
+      'transform-css': './src/transform-css/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', './transform-css'],
+    external: ['vscode', 'jest-resolve/build/default_resolver', './transform-css'],
     noExternal: [
-      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(.\/transform-css)).)*$/,
+      /^((?!(vscode)|(jest-resolve\/build\/default_resolver)|(.\/transform-css)).)*$/,
       '@vscode/extension-telemetry',
     ],
-    // Vite handles the webview src watching
+    // Vite handles the webview's hot reload
     ignoreWatch: ['src/web-view-vite', outDir],
     target: 'esnext',
     env: {
@@ -109,59 +107,23 @@ export default defineConfig((options) => {
         }),
       },
       {
-        // Vite seems to require a node_modules directory to work,
-        // otherwise it can't find the required files to import/require.
-        name: 'copy-vite-deps',
-        buildStart: lodash.once(async () => {
-          console.log('Copying node_modules folder required for the extension to use Vite')
-          const from = path.join(__dirname, './vite-package/node_modules/')
-          const to = path.join(outDir, 'node_modules/')
-          await fs.cp(
-            from,
-            to,
-            { recursive: true, force: true },
-          )
-
-          // Use cross-platform @rollup/wasm-node instead of native per-platform Rollup packages
-          await deleteAsync(path.join(to, '@rollup'), { force: true })
-          await fs.cp(
-            path.join(__dirname, './vite-package/node_modules/@rollup/wasm-node'),
-            path.join(to, 'rollup'),
-            { dereference: true, recursive: true, force: true },
-          )
-
-          // Use cross-platform esbuild-wasm instead of native per-platform esbuild packages
-          // This should be done in package.json's "overrides" section, but that has no effect.
-          // TODO try "overrides" again after this issue is solved: https://github.com/npm/cli/issues/5443l
-          await deleteAsync(path.join(to, 'esbuild'), { force: true })
-          await deleteAsync(path.join(to, '@esbuild'), { force: true })
-          await fs.rename(
-            path.join(to, 'esbuild-wasm'),
-            path.join(to, 'esbuild'),
-          )
-
-          // Delete unused files
-          const toDelete = (await globby(
-            ['**/bin/**/*', '**/.bin/**/*', '**/*.d.ts'],
-            { cwd: to },
-          )).filter(f => !f.startsWith('esbuild/'))
-          await deleteAsync(toDelete.map(f => path.join(to, f)), { force: true })
-
-          console.log('Copied Vite and its dependencies to the built extension\'s node_modules dir')
-        }),
-      },
-      {
-        name: 'copy-tailwind-wasm',
+        name: 'copy-wasm-files',
         buildEnd: lodash.once(async () => {
-          console.log('Copying tailwind wasm file to the built extension\'s node_modules dir')
+          console.log('Copying Tailwind wasm file to the build dir')
           await fs.cp(
             path.join(__dirname, './node_modules/@tailwindcss/oxide-wasm32-wasi/tailwindcss-oxide.wasm32-wasi.wasm'),
             path.join(outDir, 'tailwindcss-oxide.wasm32-wasi.wasm'),
           )
 
-          console.log('Copying tailwind wasi-worker.mjs to the build dir')
+          console.log('Copying Oxc parser wasm file to the build dir')
+          await fs.cp(
+            path.join(__dirname, './node_modules/@oxc-parser/binding-wasm32-wasi/parser.wasm32-wasi.wasm'),
+            path.join(outDir, 'parser.wasm32-wasi.wasm'),
+          )
+
+          console.log('Building wasi-worker.mjs')
           await esbuild({
-            entryPoints: ['./src/tailwind-wasi-worker.mjs'],
+            entryPoints: ['./src/wasi-worker.mjs'],
             bundle: true,
             treeShaking: true,
             outfile: path.join(outDir, 'wasi-worker.mjs'),

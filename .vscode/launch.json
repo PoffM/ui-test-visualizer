@@ -57,6 +57,17 @@
       "sourceMaps": true
     },
     {
+      "name": "Jest + Babel + Next.js Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "${workspaceFolder}/examples/jest-babel-nextjs"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
       "name": "Jest Monorepo Example",
       "type": "extensionHost",
       "request": "launch",

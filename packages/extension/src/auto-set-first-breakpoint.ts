@@ -4,16 +4,13 @@ import get from 'lodash/get'
 export function autoSetFirstBreakpoint(
   testFile: string,
   startAndEndLines: [number, number],
+  firstStatementStartLine: number | null,
 ) {
   let newBreakpoint: vscode.SourceBreakpoint | undefined
 
   // Place a breakpoint at the start of the test if there is none
-  let [testStart, testEnd] = startAndEndLines
+  const [testStart, testEnd] = startAndEndLines
   if (typeof testStart === 'number' && typeof testEnd === 'number') {
-    // These numbers come from Babel's parser, which starts lines at 1, whereas VSCode starts at 0
-    testStart -= 1
-    testEnd -= 1
-
     let hasBreakpointInTest = false
 
     for (const bp of vscode.debug.breakpoints) {
@@ -33,11 +30,11 @@ export function autoSetFirstBreakpoint(
       }
     }
 
-    if (!hasBreakpointInTest) {
+    if (!hasBreakpointInTest && firstStatementStartLine !== null) {
       newBreakpoint = new vscode.SourceBreakpoint(
         new vscode.Location(
           vscode.Uri.file(testFile),
-          new vscode.Position(testStart, 0),
+          new vscode.Position(firstStatementStartLine, 0),
         ),
         true,
       )

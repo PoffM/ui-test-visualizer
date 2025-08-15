@@ -2,7 +2,6 @@
 
 import { log, error as logError } from 'node:console'
 import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
-import { z } from 'zod'
 import difference from 'lodash/difference'
 import shadowCss from './shadow.css.txt'
 
@@ -35,12 +34,8 @@ async function preTest() {
 
       const filesAsString = process.env.TEST_CSS_FILES ?? '[]'
 
-      const files = z.array(z.string()).safeParse(
-        JSON.parse(filesAsString),
-      )
-
-      if (!files.success) {
-        logError(`Invalid CSS files: ${JSON.stringify(filesAsString)} ( ${JSON.stringify(files.error)} )`)
+      const files = validateStringArray(JSON.parse(filesAsString))
+      if (!files) {
         return
       }
 
@@ -52,7 +47,7 @@ async function preTest() {
 
       loadStylesIntoHead(
         testWindow,
-        files.data,
+        files,
       )
     }
 
@@ -105,13 +100,13 @@ async function preTest() {
         // 'unknown' because this function is called remotely from the panelRouter.
         files: unknown,
       ) {
-        const parsed = z.array(z.string()).safeParse(files)
-        if (!parsed.success) {
-          const err = `Invalid CSS files: ${JSON.stringify(files)} ( ${JSON.stringify(parsed.error)} )`
+        const parsed = validateStringArray(files)
+        if (!parsed) {
+          const err = `Invalid CSS files: ${JSON.stringify(files)}`
           logError(err)
           throw new Error(err)
         }
-        const sheets = loadStylesIntoHead(testWindow, parsed.data)
+        const sheets = loadStylesIntoHead(testWindow, parsed)
         return JSON.stringify(sheets)
       },
     )
@@ -179,3 +174,11 @@ if (process.env.TEST_FRAMEWORK === 'vitest') {
 
 // Jest runs the default async function in the setupFiles.
 module.exports = preTest
+
+function validateStringArray(value: unknown): string[] | null {
+  if (!Array.isArray(value)) {
+    logError(`Invalid CSS files: ${JSON.stringify(value)} ( ${String(value)} )`)
+    return []
+  }
+  return value.map(it => String(it))
+}

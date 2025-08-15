@@ -11,7 +11,7 @@ function buildPath() {
 // Run this script into Vitest's CLI process using the NodeJS "--require" arg.
 const origFork = child_process.fork
 // @ts-expect-error Let me hook into the fork function
-child_process.fork = function (modulePath: string, ...args) {
+child_process.fork = function (modulePath: string, ...args: unknown[]) {
   const options = args.at(-1) as ForkOptions | undefined
 
   if (options) {
