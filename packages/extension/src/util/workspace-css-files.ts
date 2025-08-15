@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 
 export async function workspaceCssFiles() {
   const workspaceFiles = await vscode.workspace.findFiles(
-    '{**/*.css,**/*.sass,**/*.scss,**/*.styl,**/*.stylus}',
+    '{**/*.css,**/*.sass,**/*.scss,**/*.styl,**/*.stylus,**/*.less}',
     '**/node_modules/**',
   )
 

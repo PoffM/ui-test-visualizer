@@ -26,13 +26,18 @@ Since this extension hooks into the DOM API directly, you should be able to use 
 
 Often UI tests run without the styles that would normally be in the `<head>` of your actual application. However, this extension's UI has a menu to manually enable any additional stylesheets.
 
-Styles are loaded using Vite's `preprocessCSS()` API, so you can use any of the following:
+Styles are converted from the source file to CSS depending on the source file extension. The supported types are:
 
 - CSS
 - Sass
 - Scss
+- Less
 - Stylus
-- PostCSS (e.g. Tailwind)
+
+The supported post-processors are:
+
+- Tailwind v4
+- PostCSS (e.g. Tailwind v3)
 
 This extension could fail to auto-build your source CSS files, in which case you could try pointing the extension to your built CSS files.
 
