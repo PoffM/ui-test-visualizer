@@ -96,6 +96,11 @@ export const panelRouter = t.router({
       )
     }),
 
+  disableAllCssFiles: t.procedure
+    .mutation(async ({ ctx }) => {
+      ctx.storage.set('enabledCssFiles', [])
+    }),
+
   replaceStyles: t.procedure
     .mutation(async ({ ctx }) => {
       const files = await ctx.storage.get('enabledCssFiles') ?? []
