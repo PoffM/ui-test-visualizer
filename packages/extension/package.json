@@ -10,7 +10,7 @@
   "dependencies": {
     "@napi-rs/wasm-runtime": "^1.0.3",
     "@oxc-parser/binding-wasm32-wasi": "^0.82.1",
-    "@tailwindcss/oxide-wasm32-wasi": "^4.1.11",
+    "@tailwindcss/oxide-wasm32-wasi": "^4.1.12",
     "@trpc/server": "^11.4.4",
     "@vscode/extension-telemetry": "^1.0.0",
     "enhanced-resolve": "^5.18.3",
@@ -28,9 +28,9 @@
   "devDependencies": {
     "@types/less": "^3.0.8",
     "@types/lodash": "^4.17.20",
-    "@types/node": "^24.2.1",
+    "@types/node": "^24.3.0",
     "@types/stylus": "^0.48.43",
-    "@types/vscode": "^1.102.0",
+    "@types/vscode": "^1.103.0",
     "@types/ws": "^8.18.1",
     "@vitest/expect": "^3.2.4",
     "@vscode/codicons": "^0.0.39",
