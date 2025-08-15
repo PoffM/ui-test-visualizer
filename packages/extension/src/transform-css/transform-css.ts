@@ -1,14 +1,12 @@
 import fs from 'node:fs/promises'
-import { pathToFileURL } from 'node:url'
-import { findUp, findUpMultiple } from 'find-up'
+import { findUp } from 'find-up'
 import path from 'pathe'
 import postcss from 'postcss'
 import postcssrc from 'postcss-load-config'
 import * as vscode from 'vscode'
 
-// @ts-expect-error no ts declarations
-import { Scanner } from '@tailwindcss/oxide-wasm32-wasi'
 import { preprocessCss } from './preprocess-css'
+import { applyTailwindV4 } from './tailwind-v4-support'
 
 /**
  * Loads and processes a CSS file using
@@ -79,59 +77,7 @@ export async function transformCss(cssFilePath: string) {
         const packageJsonPath = await findUp('package.json', { cwd: path.dirname(tailwindJs) })
         if (packageJsonPath) {
           if (tailwindJs && getPackageVersion(packageJsonPath)?.startsWith('4.')) {
-            try {
-              // Find the user's package.json with Tailwind installed
-              const projectPkgJson = await (async () => {
-                const pkgJsonPaths = await findUpMultiple('package.json', { cwd: path.dirname(cssFilePath) })
-                for (const pkgJsonPath of pkgJsonPaths) {
-                  const hasTailwindInstalled = (() => {
-                    try {
-                      require.resolve('tailwindcss', { paths: [path.dirname(pkgJsonPath)] })
-                      return true
-                    }
-                    catch (error) {
-                      return false
-                    }
-                  })()
-                  if (hasTailwindInstalled) {
-                    return pkgJsonPath
-                  }
-                }
-                return null
-              })()
-
-              const twCandidates = await (async () => {
-                const scanner = new Scanner({
-                  sources: [{
-                    base: path.dirname(projectPkgJson ?? cssFilePath),
-                    pattern: '**/*',
-                    negated: false,
-                  }],
-                })
-
-                const candidates = await scanner.scan()
-                return candidates
-              })()
-
-              // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-              const { compile } = require(tailwindJs)
-              code = (await compile(code, {
-                base: path.dirname(cssFilePath),
-                // eslint-disable-next-line unused-imports/no-unused-vars
-                loadModule: async (id: string, base: string, resourceHint: 'plugin' | 'config') => {
-                  const filePath = path.join(path.dirname(cssFilePath), id)
-                  const url = pathToFileURL(filePath).href
-                  const mod = await import(url)
-                  return {
-                    base,
-                    module: mod,
-                  }
-                },
-              })).build(twCandidates)
-            }
-            catch (error) {
-              vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS for file ${cssFilePath}: ${String(error)}`)
-            }
+            code = await applyTailwindV4({ code, tailwindJs, cssFilePath })
           }
         }
       }
