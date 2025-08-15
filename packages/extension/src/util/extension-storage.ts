@@ -1,6 +1,6 @@
 import type { JsonValue } from 'type-fest'
 import type * as vscode from 'vscode'
-import type { z } from 'zod'
+import type { z } from 'zod/mini'
 
 export interface SafeStorage<T> {
   get: <P extends (keyof T & string)>(key: P) => Promise<T[P] | undefined>
@@ -11,7 +11,7 @@ export interface SafeStorage<T> {
 
 /** Wraps VSCode's extension 'globalState' with type-safe getters and setters. */
 export function extensionStorage<T extends Record<string, JsonValue>>(
-  schema: { [P in keyof T]: z.ZodType<T[P]> },
+  schema: { [P in keyof T]: z.ZodMiniType<T[P]> },
 
   /** post-process the data after accessing or setting it. */
   postprocess: { [P in keyof T]?: (pre: T[P]) => Promise<T[P]> },
@@ -26,7 +26,7 @@ export function extensionStorage<T extends Record<string, JsonValue>>(
         throw new Error(`Property ${prop.toString()} not defined in schema`)
       }
 
-      const validator: z.ZodType<T[typeof prop]> = schema[prop]
+      const validator: z.ZodMiniType<T[typeof prop]> = schema[prop]
       if (!validator) {
         throw new Error(`No validator for Extension globalState property ${prop.toString()}`)
       }

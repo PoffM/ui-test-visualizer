@@ -1,5 +1,5 @@
 import type * as vscode from 'vscode'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import type { SafeStorage } from './util/extension-storage'
 import { extensionStorage } from './util/extension-storage'
 import { workspaceCssFiles } from './util/workspace-css-files'

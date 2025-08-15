@@ -3,7 +3,7 @@ import '@total-typescript/ts-reset'
 import { TelemetryReporter } from '@vscode/extension-telemetry'
 import path from 'pathe'
 import * as vscode from 'vscode'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
 import { makeDebugConfig } from './debug-config'
@@ -122,7 +122,7 @@ export let visuallyDebugUI = async (
         return autoSetFirstBreakpoint(
           testFile,
           z.tuple([z.number(), z.number()]).parse(startAndEndLines),
-          z.number().nullable().parse(firstStatementStartLine),
+          z.nullable(z.number()).parse(firstStatementStartLine),
         )
       }
       catch {}

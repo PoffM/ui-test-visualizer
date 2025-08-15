@@ -1,7 +1,7 @@
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { initTRPC } from '@trpc/server'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'

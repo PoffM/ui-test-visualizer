@@ -1,6 +1,6 @@
 import path from 'pathe'
 import type vscode from 'vscode'
-import type { z } from 'zod'
+import type { z } from 'zod/mini'
 import { findUp } from 'find-up'
 import type { zFrameworkSetting } from './extension'
 import { detectTestFramework } from './framework-support/detect'
