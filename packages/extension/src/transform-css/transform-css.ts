@@ -4,11 +4,11 @@ import { findUp, findUpMultiple } from 'find-up'
 import path from 'pathe'
 import postcss from 'postcss'
 import postcssrc from 'postcss-load-config'
-import { preprocessCSS, resolveConfig } from 'vite'
 import * as vscode from 'vscode'
 
 // @ts-expect-error no ts declarations
 import { Scanner } from '@tailwindcss/oxide-wasm32-wasi'
+import { preprocessCss } from './preprocess-css'
 
 /**
  * Loads and processes a CSS file using
@@ -27,19 +27,9 @@ export async function transformCss(cssFilePath: string) {
     let code = await fs.readFile(cssFilePath, 'utf8')
 
     // Run preprocessors e.g. (less, sass, scss, styl, stylus) using Vite's auto-detection.
-    // Use the user's CWD so Vite imports the user's preprocessor deps.
+    // Use the user's cwd when importing and preprocessing the user's styles.
     process.chdir(path.dirname(cssFilePath))
-    code = (await preprocessCSS(
-      code,
-      cssFilePath,
-      await resolveConfig({
-        css: {
-          // Disable postcss. Oddly 'preprocessCSS' runs Postcss by default.
-          postcss: {},
-        },
-        configFile: false,
-      }, 'serve'),
-    )).code
+    code = await preprocessCss(code, cssFilePath)
 
     // Get the user's PostCSS config
     process.chdir(path.dirname(cssFilePath))

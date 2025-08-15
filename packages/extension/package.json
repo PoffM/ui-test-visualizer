@@ -22,12 +22,13 @@
     "postcss": "^8.5.6",
     "postcss-load-config": "^6.0.1",
     "replicate-dom": "workspace:*",
-    "vite": "^7.1.2",
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@types/less": "^3.0.8",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.2.1",
+    "@types/stylus": "^0.48.43",
     "@types/vscode": "^1.102.0",
     "@types/ws": "^8.18.1",
     "@vitest/expect": "^3.2.4",
@@ -37,6 +38,9 @@
     "esbuild": "^0.25.9",
     "execa": "^9.6.0",
     "globby": "^14.1.0",
+    "less": "^4.4.0",
+    "sass": "^1.90.0",
+    "stylus": "^0.64.0",
     "vitest": "^3.2.4",
     "ws": "^8.18.3"
   }

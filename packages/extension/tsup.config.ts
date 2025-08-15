@@ -24,12 +24,12 @@ export default defineConfig((options) => {
       'extension': './src/extension.ts',
       'ui-test-visualizer-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
       'ui-test-visualizer-test-setup': '../test-setup/src/test-setup.ts',
-      'transform-css': './src/transform-css.ts',
+      'transform-css': './src/transform-css/transform-css.ts',
     },
     outDir,
-    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', 'vite', './transform-css', 'babel-jest', '@babel/core'],
+    external: ['vscode', 'lightningcss', 'jiti', 'jest-resolve/build/default_resolver', 'ts-node', './transform-css', 'babel-jest', '@babel/core'],
     noExternal: [
-      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(vite)|(.\/transform-css)|(babel-jest)|(@babel\/core)).)*$/,
+      /^((?!(vscode)|(lightningcss)|(jiti)|(jest-resolve\/build\/default_resolver)|(ts-node)|(.\/transform-css)|(babel-jest)|(@babel\/core)).)*$/,
       '@vscode/extension-telemetry',
     ],
     // Vite handles the webview src watching
@@ -106,55 +106,6 @@ export default defineConfig((options) => {
           )
           await fs.writeFile(dest, newSvg)
           console.log('Green debug icon prepared')
-        }),
-      },
-      {
-        // Vite seems to require a node_modules directory to work,
-        // otherwise it can't find the required files to import/require.
-        name: 'copy-vite-deps',
-        buildStart: lodash.once(async () => {
-          console.log('Copying node_modules folder required for the extension to use Vite')
-          const from = path.join(__dirname, './vite-package/node_modules/')
-          const to = path.join(outDir, 'node_modules/')
-          await fs.cp(
-            from,
-            to,
-            { recursive: true, force: true },
-          )
-
-          // Use cross-platform @rollup/wasm-node instead of native per-platform Rollup packages
-          await deleteAsync(path.join(to, '@rollup'), { force: true })
-          await fs.cp(
-            path.join(__dirname, './vite-package/node_modules/@rollup/wasm-node'),
-            path.join(to, 'rollup'),
-            { dereference: true, recursive: true, force: true },
-          )
-
-          // TODO find a better way to do this:
-          // We only use Vite for the 'preprocessCSS' function, but Vite needs to have an 'esbuild' package in node_modules to work.
-          // esbuild seems to never actually be used through the extension, so we delete the esbuild binary anyway to reduce bundle size.
-          //
-          // eslint-disable-next-line no-lone-blocks
-          {
-            // Use cross-platform esbuild-wasm instead of native per-platform esbuild packages
-            await deleteAsync(path.join(to, 'esbuild'), { force: true })
-            await deleteAsync(path.join(to, '@esbuild'), { force: true })
-            await fs.rename(
-              path.join(to, 'esbuild-wasm'),
-              path.join(to, 'esbuild'),
-            )
-            // Then delete the wasm file anyway, because esbuild is never used during extension usage
-            await deleteAsync(path.join(to, 'esbuild/esbuild.wasm'), { force: true })
-          }
-
-          // Delete unused files
-          const toDelete = (await globby(
-            ['**/bin/**/*', '**/.bin/**/*', '**/*.d.ts'],
-            { cwd: to },
-          )).filter(f => !f.startsWith('esbuild/'))
-          await deleteAsync(toDelete.map(f => path.join(to, f)), { force: true })
-
-          console.log('Copied Vite and its dependencies to the built extension\'s node_modules dir')
         }),
       },
       {
