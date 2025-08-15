@@ -39,7 +39,7 @@ test('Steps through the Vitest+React+Tailwind@4 Counter example', async ({ brows
 
   // Enable the Tailwind v4 style
   await replicaPanel.locator('ui-test-visualizer-button[aria-label="Enable your styles"]').click()
-  await replicaPanel.getByText('src/style.css').click()
+  await replicaPanel.getByText('style.css', { exact: true }).click()
   await replicaPanel.locator('ui-test-visualizer-button[title="Apply styles"]').click()
 
   // Wait for the button to turn green because of the new styles

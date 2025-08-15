@@ -64,8 +64,8 @@ test('Load an external css file', async () => {
 
   // Disable the external css file
   await replicaPanel.locator('ui-test-visualizer-button[aria-label="Enable your styles"]').click()
-  await replicaPanel.locator('label').filter({ hasText: '/test-style.css' }).getByLabel('Checkbox').click()
-  await replicaPanel.getByRole('button', { name: 'OK' }).click()
+  await replicaPanel.locator('label').filter({ hasText: 'test-style.css' }).getByLabel('Checkbox').click()
+  await replicaPanel.locator('ui-test-visualizer-button[title="Apply styles"]').click()
 
   // Wait for the Decrement button to turn back to the original color
   await expect.poll(
