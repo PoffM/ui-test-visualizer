@@ -21,13 +21,13 @@ export function TreeNode(props: TreeNodeProps) {
 
   const rendersInline = createMemo(() => {
     // Has a shadow root -> false
-    if (props.node.type === 'element' && props.node.shadowRoot) { return false }
+    if (props.node.type === 'element' && props.node.shadowRoot()) { return false }
 
     // Has no children -> true
-    if (props.node.childNodes.length === 0) { return true }
+    if (props.node.childNodes().length === 0) { return true }
 
     // Has a single text child -> true
-    if (props.node.childNodes.length === 1 && props.node.childNodes[0]?.type === 'text') { return true }
+    if (props.node.childNodes().length === 1 && props.node.childNodes()[0]?.type === 'text') { return true }
 
     return false
   })
@@ -59,8 +59,8 @@ export function TreeNode(props: TreeNodeProps) {
       el instanceof Element
       && isCollapsed()
       && (
-        containsNode(node.childNodes, el)
-        || (node.type === 'element' && containsNode(node.shadowRoot?.childNodes ?? [], el))
+        containsNode(node.childNodes(), el)
+        || (node.type === 'element' && containsNode(node.shadowRoot()?.childNodes() ?? [], el))
       )
     ) {
       setCollapsed(false)
@@ -79,7 +79,7 @@ export function TreeNode(props: TreeNodeProps) {
   function isCollapsible() {
     if (props.node.type === 'text') { return false }
     if (props.node.type === 'shadow-root') { return true }
-    if (props.node.type === 'element' && props.node.shadowRoot) { return true }
+    if (props.node.type === 'element' && props.node.shadowRoot()) { return true }
     if (rendersInline()) { return false }
     return true
   }
@@ -200,12 +200,12 @@ export function TreeNode(props: TreeNodeProps) {
                 <span class="text-html-tag">&lt;</span>
                 <span class="text-html-tag">
                   <span ref={setupTagHighlights}>
-                    {node().tagName}
+                    {node().node.tagName.toLowerCase()}
                   </span>
                 </span>
 
                 {/* Attributes */}
-                <For each={node().attributes}>
+                <For each={node().attributes()}>
                   {attr => (
                     <span>
                       <span class="ml-1 text-html-attribute-name">{attr.name}</span>
@@ -235,7 +235,7 @@ export function TreeNode(props: TreeNodeProps) {
                 </Show>
 
                 {/* Show text inline when it's the only child node */}
-                <Show when={rendersInline() && node().childNodes.length === 1 && node().childNodes[0]?.type === 'text' && node().childNodes[0]} keyed>
+                <Show when={rendersInline() && node().childNodes().length === 1 && node().childNodes()[0]?.type === 'text' && node().childNodes()[0]} keyed>
                   {(textNode) => {
                     function setupInlineTextHighlights(span: HTMLSpanElement) {
                       highlightPlayers.set(textNode.node, () => playHighlightAnimation(span))
@@ -261,7 +261,7 @@ export function TreeNode(props: TreeNodeProps) {
                     }
 
                     return textNode.type === 'text' && (
-                      <span ref={setupInlineTextHighlights}>{textNode.text}</span>
+                      <span ref={setupInlineTextHighlights}>{textNode.text()}</span>
                     )
                   }}
                 </Show>
@@ -270,7 +270,7 @@ export function TreeNode(props: TreeNodeProps) {
                 <Show when={isCollapsed() || rendersInline()}>
                   <>
                     <span class="rounded-l-sm text-html-tag">&lt;/</span>
-                    <span class="text-html-tag">{node().tagName}</span>
+                    <span class="text-html-tag">{node().node.tagName.toLowerCase()}</span>
                     <span class="rounded-r-sm text-html-tag">&gt;</span>
                   </>
                 </Show>
@@ -284,7 +284,7 @@ export function TreeNode(props: TreeNodeProps) {
           </Match>
           <Match when={props.node.type === 'text' && props.node}>
             {textNode => (
-              <span ref={setupTagHighlights}>{textNode().text}</span>
+              <span ref={setupTagHighlights}>{textNode().text()}</span>
             )}
           </Match>
         </Switch>
@@ -295,8 +295,8 @@ export function TreeNode(props: TreeNodeProps) {
       <Show when={!isCollapsed() && !rendersInline() && (props.node.type === 'element' || props.node.type === 'shadow-root') && props.node}>
         <>
           <For each={[
-            (props.node.type === 'element' && props.node.shadowRoot),
-            ...props.node.childNodes,
+            (props.node.type === 'element' && props.node.shadowRoot()),
+            ...props.node.childNodes(),
           ].filter(Boolean)}
           >
             {child => (
@@ -320,7 +320,7 @@ export function TreeNode(props: TreeNodeProps) {
                 onClick={() => props.onSelect(isSelected() ? null : props.node.node)}
                 style={{ 'padding-left': paddingLeft }}
               >
-                <span class="text-html-tag">&lt;/{node().tagName}&gt;</span>
+                <span class="text-html-tag">&lt;/{node().node.tagName.toLowerCase()}&gt;</span>
               </div>
             )}
           </Show>

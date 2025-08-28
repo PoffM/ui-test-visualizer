@@ -83,4 +83,5 @@ it('kitchen sink test for inspector development', async () => {
     attrsDiv.setAttribute(`data-attr-${i}`, `value-${i}`)
   }
   attrsDiv.appendChild(document.createElement('div'))
+  attrsDiv.remove()
 })

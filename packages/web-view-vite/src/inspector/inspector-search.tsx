@@ -6,20 +6,20 @@ import type { InspectedNode } from '../inspector/inspector-dom-tree'
 function searchTextInsideTree(tree: InspectedNode, query: string): Node[] {
   const nodes: Node[] = []
 
-  const textNodes = tree.childNodes.filter(it => it.type === 'text')
+  const textNodes = tree.childNodes().filter(it => it.type === 'text')
   for (const textNode of textNodes) {
-    if (textNode.text.toLowerCase().includes(query.toLowerCase()) && textNode.node.parentElement) {
+    if (textNode.text().toLowerCase().includes(query.toLowerCase()) && textNode.node.parentElement) {
       nodes.push(textNode.node)
     }
   }
 
-  const elementNodes = tree.childNodes.filter(it => it.type === 'element')
+  const elementNodes = tree.childNodes().filter(it => it.type === 'element')
   for (const child of elementNodes) {
     nodes.push(...searchTextInsideTree(child, query))
   }
 
   if (tree.type === 'element' && tree.shadowRoot) {
-    const shadowChildren = tree.shadowRoot.childNodes.filter(it => it.type === 'element')
+    const shadowChildren = tree.shadowRoot()?.childNodes().filter(it => it.type === 'element') ?? []
     for (const child of shadowChildren) {
       nodes.push(...searchTextInsideTree(child, query))
     }

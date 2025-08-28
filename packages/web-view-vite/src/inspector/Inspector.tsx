@@ -1,13 +1,12 @@
-import { Show, createEffect, createMemo, createSignal, onCleanup, onMount } from 'solid-js'
-import { createStore, reconcile } from 'solid-js/store'
 import { makeEventListener } from '@solid-primitives/event-listener'
-import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { ReactiveWeakMap } from '@solid-primitives/map'
+import { createMutationObserver } from '@solid-primitives/mutation-observer'
+import { Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
 import { shadowHost } from '../App'
 import { type InspectedNode, getNewDomTree } from './inspector-dom-tree'
 import { createInspectorSearch } from './inspector-search'
-import { TreeNode } from './TreeNode'
 import { SearchToolbar } from './SearchToolbar'
+import { TreeNode } from './TreeNode'
 import { deepElementFromPoint } from './util'
 
 export const search = createInspectorSearch()
@@ -15,7 +14,7 @@ export const search = createInspectorSearch()
 export const disableHighlightAnimation = { val: true }
 
 export function Inspector() {
-  const [domTree, setDomTree] = createStore<{ tree: InspectedNode | null }>({ tree: getNewDomTree() })
+  const [domTree, setDomTree] = createSignal<InspectedNode | null>(getNewDomTree())
   const [selectedNode, setSelectedNode] = createSignal<Node | null>(null)
   const [hoveredNode, setHoveredNode] = createSignal<Node | null>(null)
   const collapsedStates = new ReactiveWeakMap<Node, boolean>()
@@ -23,24 +22,21 @@ export function Inspector() {
   // Update the DOM tree to reflect DOM changes when:
   // The 'flushPatches' event is fired (when the debugger steps to a new line),
   // Or the shadow root itself updates (e.g. on Refresh button clicked)
-  {
-    function updateDomTree() {
-      setDomTree(reconcile({ tree: getNewDomTree() }, { key: 'node' }))
-
+  makeEventListener(window, 'message', (event) => {
+    if (event.data.flushPatches) {
       // update the search results when the tree changes
-      search.handleSearch(search.searchQuery(), domTree?.tree)
+      search.handleSearch(search.searchQuery(), domTree())
     }
-    makeEventListener(window, 'message', (event) => {
-      if (event.data.flushPatches) {
-        updateDomTree()
-      }
-    })
-    createMutationObserver(
-      () => [shadowHost.shadowRoot].filter(Boolean),
-      { childList: true },
-      updateDomTree,
-    )
-  }
+  })
+  createMutationObserver(
+    () => [shadowHost.shadowRoot].filter(Boolean),
+    { childList: true },
+    () => {
+      setDomTree(getNewDomTree())
+      // update the search results when the tree changes
+      search.handleSearch(search.searchQuery(), domTree())
+    },
+  )
 
   // highlight the element under the mouse
   makeEventListener(shadowHost, 'mousemove', (e) => {
@@ -84,7 +80,7 @@ export function Inspector() {
 
   return (
     <div class="h-full w-full">
-      <Show when={domTree.tree} keyed={true}>
+      <Show when={domTree()} keyed={true}>
         {tree => (
           <div class="relative z-60 h-full w-full flex flex-col bg-(--vscode-panel-background)">
             <SearchToolbar tree={tree} />

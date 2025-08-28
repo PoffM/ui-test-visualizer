@@ -1,3 +1,7 @@
+import { createMutationObserver } from '@solid-primitives/mutation-observer'
+import type { Accessor } from 'solid-js'
+import { createSignal } from 'solid-js'
+import { createStore, reconcile } from 'solid-js/store'
 import { shadowHost } from '../App'
 
 /**
@@ -11,70 +15,109 @@ export type InspectedNode = InspectedElement | InspectedText | InspectedShadowRo
 export interface InspectedElement {
   type: 'element'
   node: Element
-  tagName: string
-  attributes: { name: string, value: string }[]
-  childNodes: InspectedNode[]
-  shadowRoot: InspectedShadowRoot | null
-  getBoundingClientRect: () => DOMRect | null
+  attributes: Accessor<{ name: string, value: string }[]>
+  childNodes: Accessor<InspectedNode[]>
+  shadowRoot: Accessor<InspectedShadowRoot | null>
 }
 
 export interface InspectedText {
   type: 'text'
   node: Node
-  text: string
-  childNodes: InspectedNode[]
-  getBoundingClientRect: () => DOMRect | null
+  text: Accessor<string>
+  childNodes: Accessor<InspectedNode[]>
 }
 
 export interface InspectedShadowRoot {
   type: 'shadow-root'
   node: ShadowRoot
-  shadowMode: 'open' | 'closed'
-  childNodes: InspectedNode[]
-  getBoundingClientRect: () => null
+  shadowMode: ShadowRootMode
+  childNodes: Accessor<InspectedNode[]>
 }
 
 function parseDOMTree(node: Node): InspectedNode {
   if (node instanceof Element) {
-    // Get all attributes
-    const attributes = Array.from(node.attributes || [])
-      .map(attr => ({ name: attr.name, value: attr.value }))
+    const getAttributes = () => {
+      return Array.from(node.attributes)
+        .map(attr => ({ name: attr.name, value: attr.value }))
+    }
+    const [attributes, setAttributes] = createStore(getAttributes())
+    createMutationObserver(node, { attributes: true }, () => {
+      setAttributes(reconcile(getAttributes(), { key: 'name' }))
+    })
 
-    const childNodes = Array.from(node.childNodes)
-      .map(child => parseDOMTree(child))
-      .filter(Boolean)
+    const getChildNodes = () => {
+      return Array.from(node.childNodes)
+        .map(child => parseDOMTree(child))
+    }
+    const [childNodes, setChildNodes] = createSignal(getChildNodes())
+    updateChildrenOnChange(node, childNodes, setChildNodes)
 
-    const shadowRoot: InspectedShadowRoot | null = node.shadowRoot
-      ? {
-          type: 'shadow-root',
-          node: node.shadowRoot,
-          shadowMode: node.shadowRoot.mode,
-          childNodes: Array.from(node.shadowRoot.childNodes || [])
-            .map(child => parseDOMTree(child))
-            .filter(Boolean),
-          getBoundingClientRect: () => null,
-        }
-      : null
+    const getShadowRoot = (shadowRoot: ShadowRoot) => {
+      const getChildNodes = () => {
+        return Array.from(shadowRoot.childNodes)
+          .map(child => parseDOMTree(child))
+      }
+      const [childNodes, setChildNodes] = createSignal(getChildNodes())
+      updateChildrenOnChange(shadowRoot, childNodes, setChildNodes)
+      return {
+        type: 'shadow-root' as const,
+        node: shadowRoot,
+        shadowMode: shadowRoot.mode,
+        childNodes,
+      }
+    }
+    const [shadowRoot, setShadowRoot] = createSignal(
+      node.shadowRoot ? getShadowRoot(node.shadowRoot) : null,
+    )
+    const originalAttach = node.attachShadow.bind(node)
+    node.attachShadow = function (init) {
+      const sr = originalAttach(init)
+      setShadowRoot(getShadowRoot(sr))
+      return sr
+    }
 
     return {
       type: 'element',
       node,
-      tagName: node.tagName.toLowerCase(),
       childNodes,
       shadowRoot,
-      attributes,
-      getBoundingClientRect: () => node.getBoundingClientRect(),
+      attributes: () => attributes,
     }
   }
   else {
+    const [text, setText] = createSignal(node.textContent || '')
+    createMutationObserver(node, { characterData: true }, () => {
+      setText(node.textContent || '')
+    })
     return {
       type: 'text',
       node,
-      text: node.textContent || '',
-      childNodes: [],
-      getBoundingClientRect: () => node.parentElement?.getBoundingClientRect() ?? null,
+      text,
+      childNodes: () => [],
     }
   }
+}
+
+function updateChildrenOnChange(
+  node: Node,
+  lastChildren: () => InspectedNode[],
+  callback: (newChildren: InspectedNode[]) => void,
+) {
+  createMutationObserver(node, { childList: true }, () => {
+    const previousNodes = new Map<Node, InspectedNode>(
+      lastChildren().map(n => [n.node, n]),
+    )
+
+    const newChildren = [...node.childNodes].map((child) => {
+      const existingNode = previousNodes.get(child)
+      if (existingNode) {
+        return existingNode
+      }
+      return parseDOMTree(child)
+    })
+
+    callback(newChildren)
+  })
 }
 
 export function getNewDomTree() {
@@ -92,8 +135,8 @@ export function containsNode(trees: InspectedNode[] | null, node: Element): bool
     if (tree.type === 'text') { continue }
 
     if (tree.node === node) { return true }
-    if (tree.childNodes?.length && containsNode(tree.childNodes, node)) { return true }
-    if (tree.type === 'element' && tree.shadowRoot?.childNodes?.length && containsNode(tree.shadowRoot?.childNodes, node)) { return true }
+    if (tree.childNodes()?.length && containsNode(tree.childNodes(), node)) { return true }
+    if (tree.type === 'element' && tree.shadowRoot()?.childNodes()?.length && containsNode(tree.shadowRoot()?.childNodes() ?? null, node)) { return true }
   }
   return false
 }
