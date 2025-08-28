@@ -1,7 +1,7 @@
 import fsSync from 'node:fs'
 import fs from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
-import { findUpMultiple } from 'find-up'
+import { findUp, findUpMultiple } from 'find-up'
 import * as EnhancedResolve from 'enhanced-resolve'
 import path from 'pathe'
 import * as vscode from 'vscode'
@@ -37,6 +37,7 @@ export async function applyTailwindV4(
       return null
     })()
 
+    // Get the Tailwind candidates: strings that look like class names in the user's source files.
     const twCandidates = await (async () => {
       const scanner = new Scanner({
         sources: [{
@@ -49,6 +50,69 @@ export async function applyTailwindV4(
       const candidates = await scanner.scan()
       return candidates
     })()
+
+    // Try to get any aliases from the tsconfig.json in case the user has aliased paths like '@/*' -> 'src/*'
+    const aliases = await (async () => {
+      try {
+        // Load tsconfig to get the 'paths' mappings.
+        const tsModulePath = require.resolve('typescript', { paths: [path.dirname(cssFilePath)] })
+        const ts = await import(tsModulePath) as typeof import('typescript')
+        const tsConfigPath = await findUp('tsconfig.json', { cwd: path.dirname(cssFilePath) })
+        if (tsConfigPath) {
+          const configFileText = await fs.readFile(tsConfigPath, 'utf8')
+          const tsConfigJson = ts.parseConfigFileTextToJson(tsConfigPath, configFileText)
+          const tsConfig = ts.parseJsonConfigFileContent(
+            tsConfigJson.config,
+            ts.sys,
+            path.dirname(tsConfigPath),
+            {},
+            tsConfigPath,
+          )
+          const paths = tsConfig.options.paths
+          if (!paths) { return {} }
+
+          const aliases = Object.fromEntries(
+            // Convert globs to paths e.g. '@/*' -> '@'
+            Object.entries(paths).map(([key, value]) => [
+              key.replace(/\/\*$/, ''),
+              value.map(v => path.resolve(path.dirname(tsConfigPath), v.replace(/\/\*$/, ''))),
+            ]),
+          )
+          return aliases
+        }
+      }
+      catch (error) {
+        return {}
+      }
+    })()
+
+    // Setup enhanced-resolvers to be used to resolve imports the css files.
+    const modules = ['node_modules', ...(process.env.NODE_PATH ? [process.env.NODE_PATH] : [])]
+    const cssResolver = EnhancedResolve.ResolverFactory.createResolver({
+      fileSystem: new EnhancedResolve.CachedInputFileSystem(fsSync, 4000),
+      useSyncFileSystemCalls: true,
+      extensions: ['.css'],
+      mainFields: ['style'],
+      conditionNames: ['style'],
+      modules,
+      alias: aliases,
+    })
+    const esmResolver = EnhancedResolve.ResolverFactory.createResolver({
+      fileSystem: new EnhancedResolve.CachedInputFileSystem(fsSync, 4000),
+      useSyncFileSystemCalls: true,
+      extensions: ['.js', '.json', '.node', '.ts'],
+      conditionNames: ['node', 'import'],
+      modules,
+      alias: aliases,
+    })
+    const cjsResolver = EnhancedResolve.ResolverFactory.createResolver({
+      fileSystem: new EnhancedResolve.CachedInputFileSystem(fsSync, 4000),
+      useSyncFileSystemCalls: true,
+      extensions: ['.js', '.json', '.node', '.ts'],
+      conditionNames: ['node', 'require'],
+      modules,
+      alias: aliases,
+    })
 
     // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
     const { compile } = require(tailwindJs)
@@ -97,30 +161,6 @@ export async function applyTailwindV4(
     vscode.window.showWarningMessage(`Failed to auto-compile Tailwind v4 CSS for file ${cssFilePath}: ${String(error)}`)
   }
 }
-
-const modules = ['node_modules', ...(process.env.NODE_PATH ? [process.env.NODE_PATH] : [])]
-const cssResolver = EnhancedResolve.ResolverFactory.createResolver({
-  fileSystem: new EnhancedResolve.CachedInputFileSystem(fsSync, 4000),
-  useSyncFileSystemCalls: true,
-  extensions: ['.css'],
-  mainFields: ['style'],
-  conditionNames: ['style'],
-  modules,
-})
-const esmResolver = EnhancedResolve.ResolverFactory.createResolver({
-  fileSystem: new EnhancedResolve.CachedInputFileSystem(fsSync, 4000),
-  useSyncFileSystemCalls: true,
-  extensions: ['.js', '.json', '.node', '.ts'],
-  conditionNames: ['node', 'import'],
-  modules,
-})
-const cjsResolver = EnhancedResolve.ResolverFactory.createResolver({
-  fileSystem: new EnhancedResolve.CachedInputFileSystem(fsSync, 4000),
-  useSyncFileSystemCalls: true,
-  extensions: ['.js', '.json', '.node', '.ts'],
-  conditionNames: ['node', 'require'],
-  modules,
-})
 
 function runResolver(
   resolver: EnhancedResolve.Resolver,
