@@ -197,8 +197,8 @@ export function TreeNode(props: TreeNodeProps) {
             {node => (
               <>
                 {/* Opening tag */}
-                <span class="text-html-tag">&lt;</span>
-                <span class="text-html-tag">
+                <span class="text-html-tag cursor-default">
+                  &lt;
                   <span ref={setupTagHighlights}>
                     {node().node.tagName.toLowerCase()}
                   </span>
@@ -207,12 +207,12 @@ export function TreeNode(props: TreeNodeProps) {
                 {/* Attributes */}
                 <For each={node().attributes()}>
                   {attr => (
-                    <span>
+                    <span class="cursor-default">
                       <span class="ml-1 text-html-attribute-name">{attr.name}</span>
                       <Show when={attr.value}>
                         <>
-                          <span class="text-html-tag">=</span>
-                          <span class="text-html-tag">"
+                          <span class="text-html-tag">
+                            ="
                             <span class="text-html-attribute-value">
                               <span ref={attrNode => setupAttributeHighlights(attrNode, attr.name)}>
                                 {attr.value}
@@ -227,7 +227,7 @@ export function TreeNode(props: TreeNodeProps) {
                 </For>
 
                 {/* '>' End of opening tag */}
-                <span class="rounded-r-sm text-html-tag">&gt;</span>
+                <span class="rounded-r-sm text-html-tag cursor-default">&gt;</span>
 
                 {/* Show an ellipsis when the node is collapsed */}
                 <Show when={isCollapsed()}>
@@ -261,18 +261,16 @@ export function TreeNode(props: TreeNodeProps) {
                     }
 
                     return textNode.type === 'text' && (
-                      <span ref={setupInlineTextHighlights}>{textNode.text()}</span>
+                      <span class="cursor-default" ref={setupInlineTextHighlights}>{textNode.text()}</span>
                     )
                   }}
                 </Show>
 
                 {/* Inline closing tag */}
                 <Show when={isCollapsed() || rendersInline()}>
-                  <>
-                    <span class="rounded-l-sm text-html-tag">&lt;/</span>
-                    <span class="text-html-tag">{node().node.tagName.toLowerCase()}</span>
-                    <span class="rounded-r-sm text-html-tag">&gt;</span>
-                  </>
+                  <span class="rounded-sm text-html-tag cursor-default">
+                    &lt;/{node().node.tagName.toLowerCase()}&gt;
+                  </span>
                 </Show>
               </>
             )}
@@ -284,7 +282,7 @@ export function TreeNode(props: TreeNodeProps) {
           </Match>
           <Match when={props.node.type === 'text' && props.node}>
             {textNode => (
-              <span ref={setupTagHighlights}>{textNode().text()}</span>
+              <span class="cursor-default" ref={setupTagHighlights}>{textNode().text()}</span>
             )}
           </Match>
         </Switch>
@@ -314,7 +312,7 @@ export function TreeNode(props: TreeNodeProps) {
             {node => (
               // Closing tag for elements
               <div
-                class="hover:bg-(--vscode-list-hoverBackground)"
+                class="hover:bg-(--vscode-list-hoverBackground) cursor-default"
                 onMouseEnter={() => props.onHover(node().node)}
                 onMouseLeave={() => props.onHover(null)}
                 onClick={() => props.onSelect(isSelected() ? null : props.node.node)}
