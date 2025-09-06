@@ -1,23 +1,19 @@
+import { findUp } from 'find-up'
 import path from 'pathe'
 import type vscode from 'vscode'
-import type { z } from 'zod/mini'
-import { findUp } from 'find-up'
-import type { zFrameworkSetting } from './extension'
-import { detectTestFramework } from './framework-support/detect'
+import type { TestFrameworkInfo } from './framework-support/detect-test-framework'
 import { jestDebugConfig } from './framework-support/jest-support'
 import { vitestDebugConfig } from './framework-support/vitest-support'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
 export async function makeDebugConfig(
+  fwInfo: TestFrameworkInfo,
   testFile: string,
   testName: string,
-  frameworkSetting: z.infer<typeof zFrameworkSetting>,
   htmlUpdaterPort: number,
   testCssFiles?: string[],
 ) {
-  const fwInfo = await detectTestFramework(testFile, frameworkSetting)
-
   const pkgPath = await findUp('package.json', { cwd: testFile })
   if (!pkgPath) {
     throw new Error(`Could not find related package.json for test file ${testFile}`)

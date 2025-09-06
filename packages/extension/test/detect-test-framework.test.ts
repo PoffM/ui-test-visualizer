@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import path from 'pathe'
-import { detectTestFramework } from '../src/framework-support/detect'
+import { detectTestFramework } from '../src/framework-support/detect-test-framework'
 
 const examplesPath = path.join(__dirname, '../../../examples')
 

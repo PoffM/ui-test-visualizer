@@ -2,7 +2,7 @@ import { findUp, findUpSync } from 'find-up'
 import { readInitialOptions } from 'jest-config'
 import path from 'pathe'
 import type * as vscode from 'vscode'
-import type { TestFrameworkInfo } from './detect'
+import type { TestFrameworkInfo } from './detect-test-framework'
 import { cleanTestNameForTerminal } from './util'
 
 function buildPath() {

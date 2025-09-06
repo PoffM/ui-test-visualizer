@@ -1,9 +1,10 @@
-import path from 'pathe'
+import { TRPCError, callTRPCProcedure } from '@trpc/server'
 import getPort from 'get-port'
+import path from 'pathe'
+import type { HTMLPatch } from 'replicate-dom'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
-import type { HTMLPatch } from 'replicate-dom'
-import { TRPCError, callTRPCProcedure } from '@trpc/server'
+import type { TestLibraryInfo } from '../framework-support/detect-test-library'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
@@ -15,6 +16,7 @@ const Server = require('../../node_modules/ws/lib/websocket-server') as typeof W
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
+  testLibraryInfo: () => Promise<TestLibraryInfo>,
 ) {
   const htmlUpdaterPort = await getPort()
   const viteDevServerPort = 5173
@@ -117,6 +119,7 @@ export async function startPanelController(
             sessionTracker,
             storage,
             flushPatches,
+            testLibraryInfo,
           }
           const result = await callTRPCProcedure({
             router: panelRouter,

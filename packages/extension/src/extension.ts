@@ -4,6 +4,7 @@ import { TelemetryReporter } from '@vscode/extension-telemetry'
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
+import once from 'lodash/once'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
 import { makeDebugConfig } from './debug-config'
@@ -12,6 +13,8 @@ import { startPanelController } from './panel-controller/panel-controller'
 import { startDebugSessionTracker } from './util/debug-session-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
+import { detectTestFramework } from './framework-support/detect-test-framework'
+import { detectTestLibrary } from './framework-support/detect-test-library'
 
 const reporter = (() => {
   try {
@@ -104,10 +107,26 @@ export let visuallyDebugUI = async (
     throw new TypeError(`Expected string argument \"testName\", received ${testName}`)
   }
 
+  const frameworkSetting = (() => {
+    const parsed = zFrameworkSetting
+      .safeParse(extensionSetting('ui-test-visualizer.testFramework'))
+    return parsed.success ? parsed.data : 'autodetect'
+  })()
+
+  const fwInfo = await detectTestFramework(testFile, frameworkSetting)
+
   // Save the test file before starting the debug session
   await vscode.window.activeTextEditor?.document.save()
 
-  const panelController = await startPanelController(extensionContext, storage)
+  const testLibraryInfo = once(async () => {
+    const testingLibrary = await detectTestLibrary(testFile)
+    return {
+      framework: fwInfo.framework,
+      testingLibrary,
+    }
+  })
+
+  const panelController = await startPanelController(extensionContext, storage, testLibraryInfo)
 
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()
@@ -144,16 +163,10 @@ export let visuallyDebugUI = async (
     )
   })
 
-  const frameworkSetting = (() => {
-    const parsed = zFrameworkSetting
-      .safeParse(extensionSetting('ui-test-visualizer.testFramework'))
-    return parsed.success ? parsed.data : 'autodetect'
-  })()
-
   const debugConfig = await makeDebugConfig(
+    fwInfo,
     testFile,
     testName,
-    frameworkSetting,
     panelController.htmlUpdaterPort,
     await storage.get('enabledCssFiles'),
   )
