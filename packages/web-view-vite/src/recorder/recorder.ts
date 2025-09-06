@@ -35,14 +35,11 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       // Generate the selector
       const suggestedQuery = getSuggestedQuery(target)
       if (suggestedQuery) {
-        const queryArgs = serializeQueryArgs(suggestedQuery.queryArgs)
+        const query = serializeQueryArgs(suggestedQuery.queryArgs)
         // Send the selector to the extension process to record as code
         await client.recordInputAsCode.mutate({
           event: type,
-          query: [
-            suggestedQuery.queryMethod,
-            queryArgs,
-          ],
+          query: [suggestedQuery.queryMethod, query],
         })
       }
     }
@@ -79,13 +76,17 @@ export function createRecorder(shadowHost: HTMLDivElement) {
 //   },
 // })
 
+/**
+ * Convert the queryArgs from testing-library to JSON to be sent to the extension process.
+ * Mainly to convert the RegExp to a string before sending it.
+ */
 export function serializeQueryArgs(queryArgs: QueryArgs): [string, { [key: string]: string | boolean }?] {
   const [query, options] = queryArgs
   if (!options) { return [query] }
   const serializedOptions = Object.entries(options).reduce((prev, curr) => {
     const val = curr[1]
     if (val !== undefined) {
-      prev[curr[0]] = String(curr[1])
+      prev[curr[0]] = val instanceof RegExp ? String(val) : val
     }
     return prev
   }, {} as Record<string, string | boolean>)
