@@ -2,7 +2,7 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import { ReactiveWeakMap } from '@solid-primitives/map'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
-import { shadowHost } from '../App'
+import { recorder, shadowHost } from '../App'
 import { type InspectedNode, getNewDomTree } from './inspector-dom-tree'
 import { createInspectorSearch } from './inspector-search'
 import { SearchToolbar } from './SearchToolbar'
@@ -101,7 +101,7 @@ export function Inspector() {
           </div>
         )}
       </Show>
-      <Show when={hoveredNode() ?? selectedNode()} keyed>
+      <Show when={!recorder.isRecording() && (hoveredNode() ?? selectedNode())} keyed>
         {(node) => {
           function newRect() {
             return node instanceof Text

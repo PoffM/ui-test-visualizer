@@ -6,6 +6,7 @@ import { createInspectorHeight } from './inspector/inspector-height'
 import { Toolbar } from './components/Toolbar'
 import { Inspector } from './inspector/Inspector'
 import { Resizer } from './inspector/Resizer'
+import { createRecorder } from './recorder/recorder'
 
 // Importing the router type from the server file
 
@@ -37,6 +38,8 @@ export const {
 } = createDomReplica()
 
 export const inspector = createInspectorHeight()
+
+export const recorder = createRecorder(shadowHost)
 
 export function App() {
   return (

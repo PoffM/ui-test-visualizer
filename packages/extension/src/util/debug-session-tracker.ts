@@ -33,25 +33,8 @@ export function startDebugSessionTracker(
     },
   })
 
-  /**
-   * Find the UI test session based on whichever session is connected to a breakpoint.
-   * TODO find a better way to do this.
-   */
-  async function getUiTestSession() {
-    const bps = vscode.debug.breakpoints
-    for (const session of sessions) {
-      for (const bp of bps) {
-        const dbp = await session.getDebugProtocolBreakpoint(bp)
-        if (dbp && Reflect.get(dbp, 'verified') === true) {
-          return session
-        }
-      }
-    }
-    return null
-  }
-
   async function runDebugExpression(expression: string) {
-    const uiSession = await getUiTestSession()
+    const uiSession = vscode.debug.activeDebugSession
     if (!uiSession) {
       throw new Error('Internal extension error: Could not find UI test session')
     }
@@ -75,9 +58,45 @@ export function startDebugSessionTracker(
     return result
   }
 
+  interface DebugPauseLocation {
+    fileUri: string
+    lineNumber: number
+    indent: number
+  }
+
+  async function getPausedLocation(): Promise<DebugPauseLocation | null> {
+    const session = vscode.debug.activeDebugSession
+    if (!session) {
+      return null
+    }
+    try {
+      const response = await session.customRequest('stackTrace', {
+        threadId: 1, // TODO is this always the right threadId?
+        startFrame: 0,
+        levels: 1,
+      })
+      if (response.stackFrames && response.stackFrames.length > 0) {
+        const frame = response.stackFrames[0]
+        const fileUri = frame.source?.path
+        const lineNumber = frame.line
+        const indent = frame.column - 1
+        vscode.window.showInformationMessage(`Stopped at ${fileUri}:${lineNumber}`)
+        return { fileUri, lineNumber, indent }
+      }
+      else {
+        vscode.window.showInformationMessage('No stack frames')
+        return null
+      }
+    }
+    catch (error) {
+      vscode.window.showErrorMessage(`Error: ${error}`)
+      return null
+    }
+  }
+
   return {
-    getUiTestSession,
     runDebugExpression,
+    getPausedLocation,
     dispose: () => {
       frameIdTracker.dispose()
       onChangeActive.dispose()

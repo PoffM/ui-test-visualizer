@@ -2,8 +2,9 @@ import Sun from 'lucide-solid/icons/sun'
 import Moon from 'lucide-solid/icons/moon'
 import RefreshCw from 'lucide-solid/icons/refresh-cw'
 import Code from 'lucide-solid/icons/code'
+import Circle from 'lucide-solid/icons/circle'
 import type { ParentProps } from 'solid-js'
-import { firstPatchReceived, inspector, refreshShadow, theme, toggleTheme } from '../App'
+import { firstPatchReceived, inspector, recorder, refreshShadow, theme, toggleTheme } from '../App'
 import { StyleIcon, StylePicker } from './StylePicker'
 import { Tooltip, TooltipContent, TooltipTrigger } from './solid-ui/tooltip'
 
@@ -42,6 +43,19 @@ export function Toolbar() {
           </ToolbarButton>
         )}
       />
+      <div class="h-10 w-10">
+        {/* Spacer */}
+      </div>
+      <ToolbarButton
+        onClick={() => recorder.toggle(!recorder.isRecording())}
+        label={recorder.isRecording() ? 'Stop recording' : '(Experimental) Record input as code'}
+      >
+        <div
+          class={`w-4 h-4 rounded-full ${
+            recorder.isRecording() ? 'bg-red-500' : 'bg-gray-500'
+          }`}
+        />
+      </ToolbarButton>
     </div>
   )
 }

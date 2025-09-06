@@ -173,6 +173,28 @@ export const panelRouter = t.router({
     .mutation(async ({ ctx }) => {
       ctx.storage.set('stylePromptDismissed', false)
     }),
+
+  recordInputAsCode: t.procedure
+    .input(
+      z.object({
+        event: z.string(),
+        query: z.tuple([z.string(), z.array(z.unknown())]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { event, query: [method, args] } = input
+      const code = `fireEvent.${method}(${args.map(arg => JSON.stringify(arg)).join(', ')})`
+
+      const pausedLocation = await ctx.sessionTracker.getPausedLocation()
+
+      console.log('code is ', code)
+      console.log('todo generate code at ', pausedLocation)
+
+      // const resultStr = await ctx.sessionTracker.runDebugExpression(
+      //   `globalThis.__recordInputAsCode(${JSON.stringify(method)}, ${JSON.stringify(args)})`,
+      // )
+      // ctx.flushPatches()
+    }),
 })
 
 export type PanelRouter = typeof panelRouter

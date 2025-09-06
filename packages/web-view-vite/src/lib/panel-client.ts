@@ -1,8 +1,7 @@
+import { makeEventListener } from '@solid-primitives/event-listener'
 import type { TRPCLink } from '@trpc/client'
 import { TRPCClientError, createTRPCProxyClient } from '@trpc/client'
 import { observable } from '@trpc/server/observable'
-
-import { makeEventListener } from '@solid-primitives/event-listener'
 import type { PanelRouter } from '../../../extension/src/panel-controller/panel-router'
 import { vscode } from './vscode'
 
