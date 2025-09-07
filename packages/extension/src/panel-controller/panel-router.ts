@@ -2,17 +2,17 @@ import { initTRPC } from '@trpc/server'
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
-import type { TestLibraryInfo } from '../framework-support/detect-test-library'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
 import { workspaceCssFiles } from '../util/workspace-css-files'
+import type { RecorderState } from '../recorder/record-input-as-code'
 import { recordInputAsCode } from '../recorder/record-input-as-code'
 
 export interface PanelRouterCtx {
   sessionTracker: DebugSessionTracker
   storage: MyStorageType
   flushPatches: () => void
-  testLibraryInfo: () => Promise<TestLibraryInfo>
+  recorderState: () => Promise<RecorderState>
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
@@ -191,8 +191,8 @@ export const panelRouter = t.router({
     )
     .mutation(async ({ ctx, input }) => {
       const { event, query: [method, [queryArg0, queryOptions]] } = input
-      const testLibraryInfo = await ctx.testLibraryInfo()
-      await recordInputAsCode(ctx.sessionTracker, testLibraryInfo, event, method, queryArg0, queryOptions)
+      const recorderState = await ctx.recorderState()
+      await recordInputAsCode(ctx.sessionTracker, recorderState, event, method, queryArg0, queryOptions)
     }),
 })
 

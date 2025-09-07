@@ -15,6 +15,7 @@ import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
 import { detectTestFramework } from './framework-support/detect-test-framework'
 import { detectTestLibrary } from './framework-support/detect-test-library'
+import { initRecorderState } from './recorder/record-input-as-code'
 
 const reporter = (() => {
   try {
@@ -118,15 +119,10 @@ export let visuallyDebugUI = async (
   // Save the test file before starting the debug session
   await vscode.window.activeTextEditor?.document.save()
 
-  const testLibraryInfo = once(async () => {
-    const testingLibrary = await detectTestLibrary(testFile)
-    return {
-      framework: fwInfo.framework,
-      testingLibrary,
-    }
-  })
+  // Only initialize the recorder state once per debug session
+  const recorderState = once(() => initRecorderState(testFile, fwInfo.framework))
 
-  const panelController = await startPanelController(extensionContext, storage, testLibraryInfo)
+  const panelController = await startPanelController(extensionContext, storage, recorderState)
 
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()

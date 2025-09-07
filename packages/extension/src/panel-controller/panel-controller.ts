@@ -7,6 +7,7 @@ import type { Server as WsServer } from 'ws'
 import type { TestLibraryInfo } from '../framework-support/detect-test-library'
 import type { MyStorageType } from '../my-extension-storage'
 import type { DebugSessionTracker } from '../util/debug-session-tracker'
+import type { RecorderState } from '../recorder/record-input-as-code'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
 
 // Avoids import errors when importing in Vitest
@@ -16,7 +17,7 @@ const Server = require('../../node_modules/ws/lib/websocket-server') as typeof W
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
-  testLibraryInfo: () => Promise<TestLibraryInfo>,
+  recorderState: () => Promise<RecorderState>,
 ) {
   const htmlUpdaterPort = await getPort()
   const viteDevServerPort = 5173
@@ -119,7 +120,7 @@ export async function startPanelController(
             sessionTracker,
             storage,
             flushPatches,
-            testLibraryInfo,
+            recorderState,
           }
           const result = await callTRPCProcedure({
             router: panelRouter,

@@ -61,7 +61,6 @@ export function startDebugSessionTracker(
   interface DebugPauseLocation {
     filePath: string
     lineNumber: number
-    indent: number
   }
 
   async function getPausedLocation(): Promise<DebugPauseLocation | null> {
@@ -79,9 +78,8 @@ export function startDebugSessionTracker(
         const frame = response.stackFrames[0]
         const fileUri = frame.source?.path
         const lineNumber = frame.line
-        const indent = frame.column - 1
         const filePath = vscode.Uri.parse(fileUri).fsPath
-        return { filePath, lineNumber, indent }
+        return { filePath, lineNumber }
       }
       else {
         vscode.window.showInformationMessage('No stack frames')
