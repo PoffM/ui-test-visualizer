@@ -5,6 +5,7 @@ import path from 'pathe'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { Server as WsServer } from 'ws'
 import { makeDebugConfig } from '../src/debug-config'
+import { detectTestFramework } from '../src/framework-support/detect-test-framework'
 
 describe('tool compatibility', async () => {
   it('works with Jest + SWC + Nextjs', async () => {
@@ -105,10 +106,11 @@ describe('tool compatibility', async () => {
     testFile: string,
     testName: string,
   ) {
+    const fwInfo = await detectTestFramework(path.join(examplesPath, testFile), 'autodetect')
     const cfg = await makeDebugConfig(
+      fwInfo,
       path.join(examplesPath, testFile),
       testName,
-      'autodetect',
       htmlUpdaterPort,
       [],
     )
