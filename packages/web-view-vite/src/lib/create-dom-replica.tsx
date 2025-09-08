@@ -34,7 +34,7 @@ export function createDomReplica() {
   }
 
   makeEventListener(window, 'message', (event) => {
-    const { htmlPatch, flushPatches } = event.data
+    const { htmlPatch, flushPatches, debuggerRestarted } = event.data
 
     if (htmlPatch) {
       patches.push(htmlPatch as HTMLPatch)
@@ -42,6 +42,9 @@ export function createDomReplica() {
     }
     if (flushPatches) {
       flushHtmlPatches()
+    }
+    if (debuggerRestarted) {
+      refreshShadow()
     }
   })
 

@@ -4,10 +4,10 @@ import { initTRPC } from '@trpc/server'
 import { z } from 'zod/mini'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { MyStorageType } from '../my-extension-storage'
-import type { DebugSessionTracker } from '../util/debug-session-tracker'
+import type { DebuggerTracker } from '../util/debugger-tracker'
 
 export interface PanelRouterCtx {
-  sessionTracker: DebugSessionTracker
+  sessionTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
 }
