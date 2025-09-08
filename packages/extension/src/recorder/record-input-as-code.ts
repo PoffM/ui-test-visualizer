@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import { detectTestLibrary } from '../framework-support/detect-test-library'
-import type { DebugSessionTracker } from '../util/debug-session-tracker'
+import type { DebuggerTracker } from '../util/debugger-tracker'
 
 export type RecorderState = Awaited<ReturnType<typeof initRecorderState>>
 
@@ -16,7 +16,7 @@ export async function initRecorderState(testFile: string, framework: SupportedFr
 }
 
 export async function recordInputAsCode(
-  sessionTracker: DebugSessionTracker,
+  sessionTracker: DebuggerTracker,
   state: RecorderState,
   event: string,
   findMethod: string,
