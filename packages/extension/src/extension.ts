@@ -10,7 +10,7 @@ import { codeLensProvider } from './code-lens-provider'
 import { makeDebugConfig } from './debug-config'
 import { myExtensionStorage } from './my-extension-storage'
 import { startPanelController } from './panel-controller/panel-controller'
-import { startDebugSessionTracker } from './util/debug-session-tracker'
+import { startDebuggerTracker } from './util/debugger-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
 import { detectTestFramework } from './framework-support/detect-test-framework'
@@ -127,9 +127,12 @@ export let visuallyDebugUI = async (
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()
 
-    const sessionTracker = await startDebugSessionTracker(
+    const sessionTracker = await startDebuggerTracker(
       currentSession,
-      () => panelController.flushPatches(),
+      {
+        onFrameChange: () => panelController.flushPatches(),
+        onDebugRestarted: () => panelController.notifyDebuggerRestarted(),
+      },
     )
 
     const autoBreakpoint = (() => {

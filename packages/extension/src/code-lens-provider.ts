@@ -15,6 +15,9 @@ interface ProcessedTestBlock {
   firstStatementStartLine: number | null
 }
 
+/** Stored the last code lenses for valid code */
+const cache = new WeakMap<vscode.TextDocument, vscode.CodeLens[]>()
+
 export const codeLensProvider: vscode.CodeLensProvider = {
   async provideCodeLenses(document) {
     try {
@@ -33,6 +36,11 @@ export const codeLensProvider: vscode.CodeLensProvider = {
       const parsed = parseSync(document.fileName, code, {})
       const programJson = parsed.program
       const program = JSON.parse(programJson)
+
+      // If there is a parsing error, return the last valid code lenses for this file
+      if (parsed.errors.length > 0) {
+        return cache.get(document) ?? []
+      }
 
       const testBlocks: TestBlock[] = []
       walk(program, {
@@ -65,6 +73,7 @@ export const codeLensProvider: vscode.CodeLensProvider = {
         )
       }
 
+      cache.set(document, codeLenses)
       return codeLenses
     }
     catch (e) {

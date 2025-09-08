@@ -18,6 +18,15 @@ export interface StylePickerProps {
   button: (isLoading: boolean) => JSX.Element
 }
 
+/**
+ * Triggers a call to the extension process to provide the new transformed CSS code to the WebView
+ */
+export function notifyForStyleChange() {
+  setStylesWereChanged(true)
+}
+
+const [stylesWereChanged, setStylesWereChanged] = createSignal(false)
+
 export function StylePicker(props: StylePickerProps) {
   const [stylePickerIsOpen, setStylePickerIsOpen] = createSignal(false)
 
@@ -30,18 +39,16 @@ export function StylePicker(props: StylePickerProps) {
     await client.dismissStylePrompt.mutate()
   }
 
-  const [filesWereChanged, setFilesWereChanged] = createSignal(false)
-
   // When the style picker is closed, and the files were changed, replace the styles.
   const [refreshQuery] = createResource(
-    () => !stylePickerIsOpen() && filesWereChanged(),
+    () => !stylePickerIsOpen() && stylesWereChanged(),
     async () => {
       const result = await client.replaceStyles.mutate()
       if (result.type === 'error') {
         console.error(result.message)
       }
       flushHtmlPatches()
-      setFilesWereChanged(false)
+      setStylesWereChanged(false)
     },
   )
 
@@ -97,7 +104,6 @@ export function StylePicker(props: StylePickerProps) {
         <PopoverContent class="w-[500px]">
           <PopoverArrow />
           <StylePickerMenu
-            setFilesWereChanged={setFilesWereChanged}
             setStylePickerOpen={setStylePickerIsOpen}
           />
         </PopoverContent>
@@ -108,7 +114,6 @@ export function StylePicker(props: StylePickerProps) {
 
 interface StylePickerMenuProps {
   setStylePickerOpen: (val: boolean) => void
-  setFilesWereChanged: (val: boolean) => void
 }
 
 function StylePickerMenu(
@@ -135,25 +140,25 @@ function StylePickerMenu(
       ?.map(f => f.path === path ? { ...f, enabled } : f)
     fileQuery.mutate(optimisticUpdate)
     await client.toggleCssFile.mutate({ path, enabled })
-    props.setFilesWereChanged(true)
+    notifyForStyleChange()
   }
 
   async function disableAllFiles() {
     const optimisticUpdate = files()?.map(f => ({ ...f, enabled: false }))
     fileQuery.mutate(optimisticUpdate)
     await client.disableAllCssFiles.mutate()
-    props.setFilesWereChanged(true)
+    notifyForStyleChange()
   }
 
   async function addExternalFiles() {
     await client.addExternalCssFiles.mutate()
-    props.setFilesWereChanged(true)
+    notifyForStyleChange()
     fileQuery.refetch()
   }
 
   async function removeExternalFile(path: string) {
     await client.removeExternalCssFile.mutate(path)
-    props.setFilesWereChanged(true)
+    notifyForStyleChange()
     fileQuery.refetch()
   }
 

@@ -4,10 +4,9 @@ import path from 'pathe'
 import type { HTMLPatch } from 'replicate-dom'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
-import type { TestLibraryInfo } from '../framework-support/detect-test-library'
 import type { MyStorageType } from '../my-extension-storage'
-import type { DebugSessionTracker } from '../util/debug-session-tracker'
 import type { RecorderState } from '../recorder/record-input-as-code'
+import type { DebuggerTracker } from '../util/debugger-tracker'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
 
 // Avoids import errors when importing in Vitest
@@ -43,11 +42,20 @@ export async function startPanelController(
     panel?.webview.postMessage({ flushPatches: true })
   }
 
+  /**
+   * Tell the webview that the debugger has restarted
+   * i.e. to refresh the replicated UI.
+   */
+  function notifyDebuggerRestarted() {
+    panel?.webview.postMessage({ debuggerRestarted: true })
+  }
+
   return {
     htmlUpdaterPort,
     flushPatches,
+    notifyDebuggerRestarted,
     async openPanel(
-      sessionTracker: DebugSessionTracker,
+      sessionTracker: DebuggerTracker,
     ) {
       // Create the webview panel
       panel = vscode.window.createWebviewPanel(

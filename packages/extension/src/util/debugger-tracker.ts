@@ -1,37 +1,45 @@
 import * as vscode from 'vscode'
 
-export type DebugSessionTracker = ReturnType<typeof startDebugSessionTracker>
+export type DebuggerTracker = ReturnType<typeof startDebuggerTracker>
 
 /**
  * Wrapper around the VSCode debug session with convenience methods.
- * Tracks the active debug session, which frame it's paused on,
+ * Emits debugger-related events e.g. onFrameChange (Step Over) and onDebugRestarted (the Restart button is clicked).
  * and provides a method to run debug expressions.
  */
-export function startDebugSessionTracker(
+export function startDebuggerTracker(
   rootSession: vscode.DebugSession,
-  onFrameChange: () => void,
+  {
+    onFrameChange,
+    onDebugRestarted,
+  }: { onFrameChange: () => void, onDebugRestarted: () => void },
 ) {
-  const sessions = new Set([rootSession])
+  const disposables = new Set<vscode.Disposable>()
 
-  /** Tracks which frame each debug session is paused on. */
-  const frameIds = new WeakMap<vscode.DebugSession, number>()
+  disposables.add(
+    vscode.debug.onDidChangeActiveDebugSession((newSession) => {
+      if (!(newSession && isChildSession(newSession, rootSession))) {
+        // This 'else' should run when the restart button is clicked, and a new debug session starts.
+        // Use an 'ActiveStackItem' to run some code when the next breakpoint is hit, so the WebView can do a refresh.
+        const listener = vscode.debug.onDidChangeActiveStackItem(() => {
+          onDebugRestarted()
+          listener.dispose()
+          disposables.delete(listener)
+        })
+        disposables.add(listener)
+      }
+    }),
+  )
 
-  const onChangeActive = vscode.debug.onDidChangeActiveDebugSession((newSession) => {
-    if (newSession && isChildSession(newSession, rootSession)) {
-      sessions.add(newSession)
-    }
-  })
-
-  const frameIdTracker = vscode.languages.registerInlineValuesProvider('*', {
-    provideInlineValues(_document, _viewPort, context, _token) {
+  disposables.add(
+    vscode.debug.onDidChangeActiveStackItem(() => {
       const activeSession = vscode.debug.activeDebugSession
       if (activeSession && isChildSession(activeSession, rootSession)) {
-        frameIds.set(activeSession, context.frameId)
         onFrameChange()
       }
       return []
-    },
-  })
+    }),
+  )
 
   async function runDebugExpression(expression: string) {
     const uiSession = vscode.debug.activeDebugSession
@@ -39,7 +47,13 @@ export function startDebugSessionTracker(
       throw new Error('Internal extension error: Could not find UI test session')
     }
 
-    const frameId = frameIds.get(uiSession)
+    const stackTrace = await uiSession.customRequest('stackTrace', {
+      threadId: 1, // TODO is this always the right threadId?
+      startFrame: 0,
+      levels: 1,
+    })
+
+    const frameId = stackTrace.stackFrames[0].id
     if (!frameId) {
       throw new Error('Internal extension error: Could not find debugger frame ID for UI test session')
     }
@@ -96,8 +110,9 @@ export function startDebugSessionTracker(
     runDebugExpression,
     getPausedLocation,
     dispose: () => {
-      frameIdTracker.dispose()
-      onChangeActive.dispose()
+      for (const disposable of disposables) {
+        disposable.dispose()
+      }
     },
   }
 }

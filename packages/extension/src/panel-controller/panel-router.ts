@@ -3,13 +3,13 @@ import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
 import type { MyStorageType } from '../my-extension-storage'
-import type { DebugSessionTracker } from '../util/debug-session-tracker'
-import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { RecorderState } from '../recorder/record-input-as-code'
 import { recordInputAsCode } from '../recorder/record-input-as-code'
+import type { DebuggerTracker } from '../util/debugger-tracker'
+import { workspaceCssFiles } from '../util/workspace-css-files'
 
 export interface PanelRouterCtx {
-  sessionTracker: DebugSessionTracker
+  sessionTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
   recorderState: () => Promise<RecorderState>

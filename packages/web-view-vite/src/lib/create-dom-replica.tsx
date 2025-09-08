@@ -3,6 +3,7 @@ import type { HTMLPatch } from 'replicate-dom'
 import { applyDomPatch, parseDomNode } from 'replicate-dom'
 import { createEffect, createResource, createSignal, onCleanup } from 'solid-js'
 import { setReplicaHtmlEl } from '../App'
+import { notifyForStyleChange } from '../components/StylePicker'
 import { client } from './panel-client'
 
 export function createDomReplica() {
@@ -33,8 +34,8 @@ export function createDomReplica() {
     patches = []
   }
 
-  makeEventListener(window, 'message', (event) => {
-    const { htmlPatch, flushPatches } = event.data
+  makeEventListener(window, 'message', async (event) => {
+    const { htmlPatch, flushPatches, debuggerRestarted } = event.data
 
     if (htmlPatch) {
       patches.push(htmlPatch as HTMLPatch)
@@ -42,6 +43,15 @@ export function createDomReplica() {
     }
     if (flushPatches) {
       flushHtmlPatches()
+    }
+    if (debuggerRestarted) {
+      // After the debugger restarts (i.e. the Restart button), refresh the DOM to show the new run's UI.
+      await refreshShadow()
+
+      // Since styles are passed in as environment variables, restarting the debugger
+      // will ignore any style changes that were made during the debug session.
+      // Notify the style picker to check for changes by setting this signal.
+      notifyForStyleChange()
     }
   })
 
