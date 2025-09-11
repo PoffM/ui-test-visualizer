@@ -1,29 +1,40 @@
 import { createEffect, createSignal } from 'solid-js'
-import { createEventListener } from '@solid-primitives/event-listener'
+import { makeEventListener } from '@solid-primitives/event-listener'
 import type { QueryArgs, Suggestion } from '@testing-library/dom'
 import { getSuggestedQuery } from '@testing-library/dom'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
+
+export type InputEventType = 'click' | 'input' | 'submit' | 'focus' | 'blur'
 
 export function createRecorder(shadowHost: HTMLDivElement) {
   const [isRecording, setIsRecording] = createSignal(false)
 
   createEffect(() => {
     if (isRecording()) {
-      createEventListener(shadowHost.shadowRoot!, 'click', (e: Event) => {
-        if (!(e instanceof MouseEvent)) {
-          return
-        }
-        const clickedEl = (shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)) ?? e.target
-        if (!(clickedEl instanceof Element)) {
-          return
-        }
-        emitEvent('click', clickedEl)
-      })
+      for (const eventType of ['click', 'input', 'submit', 'focus', 'blur'] as const) {
+        makeEventListener(shadowHost.shadowRoot!, eventType, (e: Event) => {
+          let target = e.target
+
+          // When clicking, use deepElementFromPoint to get the right element if it's inside a shadow root.
+          if (e instanceof MouseEvent) {
+            const clickedEl = (shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)) ?? e.target
+            if (!(clickedEl instanceof Element)) {
+              return
+            }
+            target = clickedEl
+          }
+
+          if (!(target instanceof Element)) {
+            return
+          }
+          emitEvent(eventType, target)
+        })
+      }
     }
   })
 
-  async function emitEvent(type: 'click', target: Element) {
+  async function emitEvent(type: InputEventType, target: Element) {
     let suggestedQuery: Suggestion | undefined
 
     // Generate the selector using the closest HTMLElement.
