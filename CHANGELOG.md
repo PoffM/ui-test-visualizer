@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.2.4
+
+### Patch Changes
+
+- 0c99e56: Fixed bug where form submission in a test caused the webview to go blank
+
 ## 1.2.3
 
 ### Patch Changes
