@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
-import { z } from 'zod/mini'
+import { required, z } from 'zod/mini'
+import { walk } from 'estree-walker'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import { detectTestLibrary } from '../framework-support/detect-test-library'
 import type { DebuggerTracker } from '../util/debugger-tracker'
@@ -16,7 +17,10 @@ export async function startRecorderCodeGenSession(
   testFile: string,
   testFramework: SupportedFramework,
 ) {
-  const testLibrary = await detectTestLibrary(testFile)
+  const testLibrary = await detectTestLibrary(testFile) ?? '@testing-library/dom'
+
+  // @ts-expect-error import the wasm file directly
+  const { parseSync } = await import('@oxc-parser/binding-wasm32-wasi')
 
   let offset = 0
 
@@ -79,18 +83,73 @@ export async function startRecorderCodeGenSession(
         return result
       })()
 
-      let code = `fireEvent.${event}(${findMethod}(${queryArgsStr}))`
+      const fireEvent = 'fireEvent'
+      const screen = 'screen'
+
+      let code = `${fireEvent}.${event}(${screen}.${findMethod}(${queryArgsStr}))`
 
       const line = editor.document.lineAt(pausedLocation.lineNumber - 1)
       const indent = line.text.match(/^\s*/)?.[0] || ''
       code = `${indent}${code}`
 
+      // Figure out which imports need to be added
+      const requiredImports = new Map<string, { from: string }>([
+        [fireEvent, { from: testLibrary }],
+        [findMethod, { from: testLibrary }],
+      ])
+      const importInsertionPoints = new Map<string, number>()
+      {
+        // TODO avoid re-parsing for every generated line of code
+        const parsed = parseSync(editor.document.fileName, editor.document.getText(), {})
+        const programJson = parsed.program
+        const program = JSON.parse(programJson)
+
+        walk(program, {
+          enter(node) {
+            if (node.type === 'ImportDeclaration') {
+              if (node.source.type === 'Literal') {
+                const endOfLastSpecifier = node.specifiers.at(-1)?.end
+                if (endOfLastSpecifier) {
+                  importInsertionPoints.set(node.source.value, endOfLastSpecifier)
+                }
+              }
+              for (const specifier of node.specifiers) {
+                if (['ImportSpecifier', 'ImportDefaultSpecifier', 'ImportNamespaceSpecifier'].includes(specifier.type)) {
+                  requiredImports.delete(specifier.local.name)
+                }
+              }
+            }
+          },
+        })
+      }
+
+      // Do the code edit
+
+      // Add the fireEvent code
       if (editor && pausedLocation) {
         const position = new vscode.Position(pausedLocation.lineNumber - 1 + offset, 0)
         await editor.edit((editBuilder) => {
           editBuilder.insert(position, `${code}\n`)
           offset += 1
         })
+      }
+
+      // Add missing imports
+      for (const [importName, { from }] of requiredImports) {
+        const insertionPoint = importInsertionPoints.get(from)
+        if (insertionPoint) {
+          const position = editor.document.positionAt(insertionPoint)
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(position, `, ${importName}`)
+            offset += 1
+          })
+        }
+        else {
+          await editor.edit((editBuilder) => {
+            editBuilder.insert(new vscode.Position(0, 0), `import { ${importName} } from '${from}'\n`)
+            offset += 1
+          })
+        }
       }
 
       // const resultStr = await ctx.sessionTracker.runDebugExpression(
