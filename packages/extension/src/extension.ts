@@ -1,21 +1,20 @@
 import '@total-typescript/ts-reset'
 
 import { TelemetryReporter } from '@vscode/extension-telemetry'
+import once from 'lodash/once'
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
-import once from 'lodash/once'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
 import { makeDebugConfig } from './debug-config'
+import { detectTestFramework } from './framework-support/detect-test-framework'
 import { myExtensionStorage } from './my-extension-storage'
 import { startPanelController } from './panel-controller/panel-controller'
+import { startRecorderCodeGenSession } from './recorder/record-input-as-code'
 import { startDebuggerTracker } from './util/debugger-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
-import { detectTestFramework } from './framework-support/detect-test-framework'
-import { detectTestLibrary } from './framework-support/detect-test-library'
-import { initRecorderState } from './recorder/record-input-as-code'
 
 const reporter = (() => {
   try {
@@ -120,14 +119,14 @@ export let visuallyDebugUI = async (
   await vscode.window.activeTextEditor?.document.save()
 
   // Only initialize the recorder state once per debug session
-  const recorderState = once(() => initRecorderState(testFile, fwInfo.framework))
+  const recorderCodeGenSession = once(() => startRecorderCodeGenSession(testFile, fwInfo.framework))
 
-  const panelController = await startPanelController(extensionContext, storage, recorderState)
+  const panelController = await startPanelController(extensionContext, storage, recorderCodeGenSession)
 
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()
 
-    const sessionTracker = await startDebuggerTracker(
+    const sessionTracker = startDebuggerTracker(
       currentSession,
       {
         onFrameChange: () => panelController.flushPatches(),

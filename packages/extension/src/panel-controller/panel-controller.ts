@@ -5,7 +5,7 @@ import type { HTMLPatch } from 'replicate-dom'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { MyStorageType } from '../my-extension-storage'
-import type { RecorderState } from '../recorder/record-input-as-code'
+import type { RecorderCodeGenSession } from '../recorder/record-input-as-code'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
 
@@ -16,7 +16,7 @@ const Server = require('../../node_modules/ws/lib/websocket-server') as typeof W
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
-  recorderState: () => Promise<RecorderState>,
+  recorderCodeGenSession: () => Promise<RecorderCodeGenSession>,
 ) {
   const htmlUpdaterPort = await getPort()
   const viteDevServerPort = 5173
@@ -115,7 +115,7 @@ export async function startPanelController(
           return prodHtml
         }
 
-        throw new Error('Unknown NODE_ENV')
+        throw new Error(`Unknown NODE_ENV ${process.env.NODE_ENV}`)
       })()
 
       panel.webview.html = html
@@ -128,7 +128,7 @@ export async function startPanelController(
             sessionTracker,
             storage,
             flushPatches,
-            recorderState,
+            recorderCodeGenSession,
           }
           const result = await callTRPCProcedure({
             router: panelRouter,

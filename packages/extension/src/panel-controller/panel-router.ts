@@ -3,8 +3,7 @@ import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
 import type { MyStorageType } from '../my-extension-storage'
-import type { RecorderState } from '../recorder/record-input-as-code'
-import { recordInputAsCode } from '../recorder/record-input-as-code'
+import { type RecorderCodeGenSession, zSerializedRegexp } from '../recorder/record-input-as-code'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 
@@ -12,7 +11,7 @@ export interface PanelRouterCtx {
   sessionTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
-  recorderState: () => Promise<RecorderState>
+  recorderCodeGenSession: () => Promise<RecorderCodeGenSession>
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
@@ -183,16 +182,17 @@ export const panelRouter = t.router({
         event: z.string(),
         query: z.tuple([
           z.string(),
-          z.tuple([z.string(), z.optional(
-            z.record(z.string(), z.union([z.string(), z.boolean()])),
-          )]),
+          z.tuple([
+            z.union([z.string(), zSerializedRegexp]),
+            z.optional(z.record(z.string(), z.union([z.string(), z.boolean(), zSerializedRegexp]))),
+          ]),
         ]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { event, query: [method, [queryArg0, queryOptions]] } = input
-      const recorderState = await ctx.recorderState()
-      await recordInputAsCode(ctx.sessionTracker, recorderState, event, method, queryArg0, queryOptions)
+      const recorderCodeGenSession = await ctx.recorderCodeGenSession()
+      await recorderCodeGenSession.recordInputAsCode(ctx.sessionTracker, event, method, queryArg0, queryOptions)
     }),
 })
 
