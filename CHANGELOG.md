@@ -1,5 +1,18 @@
 # ui-test-visualizer
 
+## 1.2.4
+
+### Patch Changes
+
+- 0c99e56: Fixed bug where form submission in a test caused the webview to go blank
+
+## 1.2.3
+
+### Patch Changes
+
+- b5edadb: perf and visual tweaks
+- 19a4702: The Web View now refreshes automatically when the debugger's Restart button is used.
+
 ## 1.2.2
 
 ### Patch Changes

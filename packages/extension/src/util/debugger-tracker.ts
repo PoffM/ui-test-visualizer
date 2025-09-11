@@ -16,20 +16,27 @@ export function startDebuggerTracker(
 ) {
   const disposables = new Set<vscode.Disposable>()
 
-  disposables.add(
-    vscode.debug.onDidChangeActiveDebugSession((newSession) => {
-      if (!(newSession && isChildSession(newSession, rootSession))) {
-        // This 'else' should run when the restart button is clicked, and a new debug session starts.
-        // Use an 'ActiveStackItem' to run some code when the next breakpoint is hit, so the WebView can do a refresh.
-        const listener = vscode.debug.onDidChangeActiveStackItem(() => {
+  // Call the onDebugRestarted callback function when the Restart button is clicked and the new debug session hits its first breakpoint
+  {
+    let hasHitFirstBreakpoint = false
+    const startedSessions = new WeakSet<vscode.DebugSession>()
+    disposables.add(vscode.debug.onDidStartDebugSession(session => startedSessions.add(session)))
+    disposables.add(vscode.debug.onDidTerminateDebugSession(session => startedSessions.delete(session)))
+    disposables.add(vscode.debug.onDidChangeActiveStackItem((stackItem) => {
+      if (stackItem && startedSessions.has(stackItem?.session)) {
+        if (hasHitFirstBreakpoint) {
+          // If this branch is hit, the restarted debug session has hit its first breakpoint.
           onDebugRestarted()
-          listener.dispose()
-          disposables.delete(listener)
-        })
-        disposables.add(listener)
+        }
+        else {
+          hasHitFirstBreakpoint = true
+        }
+
+        // Stop listening for this debug session
+        startedSessions.delete(stackItem.session)
       }
-    }),
-  )
+    }))
+  }
 
   disposables.add(
     vscode.debug.onDidChangeActiveStackItem(() => {

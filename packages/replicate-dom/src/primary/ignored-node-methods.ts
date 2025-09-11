@@ -46,6 +46,11 @@ export const IGNORED_NODE_METHODS: {
   isPrototypeOf: true,
   propertyIsEnumerable: true,
 
+  // Form-related methods
+  // @ts-expect-error TODO figure out why NodeFunctionKeys doesn't recognize this key
+  requestSubmit: true,
+  submit: true,
+
   createElement: true,
   createAttribute: true,
   createAttributeNS: true,
