@@ -119,14 +119,16 @@ export let visuallyDebugUI = async (
   await vscode.window.activeTextEditor?.document.save()
 
   // Only initialize the recorder state once per debug session
-  const recorderCodeGenSession = once(() => startRecorderCodeGenSession(testFile, fwInfo.framework))
+  const recorderCodeGenSession = once(
+    () => startRecorderCodeGenSession(testFile, fwInfo.framework, panelController),
+  )
 
   const panelController = await startPanelController(extensionContext, storage, recorderCodeGenSession)
 
   const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
     onStartDebug.dispose()
 
-    const sessionTracker = startDebuggerTracker(
+    const debuggerTracker = startDebuggerTracker(
       currentSession,
       {
         onFrameChange: () => panelController.flushPatches(),
@@ -145,7 +147,7 @@ export let visuallyDebugUI = async (
       catch {}
     })()
 
-    await panelController.openPanel(sessionTracker)
+    await panelController.openPanel(debuggerTracker)
 
     const onTerminate = vscode.debug.onDidTerminateDebugSession(
       (endedSession) => {
@@ -154,7 +156,7 @@ export let visuallyDebugUI = async (
         }
 
         autoBreakpoint?.dispose()
-        sessionTracker.dispose()
+        debuggerTracker.dispose()
         panelController.dispose()
         onTerminate.dispose()
       },

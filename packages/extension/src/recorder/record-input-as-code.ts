@@ -1,9 +1,10 @@
-import * as vscode from 'vscode'
-import { required, z } from 'zod/mini'
 import { walk } from 'estree-walker'
+import * as vscode from 'vscode'
+import { z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import { detectTestLibrary } from '../framework-support/detect-test-library'
 import type { DebuggerTracker } from '../util/debugger-tracker'
+import type { PanelController } from '../panel-controller/panel-controller'
 
 export type RecorderCodeGenSession = Awaited<ReturnType<typeof startRecorderCodeGenSession>>
 
@@ -16,6 +17,7 @@ export const zSerializedRegexp = z.object({
 export async function startRecorderCodeGenSession(
   testFile: string,
   testFramework: SupportedFramework,
+  panelController: PanelController,
 ) {
   const testLibrary = await detectTestLibrary(testFile) ?? '@testing-library/dom'
 
@@ -26,13 +28,13 @@ export async function startRecorderCodeGenSession(
 
   const codeGenSession = {
     recordInputAsCode: async (
-      sessionTracker: DebuggerTracker,
+      debuggerTracker: DebuggerTracker,
       event: string,
       findMethod: string,
       queryArg0: string | SerializedRegexp,
       queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
     ) => {
-      const pausedLocation = await sessionTracker.getPausedLocation()
+      const pausedLocation = await debuggerTracker.getPausedLocation()
       if (!pausedLocation) {
         return
       }
@@ -49,13 +51,13 @@ export async function startRecorderCodeGenSession(
           const [key, val] = entry
           result[key] = (() => {
             if (typeof val === 'string') {
-              return new RegExp(val)
+              return `'${val.replace(/'/g, '\\\'')}'`
             }
             else if (typeof val === 'boolean') {
               return val
             }
             else if (val.type === 'regexp') {
-              return new RegExp(val.value)
+              return val.value
             }
             else {
               return ''
@@ -86,7 +88,18 @@ export async function startRecorderCodeGenSession(
       const fireEvent = 'fireEvent'
       const screen = 'screen'
 
-      let code = `${fireEvent}.${event}(${screen}.${findMethod}(${queryArgsStr}))`
+      /**
+       * e.g. `screen.getByRole('button', { name: 'Submit' })`
+       * or just `document`
+       */
+      const selector = (() => {
+        if (queryArg0 === 'document') {
+          return 'document'
+        }
+        return `${screen}.${findMethod}(${queryArgsStr})`
+      })()
+
+      let code = `${fireEvent}.${event}(${selector})`
 
       const line = editor.document.lineAt(pausedLocation.lineNumber - 1)
       const indent = line.text.match(/^\s*/)?.[0] || ''
@@ -95,8 +108,23 @@ export async function startRecorderCodeGenSession(
       // Figure out which imports need to be added
       const requiredImports = new Map<string, { from: string }>([
         [fireEvent, { from: testLibrary }],
-        [findMethod, { from: testLibrary }],
+        [screen, { from: testLibrary }],
       ])
+
+      // Replicate the input event from the webview to the test runtime.
+      // We do this through a debug expression, which is the same as running code through vscode's 'Debug Terminal'.
+      const debugExpression = `
+(() => {
+${[...requiredImports.entries()].map(([importName, { from }]) => `const { ${importName} } = require('${from}');`).join('\n')}
+${code};
+})()
+`
+
+      const resultStr = await debuggerTracker.runDebugExpression(
+        debugExpression,
+      )
+      panelController.flushPatches()
+
       const importInsertionPoints = new Map<string, number>()
       {
         // TODO avoid re-parsing for every generated line of code
@@ -151,11 +179,6 @@ export async function startRecorderCodeGenSession(
           })
         }
       }
-
-      // const resultStr = await ctx.sessionTracker.runDebugExpression(
-      //   `globalThis.__recordInputAsCode(${JSON.stringify(method)}, ${JSON.stringify(args)})`,
-      // )
-      // ctx.flushPatches()
     },
   }
   return codeGenSession

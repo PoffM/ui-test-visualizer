@@ -8,7 +8,7 @@ import type { DebuggerTracker } from '../util/debugger-tracker'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 
 export interface PanelRouterCtx {
-  sessionTracker: DebuggerTracker
+  debuggerTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
   recorderCodeGenSession: () => Promise<RecorderCodeGenSession>
@@ -20,7 +20,7 @@ const t = initTRPC.context<PanelRouterCtx>().create()
 export const panelRouter = t.router({
   serializeHtml: t.procedure
     .query(async ({ ctx }) => {
-      const html = await ctx.sessionTracker.runDebugExpression('globalThis.__serializeHtml()')
+      const html = await ctx.debuggerTracker.runDebugExpression('globalThis.__serializeHtml()')
       return html
     }),
 
@@ -107,7 +107,7 @@ export const panelRouter = t.router({
     .mutation(async ({ ctx }) => {
       const files = await ctx.storage.get('enabledCssFiles') ?? []
       const filesAsString = JSON.stringify(files)
-      const resultStr = await ctx.sessionTracker.runDebugExpression(
+      const resultStr = await ctx.debuggerTracker.runDebugExpression(
         `globalThis.__replaceStyles(${filesAsString})`,
       )
       ctx.flushPatches()
@@ -192,7 +192,7 @@ export const panelRouter = t.router({
     .mutation(async ({ ctx, input }) => {
       const { event, query: [method, [queryArg0, queryOptions]] } = input
       const recorderCodeGenSession = await ctx.recorderCodeGenSession()
-      await recorderCodeGenSession.recordInputAsCode(ctx.sessionTracker, event, method, queryArg0, queryOptions)
+      await recorderCodeGenSession.recordInputAsCode(ctx.debuggerTracker, event, method, queryArg0, queryOptions)
     }),
 })
 

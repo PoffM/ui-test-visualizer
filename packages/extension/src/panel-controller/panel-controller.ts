@@ -13,6 +13,8 @@ import { type PanelRouterCtx, panelRouter } from './panel-router'
 // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
 const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
+export type PanelController = Awaited<ReturnType<typeof startPanelController>>
+
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
@@ -55,7 +57,7 @@ export async function startPanelController(
     flushPatches,
     notifyDebuggerRestarted,
     async openPanel(
-      sessionTracker: DebuggerTracker,
+      debuggerTracker: DebuggerTracker,
     ) {
       // Create the webview panel
       panel = vscode.window.createWebviewPanel(
@@ -104,6 +106,7 @@ export async function startPanelController(
               <head>
                 <link rel="icon" type="image/svg+xml" href="${icon}" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <meta http-equiv="Content-Security-Policy" content="form-action 'none';">
                 <script type="module" crossorigin src="${appJs}"></script>
                 <link rel="stylesheet" crossorigin href="${appCss}">
               </head>
@@ -125,7 +128,7 @@ export async function startPanelController(
 
         try {
           const ctx: PanelRouterCtx = {
-            sessionTracker,
+            debuggerTracker,
             storage,
             flushPatches,
             recorderCodeGenSession,

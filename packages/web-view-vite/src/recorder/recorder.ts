@@ -28,6 +28,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
           if (!(target instanceof Element)) {
             return
           }
+
           emitEvent(eventType, target)
         })
       }
@@ -37,14 +38,28 @@ export function createRecorder(shadowHost: HTMLDivElement) {
   async function emitEvent(type: InputEventType, target: Element) {
     let suggestedQuery: Suggestion | undefined
 
+    /**
+     * Sometimes testing-library can't find a good query to use.
+     * This fn checks if testing-library generated a useful query.
+     */
+    function hasQuery() {
+      if (!suggestedQuery) {
+        return false
+      }
+      if (suggestedQuery.queryArgs[0] === 'document') {
+        return false
+      }
+      return true
+    }
+
     // Generate the selector using the closest HTMLElement.
     // e.g. if you click on an SVG, that doesn't count as an HTMLElement,
     // so step up to the parent.
-    while (!suggestedQuery && target) {
+    while (!hasQuery() && target) {
       if (target instanceof HTMLElement) {
         suggestedQuery = getSuggestedQuery(target)
       }
-      if (!suggestedQuery) {
+      if (!hasQuery()) {
         if (target.parentElement) {
           target = target.parentElement
         }
@@ -54,7 +69,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       }
     }
 
-    if (!suggestedQuery) {
+    if (!hasQuery() || !suggestedQuery) {
       return
     }
 
