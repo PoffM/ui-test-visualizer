@@ -66,7 +66,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
 
           const eventData: Parameters<typeof client.recordInputAsCode.mutate>[0]['eventData'] = {}
 
-          if (eventType === 'change' && target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+          if (eventType === 'change' && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
             const text = target.value
             eventData.text = text
           }
@@ -99,13 +99,13 @@ export function serializeQueryArgs(queryArgs: QueryArgs): [string | SerializedRe
   const [query, options] = queryArgs
   if (!options) {
     // @ts-expect-error Not declared the testing library, but the query could be a RegExp:
-    const result = query instanceof RegExp ? serializeRegexp(query) : query
+    const result = query instanceof RegExp ? processRegexp(query) : query
     return [result]
   }
   const serializedOptions = Object.entries(options).reduce((prev, curr) => {
     const val = curr[1]
     if (val !== undefined) {
-      prev[curr[0]] = val instanceof RegExp ? serializeRegexp(val) : val
+      prev[curr[0]] = val instanceof RegExp ? processRegexp(val) : val
     }
     return prev
   }, {} as Record<string, string | boolean | SerializedRegexp>)
@@ -115,6 +115,17 @@ export function serializeQueryArgs(queryArgs: QueryArgs): [string | SerializedRe
 
 export interface SerializedRegexp { type: 'regexp', value: string }
 
-function serializeRegexp(regexp: RegExp): SerializedRegexp {
+function processRegexp(regexp: RegExp): SerializedRegexp {
+  // Make the regexp exact, to avoid multiple matches.
+  // e.g. when you have buttons aria-labeled "right" and "top right", then the regex /right/ would match both.
+  regexp = makeRegexpExact(regexp)
+
   return { type: 'regexp', value: regexp.toString() }
+}
+
+function makeRegexpExact(regexp: RegExp) {
+  const { source, flags } = regexp
+
+  // Wrap with ^ and $
+  return new RegExp(`^${source}$`, flags)
 }
