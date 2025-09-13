@@ -18,7 +18,7 @@ export type PanelController = Awaited<ReturnType<typeof startPanelController>>
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
-  recorderCodeGenSession: () => Promise<RecorderCodeGenSession>,
+  recorderCodeGenSession: () => Promise<RecorderCodeGenSession | null>,
 ) {
   const htmlUpdaterPort = await getPort()
   const viteDevServerPort = 5173

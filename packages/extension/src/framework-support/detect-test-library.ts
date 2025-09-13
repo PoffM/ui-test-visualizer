@@ -8,11 +8,6 @@ export const SUPPORTED_TESTING_LIBRARIES = [
 
 export type TestingLibrary = typeof SUPPORTED_TESTING_LIBRARIES[number]
 
-export interface TestLibraryInfo {
-  framework: SupportedFramework
-  testingLibrary: TestingLibrary | null
-}
-
 export async function detectTestLibrary(testFilePath: string): Promise<TestingLibrary | null> {
   // Lookup the test framework in node_modules
   const detectedLibrary = (() => {

@@ -11,7 +11,7 @@ export interface PanelRouterCtx {
   debuggerTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
-  recorderCodeGenSession: () => Promise<RecorderCodeGenSession>
+  recorderCodeGenSession: () => Promise<RecorderCodeGenSession | null>
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
@@ -180,19 +180,32 @@ export const panelRouter = t.router({
     .input(
       z.object({
         event: z.string(),
+        eventData: z.object({
+          text: z.optional(z.string()), // Used for change events
+        }),
         query: z.tuple([
           z.string(),
           z.tuple([
             z.union([z.string(), zSerializedRegexp]),
-            z.optional(z.record(z.string(), z.union([z.string(), z.boolean(), zSerializedRegexp]))),
+            z.optional(z.record(
+              z.string(),
+              z.union([z.string(), z.boolean(), zSerializedRegexp]),
+            )),
           ]),
         ]),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { event, query: [method, [queryArg0, queryOptions]] } = input
+      const { event, eventData, query: [method, [queryArg0, queryOptions]] } = input
       const recorderCodeGenSession = await ctx.recorderCodeGenSession()
-      await recorderCodeGenSession.recordInputAsCode(ctx.debuggerTracker, event, method, queryArg0, queryOptions)
+      await recorderCodeGenSession?.recordInputAsCode(
+        ctx.debuggerTracker,
+        event,
+        eventData,
+        method,
+        queryArg0,
+        queryOptions,
+      )
     }),
 })
 

@@ -1,10 +1,13 @@
+import type { inferProcedureInput } from '@trpc/server'
 import { walk } from 'estree-walker'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
+import type { TestingLibrary } from '../framework-support/detect-test-library'
 import { detectTestLibrary } from '../framework-support/detect-test-library'
-import type { DebuggerTracker } from '../util/debugger-tracker'
 import type { PanelController } from '../panel-controller/panel-controller'
+import type { panelRouter } from '../panel-controller/panel-router'
+import type { DebuggerTracker } from '../util/debugger-tracker'
 
 export type RecorderCodeGenSession = Awaited<ReturnType<typeof startRecorderCodeGenSession>>
 
@@ -17,19 +20,19 @@ export const zSerializedRegexp = z.object({
 export async function startRecorderCodeGenSession(
   testFile: string,
   testFramework: SupportedFramework,
+  testLibrary: TestingLibrary,
   panelController: PanelController,
 ) {
-  const testLibrary = await detectTestLibrary(testFile) ?? '@testing-library/dom'
-
   // @ts-expect-error import the wasm file directly
   const { parseSync } = await import('@oxc-parser/binding-wasm32-wasi')
 
   let offset = 0
 
-  const codeGenSession = {
+  return {
     recordInputAsCode: async (
       debuggerTracker: DebuggerTracker,
       event: string,
+      eventData: inferProcedureInput<typeof panelRouter.recordInputAsCode>['eventData'],
       findMethod: string,
       queryArg0: string | SerializedRegexp,
       queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
@@ -99,7 +102,15 @@ export async function startRecorderCodeGenSession(
         return `${screen}.${findMethod}(${queryArgsStr})`
       })()
 
-      let code = `${fireEvent}.${event}(${selector})`
+      const fireEventArgs = (() => {
+        if (event === 'change' && eventData.text) {
+          const value = eventData.text.replace(/'/g, '\\\'')
+          return `, { target: { value: '${value}' } }`
+        }
+        return ''
+      })()
+
+      let code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
 
       const line = editor.document.lineAt(pausedLocation.lineNumber - 1)
       const indent = line.text.match(/^\s*/)?.[0] || ''
@@ -181,5 +192,4 @@ ${code};
       }
     },
   }
-  return codeGenSession
 }

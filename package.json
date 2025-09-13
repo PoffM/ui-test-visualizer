@@ -65,7 +65,21 @@
           "description": "Test Framework: Vitest or Jest. Auto-detects by default by walking up directories from your test file."
         }
       }
-    }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ui-test-visualizer.createUiTest",
+          "when": "editorTextFocus && editorLangId =~ /typescript|javascript/"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ui-test-visualizer.createUiTest",
+        "title": "Create UI test (UI Test Visualizer)"
+      }
+    ]
   },
   "scripts": {
     "dev": "rm -rf build-dev && pnpm run -r dev",

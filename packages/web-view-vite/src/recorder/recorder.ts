@@ -1,18 +1,16 @@
-import { createEffect, createSignal } from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import type { QueryArgs, Suggestion } from '@testing-library/dom'
 import { getSuggestedQuery } from '@testing-library/dom'
+import { createEffect, createSignal } from 'solid-js'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
-
-export type InputEventType = 'click' | 'input' | 'submit' | 'focus' | 'blur'
 
 export function createRecorder(shadowHost: HTMLDivElement) {
   const [isRecording, setIsRecording] = createSignal(false)
 
   createEffect(() => {
     if (isRecording()) {
-      for (const eventType of ['click', 'input', 'submit', 'focus', 'blur'] as const) {
+      for (const eventType of ['click', 'submit', 'focus', 'blur', 'change'] as const) {
         makeEventListener(shadowHost.shadowRoot!, eventType, (e: Event) => {
           let target = e.target
 
@@ -29,63 +27,66 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             return
           }
 
-          emitEvent(eventType, target)
+          let suggestedQuery: Suggestion | undefined
+
+          /**
+           * Sometimes testing-library can't find a good query to use.
+           * This fn checks if testing-library generated a useful query.
+           */
+          function hasQuery() {
+            if (!suggestedQuery) {
+              return false
+            }
+            if (suggestedQuery.queryArgs[0] === 'document') {
+              return false
+            }
+            return true
+          }
+
+          // Generate the selector using the closest HTMLElement.
+          // e.g. if you click on an SVG, that doesn't count as an HTMLElement,
+          // so step up to the parent.
+          while (!hasQuery() && target) {
+            if (target instanceof HTMLElement) {
+              suggestedQuery = getSuggestedQuery(target)
+            }
+            if (!hasQuery()) {
+              if (target instanceof Element && target.parentElement) {
+                target = target.parentElement
+              }
+              else {
+                return
+              }
+            }
+          }
+
+          if (!hasQuery() || !suggestedQuery) {
+            return
+          }
+
+          const eventData: Parameters<typeof client.recordInputAsCode.mutate>[0]['eventData'] = {}
+
+          if (eventType === 'change' && target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+            const text = target.value
+            eventData.text = text
+          }
+
+          const query = serializeQueryArgs(suggestedQuery.queryArgs)
+          // Send the selector to the extension process to record as code
+          void client.recordInputAsCode.mutate({
+            event: eventType,
+            query: [suggestedQuery.queryMethod, query],
+            eventData,
+          })
         })
       }
     }
   })
 
-  async function emitEvent(type: InputEventType, target: Element) {
-    let suggestedQuery: Suggestion | undefined
-
-    /**
-     * Sometimes testing-library can't find a good query to use.
-     * This fn checks if testing-library generated a useful query.
-     */
-    function hasQuery() {
-      if (!suggestedQuery) {
-        return false
-      }
-      if (suggestedQuery.queryArgs[0] === 'document') {
-        return false
-      }
-      return true
-    }
-
-    // Generate the selector using the closest HTMLElement.
-    // e.g. if you click on an SVG, that doesn't count as an HTMLElement,
-    // so step up to the parent.
-    while (!hasQuery() && target) {
-      if (target instanceof HTMLElement) {
-        suggestedQuery = getSuggestedQuery(target)
-      }
-      if (!hasQuery()) {
-        if (target.parentElement) {
-          target = target.parentElement
-        }
-        else {
-          return
-        }
-      }
-    }
-
-    if (!hasQuery() || !suggestedQuery) {
-      return
-    }
-
-    const query = serializeQueryArgs(suggestedQuery.queryArgs)
-    // Send the selector to the extension process to record as code
-    await client.recordInputAsCode.mutate({
-      event: type,
-      query: [suggestedQuery.queryMethod, query],
-    })
-  }
-
   return {
     isRecording,
     toggle: (recording: boolean) => {
       setIsRecording(recording)
-      console.log('recording:', recording)
     },
   }
 }

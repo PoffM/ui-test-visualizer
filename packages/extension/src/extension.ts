@@ -15,6 +15,8 @@ import { startRecorderCodeGenSession } from './recorder/record-input-as-code'
 import { startDebuggerTracker } from './util/debugger-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
+import { detectTestLibrary } from './framework-support/detect-test-library'
+import { createUiTestFile } from './recorder/create-ui-test-file'
 
 const reporter = (() => {
   try {
@@ -41,14 +43,16 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
     })
   }
 
-  const debugTest = vscode.commands.registerCommand(
-    'ui-test-visualizer.visuallyDebugUI',
-    (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => visuallyDebugUI(
-      testFile,
-      testName,
-      startAndEndLines,
-      firstStatementStartLine,
-      extensionContext,
+  extensionContext.subscriptions.push(
+    vscode.commands.registerCommand(
+      'ui-test-visualizer.visuallyDebugUI',
+      (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => visuallyDebugUI(
+        testFile,
+        testName,
+        startAndEndLines,
+        firstStatementStartLine,
+        extensionContext,
+      ),
     ),
   )
 
@@ -85,7 +89,10 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
     )
   }
 
-  extensionContext.subscriptions.push(debugTest)
+  // Right-click a component name and click "Create UI test" -> create a test file with the name of the component
+  extensionContext.subscriptions.push(
+    vscode.commands.registerCommand('ui-test-visualizer.createUiTest', () => createUiTestFile()),
+  )
 }
 
 export function deactivate() { }
@@ -113,14 +120,17 @@ export let visuallyDebugUI = async (
     return parsed.success ? parsed.data : 'autodetect'
   })()
 
-  const fwInfo = await detectTestFramework(testFile, frameworkSetting)
+  const frameworkInfo = await detectTestFramework(testFile, frameworkSetting)
+  const testLibrary = await detectTestLibrary(testFile)
 
   // Save the test file before starting the debug session
   await vscode.window.activeTextEditor?.document.save()
 
   // Only initialize the recorder state once per debug session
   const recorderCodeGenSession = once(
-    () => startRecorderCodeGenSession(testFile, fwInfo.framework, panelController),
+    async () => testLibrary
+      ? await startRecorderCodeGenSession(testFile, frameworkInfo.framework, testLibrary, panelController)
+      : null,
   )
 
   const panelController = await startPanelController(extensionContext, storage, recorderCodeGenSession)
@@ -164,7 +174,7 @@ export let visuallyDebugUI = async (
   })
 
   const debugConfig = await makeDebugConfig(
-    fwInfo,
+    frameworkInfo,
     testFile,
     testName,
     panelController.htmlUpdaterPort,
