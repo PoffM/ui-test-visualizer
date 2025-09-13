@@ -35,11 +35,11 @@ export async function createUiTestFile() {
     let result: string | null = null
     walk(program, {
       enter(node) {
-        if (node.type === 'ExportNamedDeclaration' && node.start <= wordStart && node.end >= wordEnd) {
-          result = node.declaration?.id.name
-        }
-        if (node.type === 'ExportDefaultDeclaration' && node.declaration.type === 'FunctionDeclaration' && node.start <= wordStart && node.end >= wordEnd) {
-          result = node.declaration.id.name
+        if (
+          (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration')
+          && node.start <= wordStart && node.end >= wordEnd
+        ) {
+          result = node?.declaration?.id?.name ?? node?.declaration?.declarations?.[0]?.id?.name ?? null
         }
       },
     })
@@ -92,13 +92,17 @@ export async function createUiTestFile() {
     // File does not exist, proceed to create
   }
 
+  const relativePathToSrc = path.relative(currentDir, doc.fileName).replace(/\.[jt]sx?$/, '')
+
   // Create basic test content
+  const isArrowRender = testingLibrary === '@solidjs/testing-library'
   const testContent = `import { describe, test } from '${frameworkInfo.framework}'
 import { render } from '${testingLibrary}'
+import { ${exportName} } from './${relativePathToSrc}'
 
 describe('${exportName}', () => {
   test('basic usage', () => {
-    render(<${exportName} />)
+    render(${isArrowRender ? `() => <${exportName} />` : `<${exportName} />`})
   })
 })
 `
