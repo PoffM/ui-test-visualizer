@@ -1,16 +1,30 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
-import type { QueryArgs, Suggestion } from '@testing-library/dom'
+import type { EventType, QueryArgs, Suggestion } from '@testing-library/dom'
 import { getSuggestedQuery } from '@testing-library/dom'
 import { createEffect, createSignal } from 'solid-js'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
 
+export const MOUSE_EVENT_TYPES: EventType[] = [
+  'click',
+  'dblClick',
+  'mouseDown',
+  'mouseUp',
+  'mouseEnter',
+  'mouseLeave',
+  'mouseMove',
+  'mouseOver',
+  'mouseOut',
+  'contextMenu',
+]
+
 export function createRecorder(shadowHost: HTMLDivElement) {
   const [isRecording, setIsRecording] = createSignal(false)
+  const [mouseEvent, setMouseEvent] = createSignal<EventType>('click')
 
   createEffect(() => {
     if (isRecording()) {
-      for (const eventType of ['click', 'submit', 'focus', 'blur', 'change'] as const) {
+      for (const eventType of ['click', 'submit', 'change'] as const) {
         makeEventListener(shadowHost.shadowRoot!, eventType, (e: Event) => {
           let target = e.target
 
@@ -71,10 +85,14 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             eventData.text = text
           }
 
+          const recordedEventType = eventType === 'click'
+            ? mouseEvent()
+            : eventType
+
           const query = serializeQueryArgs(suggestedQuery.queryArgs)
           // Send the selector to the extension process to record as code
           void client.recordInputAsCode.mutate({
-            event: eventType,
+            event: recordedEventType,
             query: [suggestedQuery.queryMethod, query],
             eventData,
           })
@@ -88,6 +106,8 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     toggle: (recording: boolean) => {
       setIsRecording(recording)
     },
+    mouseEvent,
+    setMouseEvent,
   }
 }
 

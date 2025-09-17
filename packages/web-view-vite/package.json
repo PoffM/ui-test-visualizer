@@ -9,6 +9,8 @@
   "dependencies": {
     "@kobalte/core": "0.13.11",
     "@kobalte/utils": "^0.9.1",
+    "@shikijs/langs": "^3.12.2",
+    "@shikijs/themes": "^3.12.2",
     "@solid-primitives/event-listener": "^2.4.3",
     "@solid-primitives/map": "^0.7.2",
     "@solid-primitives/mutation-observer": "^1.2.2",
@@ -23,6 +25,7 @@
     "lodash": "^4.17.21",
     "lucide-solid": "^0.542.0",
     "replicate-dom": "workspace:*",
+    "shiki": "^3.12.2",
     "solid-js": "^1.9.9",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",

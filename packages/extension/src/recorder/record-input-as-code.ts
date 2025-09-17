@@ -131,7 +131,7 @@ ${code};
 })()
 `
 
-      const resultStr = await debuggerTracker.runDebugExpression(
+      await debuggerTracker.runDebugExpression(
         debugExpression,
       )
       panelController.flushPatches()

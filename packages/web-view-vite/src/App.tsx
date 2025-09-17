@@ -1,5 +1,5 @@
 import * as webviewToolkit from '@vscode/webview-ui-toolkit'
-import { ErrorBoundary, Show, createSignal } from 'solid-js'
+import { ErrorBoundary, Match, Show, Switch, createSignal } from 'solid-js'
 import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { createInspectorHeight } from './inspector/inspector-height'
@@ -7,8 +7,7 @@ import { Toolbar } from './components/Toolbar'
 import { Inspector } from './inspector/Inspector'
 import { Resizer } from './inspector/Resizer'
 import { createRecorder } from './recorder/recorder'
-
-// Importing the router type from the server file
+import { RecorderPanel } from './recorder/recorder-panel'
 
 // In order to use the Webview UI Toolkit web components they
 // must be registered with the browser (i.e. webview) using the
@@ -21,6 +20,7 @@ import { createRecorder } from './recorder/recorder'
     .register(webviewToolkit.vsCodeCheckbox({ prefix }))
     .register(webviewToolkit.vsCodeProgressRing({ prefix }))
     .register(webviewToolkit.vsCodeTextField({ prefix }))
+    .register(webviewToolkit.vsCodeRadio({ prefix }))
 }
 
 // TODO put these into a context provider
@@ -65,17 +65,32 @@ export function App() {
           >
             {shadowHost}
           </div>
-          <Show when={inspector.isOpen()}>
+          <Show when={inspector.isOpen() || recorder.isRecording()}>
             <div style={{ height: `${inspector.height()}px` }}>
               <Resizer onResize={inspector.updateHeight} />
-              <ErrorBoundary fallback={error => (
-                <div class="text-error-foreground p-4">
-                  Error showing the inspector{error instanceof Error ? `: ${error.message}` : ''}
-                </div>
-              )}
-              >
-                <Inspector />
-              </ErrorBoundary>
+              <Switch>
+                <Match when={recorder.isRecording()}>
+                  <ErrorBoundary fallback={error => (
+                    <div class="text-error-foreground p-4">
+                      Error showing the recorder UI{error instanceof Error ? `: ${error.message}` : ''}
+                    </div>
+                  )}
+                  >
+                    <RecorderPanel />
+                  </ErrorBoundary>
+
+                </Match>
+                <Match when={inspector.isOpen()}>
+                  <ErrorBoundary fallback={error => (
+                    <div class="text-error-foreground p-4">
+                      Error showing the inspector{error instanceof Error ? `: ${error.message}` : ''}
+                    </div>
+                  )}
+                  >
+                    <Inspector />
+                  </ErrorBoundary>
+                </Match>
+              </Switch>
             </div>
           </Show>
         </div>
