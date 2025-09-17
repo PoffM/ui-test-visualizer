@@ -1,8 +1,9 @@
-import { For, Suspense, createResource, createSignal } from 'solid-js'
-import { createHighlighterCore, createJavaScriptRegexEngine } from 'shiki'
+import { createHighlighterCore } from '@shikijs/core'
+import shikiTypescript from '@shikijs/langs/typescript'
 import shikiDarkPlus from '@shikijs/themes/dark-plus'
 import shikiLightPlus from '@shikijs/themes/light-plus'
-import shikiTypescript from '@shikijs/langs/typescript'
+import { createJavaScriptRegexEngine } from 'shiki'
+import { For, Suspense, createResource, createSignal } from 'solid-js'
 import { recorder } from '../App'
 import { MOUSE_EVENT_TYPES } from './recorder'
 

@@ -473,6 +473,9 @@ importers:
       '@kobalte/utils':
         specifier: ^0.9.1
         version: 0.9.1(solid-js@1.9.9)
+      '@shikijs/core':
+        specifier: ^3.12.2
+        version: 3.12.2
       '@shikijs/langs':
         specifier: ^3.12.2
         version: 3.12.2
@@ -11472,7 +11475,7 @@ snapshots:
 
   '@types/hast@3.0.4':
     dependencies:
-      '@types/unist': 2.0.10
+      '@types/unist': 3.0.3
 
   '@types/istanbul-lib-coverage@2.0.6': {}
 
