@@ -2,6 +2,7 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import type { EventType, QueryArgs, Suggestion } from '@testing-library/dom'
 import { getSuggestedQuery } from '@testing-library/dom'
 import { createEffect, createSignal } from 'solid-js'
+import { createMutable } from 'solid-js/store'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
 
@@ -22,10 +23,20 @@ export function createRecorder(shadowHost: HTMLDivElement) {
   const [isRecording, setIsRecording] = createSignal(false)
   const [mouseEvent, setMouseEvent] = createSignal<EventType>('click')
 
+  // A copy of the insertions, replicated from the extension process to the webview here.
+  // TODO make this a CRDT owned by the extension process instead of re-creating it inside the webview?
+  const insertionsCopy = createMutable<Record<number, string[]>>({})
+  function addInsertion(line: number, text: string) {
+    if (!insertionsCopy[line]) {
+      insertionsCopy[line] = []
+    }
+    insertionsCopy[line].push(text)
+  }
+
   createEffect(() => {
     if (isRecording()) {
       for (const eventType of ['click', 'submit', 'change'] as const) {
-        makeEventListener(shadowHost.shadowRoot!, eventType, (e: Event) => {
+        makeEventListener(shadowHost.shadowRoot!, eventType, async (e: Event) => {
           let target = e.target
 
           // When clicking, use deepElementFromPoint to get the right element if it's inside a shadow root.
@@ -91,11 +102,15 @@ export function createRecorder(shadowHost: HTMLDivElement) {
 
           const query = serializeQueryArgs(suggestedQuery.queryArgs)
           // Send the selector to the extension process to record as code
-          void client.recordInputAsCode.mutate({
+          const insertion = await client.recordInputAsCode.mutate({
             event: recordedEventType,
             query: [suggestedQuery.queryMethod, query],
             eventData,
           })
+
+          if (insertion) {
+            addInsertion(insertion[0], insertion[1])
+          }
         })
       }
     }
@@ -108,6 +123,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     },
     mouseEvent,
     setMouseEvent,
+    insertions: insertionsCopy,
   }
 }
 

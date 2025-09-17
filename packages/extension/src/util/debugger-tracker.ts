@@ -12,7 +12,12 @@ export function startDebuggerTracker(
   {
     onFrameChange,
     onDebugRestarted,
-  }: { onFrameChange: () => void, onDebugRestarted: () => void },
+    onDebugTerminated,
+  }: {
+    onFrameChange: () => void
+    onDebugRestarted: () => void
+    onDebugTerminated: () => void
+  },
 ) {
   const disposables = new Set<vscode.Disposable>()
 
@@ -21,7 +26,13 @@ export function startDebuggerTracker(
     let hasHitFirstBreakpoint = false
     const startedSessions = new WeakSet<vscode.DebugSession>()
     disposables.add(vscode.debug.onDidStartDebugSession(session => startedSessions.add(session)))
-    disposables.add(vscode.debug.onDidTerminateDebugSession(session => startedSessions.delete(session)))
+    disposables.add(vscode.debug.onDidTerminateDebugSession((session) => {
+      startedSessions.delete(session)
+
+      if (session === rootSession) {
+        onDebugTerminated()
+      }
+    }))
     disposables.add(vscode.debug.onDidChangeActiveStackItem((stackItem) => {
       if (stackItem && startedSessions.has(stackItem?.session)) {
         if (hasHitFirstBreakpoint) {

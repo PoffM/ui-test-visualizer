@@ -1,12 +1,10 @@
-import type { inferProcedureInput } from '@trpc/server'
 import { walk } from 'estree-walker'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
-import { detectTestLibrary } from '../framework-support/detect-test-library'
 import type { PanelController } from '../panel-controller/panel-controller'
-import type { panelRouter } from '../panel-controller/panel-router'
+import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 
 export type RecorderCodeGenSession = Awaited<ReturnType<typeof startRecorderCodeGenSession>>
@@ -17,36 +15,44 @@ export const zSerializedRegexp = z.object({
   value: z.string(),
 })
 
-export async function startRecorderCodeGenSession(
+export function startRecorderCodeGenSession(
   testFile: string,
   testFramework: SupportedFramework,
   testLibrary: TestingLibrary,
   panelController: PanelController,
 ) {
-  // @ts-expect-error import the wasm file directly
-  const { parseSync } = await import('@oxc-parser/binding-wasm32-wasi')
+  // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
+  const { parseSync } = require('@oxc-parser/binding-wasm32-wasi')
 
-  let offset = 0
+  const insertions: Record<number, string[]> = {}
+  function addInsertion(line: number, text: string) {
+    const lines = insertions[line] ?? (insertions[line] = [])
+    lines.push(text)
+  }
+
+  const requiredImports = new Map<string, { from: string }>()
+
+  let editor: vscode.TextEditor | undefined
 
   return {
     recordInputAsCode: async (
       debuggerTracker: DebuggerTracker,
       event: string,
-      eventData: inferProcedureInput<typeof panelRouter.recordInputAsCode>['eventData'],
+      eventData: z.infer<typeof zRecordedEventData>,
       findMethod: string,
       queryArg0: string | SerializedRegexp,
       queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
-    ) => {
+    ): Promise<[number, string] | null> => {
       const pausedLocation = await debuggerTracker.getPausedLocation()
       if (!pausedLocation) {
-        return
+        return null
       }
 
-      const editor = vscode.window.visibleTextEditors.find(
+      editor = vscode.window.visibleTextEditors.find(
         editor => editor.document.uri.path === pausedLocation.filePath.toString(),
-      )
+      ) ?? editor
       if (!editor) {
-        return
+        return null
       }
 
       const parsedQueryOptions = queryOptions && Object.entries(queryOptions).reduce(
@@ -117,7 +123,7 @@ export async function startRecorderCodeGenSession(
       code = `${indent}${code}`
 
       // Figure out which imports need to be added
-      const requiredImports = new Map<string, { from: string }>([
+      const newRequiredImports = new Map<string, { from: string }>([
         [fireEvent, { from: testLibrary }],
         [screen, { from: testLibrary }],
       ])
@@ -126,19 +132,49 @@ export async function startRecorderCodeGenSession(
       // We do this through a debug expression, which is the same as running code through vscode's 'Debug Terminal'.
       const debugExpression = `
 (() => {
-${[...requiredImports.entries()].map(([importName, { from }]) => `const { ${importName} } = require('${from}');`).join('\n')}
+${[...newRequiredImports.entries()].map(([importName, { from }]) => `const { ${importName} } = require('${from}');`).join('\n')}
 ${code};
 })()
 `
 
-      await debuggerTracker.runDebugExpression(
-        debugExpression,
-      )
+      await debuggerTracker.runDebugExpression(debugExpression)
       panelController.flushPatches()
 
+      // Add the fireEvent code
+      addInsertion(pausedLocation.lineNumber, `${code}\n`)
+
+      return [pausedLocation.lineNumber, code] as const
+    },
+
+    performEdit: async () => {
+      if (Object.keys(insertions).length === 0) {
+        // No edits to perform
+        return
+      }
+
+      if (!editor) {
+        vscode.window.showInformationMessage('No editor found')
+        return
+      }
+
+      const reverseOrderInsertions = Object.entries(insertions)
+        .sort((a, b) => Number(b[0]) - Number(a[0]))
+
+      for (const [line, lines] of reverseOrderInsertions) {
+        const lineNumber = Number.parseInt(line)
+        const position = new vscode.Position(lineNumber - 1, 0)
+        await editor.edit((editBuilder) => {
+          for (const line of lines) {
+            editBuilder.insert(position, line)
+          }
+        })
+      }
+
+      // Figure out where to put each import statement
+      // Either add a new import, or edit an existing one to import something else
       const importInsertionPoints = new Map<string, number>()
       {
-        // TODO avoid re-parsing for every generated line of code
+        // TODO avoid re-parsing for every generated line of code?
         const parsed = parseSync(editor.document.fileName, editor.document.getText(), {})
         const programJson = parsed.program
         const program = JSON.parse(programJson)
@@ -162,17 +198,6 @@ ${code};
         })
       }
 
-      // Do the code edit
-
-      // Add the fireEvent code
-      if (editor && pausedLocation) {
-        const position = new vscode.Position(pausedLocation.lineNumber - 1 + offset, 0)
-        await editor.edit((editBuilder) => {
-          editBuilder.insert(position, `${code}\n`)
-          offset += 1
-        })
-      }
-
       // Add missing imports
       for (const [importName, { from }] of requiredImports) {
         const insertionPoint = importInsertionPoints.get(from)
@@ -180,13 +205,11 @@ ${code};
           const position = editor.document.positionAt(insertionPoint)
           await editor.edit((editBuilder) => {
             editBuilder.insert(position, `, ${importName}`)
-            offset += 1
           })
         }
         else {
           await editor.edit((editBuilder) => {
             editBuilder.insert(new vscode.Position(0, 0), `import { ${importName} } from '${from}'\n`)
-            offset += 1
           })
         }
       }

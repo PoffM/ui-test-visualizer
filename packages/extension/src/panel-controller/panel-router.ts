@@ -11,10 +11,14 @@ export interface PanelRouterCtx {
   debuggerTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
-  recorderCodeGenSession: () => Promise<RecorderCodeGenSession | null>
+  recorderCodeGenSession: () => RecorderCodeGenSession | null
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
+
+export const zRecordedEventData = z.object({
+  text: z.optional(z.string()), // Used for change events
+})
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
 export const panelRouter = t.router({
@@ -180,9 +184,7 @@ export const panelRouter = t.router({
     .input(
       z.object({
         event: z.string(),
-        eventData: z.object({
-          text: z.optional(z.string()), // Used for change events
-        }),
+        eventData: zRecordedEventData,
         query: z.tuple([
           z.string(),
           z.tuple([
@@ -198,7 +200,7 @@ export const panelRouter = t.router({
     .mutation(async ({ ctx, input }) => {
       const { event, eventData, query: [method, [queryArg0, queryOptions]] } = input
       const recorderCodeGenSession = await ctx.recorderCodeGenSession()
-      await recorderCodeGenSession?.recordInputAsCode(
+      const insertion = recorderCodeGenSession?.recordInputAsCode(
         ctx.debuggerTracker,
         event,
         eventData,
@@ -206,6 +208,7 @@ export const panelRouter = t.router({
         queryArg0,
         queryOptions,
       )
+      return insertion
     }),
 })
 

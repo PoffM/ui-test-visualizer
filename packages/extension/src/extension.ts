@@ -1,7 +1,6 @@
 import '@total-typescript/ts-reset'
 
 import { TelemetryReporter } from '@vscode/extension-telemetry'
-import once from 'lodash/once'
 import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
@@ -9,14 +8,15 @@ import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
 import { makeDebugConfig } from './debug-config'
 import { detectTestFramework } from './framework-support/detect-test-framework'
+import { detectTestLibrary } from './framework-support/detect-test-library'
 import { myExtensionStorage } from './my-extension-storage'
 import { startPanelController } from './panel-controller/panel-controller'
+import { createUiTestFile } from './recorder/create-ui-test-file'
 import { startRecorderCodeGenSession } from './recorder/record-input-as-code'
 import { startDebuggerTracker } from './util/debugger-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
-import { detectTestLibrary } from './framework-support/detect-test-library'
-import { createUiTestFile } from './recorder/create-ui-test-file'
+import { onceWithPeek } from './util/util'
 
 const reporter = (() => {
   try {
@@ -127,9 +127,9 @@ export let visuallyDebugUI = async (
   await vscode.window.activeTextEditor?.document.save()
 
   // Only initialize the recorder state once per debug session
-  const recorderCodeGenSession = once(
-    async () => testLibrary
-      ? await startRecorderCodeGenSession(testFile, frameworkInfo.framework, testLibrary, panelController)
+  const recorderCodeGenSession = onceWithPeek(
+    () => testLibrary
+      ? startRecorderCodeGenSession(testFile, frameworkInfo.framework, testLibrary, panelController)
       : null,
   )
 
@@ -143,6 +143,7 @@ export let visuallyDebugUI = async (
       {
         onFrameChange: () => panelController.flushPatches(),
         onDebugRestarted: () => panelController.notifyDebuggerRestarted(),
+        onDebugTerminated: async () => recorderCodeGenSession.peek()?.performEdit(),
       },
     )
 

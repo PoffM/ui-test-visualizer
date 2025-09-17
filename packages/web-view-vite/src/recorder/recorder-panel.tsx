@@ -3,7 +3,7 @@ import shikiTypescript from '@shikijs/langs/typescript'
 import shikiDarkPlus from '@shikijs/themes/dark-plus'
 import shikiLightPlus from '@shikijs/themes/light-plus'
 import { createJavaScriptRegexEngine } from 'shiki'
-import { For, Suspense, createResource, createSignal } from 'solid-js'
+import { For, Suspense, createResource } from 'solid-js'
 import { recorder } from '../App'
 import { MOUSE_EVENT_TYPES } from './recorder'
 
@@ -13,20 +13,6 @@ export function RecorderPanel() {
     langs: [shikiTypescript],
     engine: createJavaScriptRegexEngine(),
   }))
-
-  // TODO show the actual generated code
-  const [mockGeneratedCode] = createSignal([
-    'console.log(\'click on button\')',
-    'console.log(\'type in input\')',
-    'console.log(\'hover over element\')',
-    'console.log(\'double click\')',
-    'console.log(\'right click\')',
-    'console.log(\'mouse down\')',
-    'console.log(\'mouse up\')',
-    'console.log(\'mouse enter\')',
-    'console.log(\'mouse leave\')',
-    'console.log(\'mouse move\')',
-  ])
 
   function highlightedCode(code: string) {
     const shikiTheme = document.body.classList.contains('vscode-light') ? 'light-plus' : 'dark-plus'
@@ -62,20 +48,25 @@ export function RecorderPanel() {
     <div class="flex h-full w-full">
       <div class="w-1/2 h-full overflow-y-auto p-4 border-r border-[--vscode-panel-border]">
         <div>
-          <h2 class="text-lg font-semibold mb-2">Generated Code</h2>
-          <pre class="text-sm">
-            <For each={mockGeneratedCode()}>{code => (
-              <Suspense fallback={<div>{code}</div>}>
-                <>{highlightedCode(code)}</>
-              </Suspense>
+          <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
+          <div class="text-sm flex flex-col gap-2">
+            <For each={Object.entries(recorder.insertions)}>{([lineNum, code]) => (
+              <div>
+                <h2>Insert at line: {lineNum}</h2>
+                <div class="pl-2">
+                  <Suspense fallback={<div>{code}</div>}>
+                    <>{highlightedCode(code.join('\n'))}</>
+                  </Suspense>
+                </div>
+              </div>
             )}
             </For>
-          </pre>
+          </div>
         </div>
       </div>
       <div class="w-1/2 h-full overflow-y-auto p-4">
         <div>
-          <h2 class="text-lg font-semibold mb-2">Choose Mouse Event</h2>
+          <h1 class="text-lg font-semibold mb-2">Choose Mouse Event</h1>
           <div class="flex flex-wrap gap-1">
             <For each={MOUSE_EVENT_TYPES}>{event => (
               <label class="flex items-center bg-(--vscode-list-hoverBackground) px-2 py-1 rounded cursor-pointer">
