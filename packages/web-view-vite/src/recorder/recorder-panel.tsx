@@ -58,8 +58,8 @@ export function RecorderPanel() {
   }
 
   return (
-    <div class="flex h-full">
-      <div class="w-1/2 p-4 border-r border-[--vscode-panel-border]">
+    <div class="flex h-full w-full">
+      <div class="w-1/2 h-full overflow-y-auto p-4 border-r border-[--vscode-panel-border]">
         <div>
           <h2 class="text-lg font-semibold mb-2">Generated Code</h2>
           <pre class="text-sm">
@@ -72,19 +72,18 @@ export function RecorderPanel() {
           </pre>
         </div>
       </div>
-      <div class="w-1/2 p-4">
+      <div class="w-1/2 h-full overflow-y-auto p-4">
         <div>
           <h2 class="text-lg font-semibold mb-2">Choose Mouse Event</h2>
           <div class="flex flex-wrap gap-1">
             <For each={MOUSE_EVENT_TYPES}>{event => (
-              <label class="flex items-center bg-(--checkbox-background) px-2 py-1 rounded cursor-pointer">
+              <label class="flex items-center bg-(--vscode-list-hoverBackground) px-2 py-1 rounded cursor-pointer">
                 <ui-test-visualizer-radio
                   value={event}
                   checked={recorder.mouseEvent() === event}
                   onChange={(e: any) => {
                     if (e.target.checked) {
                       recorder.setMouseEvent(e.target.value)
-                      console.log('changed to', e)
                     }
                   }}
                 >

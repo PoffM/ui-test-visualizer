@@ -58,11 +58,7 @@ export function App() {
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
           class="absolute h-full w-full flex flex-col"
         >
-          <div
-            style={{
-              height: inspector.isOpen() ? `calc(100% - ${inspector.height()}px)` : '100%',
-            }}
-          >
+          <div class="flex-1">
             {shadowHost}
           </div>
           <Show when={inspector.isOpen() || recorder.isRecording()}>
@@ -78,7 +74,6 @@ export function App() {
                   >
                     <RecorderPanel />
                   </ErrorBoundary>
-
                 </Match>
                 <Match when={inspector.isOpen()}>
                   <ErrorBoundary fallback={error => (
