@@ -210,6 +210,20 @@ export const panelRouter = t.router({
       )
       return recorderCodeGenSession?.insertions
     }),
+
+  removeRecorderInsertion: t.procedure
+    .input(
+      z.object({
+        line: z.number(),
+        idx: z.optional(z.number()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { line, idx } = input
+      const session = ctx.recorderCodeGenSession()
+      session?.removeInsertion(line, idx)
+      return session?.insertions
+    }),
 })
 
 export type PanelRouter = typeof panelRouter

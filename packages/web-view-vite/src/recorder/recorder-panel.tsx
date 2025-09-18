@@ -4,6 +4,7 @@ import shikiDarkPlus from '@shikijs/themes/dark-plus'
 import shikiLightPlus from '@shikijs/themes/light-plus'
 import { createJavaScriptRegexEngine } from 'shiki'
 import { For, Suspense, createResource } from 'solid-js'
+import X from 'lucide-solid/icons/x'
 import { recorder } from '../App'
 import { MOUSE_EVENT_TYPES } from './recorder'
 
@@ -50,13 +51,37 @@ export function RecorderPanel() {
         <div>
           <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
           <div class="text-sm flex flex-col gap-2">
-            <For each={Object.entries(recorder.codeInsertions() ?? {})}>{([lineNum, code]) => (
+            <For each={Object.entries(recorder.codeInsertions() ?? {})}>{([lineNum, codeLines]) => (
               <div>
-                <h2>Insert at line: {lineNum}</h2>
+                <div class="flex items-center gap-1">
+                  <ui-test-visualizer-button
+                    appearance="icon"
+                    onClick={async () => {
+                      await recorder.removeInsertion(Number(lineNum))
+                    }}
+                  >
+                    <X />
+                  </ui-test-visualizer-button>
+                  <h2>Insert at line: {lineNum}</h2>
+                </div>
                 <div class="pl-2">
-                  <Suspense fallback={<div>{code}</div>}>
-                    <>{highlightedCode(code.map(it => it.trim()).join('\n'))}</>
-                  </Suspense>
+                  <For each={codeLines}>
+                    {(code, idx) => (
+                      <div class="flex items-center gap-1">
+                        <ui-test-visualizer-button
+                          appearance="icon"
+                          onClick={async () => {
+                            await recorder.removeInsertion(Number(lineNum), idx())
+                          }}
+                        >
+                          <X />
+                        </ui-test-visualizer-button>
+                        <Suspense fallback={<div>{code}</div>}>
+                          <>{highlightedCode(code.trim())}</>
+                        </Suspense>
+                      </div>
+                    )}
+                  </For>
                 </div>
               </div>
             )}

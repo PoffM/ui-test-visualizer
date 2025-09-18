@@ -108,6 +108,10 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     toggle: (recording: boolean) => {
       setIsRecording(recording)
     },
+    removeInsertion: async (line: number, idx?: number) => {
+      const newInsertions = await client.removeRecorderInsertion.mutate({ line, idx })
+      setCodeInsertions(newInsertions)
+    },
     mouseEvent,
     setMouseEvent,
     codeInsertions,

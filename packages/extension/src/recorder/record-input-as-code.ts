@@ -30,6 +30,18 @@ export function startRecorderCodeGenSession(
     lines.push(text)
     updateCodeLens.fire()
   }
+  function removeInsertion(line: number, idx?: number) {
+    if (idx === undefined) {
+      delete insertions[line]
+    }
+    else {
+      insertions[line]?.splice(idx, 1)
+      if (insertions[line]?.length === 0) {
+        delete insertions[line]
+      }
+    }
+    updateCodeLens.fire()
+  }
 
   const disposables = new Set<vscode.Disposable>()
 
@@ -242,6 +254,7 @@ ${code};
       }
     },
     insertions,
+    removeInsertion,
     dispose: () => {
       for (const disposable of disposables) {
         disposable.dispose()
