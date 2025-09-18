@@ -199,8 +199,8 @@ export const panelRouter = t.router({
     )
     .mutation(async ({ ctx, input }) => {
       const { event, eventData, query: [method, [queryArg0, queryOptions]] } = input
-      const recorderCodeGenSession = await ctx.recorderCodeGenSession()
-      const insertion = recorderCodeGenSession?.recordInputAsCode(
+      const recorderCodeGenSession = ctx.recorderCodeGenSession()
+      const _insertion = await recorderCodeGenSession?.recordInputAsCode(
         ctx.debuggerTracker,
         event,
         eventData,
@@ -208,7 +208,7 @@ export const panelRouter = t.router({
         queryArg0,
         queryOptions,
       )
-      return insertion
+      return recorderCodeGenSession?.insertions
     }),
 })
 

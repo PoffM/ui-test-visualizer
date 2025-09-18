@@ -50,12 +50,12 @@ export function RecorderPanel() {
         <div>
           <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
           <div class="text-sm flex flex-col gap-2">
-            <For each={Object.entries(recorder.insertions)}>{([lineNum, code]) => (
+            <For each={Object.entries(recorder.codeInsertions() ?? {})}>{([lineNum, code]) => (
               <div>
                 <h2>Insert at line: {lineNum}</h2>
                 <div class="pl-2">
                   <Suspense fallback={<div>{code}</div>}>
-                    <>{highlightedCode(code.join('\n'))}</>
+                    <>{highlightedCode(code.map(it => it.trim()).join('\n'))}</>
                   </Suspense>
                 </div>
               </div>
