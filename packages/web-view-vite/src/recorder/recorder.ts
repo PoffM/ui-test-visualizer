@@ -4,6 +4,7 @@ import { getSuggestedQuery } from '@testing-library/dom'
 import { createEffect, createSignal } from 'solid-js'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
+import type { RecorderCodeInsertions } from '../../../extension/src/recorder/record-input-as-code'
 
 export const MOUSE_EVENT_TYPES: EventType[] = [
   'click',
@@ -21,7 +22,7 @@ export const MOUSE_EVENT_TYPES: EventType[] = [
 export function createRecorder(shadowHost: HTMLDivElement) {
   const [isRecording, setIsRecording] = createSignal(false)
   const [mouseEvent, setMouseEvent] = createSignal<EventType>('click')
-  const [codeInsertions, setCodeInsertions] = createSignal<Record<number, string[]> | undefined>()
+  const [codeInsertions, setCodeInsertions] = createSignal<RecorderCodeInsertions | undefined>()
 
   createEffect(() => {
     if (isRecording()) {

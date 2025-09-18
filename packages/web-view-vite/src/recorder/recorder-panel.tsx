@@ -66,7 +66,7 @@ export function RecorderPanel() {
                 </div>
                 <div class="pl-2">
                   <For each={codeLines}>
-                    {(code, idx) => (
+                    {([code, _requiredImports], idx) => (
                       <div class="flex items-center gap-1">
                         <ui-test-visualizer-button
                           appearance="icon"

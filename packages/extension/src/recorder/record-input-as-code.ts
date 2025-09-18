@@ -1,6 +1,6 @@
 import { walk } from 'estree-walker'
 import * as vscode from 'vscode'
-import { z } from 'zod/mini'
+import { string, z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { PanelController } from '../panel-controller/panel-controller'
@@ -8,6 +8,8 @@ import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 
 export type RecorderCodeGenSession = Awaited<ReturnType<typeof startRecorderCodeGenSession>>
+
+export type RecorderCodeInsertions = Record<number, [code: string, requiredImports: Record<string, string>][]>
 
 export type SerializedRegexp = z.infer<typeof zSerializedRegexp>
 export const zSerializedRegexp = z.object({
@@ -24,10 +26,10 @@ export function startRecorderCodeGenSession(
   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
   const { parseSync } = require('@oxc-parser/binding-wasm32-wasi')
 
-  const insertions: Record<number, string[]> = {}
-  function addInsertion(line: number, text: string) {
+  const insertions: RecorderCodeInsertions = {}
+  function addInsertion(line: number, text: string, requiredImports: Record<string, string>) {
     const lines = insertions[line] ?? (insertions[line] = [])
-    lines.push(text)
+    lines.push([text, requiredImports])
     updateCodeLens.fire()
   }
   function removeInsertion(line: number, idx?: number) {
@@ -68,8 +70,6 @@ export function startRecorderCodeGenSession(
       onDidChangeCodeLenses: updateCodeLens.event,
     },
   ))
-
-  const requiredImports = new Map<string, { from: string }>()
 
   let editor: vscode.TextEditor | undefined
 
@@ -162,16 +162,16 @@ export function startRecorderCodeGenSession(
       code = `${indent}${code}`
 
       // Figure out which imports need to be added
-      const newRequiredImports = new Map<string, { from: string }>([
-        [fireEvent, { from: testLibrary }],
-        [screen, { from: testLibrary }],
-      ])
+      const requiredImports: Record<string, string> = {
+        [fireEvent]: testLibrary,
+        [screen]: testLibrary,
+      }
 
       // Replicate the input event from the webview to the test runtime.
       // We do this through a debug expression, which is the same as running code through vscode's 'Debug Terminal'.
       const debugExpression = `
 (() => {
-${[...newRequiredImports.entries()].map(([importName, { from }]) => `const { ${importName} } = require('${from}');`).join('\n')}
+${Object.entries(requiredImports).map(([importName, from]) => `const { ${importName} } = require('${from}');`).join('\n')}
 ${code};
 })()
 `
@@ -180,7 +180,7 @@ ${code};
       panelController.flushPatches()
 
       // Add the fireEvent code
-      addInsertion(pausedLocation.lineNumber, `${code}\n`)
+      addInsertion(pausedLocation.lineNumber, `${code}\n`, requiredImports)
 
       return [pausedLocation.lineNumber, code] as const
     },
@@ -203,7 +203,7 @@ ${code};
         const lineNumber = Number.parseInt(line)
         const position = new vscode.Position(lineNumber - 1, 0)
         await editor.edit((editBuilder) => {
-          for (const line of lines) {
+          for (const [line, _requiredImports] of lines) {
             editBuilder.insert(position, line)
           }
         })
@@ -212,6 +212,7 @@ ${code};
       // Figure out where to put each import statement
       // Either add a new import, or edit an existing one to import something else
       const importInsertionPoints = new Map<string, number>()
+      const existingImports = new Set<string>()
       {
         // TODO avoid re-parsing for every generated line of code?
         const parsed = parseSync(editor.document.fileName, editor.document.getText(), {})
@@ -229,7 +230,7 @@ ${code};
               }
               for (const specifier of node.specifiers) {
                 if (['ImportSpecifier', 'ImportDefaultSpecifier', 'ImportNamespaceSpecifier'].includes(specifier.type)) {
-                  requiredImports.delete(specifier.local.name)
+                  existingImports.add(specifier.local.name)
                 }
               }
             }
@@ -237,8 +238,24 @@ ${code};
         })
       }
 
-      // Add missing imports
-      for (const [importName, { from }] of requiredImports) {
+      // Get the list of imports to add
+      const importList: { importName: string, from: string }[] = []
+      for (const [_lineNum, insertionGroup] of Object.entries(insertions)) {
+        for (const [_code, requiredImports] of insertionGroup) {
+          for (const [importName, from] of Object.entries(requiredImports)) {
+            if (existingImports.has(importName)) {
+              continue
+            }
+
+            importList.push({ importName, from })
+
+            existingImports.add(importName)
+          }
+        }
+      }
+
+      // Edit the imports into the file
+      for (const { importName, from } of importList) {
         const insertionPoint = importInsertionPoints.get(from)
         if (insertionPoint) {
           const position = editor.document.positionAt(insertionPoint)
