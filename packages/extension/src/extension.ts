@@ -170,6 +170,7 @@ export let visuallyDebugUI = async (
         debuggerTracker.dispose()
         panelController.dispose()
         onTerminate.dispose()
+        recorderCodeGenSession.peek()?.dispose()
       },
     )
   })

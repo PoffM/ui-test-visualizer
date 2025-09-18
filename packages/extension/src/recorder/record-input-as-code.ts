@@ -28,7 +28,34 @@ export function startRecorderCodeGenSession(
   function addInsertion(line: number, text: string) {
     const lines = insertions[line] ?? (insertions[line] = [])
     lines.push(text)
+    updateCodeLens.fire()
   }
+
+  const disposables = new Set<vscode.Disposable>()
+
+  // Show Code Lens in between lines of code to indicate where the generated code will go.
+  const updateCodeLens = new vscode.EventEmitter<void>()
+  disposables.add(vscode.languages.registerCodeLensProvider(
+    [{ pattern: testFile }],
+    {
+      provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
+        const lenses: vscode.CodeLens[] = []
+        for (const [lineStr, _codeLines] of Object.entries(insertions)) {
+          const line = Number(lineStr) - 1
+          if (line >= 0 && line < document.lineCount) {
+            const lineText = document.lineAt(line).text
+            const range = new vscode.Range(line, 0, line, lineText.length)
+            const title = 'Code will be inserted here after the test'
+            lenses.push(new vscode.CodeLens(range, { title, command: '' }))
+          }
+        }
+        return lenses
+      },
+
+      // Weird trick to be able to manually trigger the code lens update.
+      onDidChangeCodeLenses: updateCodeLens.event,
+    },
+  ))
 
   const requiredImports = new Map<string, { from: string }>()
 
@@ -212,6 +239,12 @@ ${code};
             editBuilder.insert(new vscode.Position(0, 0), `import { ${importName} } from '${from}'\n`)
           })
         }
+      }
+    },
+    insertions,
+    dispose: () => {
+      for (const disposable of disposables) {
+        disposable.dispose()
       }
     },
   }
