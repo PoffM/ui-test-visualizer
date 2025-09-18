@@ -58,7 +58,11 @@ export function App() {
           style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
           class="absolute h-full w-full flex flex-col"
         >
-          <div class="flex-1">
+          <div
+            style={{
+              height: (inspector.isOpen() || recorder.isRecording()) ? `calc(100% - ${inspector.height()}px)` : '100%',
+            }}
+          >
             {shadowHost}
           </div>
           <Show when={inspector.isOpen() || recorder.isRecording()}>
