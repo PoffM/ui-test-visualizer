@@ -2,6 +2,11 @@ import * as vscode from 'vscode'
 
 export type DebuggerTracker = ReturnType<typeof startDebuggerTracker>
 
+export interface DebugPauseLocation {
+  filePath: string
+  lineNumber: number
+}
+
 /**
  * Wrapper around the VSCode debug session with convenience methods.
  * Emits debugger-related events e.g. onFrameChange (Step Over) and onDebugRestarted (the Restart button is clicked).
@@ -88,11 +93,6 @@ export function startDebuggerTracker(
     const result = evalResult.result
 
     return result
-  }
-
-  interface DebugPauseLocation {
-    filePath: string
-    lineNumber: number
   }
 
   async function getPausedLocation(): Promise<DebugPauseLocation | null> {

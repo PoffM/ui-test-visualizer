@@ -3,7 +3,7 @@ import path from 'pathe'
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
 import type { MyStorageType } from '../my-extension-storage'
-import { type RecorderCodeGenSession, zSerializedRegexp } from '../recorder/record-input-as-code'
+import { type RecorderCodeGenSession, zSerializedRegexp } from '../recorder/recorder-codegen-session'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 import { workspaceCssFiles } from '../util/workspace-css-files'
 
@@ -195,10 +195,12 @@ export const panelRouter = t.router({
             )),
           ]),
         ]),
+        // Whether to generate an 'expect' statement
+        useExpect: z.optional(z.boolean()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { event, eventData, query: [method, [queryArg0, queryOptions]] } = input
+      const { event, eventData, query: [method, [queryArg0, queryOptions]], useExpect } = input
       const recorderCodeGenSession = ctx.recorderCodeGenSession()
       const _insertion = await recorderCodeGenSession?.recordInputAsCode(
         ctx.debuggerTracker,
@@ -207,6 +209,7 @@ export const panelRouter = t.router({
         method,
         queryArg0,
         queryOptions,
+        useExpect,
       )
       return recorderCodeGenSession?.insertions
     }),

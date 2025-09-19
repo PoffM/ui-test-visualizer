@@ -4,7 +4,7 @@ import { getSuggestedQuery } from '@testing-library/dom'
 import { createEffect, createSignal } from 'solid-js'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
-import type { RecorderCodeInsertions } from '../../../extension/src/recorder/record-input-as-code'
+import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
 
 export const MOUSE_EVENT_TYPES: EventType[] = [
   'click',
@@ -99,11 +99,16 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             : eventType
 
           const query = serializeQueryArgs(suggestedQuery.queryArgs)
+
+          // When the 'alt' key is held while clicking, generate an 'expect' statement
+          const useExpect = eventType === 'click' && e instanceof MouseEvent && e.altKey
+
           // Send the selector to the extension process to record as code
           const insertions = await client.recordInputAsCode.mutate({
             event: recordedEventType,
             query: [suggestedQuery.queryMethod, query],
             eventData,
+            useExpect,
           })
           setCodeInsertions(insertions)
         })

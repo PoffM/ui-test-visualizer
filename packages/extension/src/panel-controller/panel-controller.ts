@@ -5,7 +5,7 @@ import type { HTMLPatch } from 'replicate-dom'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { MyStorageType } from '../my-extension-storage'
-import type { RecorderCodeGenSession } from '../recorder/record-input-as-code'
+import type { RecorderCodeGenSession } from '../recorder/recorder-codegen-session'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
 

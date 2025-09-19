@@ -1,7 +1,7 @@
 import { walk } from 'estree-walker'
 import * as vscode from 'vscode'
 import type { PanelController } from '../panel-controller/panel-controller'
-import type { RecorderCodeInsertions } from './record-input-as-code'
+import type { RecorderCodeInsertions } from './recorder-codegen-session'
 
 export async function performEdit(
   editor: vscode.TextEditor | undefined,
