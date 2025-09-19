@@ -1,11 +1,11 @@
-import { walk } from 'estree-walker'
 import * as vscode from 'vscode'
-import { string, z } from 'zod/mini'
+import { z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { PanelController } from '../panel-controller/panel-controller'
 import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebuggerTracker } from '../util/debugger-tracker'
+import { performEdit } from './perform-edit'
 
 export type RecorderCodeGenSession = Awaited<ReturnType<typeof startRecorderCodeGenSession>>
 
@@ -23,9 +23,6 @@ export function startRecorderCodeGenSession(
   testLibrary: TestingLibrary,
   panelController: PanelController,
 ) {
-  // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-  const { parseSync } = require('@oxc-parser/binding-wasm32-wasi')
-
   const insertions: RecorderCodeInsertions = {}
   function addInsertion(line: number, text: string, requiredImports: Record<string, string>) {
     const lines = insertions[line] ?? (insertions[line] = [])
@@ -66,10 +63,24 @@ export function startRecorderCodeGenSession(
         return lenses
       },
 
-      // Weird trick to be able to manually trigger the code lens update.
+      // Weird trick to manually trigger the code lens update.
       onDidChangeCodeLenses: updateCodeLens.event,
     },
   ))
+
+  async function runPerformEdit() {
+    await performEdit(
+      editor,
+      insertions,
+      panelController,
+    )
+  }
+
+  disposables.add(vscode.debug.onDidChangeActiveStackItem((stackItem) => {
+    if (stackItem === undefined) {
+      runPerformEdit()
+    }
+  }))
 
   let editor: vscode.TextEditor | undefined
 
@@ -184,92 +195,7 @@ ${code};
 
       return [pausedLocation.lineNumber, code] as const
     },
-
-    performEdit: async () => {
-      if (Object.keys(insertions).length === 0) {
-        // No edits to perform
-        return
-      }
-
-      if (!editor) {
-        vscode.window.showInformationMessage('No editor found')
-        return
-      }
-
-      const reverseOrderInsertions = Object.entries(insertions)
-        .sort((a, b) => Number(b[0]) - Number(a[0]))
-
-      for (const [line, lines] of reverseOrderInsertions) {
-        const lineNumber = Number.parseInt(line)
-        const position = new vscode.Position(lineNumber - 1, 0)
-        await editor.edit((editBuilder) => {
-          for (const [line, _requiredImports] of lines) {
-            editBuilder.insert(position, line)
-          }
-        })
-      }
-
-      // Figure out where to put each import statement
-      // Either add a new import, or edit an existing one to import something else
-      const importInsertionPoints = new Map<string, number>()
-      const existingImports = new Set<string>()
-      {
-        // TODO avoid re-parsing for every generated line of code?
-        const parsed = parseSync(editor.document.fileName, editor.document.getText(), {})
-        const programJson = parsed.program
-        const program = JSON.parse(programJson)
-
-        walk(program, {
-          enter(node) {
-            if (node.type === 'ImportDeclaration') {
-              if (node.source.type === 'Literal') {
-                const endOfLastSpecifier = node.specifiers.at(-1)?.end
-                if (endOfLastSpecifier) {
-                  importInsertionPoints.set(node.source.value, endOfLastSpecifier)
-                }
-              }
-              for (const specifier of node.specifiers) {
-                if (['ImportSpecifier', 'ImportDefaultSpecifier', 'ImportNamespaceSpecifier'].includes(specifier.type)) {
-                  existingImports.add(specifier.local.name)
-                }
-              }
-            }
-          },
-        })
-      }
-
-      // Get the list of imports to add
-      const importList: { importName: string, from: string }[] = []
-      for (const [_lineNum, insertionGroup] of Object.entries(insertions)) {
-        for (const [_code, requiredImports] of insertionGroup) {
-          for (const [importName, from] of Object.entries(requiredImports)) {
-            if (existingImports.has(importName)) {
-              continue
-            }
-
-            importList.push({ importName, from })
-
-            existingImports.add(importName)
-          }
-        }
-      }
-
-      // Edit the imports into the file
-      for (const { importName, from } of importList) {
-        const insertionPoint = importInsertionPoints.get(from)
-        if (insertionPoint) {
-          const position = editor.document.positionAt(insertionPoint)
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(position, `, ${importName}`)
-          })
-        }
-        else {
-          await editor.edit((editBuilder) => {
-            editBuilder.insert(new vscode.Position(0, 0), `import { ${importName} } from '${from}'\n`)
-          })
-        }
-      }
-    },
+    performEdit: runPerformEdit,
     insertions,
     removeInsertion,
     dispose: () => {

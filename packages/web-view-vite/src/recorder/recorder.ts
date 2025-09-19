@@ -24,6 +24,13 @@ export function createRecorder(shadowHost: HTMLDivElement) {
   const [mouseEvent, setMouseEvent] = createSignal<EventType>('click')
   const [codeInsertions, setCodeInsertions] = createSignal<RecorderCodeInsertions | undefined>()
 
+  // When the edit is performed, clear the recorder UI's insertions state
+  makeEventListener(window, 'message', (event) => {
+    if (event.data.recorderEditPerformed) {
+      setCodeInsertions(undefined)
+    }
+  })
+
   createEffect(() => {
     if (isRecording()) {
       for (const eventType of ['click', 'submit', 'change'] as const) {

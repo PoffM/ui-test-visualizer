@@ -52,10 +52,15 @@ export async function startPanelController(
     panel?.webview.postMessage({ debuggerRestarted: true })
   }
 
+  function notifyRecorderEditPerformed() {
+    panel?.webview.postMessage({ recorderEditPerformed: true })
+  }
+
   return {
     htmlUpdaterPort,
     flushPatches,
     notifyDebuggerRestarted,
+    notifyRecorderEditPerformed,
     async openPanel(
       debuggerTracker: DebuggerTracker,
     ) {

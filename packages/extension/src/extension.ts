@@ -3,6 +3,7 @@ import '@total-typescript/ts-reset'
 import { TelemetryReporter } from '@vscode/extension-telemetry'
 import path from 'pathe'
 import * as vscode from 'vscode'
+import { en as zodEn } from 'zod/locales'
 import { z } from 'zod/mini'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
@@ -17,6 +18,8 @@ import { startDebuggerTracker } from './util/debugger-tracker'
 import { extensionSetting } from './util/extension-setting'
 import { hotReload } from './util/hot-reload'
 import { onceWithPeek } from './util/util'
+
+z.config(zodEn())
 
 const reporter = (() => {
   try {
