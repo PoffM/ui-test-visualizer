@@ -108,9 +108,11 @@ export function startRecorderCodeGenSession(
       }
 
       const { code, debugExpression, requiredImports } = await generateCode(
+        testFile,
         editor,
         pausedLocation,
         testLibrary,
+        testFramework,
         event,
         eventData,
         findMethod,

@@ -3,12 +3,14 @@ import type * as vscode from 'vscode'
 import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebugPauseLocation } from '../util/debugger-tracker'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
+import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { SerializedRegexp } from './recorder-codegen-session'
 
 export async function generateCode(
   editor: vscode.TextEditor,
   pausedLocation: DebugPauseLocation,
   testLibrary: TestingLibrary,
+  testFramework: SupportedFramework,
 
   event: string,
   eventData: z.infer<typeof zRecordedEventData>,
@@ -57,7 +59,6 @@ export async function generateCode(
     return result
   })()
 
-  const fireEvent = 'fireEvent'
   const screen = 'screen'
 
   /**
@@ -71,31 +72,53 @@ export async function generateCode(
     return `${screen}.${findMethod}(${queryArgsStr})`
   })()
 
-  const fireEventArgs = (() => {
-    if (event === 'change' && eventData.text) {
-      const value = eventData.text.replace(/'/g, '\\\'')
-      return `, { target: { value: '${value}' } }`
-    }
-    return ''
-  })()
+  let code = ''
+  const requiredImports: Record<string, string> = {
+    [screen]: testLibrary,
+  }
 
-  let code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
+  // When 'useExpect' is true, generate an 'expect' statement
+  if (useExpect) {
+    const expect = 'expect'
+    code = `${expect}(${selector}).toBeTruthy()`
+    if (testFramework === 'vitest') {
+      requiredImports[expect] = testFramework
+    }
+  }
+  // Otherwise, generate a fireEvent call
+  else {
+    const fireEvent = 'fireEvent'
+
+    const fireEventArgs = (() => {
+      if (event === 'change' && eventData.text) {
+        const value = eventData.text.replace(/'/g, '\\\'')
+        return `, { target: { value: '${value}' } }`
+      }
+      return ''
+    })()
+
+    code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
+
+    // Figure out which imports need to be added
+    requiredImports[fireEvent] = testLibrary
+  }
 
   const line = editor.document.lineAt(pausedLocation.lineNumber - 1)
   const indent = line.text.match(/^\s*/)?.[0] || ''
   code = `${indent}${code}`
 
-  // Figure out which imports need to be added
-  const requiredImports: Record<string, string> = {
-    [fireEvent]: testLibrary,
-    [screen]: testLibrary,
-  }
+  const importCode = Object.entries(requiredImports).map(([importName, from]) => {
+    if (from === 'vitest') {
+      from = 'vitest/dist/index.js'
+    }
+    return `const { ${importName} } = require('${from}');`
+  }).join('\n')
 
   // Replicate the input event from the webview to the test runtime.
   // We do this through a debug expression, which is the same as running code through vscode's 'Debug Terminal'.
   const debugExpression = `
 (() => {
-${Object.entries(requiredImports).map(([importName, from]) => `const { ${importName} } = require('${from}');`).join('\n')}
+${importCode}
 ${code};
 })()
 `
