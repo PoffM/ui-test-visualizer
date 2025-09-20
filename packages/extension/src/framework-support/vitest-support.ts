@@ -31,6 +31,7 @@ export async function vitestDebugConfig(
       '1',
       '--poolOptions.forks.maxForks',
       '1',
+      '--testTimeout=0',
     ],
     autoAttachChildProcesses: true,
     // TODO use the config
