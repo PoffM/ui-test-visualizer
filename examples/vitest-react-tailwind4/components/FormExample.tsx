@@ -34,6 +34,15 @@ const FormExample: React.FC = () => {
                 placeholder="Second input"
               />
             </label>
+            <label>
+              Select menu
+              <select className="border p-2 mr-2" aria-label="Select menu">
+                <option value="">Choose an option</option>
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+                <option value="option3">Option 3</option>
+              </select>
+            </label>
             <button type="submit" className="bg-blue-500 text-white p-2">
               Submit
             </button>

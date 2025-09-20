@@ -107,9 +107,18 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             eventData.text = text
           }
 
-          const recordedEventType = eventType === 'click'
-            ? mouseEvent()
-            : eventType
+          const recordedEventType = (() => {
+            if (eventType === 'click') {
+              return mouseEvent()
+            }
+
+            if (eventType === 'change' && target instanceof HTMLSelectElement) {
+              eventData.options = [target.value]
+              return 'selectOptions'
+            }
+
+            return eventType
+          })()
 
           const query = serializeQueryArgs(suggestedQuery.queryArgs)
 

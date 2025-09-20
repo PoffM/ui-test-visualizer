@@ -1,5 +1,6 @@
 import type { z } from 'zod/mini'
 import type * as vscode from 'vscode'
+import { mapValues } from 'lodash'
 import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebugPauseLocation } from '../util/debugger-tracker'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
@@ -108,6 +109,9 @@ export async function generateCode(
           event = 'type'
           const value = eventData.text.replace(/'/g, '\\\'')
           return `, '${value}'`
+        }
+        if (event === 'selectOptions' && eventData.options) {
+          return `, [${eventData.options.map(it => `'${it.replace(/'/g, '\\\'')}'`).join(', ')}]`
         }
         return ''
       })()
