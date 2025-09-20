@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.2.5
+
+### Patch Changes
+
+- cc3eb60: Disable test timeout for Vitest
+
 ## 1.2.4
 
 ### Patch Changes
