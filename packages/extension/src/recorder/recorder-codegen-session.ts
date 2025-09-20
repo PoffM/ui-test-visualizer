@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import { z } from 'zod/mini'
+import path from 'pathe'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { PanelController } from '../panel-controller/panel-controller'
@@ -85,6 +86,16 @@ export function startRecorderCodeGenSession(
 
   let editor: vscode.TextEditor | undefined
 
+  const hasUserEventLib = (() => {
+    try {
+      require.resolve('@testing-library/user-event', { paths: [path.dirname(testFile)] })
+      return true
+    }
+    catch {
+      return false
+    }
+  })()
+
   return {
     recordInputAsCode: async (
       debuggerTracker: DebuggerTracker,
@@ -109,6 +120,7 @@ export function startRecorderCodeGenSession(
 
       const { code, debugExpression, requiredImports } = await generateCode(
         editor,
+        hasUserEventLib,
         pausedLocation,
         testLibrary,
         testFramework,
@@ -131,6 +143,7 @@ export function startRecorderCodeGenSession(
     performEdit: runPerformEdit,
     insertions,
     removeInsertion,
+    hasUserEventLib,
     dispose: () => {
       for (const disposable of disposables) {
         disposable.dispose()

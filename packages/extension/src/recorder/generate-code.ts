@@ -8,6 +8,7 @@ import type { SerializedRegexp } from './recorder-codegen-session'
 
 export async function generateCode(
   editor: vscode.TextEditor,
+  hasUserEventLib: boolean,
   pausedLocation: DebugPauseLocation,
   testLibrary: TestingLibrary,
   testFramework: SupportedFramework,
@@ -85,22 +86,39 @@ export async function generateCode(
       requiredImports[expect] = testFramework
     }
   }
-  // Otherwise, generate a fireEvent call
+  // Otherwise, generate a userEvent call
   else {
-    const fireEvent = 'fireEvent'
+    if (hasUserEventLib) {
+      const userEvent = 'userEvent'
 
-    const fireEventArgs = (() => {
-      if (event === 'change' && eventData.text) {
-        const value = eventData.text.replace(/'/g, '\\\'')
-        return `, { target: { value: '${value}' } }`
-      }
-      return ''
-    })()
+      const userEventArgs = (() => {
+        if (event === 'change' && eventData.text) {
+          event = 'type'
+          const value = eventData.text.replace(/'/g, '\\\'')
+          return `, '${value}'`
+        }
+        return ''
+      })()
 
-    code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
+      code = `await ${userEvent}.${event}(${selector}${userEventArgs})`
 
-    // Figure out which imports need to be added
-    requiredImports[fireEvent] = testLibrary
+      requiredImports[userEvent] = '@testing-library/user-event'
+    }
+    else {
+      const fireEvent = 'fireEvent'
+
+      const fireEventArgs = (() => {
+        if (event === 'change' && eventData.text) {
+          const value = eventData.text.replace(/'/g, '\\\'')
+          return `, { target: { value: '${value}' } }`
+        }
+        return ''
+      })()
+
+      code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
+
+      requiredImports[fireEvent] = testLibrary
+    }
   }
 
   const line = editor.document.lineAt(pausedLocation.lineNumber - 1)
@@ -119,7 +137,7 @@ export async function generateCode(
   const debugExpression = `
 (() => {
 ${importCode}
-${code};
+${code.replace(/\s*await/, '') /* No 'awaits' allowed in debug expressions */};
 })()
 `
 
