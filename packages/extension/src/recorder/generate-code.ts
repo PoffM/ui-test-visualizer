@@ -128,6 +128,9 @@ export async function generateCode(
           const value = eventData.text.replace(/'/g, '\\\'')
           return `, { target: { value: '${value}' } }`
         }
+        if (event === 'selectOptions' && eventData.options) {
+          return `, { target: { value: '${eventData.options[0]}' } }`
+        }
         return ''
       })()
 
