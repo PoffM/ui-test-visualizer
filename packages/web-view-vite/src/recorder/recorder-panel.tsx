@@ -6,7 +6,7 @@ import { createJavaScriptRegexEngine } from 'shiki'
 import { For, Suspense, createResource } from 'solid-js'
 import X from 'lucide-solid/icons/x'
 import { recorder } from '../App'
-import { MOUSE_EVENT_TYPES } from './recorder'
+import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
 
 export function RecorderPanel() {
   const [codeHighlighter] = createResource(async () => await createHighlighterCore({
@@ -90,28 +90,39 @@ export function RecorderPanel() {
         </div>
       </div>
       <div class="w-1/2 h-full overflow-y-auto p-4">
-        <div>
-          <h1 class="text-lg font-semibold mb-2">Choose Mouse Event</h1>
-          <div class="flex flex-wrap gap-1">
-            <For each={MOUSE_EVENT_TYPES}>{event => (
-              <label class="flex items-center bg-(--vscode-list-hoverBackground) px-2 py-1 rounded cursor-pointer">
-                <ui-test-visualizer-radio
-                  value={event}
-                  checked={recorder.mouseEvent() === event}
-                  onChange={(e: any) => {
-                    if (e.target.checked) {
-                      recorder.setMouseEvent(e.target.value)
-                    }
-                  }}
-                >
-                  <div class="pb-[3px]">
-                    {event}
-                  </div>
-                </ui-test-visualizer-radio>
-              </label>
+        <div class="flex flex-col gap-2">
+          <For each={[
+            { eventTypes: USEREVENT_MOUSE_EVENT_TYPES, name: 'user-event', useUserEvent: true },
+            { eventTypes: FIREEVENT_MOUSE_EVENT_TYPES, name: 'fireEvent', useUserEvent: false },
+          ]}
+          >
+            {section => (
+              <div>
+                <h1 class="text-lg font-semibold mb-2">Choose Mouse Event ({section.name})</h1>
+                <div class="flex flex-wrap gap-1">
+                  <For each={section.eventTypes}>{event => (
+                    <label class="flex items-center bg-(--vscode-list-hoverBackground) px-2 py-1 rounded cursor-pointer">
+                      <ui-test-visualizer-radio
+                        value={event}
+                        checked={recorder.mouseEvent() === event && recorder.useUserEvent() === section.useUserEvent}
+                        onChange={(e: any) => {
+                          if (e.target.checked) {
+                            recorder.setMouseEvent(e.target.value)
+                            recorder.setUseUserEvent(section.useUserEvent)
+                          }
+                        }}
+                      >
+                        <div class="pb-[3px]">
+                          {event}
+                        </div>
+                      </ui-test-visualizer-radio>
+                    </label>
+                  )}
+                  </For>
+                </div>
+              </div>
             )}
-            </For>
-          </div>
+          </For>
         </div>
       </div>
     </div>

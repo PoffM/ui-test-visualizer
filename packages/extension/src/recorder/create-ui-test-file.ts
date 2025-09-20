@@ -101,7 +101,7 @@ import { render } from '${testingLibrary}'
 import { ${exportName} } from './${relativePathToSrc}'
 
 describe('${exportName}', () => {
-  test('basic usage', () => {
+  test('basic usage', async () => {
     render(${isArrowRender ? `() => <${exportName} />` : `<${exportName} />`})
   })
 })

@@ -197,10 +197,12 @@ export const panelRouter = t.router({
         ]),
         // Whether to generate an 'expect' statement
         useExpect: z.optional(z.boolean()),
+        // Whether to use userEvent instead of fireEvent
+        useUserEvent: z.boolean(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { event, eventData, query: [method, [queryArg0, queryOptions]], useExpect } = input
+      const { event, eventData, query: [method, [queryArg0, queryOptions]], useExpect, useUserEvent } = input
       const recorderCodeGenSession = ctx.recorderCodeGenSession()
       const _insertion = await recorderCodeGenSession?.recordInputAsCode(
         ctx.debuggerTracker,
@@ -209,7 +211,8 @@ export const panelRouter = t.router({
         method,
         queryArg0,
         queryOptions,
-        useExpect,
+        useExpect ?? false,
+        useUserEvent,
       )
       return recorderCodeGenSession?.insertions
     }),

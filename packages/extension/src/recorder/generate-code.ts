@@ -19,7 +19,8 @@ export async function generateCode(
   queryArg0: string | SerializedRegexp,
   queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
 
-  useExpect?: boolean,
+  useExpect: boolean,
+  useUserEvent: boolean,
 ) {
   const parsedQueryOptions = queryOptions && Object.entries(queryOptions).reduce(
     (result, entry) => {
@@ -88,11 +89,22 @@ export async function generateCode(
   }
   // Otherwise, generate a userEvent call
   else {
-    if (hasUserEventLib) {
+    if (useUserEvent) {
+      if (!hasUserEventLib) {
+        throw new Error('Cannot use userEvent without @testing-library/user-event installed')
+      }
       const userEvent = 'userEvent'
 
       const userEventArgs = (() => {
-        if (event === 'change' && eventData.text) {
+        // When using userEvent with text inputs, the method is either 'type' or 'clear'
+        if (event === 'change' && typeof eventData.text === 'string') {
+          // If the text is empty, use 'clear' instead of 'type'
+          if (eventData.text.length === 0) {
+            event = 'clear'
+            return ''
+          }
+
+          // Otherwise 'type' the text
           event = 'type'
           const value = eventData.text.replace(/'/g, '\\\'')
           return `, '${value}'`

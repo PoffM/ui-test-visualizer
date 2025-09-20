@@ -1,12 +1,24 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import type { EventType, QueryArgs, Suggestion } from '@testing-library/dom'
 import { getSuggestedQuery } from '@testing-library/dom'
+import type { userEvent } from '@testing-library/user-event'
 import { createEffect, createSignal } from 'solid-js'
+import type { z } from 'zod'
+import type { zRecordedEventData } from '../../../extension/src/panel-controller/panel-router'
+import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
-import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
 
-export const MOUSE_EVENT_TYPES: EventType[] = [
+export const USEREVENT_MOUSE_EVENT_TYPES: (keyof typeof userEvent)[] = [
+  'click',
+  'dblClick',
+  'tripleClick',
+  'hover',
+  'unhover',
+  'clear',
+]
+
+export const FIREEVENT_MOUSE_EVENT_TYPES: EventType[] = [
   'click',
   'dblClick',
   'mouseDown',
@@ -22,6 +34,7 @@ export const MOUSE_EVENT_TYPES: EventType[] = [
 export function createRecorder(shadowHost: HTMLDivElement) {
   const [isRecording, setIsRecording] = createSignal(false)
   const [mouseEvent, setMouseEvent] = createSignal<EventType>('click')
+  const [useUserEvent, setUseUserEvent] = createSignal(true)
   const [codeInsertions, setCodeInsertions] = createSignal<RecorderCodeInsertions | undefined>()
 
   // When the edit is performed, clear the recorder UI's insertions state
@@ -87,7 +100,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             return
           }
 
-          const eventData: Parameters<typeof client.recordInputAsCode.mutate>[0]['eventData'] = {}
+          const eventData: z.infer<typeof zRecordedEventData> = {}
 
           if (eventType === 'change' && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
             const text = target.value
@@ -109,6 +122,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             query: [suggestedQuery.queryMethod, query],
             eventData,
             useExpect,
+            useUserEvent: useUserEvent(),
           })
           setCodeInsertions(insertions)
         })
@@ -127,6 +141,8 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     },
     mouseEvent,
     setMouseEvent,
+    useUserEvent,
+    setUseUserEvent,
     codeInsertions,
   }
 }
