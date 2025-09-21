@@ -21,6 +21,18 @@ export async function performEdit(
   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
   const { parseSync } = require('@oxc-parser/binding-wasm32-wasi')
 
+  // Convert insertion line numbers to character indexes
+  const insertionCharIndexes: number[] = []
+  for (const line in insertions) {
+    const lineNumber = Number.parseInt(line) - 1 // 0-based
+    const position = new vscode.Position(lineNumber, 0)
+    const offset = editor.document.offsetAt(position)
+    insertionCharIndexes.push(offset)
+  }
+
+  const requiresAsync = Object.keys(insertions)
+    .some(lineNum => insertions[Number(lineNum)]?.some(line => /\s*await*/.test(line[0])))
+
   const reverseOrderInsertions = Object.entries(insertions)
     .sort((a, b) => Number(b[0]) - Number(a[0]))
 
@@ -28,8 +40,8 @@ export async function performEdit(
     for (const [line, lines] of reverseOrderInsertions) {
       const lineNumber = Number.parseInt(line)
       const position = new vscode.Position(lineNumber - 1, 0)
-      for (const [line, _requiredImports] of lines) {
-        editBuilder.insert(position, line)
+      for (const [code, _requiredImports] of lines) {
+        editBuilder.insert(position, code)
       }
     }
 
@@ -38,7 +50,6 @@ export async function performEdit(
     const importInsertionPoints = new Map<string, number>()
     const existingImports = new Set<string>()
     {
-    // TODO avoid re-parsing for every generated line of code?
       const parsed = parseSync(editor.document.fileName, editor.document.getText(), {})
       const programJson = parsed.program
       const program = JSON.parse(programJson)
@@ -55,6 +66,30 @@ export async function performEdit(
             for (const specifier of node.specifiers) {
               if (['ImportSpecifier', 'ImportDefaultSpecifier', 'ImportNamespaceSpecifier'].includes(specifier.type)) {
                 existingImports.add(specifier.local.name)
+              }
+            }
+          }
+
+          // When the test needs to be async, insert the 'async' keyword if it's missing
+          if (
+            requiresAsync
+            // Find the running test
+            && node.type === 'CallExpression' && ['it', 'fit', 'test'].includes(node?.callee.name)
+          ) {
+            for (const argNode of node.arguments) {
+              // Find the arrow function containing the insertion char indexes
+              if (
+                ['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(argNode?.type ?? '')
+                && argNode?.async === false
+                && insertionCharIndexes.some(charIndex => charIndex >= argNode.start && charIndex <= argNode.end)
+              ) {
+                // Check if the function node contains any insertion char indexes
+                for (const charIndex of insertionCharIndexes) {
+                  if (charIndex >= argNode.start && charIndex <= argNode.end) {
+                    const position = editor.document.positionAt(argNode.start)
+                    editBuilder.insert(position, 'async ')
+                  }
+                }
               }
             }
           }
@@ -92,7 +127,7 @@ export async function performEdit(
   })
 
   // Remove the insertions from the state after they've been inserted into the code
-  for (const line of Object.keys(insertions)) {
+  for (const line in insertions) {
     delete insertions[Number(line)]
   }
 

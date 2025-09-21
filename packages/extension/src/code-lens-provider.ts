@@ -46,8 +46,16 @@ export const codeLensProvider: vscode.CodeLensProvider = {
       walk(program, {
         enter(node) {
           if (node.type === 'CallExpression' && ['it', 'fit', 'test'].includes(node?.callee.name)) {
+            const functionNode = (() => {
+              for (const argNode of node.arguments) {
+                if (['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(argNode?.type ?? '')) {
+                  return argNode
+                }
+              }
+            })()
+
             const name = node?.arguments?.[0]?.value
-            let firstStatementStartChar: number | null = Number(node?.arguments?.[1]?.body?.body?.[0]?.start ?? undefined)
+            let firstStatementStartChar: number | null = Number(functionNode?.body?.body?.[0]?.start ?? undefined)
             if (Number.isNaN(firstStatementStartChar)) {
               firstStatementStartChar = null
             }
