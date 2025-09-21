@@ -5,7 +5,9 @@ import shikiLightPlus from '@shikijs/themes/light-plus'
 import { createJavaScriptRegexEngine } from 'shiki'
 import { For, Suspense, createResource } from 'solid-js'
 import X from 'lucide-solid/icons/x'
+import Info from 'lucide-solid/icons/info'
 import { recorder } from '../App'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../components/solid-ui/tooltip'
 import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
 
 export function RecorderPanel() {
@@ -47,7 +49,7 @@ export function RecorderPanel() {
 
   return (
     <div class="flex h-full w-full">
-      <div class="w-1/2 h-full overflow-y-auto p-4 border-r border-[--vscode-panel-border]">
+      <div class="w-1/2 h-full overflow-y-auto p-4 border-r border-[var(--vscode-panel-border)]">
         <div>
           <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
           <div class="text-sm flex flex-col gap-2">
@@ -90,15 +92,25 @@ export function RecorderPanel() {
         </div>
       </div>
       <div class="w-1/2 h-full overflow-y-auto p-4">
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-3">
           <For each={[
-            { eventTypes: USEREVENT_MOUSE_EVENT_TYPES, name: 'user-event', useUserEvent: true },
-            { eventTypes: FIREEVENT_MOUSE_EVENT_TYPES, name: 'fireEvent', useUserEvent: false },
+            { eventTypes: USEREVENT_MOUSE_EVENT_TYPES, name: 'user-event', useUserEvent: true, tooltip: 'Uses @testing-library/user-event' },
+            { eventTypes: FIREEVENT_MOUSE_EVENT_TYPES, name: 'fireEvent', useUserEvent: false, tooltip: 'Uses testing-library\'s fireEvent' },
           ]}
           >
             {section => (
               <div>
-                <h1 class="text-lg font-semibold mb-2">Choose Mouse Event ({section.name})</h1>
+                <div class="flex gap-2">
+                  <h1 class="text-lg font-semibold mb-1">Choose Mouse Event ({section.name})</h1>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info class="w-5 h-5 mb-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {section.tooltip}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <div class="flex flex-wrap gap-1">
                   <For each={section.eventTypes}>{event => (
                     <label class="flex items-center bg-(--vscode-list-hoverBackground) px-2 py-1 rounded cursor-pointer">
