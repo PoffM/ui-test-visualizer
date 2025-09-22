@@ -20,38 +20,43 @@ export async function createUiTestFile() {
 
   const selection = editor.selection
   const wordRange = doc.getWordRangeAtPosition(selection.active, /\w+/)
-  if (!wordRange) {
+  const word = doc.getText(wordRange)
+
+  if (!wordRange || !word) {
+    vscode.window.showInformationMessage(
+      `No valid identifier found. Must be an exported capitalized function name. Got ${word}`,
+    )
     return
   }
 
-  const exportName = (() => {
+  const { exportName, isDefaultExport } = (() => {
     const parsed = parseSync(doc.fileName, doc.getText(), {})
     const programJson = parsed.program
     const program = JSON.parse(programJson)
 
-    const wordStart = doc.offsetAt(wordRange.start)
-    const wordEnd = doc.offsetAt(wordRange.end)
-
     let result: string | null = null
+    let isDefaultExport = false
     walk(program, {
       enter(node) {
-        if (
-          (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration')
-          && node.start <= wordStart && node.end >= wordEnd
-        ) {
-          result = node?.declaration?.id?.name ?? node?.declaration?.declarations?.[0]?.id?.name ?? null
+        if (node.type === 'ExportNamedDeclaration' || node.type === 'ExportDefaultDeclaration') {
+          const nodeName = node?.declaration?.name
+            ?? node?.declaration?.id?.name
+            ?? node?.declaration?.declarations?.[0]?.id?.name
+            ?? node?.declaration?.declarations?.[0]?.name
+          if (nodeName === word) {
+            result = nodeName ?? null
+            isDefaultExport = node.type === 'ExportDefaultDeclaration'
+          }
         }
       },
     })
 
-    return result as string | null
+    return { exportName: result as string | null, isDefaultExport }
   })()
-
-  const word = doc.getText(wordRange)
 
   if (!exportName) {
     vscode.window.showInformationMessage(
-      `No valid selection found. Must be an exported capitalized function name. Got ${word}`,
+      `No valid export found. Must be an exported capitalized function name. Got ${word}`,
     )
     return
   }
@@ -96,12 +101,12 @@ export async function createUiTestFile() {
 
   // Create basic test content
   const isArrowRender = testingLibrary === '@solidjs/testing-library'
-  const testContent = `import { describe, test } from '${frameworkInfo.framework}'
+  const testContent = `import { describe, it } from '${frameworkInfo.framework}'
 import { render } from '${testingLibrary}'
-import { ${exportName} } from './${relativePathToSrc}'
+import ${isDefaultExport ? exportName : `{ ${exportName} }`} from './${relativePathToSrc}'
 
 describe('${exportName}', () => {
-  test('basic usage', async () => {
+  it('basic usage', async () => {
     render(${isArrowRender ? `() => <${exportName} />` : `<${exportName} />`})
   })
 })

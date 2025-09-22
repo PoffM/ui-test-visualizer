@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const FormExample: React.FC = () => {
+export const FormExample: React.FC = () => {
   const [submitCount, setSubmitCount] = useState(0)
   return (
     <div className="">
@@ -77,5 +77,3 @@ const FormExample: React.FC = () => {
     </div>
   )
 }
-
-export default FormExample
