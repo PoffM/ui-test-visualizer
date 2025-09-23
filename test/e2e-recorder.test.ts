@@ -94,6 +94,9 @@ test('Record a UI test', async ({ browser }) => {
   // Start recording
   await replicaPanel.getByRole('button', { name: '(Experimental) Record input' }).first().click()
 
+  // Check that the submission count starts at 0
+  await replicaPanel.getByText(`Submit Count: 0`)
+
   // Fill in the first input
   await replicaPanel.getByRole('textbox', { name: 'First input' }).click()
   await replicaPanel.getByRole('textbox', { name: 'First input' }).fill('test input 1')
@@ -112,11 +115,21 @@ test('Record a UI test', async ({ browser }) => {
   await replicaPanel.getByRole('button', { name: 'Submit' }).click()
   await page.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`)
 
+  // Alt-click the submit count to generate the `expect` statement
+  await replicaPanel.getByText('Submit Count:').click({
+    modifiers: ['Alt'],
+  })
+  // Check that the submission count increased due to the click, which causes the userEvent code to run in the debugger
+  await replicaPanel.getByText(`Submit Count: 1`)
+  await replicaPanel.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`)
+
   // Finish the test
   await page.getByRole('button', { name: 'Continue (F5)' }).click()
+
   // Wait for replica panel to be closed
   await page.frameLocator('iframe.webview.ready').locator('iframe[title="Tested UI"]').waitFor({ state: 'detached' })
 
-  // Check for the generated code
+  // Check for the generated code in the editor
   await page.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`)
+  await page.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`)
 })

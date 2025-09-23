@@ -12,7 +12,6 @@ import { client } from '../lib/panel-client'
 export const USEREVENT_MOUSE_EVENT_TYPES: (keyof typeof userEvent)[] = [
   'click',
   'dblClick',
-  'tripleClick',
   'hover',
   'unhover',
   'clear',

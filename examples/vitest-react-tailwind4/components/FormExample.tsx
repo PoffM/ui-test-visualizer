@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
-export const FormExample: React.FC = () => {
+export function FormExample() {
   const [submitCount, setSubmitCount] = useState(0)
   return (
     <div className="">

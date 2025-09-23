@@ -1,10 +1,10 @@
-import type { z } from 'zod/mini'
+import path from 'pathe'
 import type * as vscode from 'vscode'
-import { mapValues } from 'lodash'
+import type { z } from 'zod/mini'
+import type { SupportedFramework } from '../framework-support/detect-test-framework'
+import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebugPauseLocation } from '../util/debugger-tracker'
-import type { TestingLibrary } from '../framework-support/detect-test-library'
-import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { SerializedRegexp } from './recorder-codegen-session'
 
 export async function generateCode(
@@ -148,15 +148,36 @@ export async function generateCode(
     if (from === 'vitest') {
       from = 'vitest/dist/index.js'
     }
+
+    // user-event v13 is used when running the debug expressions, because it's the last version
+    // where the methods were synchronous e.g. `userEvent.click(...);`.
+    // Newer versions use async code e.g. `await userEvent.click(...);`,
+    // which fail when running through the debugger's 'evaluate' request.
+    if (from === '@testing-library/user-event') {
+      from = path.join(__dirname, 'user-event-13.js')
+      return `const ${importName} = require('${from}').default;`
+    }
     return `const { ${importName} } = require('${from}');`
   }).join('\n')
+
+  // The fireEvent or userEvent statement to run in the debugger.
+  // May be slightly different than the code that is actually generated for the user.
+  const debugEventStatement = (() => {
+    const result = code.replace(/\s*await/, '') // No 'awaits' allowed in debug expressions
+
+    // When writing react tests with userEvent v13, wrap in 'act'.
+    if (testLibrary === '@testing-library/react' && useUserEvent) {
+      return `require('react').act(() => { ${result} });`
+    }
+    return result
+  })()
 
   // Replicate the input event from the webview to the test runtime.
   // We do this through a debug expression, which is the same as running code through vscode's 'Debug Terminal'.
   const debugExpression = `
 (() => {
 ${importCode}
-${code.replace(/\s*await/, '') /* No 'awaits' allowed in debug expressions */};
+${debugEventStatement}
 })()
 `
 

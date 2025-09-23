@@ -26,6 +26,7 @@
     "zod": "^4.1.5"
   },
   "devDependencies": {
+    "@testing-library/user-event": "^13.5.0",
     "@types/less": "^3.0.8",
     "@types/lodash": "^4.17.20",
     "@types/node": "^24.3.0",
