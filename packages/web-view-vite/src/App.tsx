@@ -37,6 +37,14 @@ export const {
   stylesAreLoading,
 } = createDomReplica()
 
+export const STORAGE_KEY_INSPECTOR_IS_OPEN = 'ui-test-visualizer.inspector-is-open'
+const inspectorWasOpen = Boolean(localStorage.getItem(STORAGE_KEY_INSPECTOR_IS_OPEN))
+
+export type Panel = 'inspector' | 'recorder'
+export const [openPanel, setOpenPanel] = createSignal<Panel | null>(
+  inspectorWasOpen ? 'inspector' : null,
+)
+
 export const inspector = createInspectorHeight()
 
 export const recorder = createRecorder(shadowHost)
@@ -69,7 +77,7 @@ export function App() {
             <div style={{ height: `${inspector.height()}px` }}>
               <Resizer onResize={inspector.updateHeight} />
               <Switch>
-                <Match when={recorder.isRecording()}>
+                <Match when={openPanel() === 'recorder'}>
                   <ErrorBoundary fallback={error => (
                     <div class="text-error-foreground p-4">
                       Error showing the recorder UI{error instanceof Error ? `: ${error.message}` : ''}
@@ -79,7 +87,7 @@ export function App() {
                     <RecorderPanel />
                   </ErrorBoundary>
                 </Match>
-                <Match when={inspector.isOpen()}>
+                <Match when={openPanel() === 'inspector'}>
                   <ErrorBoundary fallback={error => (
                     <div class="text-error-foreground p-4">
                       Error showing the inspector{error instanceof Error ? `: ${error.message}` : ''}

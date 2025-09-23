@@ -92,7 +92,7 @@ test('Record a UI test', async ({ browser }) => {
   await debugHelper.debugStep()
 
   // Start recording
-  await replicaPanel.getByRole('button', { name: '(Experimental) Record input' }).first().click()
+  await replicaPanel.getByRole('button', { name: 'Record input as code (Experimental)' }).first().click()
 
   // Check that the submission count starts at 0
   await replicaPanel.getByText(`Submit Count: 0`)

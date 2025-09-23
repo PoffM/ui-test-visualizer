@@ -1,17 +1,18 @@
 import { createSignal } from 'solid-js'
 import debounce from 'lodash/debounce'
+import { STORAGE_KEY_INSPECTOR_IS_OPEN, openPanel, setOpenPanel } from '../App'
 
 const STORAGE_KEY_INSPECTOR_HEIGHT = 'ui-test-visualizer.inspector-height'
-const STORAGE_KEY_INSPECTOR_IS_OPEN = 'ui-test-visualizer.inspector-is-open'
 const DEFAULT_HEIGHT = 300
 
 export function createInspectorHeight() {
-  const initialIsOpen = Boolean(localStorage.getItem(STORAGE_KEY_INSPECTOR_IS_OPEN))
-  const [isOpen, setIsOpen] = createSignal(initialIsOpen)
-
   // Get initial height from storage or use default
   const initialHeight = Number(localStorage.getItem(STORAGE_KEY_INSPECTOR_HEIGHT)) || DEFAULT_HEIGHT
   const [height, setHeight] = createSignal(initialHeight)
+
+  function isOpen() {
+    return openPanel() === 'inspector'
+  }
 
   // Wrapper for setHeight that also persists to storage
   function updateHeight(newHeight: number) {
@@ -22,7 +23,7 @@ export function createInspectorHeight() {
   }
 
   function toggle() {
-    setIsOpen(!isOpen())
+    setOpenPanel(isOpen() ? null : 'inspector')
     localStorage.setItem(STORAGE_KEY_INSPECTOR_IS_OPEN, isOpen() ? 'true' : '')
   }
 

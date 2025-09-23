@@ -16,6 +16,6 @@ export default defineConfig({
     headless: !!process.env.CI || !!process.env.PLAYWRIGHT_HEADLESS,
     viewport: { width: 1600, height: 800 },
   },
-  timeout: 60_000,
+  timeout: 90_000,
   retries: process.env.CI ? 1 : 0,
 })

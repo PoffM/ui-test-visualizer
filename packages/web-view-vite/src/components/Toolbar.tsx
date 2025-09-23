@@ -20,7 +20,9 @@ export function Toolbar() {
         onClick={inspector.toggle}
         label="Toggle Inspector"
       >
-        <Code />
+        <Code
+          classList={{ 'text-[#75beff]': inspector.isOpen() }}
+        />
       </ToolbarButton>
       <ToolbarButton
         onClick={refreshShadow}
@@ -51,11 +53,11 @@ export function Toolbar() {
       <div class="flex">
         <ToolbarButton
           onClick={() => recorder.toggle(!recorder.isRecording())}
-          label={recorder.isRecording() ? 'Stop recording' : '(Experimental) Record input as code'}
+          label={recorder.isRecording() ? 'Stop recording' : 'Record input as code (Experimental)'}
         >
           <div
             class={`w-4 h-4 rounded-full ${
-                recorder.isRecording() ? 'bg-red-500' : 'bg-gray-500'
+                recorder.isRecording() ? 'bg-red-500' : 'bg-gray-400'
             }`}
           />
         </ToolbarButton>
