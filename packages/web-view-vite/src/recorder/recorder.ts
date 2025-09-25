@@ -51,9 +51,13 @@ export function createRecorder(shadowHost: HTMLDivElement) {
   const { hasPendingInputChange } = trackPendingInputChanges(shadowHost, isRecording)
 
   createEffect(() => {
+    const shadowHtml = shadowHost.shadowRoot?.children[0]
+    if (!shadowHtml) {
+      return
+    }
     if (isRecording()) {
       for (const eventType of ['click', 'submit', 'change'] as const) {
-        makeEventListener(shadowHost.shadowRoot!, eventType, async (e: Event) => {
+        makeEventListener(shadowHtml, eventType, async (e: Event) => {
           let target = e.target
 
           // When clicking, use deepElementFromPoint to get the right element if it's inside a shadow root.
@@ -142,6 +146,12 @@ export function createRecorder(shadowHost: HTMLDivElement) {
           setCodeInsertions(insertions)
         })
       }
+    }
+    else {
+      makeEventListener(shadowHtml, 'beforeinput', (e) => {
+        // Block changing inputs when not recording
+        e.preventDefault()
+      })
     }
   })
 
