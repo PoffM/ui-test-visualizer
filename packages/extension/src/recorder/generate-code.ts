@@ -140,8 +140,20 @@ export async function generateCode(
     }
   }
 
-  const line = editor.document.lineAt(pausedLocation.lineNumber - 1)
-  const indent = line.text.match(/^\s*/)?.[0] || ''
+  const indent: string = (() => {
+    // Indent should be the longest indentation between the paused line and the previous line.
+    // This is to make sure the right indent is used when paused at the end of the test.
+    // e.g.
+    // test('click button', () => {
+    //   const button = screen.getByRole('button')
+    //   button.click() <-- when paused here, use this line's indent.
+    // }) <-- when paused here, use previous line's indent.
+
+    const line1 = editor.document.lineAt(pausedLocation.lineNumber - 1)
+    const line2 = editor.document.lineAt(pausedLocation.lineNumber - 2)
+    return [line1, line2].map(it => it.text.match(/^\s*/)?.[0] || '').sort((a, b) => b.length - a.length)[0] || ''
+  })()
+
   code = `${indent}${code}`
 
   const importCode = Object.entries(requiredImports).map(([importName, from]) => {
