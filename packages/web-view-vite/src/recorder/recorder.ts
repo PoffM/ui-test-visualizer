@@ -1,9 +1,11 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
+import { ReactiveMap } from '@solid-primitives/map'
 import type { EventType, QueryArgs, Suggestion } from '@testing-library/dom'
 import { getSuggestedQuery } from '@testing-library/dom'
 import type { userEvent } from '@testing-library/user-event'
 import { createEffect, createSignal } from 'solid-js'
 import type { z } from 'zod'
+import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import type { zRecordedEventData } from '../../../extension/src/panel-controller/panel-router'
 import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
 import { deepElementFromPoint } from '../inspector/util'
@@ -45,6 +47,8 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       setCodeInsertions(undefined)
     }
   })
+
+  const { hasPendingInputChange } = trackPendingInputChanges(shadowHost, isRecording)
 
   createEffect(() => {
     if (isRecording()) {
@@ -155,6 +159,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     useUserEvent,
     setUseUserEvent,
     codeInsertions,
+    hasPendingInputChange,
   }
 }
 
@@ -195,4 +200,44 @@ function makeRegexpExact(regexp: RegExp) {
 
   // Wrap with ^ and $
   return new RegExp(`^${source}$`, flags)
+}
+
+function trackPendingInputChanges(shadowHost: HTMLDivElement, isRecording: () => boolean) {
+  const isPendingInputChange = new ReactiveMap<Node, boolean>()
+  function hasPendingInputChange() {
+    return isPendingInputChange.size > 0
+  }
+
+  makeEventListener(shadowHost.shadowRoot!, 'input', (e) => {
+    if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      return
+    }
+    isPendingInputChange.set(e.target, true)
+  })
+  makeEventListener(shadowHost.shadowRoot!, 'change', (e) => {
+    if (!(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      return
+    }
+    isPendingInputChange.delete(e.target)
+  })
+
+  const shadowHtml = shadowHost.shadowRoot?.children[0]
+  if (shadowHtml) {
+    createMutationObserver(shadowHtml, { subtree: true, childList: true }, (mutations) => {
+      for (const mutation of mutations) {
+        for (const removedNode of mutation.removedNodes) {
+          isPendingInputChange.delete(removedNode)
+        }
+      }
+    })
+  }
+  createEffect(() => {
+    if (!isRecording()) {
+      isPendingInputChange.clear()
+    }
+  })
+
+  return {
+    hasPendingInputChange,
+  }
 }

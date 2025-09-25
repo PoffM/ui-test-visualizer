@@ -3,7 +3,7 @@ import shikiTypescript from '@shikijs/langs/typescript'
 import shikiDarkPlus from '@shikijs/themes/dark-plus'
 import shikiLightPlus from '@shikijs/themes/light-plus'
 import { createJavaScriptRegexEngine } from 'shiki'
-import { For, Suspense, createResource } from 'solid-js'
+import { For, Show, Suspense, createResource } from 'solid-js'
 import X from 'lucide-solid/icons/x'
 import Info from 'lucide-solid/icons/info'
 import { recorder } from '../App'
@@ -52,6 +52,11 @@ export function RecorderPanel() {
       <div class="w-1/2 h-full overflow-y-auto p-4 border-r border-[var(--vscode-panel-border)]">
         <div>
           <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
+          <Show when={recorder.hasPendingInputChange()}>
+            <div class="text-warning-foreground mb-2">
+              Input 'change' code generates after unfocusing the input
+            </div>
+          </Show>
           <div class="text-sm flex flex-col gap-2">
             <For each={Object.entries(recorder.codeInsertions() ?? {})}>{([lineNum, codeLines]) => (
               <div>
