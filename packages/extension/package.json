@@ -2,6 +2,7 @@
   "name": "extension",
   "private": true,
   "main": "./src/extension.ts",
+  "type": "module",
   "scripts": {
     "dev": "tsup --watch . --watch ../replicate-dom --sourcemap",
     "test": "vitest --run",

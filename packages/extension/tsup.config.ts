@@ -24,6 +24,10 @@ export default defineConfig((options) => {
       'ui-test-visualizer-test-setup': '../test-setup/src/test-setup.ts',
       'transform-css': './src/transform-css/transform-css.ts',
     },
+    format: ['cjs'],
+    outExtension: () => ({
+      js: '.js',
+    }),
     outDir,
     external: ['vscode', 'jest-resolve', 'jest-circus', 'jest-runner', 'jiti', './transform-css', 'babel-jest', '@babel/core'],
     noExternal: [
