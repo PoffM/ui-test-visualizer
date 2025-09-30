@@ -1,5 +1,5 @@
 {
-  "name": "jest-nextjs",
+  "name": "jest-nextjs-ts-node",
   "private": true,
   "scripts": {
     "test": "jest"

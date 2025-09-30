@@ -2,7 +2,6 @@
   "name": "jest-nextjs-minimal",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "test": "jest"
   },
   "dependencies": {

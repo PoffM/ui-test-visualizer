@@ -36,16 +36,30 @@ describe('detectTestFramework', () => {
     })
   })
 
-  it('detects Jest config in a Next.js project', async () => {
+  it('detects Jest config in a Next.js + ts-node project', async () => {
     const result = await detectTestFramework(
       path.join(
         examplesPath,
-        'jest-nextjs/app/counter.test.tsx',
+        'jest-nextjs-ts-node/app/counter.test.tsx',
       ),
       'autodetect',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'jest-nextjs/jest.config.ts'),
+      configPath: path.join(examplesPath, 'jest-nextjs-ts-node/jest.config.ts'),
+      framework: 'jest',
+    })
+  })
+
+  it('detects Jest config in a Next.js project', async () => {
+    const result = await detectTestFramework(
+      path.join(
+        examplesPath,
+        'jest-nextjs-minimal/app/counter.test.tsx',
+      ),
+      'autodetect',
+    )
+    expect(result).toEqual({
+      configPath: path.join(examplesPath, 'jest-nextjs-minimal/jest.config.ts'),
       framework: 'jest',
     })
   })

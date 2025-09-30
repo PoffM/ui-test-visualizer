@@ -96,7 +96,7 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "jest-config@29.7.0": "patches/jest-config@29.7.0.patch"
+      "jest-config@30.2.0": "patches/jest-config@30.2.0.patch"
     }
   }
 }

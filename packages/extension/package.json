@@ -17,7 +17,7 @@
     "estree-walker": "^3.0.3",
     "find-up": "^8.0.0",
     "get-port": "^7.1.0",
-    "jest-config": "29.7.0",
+    "jest-config": "30.2.0",
     "lodash": "^4.17.21",
     "pathe": "^2.0.3",
     "postcss": "^8.5.6",

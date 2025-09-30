@@ -1,0 +1,46 @@
+diff --git a/build/index.js b/build/index.js
+index 4546b72c43eed587d364b075283096ca3614be40..1d813a95c90118e2aea20add80b4b34282dd1523 100644
+--- a/build/index.js
++++ b/build/index.js
+@@ -2324,7 +2324,7 @@ const loadTSConfigFile = async configPath => {
+   if (Array.isArray(tsLoader)) {
+     throw new TypeError(`Jest: You can only define a single loader through docblocks, got "${tsLoader.join(', ')}"`);
+   }
+-  const registeredCompiler = await getRegisteredCompiler(tsLoader);
++  const registeredCompiler = await getRegisteredCompiler(tsLoader, configPath);
+   registeredCompiler.enabled(true);
+   let configObject = (0, _jestUtil().interopRequireDefault)(require(configPath)).default;
+ 
+@@ -2336,16 +2336,17 @@ const loadTSConfigFile = async configPath => {
+   return configObject;
+ };
+ let registeredCompilerPromise;
+-function getRegisteredCompiler(loader) {
++function getRegisteredCompiler(loader, configPath) {
+   // Cache the promise to avoid multiple registrations
+-  registeredCompilerPromise = registeredCompilerPromise ?? registerTsLoader(loader);
++  registeredCompilerPromise = registeredCompilerPromise ?? registerTsLoader(loader, configPath);
+   return registeredCompilerPromise;
+ }
+-async function registerTsLoader(loader) {
++async function registerTsLoader(loader, configPath) {
+   try {
+     // Register TypeScript compiler instance
+     if (loader === 'ts-node') {
+-      const tsLoader = await import(/* webpackIgnore: true */'ts-node');
++      const tsLoaderPath = require.resolve('ts-node', { paths: [configPath] })
++      const tsLoader = require(tsLoaderPath);
+       return tsLoader.register({
+         compilerOptions: {
+           module: 'CommonJS'
+@@ -2353,7 +2354,9 @@ async function registerTsLoader(loader) {
+         moduleTypes: {
+           '**': 'cjs'
+         },
+-        ...extraTSLoaderOptions
++        ...extraTSLoaderOptions,
++        // Don't let type checks crash the UI Test Visualizer
++        transpileOnly: true
+       });
+     } else if (loader === 'esbuild-register') {
+       const tsLoader = await import(/* webpackIgnore: true */'esbuild-register/dist/node');

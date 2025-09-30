@@ -46,12 +46,23 @@
       "sourceMaps": true
     },
     {
+      "name": "Jest + Next.js + ts-node Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "${workspaceFolder}/examples/jest-nextjs-ts-node"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
       "name": "Jest + Next.js Example",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
-        "${workspaceFolder}/examples/jest-nextjs"
+        "${workspaceFolder}/examples/jest-nextjs-minimal"
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true

@@ -19,7 +19,7 @@ describe('tool compatibility', async () => {
   it('works with Jest + SWC + Nextjs + ts-node', async () => {
     expect(
       (await runTest(
-        'jest-nextjs/app/counter.test.tsx',
+        'jest-nextjs-ts-node/app/counter.test.tsx',
         'simple react testing library test',
       )).exitCode,
     ).toEqual(0)
