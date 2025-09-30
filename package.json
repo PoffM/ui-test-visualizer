@@ -98,5 +98,6 @@
     "patchedDependencies": {
       "jest-config@30.2.0": "patches/jest-config@30.2.0.patch"
     }
-  }
+  },
+  "packageManager": "pnpm@10.17.1"
 }
