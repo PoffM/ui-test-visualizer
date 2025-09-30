@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.2.6
+
+### Patch Changes
+
+- ce03c59: Support Jest Typescript config files without ts-node
+
 ## 1.2.5
 
 ### Patch Changes
