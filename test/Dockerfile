@@ -1,6 +1,6 @@
 FROM codercom/code-server:4.96.4
 
-ENV NODE_VERSION=22.16.0
+ENV NODE_VERSION=22.20.0
 # installs NVM (Node Version Manager)
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 ENV NVM_DIR=/home/coder/.nvm
