@@ -7,7 +7,16 @@ import type { Server as WsServer } from 'ws'
 import { makeDebugConfig } from '../src/debug-config'
 
 describe('tool compatibility', async () => {
-  it('works with Jest + SWC + Nextjs', async () => {
+  it('works with Jest + Nextjs + SWC minimal/default setup', async () => {
+    expect(
+      (await runTest(
+        'jest-nextjs-minimal/app/counter.test.tsx',
+        'app Router: Works with Client Components (React State)',
+      )).exitCode,
+    ).toEqual(0)
+  }, 30_000)
+
+  it('works with Jest + SWC + Nextjs + ts-node', async () => {
     expect(
       (await runTest(
         'jest-nextjs/app/counter.test.tsx',
