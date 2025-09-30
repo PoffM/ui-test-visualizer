@@ -2,6 +2,7 @@
   "publisher": "poffm",
   "name": "ui-test-visualizer",
   "displayName": "UI Test Visualizer",
+  "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
     "url": "https://github.com/PoffM/ui-test-visualizer.git"
