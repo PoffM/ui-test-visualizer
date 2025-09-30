@@ -2,7 +2,7 @@
   "name": "test-setup",
   "private": true,
   "dependencies": {
-    "find-up": "^7.0.0",
+    "find-up": "^8.0.0",
     "lodash": "^4.17.21",
     "pathe": "^2.0.3",
     "replicate-dom": "workspace:*",
