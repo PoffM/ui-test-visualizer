@@ -1,4 +1,4 @@
-FROM codercom/code-server:4.96.4
+FROM codercom/code-server:4.104.2
 
 ENV NODE_VERSION=22.20.0
 # installs NVM (Node Version Manager)

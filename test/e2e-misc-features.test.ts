@@ -47,8 +47,8 @@ test('Load an external css file', async () => {
   // Add the external file
   await replicaPanel.locator('ui-test-visualizer-button[aria-label="Enable your styles"]').click()
   await replicaPanel.getByRole('button', { name: 'Add external file' }).click()
-  await page.getByLabel('input').clear()
-  await page.getByLabel('input').fill('/test-style.css')
+  await page.getByRole('textbox', { name: 'Type to narrow down results.' }).clear()
+  await page.getByRole('textbox', { name: 'Type to narrow down results.' }).fill('/test-style.css')
   await page.getByRole('button', { name: 'OK' }).click()
 
   await replicaPanel.locator('ui-test-visualizer-button[title="Apply styles"]').click()
