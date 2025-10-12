@@ -6,8 +6,8 @@
   },
   "dependencies": {
     "next": "^15.5.4",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@babel/runtime": "^7.28.4",
@@ -15,7 +15,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/react": "^19.1.16",
+    "@types/react": "^19.2.2",
     "babel-jest": "^30.2.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.2.0",
