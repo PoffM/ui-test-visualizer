@@ -20,6 +20,7 @@
     "test",
     "vitest",
     "jest",
+    "bun",
     "debug",
     "typescript",
     "javascript"
@@ -61,7 +62,8 @@
           "enum": [
             "autodetect",
             "jest",
-            "vitest"
+            "vitest",
+            "bun"
           ],
           "description": "Test Framework: Vitest or Jest. Auto-detects by default by walking up directories from your test file."
         }
@@ -69,6 +71,7 @@
     }
   },
   "scripts": {
+    "prepare": "which bun && bun install --cwd ./examples/bun-react || true",
     "dev": "rm -rf build-dev && pnpm run -r dev",
     "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
     "lint": "tsc",

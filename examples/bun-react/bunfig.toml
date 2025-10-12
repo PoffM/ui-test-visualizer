@@ -1,0 +1,8 @@
+[serve.static]
+env = "BUN_PUBLIC_*"
+
+[install]
+linker = "isolated"
+
+[test]
+preload = "./test/happy-dom.ts"

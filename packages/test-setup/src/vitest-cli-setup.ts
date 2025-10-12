@@ -18,7 +18,7 @@ child_process.fork = function (modulePath: string, ...args: unknown[]) {
     options.execArgv = [
       ...(options.execArgv ?? []),
       '--require',
-      path.resolve(buildPath(), 'ui-test-visualizer-test-setup.js'),
+      path.resolve(buildPath(), 'test-runtime-setup.js'),
     ]
   }
 

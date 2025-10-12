@@ -9,10 +9,11 @@ import shadowCss from './shadow.css.txt'
 // "ws" wrongly thinks it's in a browser environment. Import from the index.js file
 // directly instead to bypass that check.
 const WebSocket
+  // @ts-expect-error isBun should be available when running in Bun
   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
-  = require('../node_modules/ws/index.js') as typeof globalThis.WebSocket
+  = process.isBun ? globalThis.WebSocket : require('../node_modules/ws/index.js') as typeof globalThis.WebSocket
 
-async function preTest() {
+export default async function preTest() {
   try {
     const client = new WebSocket(
       `ws://localhost:${process.env.HTML_UPDATER_PORT}`,
@@ -167,13 +168,15 @@ function loadStylesIntoHead(win: typeof window, files: string[]) {
   }
 }
 
-// For when this file is "--require"d before the Vitest tests: Run immediately.
+// Run immediately when this file is "--require"d before the Vitest tests.
 if (process.env.TEST_FRAMEWORK === 'vitest') {
   preTest()
 }
 
 // Jest runs the default async function in the setupFiles.
-module.exports = preTest
+if (process.env.TEST_FRAMEWORK === 'jest') {
+  module.exports = preTest
+}
 
 function validateStringArray(value: unknown): string[] | null {
   if (!Array.isArray(value)) {

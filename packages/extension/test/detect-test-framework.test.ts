@@ -78,6 +78,20 @@ describe('detectTestFramework', () => {
     })
   })
 
+  it('detects bun.lock file', async () => {
+    const result = await detectTestFramework(
+      path.join(
+        examplesPath,
+        'bun-react/test/basic.test.tsx',
+      ),
+      'autodetect',
+    )
+    expect(result).toEqual({
+      configPath: path.join(examplesPath, 'bun-react/bun.lock'),
+      framework: 'bun',
+    })
+  })
+
   it('uses jest when specified', async () => {
     const result1 = await detectTestFramework(
       path.join(
@@ -121,6 +135,20 @@ describe('detectTestFramework', () => {
     })
   })
 
+  it('uses Bun when specified', async () => {
+    const result = await detectTestFramework(
+      path.join(
+        examplesPath,
+        'bun-react/test/basic.test.tsx',
+      ),
+      'bun',
+    )
+    expect(result).toEqual({
+      configPath: path.join(examplesPath, 'bun-react/bun.lock'),
+      framework: 'bun',
+    })
+  })
+
   it('throws when vitest detection fails', async () => {
     await expect(
       detectTestFramework(
@@ -160,6 +188,6 @@ describe('detectTestFramework', () => {
         examplesPath, // some folder without a test framework
         'autodetect',
       ),
-    ).rejects.toThrow('No Vitest or Jest config found')
+    ).rejects.toThrow('Test framework auto-detection failed. Requires Vitest or Jest config, or a Bun lockfile. Or manually specify the test framework in the extension\'s settings.')
   })
 })

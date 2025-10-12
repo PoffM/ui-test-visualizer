@@ -90,6 +90,17 @@
       "sourceMaps": true
     },
     {
+      "name": "Bun Test Runner Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "${workspaceFolder}/examples/bun-react"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
       "name": "All examples",
       "type": "extensionHost",
       "request": "launch",
@@ -99,6 +110,6 @@
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true
-    },
+    }
   ]
 }

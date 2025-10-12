@@ -70,6 +70,15 @@ describe('tool compatibility', async () => {
     ).toEqual(0)
   }, 30_000)
 
+  it('works with Bun + React', async () => {
+    expect(
+      (await runTest(
+        'bun-react/test/basic.test.tsx',
+        'simple react testing library test',
+      )).exitCode,
+    ).toEqual(0)
+  })
+
   // Avoids import errors when importing in Vitest
   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
   const Server = require('../node_modules/ws/lib/websocket-server') as typeof WsServer

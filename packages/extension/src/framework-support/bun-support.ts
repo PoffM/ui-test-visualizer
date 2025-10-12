@@ -10,28 +10,21 @@ function buildPath() {
 }
 
 /** Extra debug config to pass into the VSCode debug process when using Vitest. */
-export async function vitestDebugConfig(
+export async function bunDebugConfig(
   filePath: string,
   testName: string,
 ): Promise<Partial<vscode.DebugConfiguration>> {
   return {
-    env: {
-      NODE_OPTIONS: `--require ${path.join(buildPath(), 'vitest-cli-setup.js')}`,
-    },
+    type: 'bun',
+    runtimeExecutable: 'bun',
     args: [
-      'vitest',
-      'run',
+      'test',
+      '--preload',
+      path.join(buildPath(), 'bun-preload.js'),
       filePath,
-      '-t',
+      '--test-name-pattern',
       cleanTestNameForTerminal(testName),
-      // Use child process instead of the default threads.
-      '--pool',
-      'forks',
-      '--poolOptions.forks.minForks',
-      '1',
-      '--poolOptions.forks.maxForks',
-      '1',
-      '--testTimeout=0',
+      '--timeout=0',
     ],
     autoAttachChildProcesses: true,
     // TODO use the config

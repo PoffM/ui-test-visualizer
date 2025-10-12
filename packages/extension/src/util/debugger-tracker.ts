@@ -61,7 +61,7 @@ export function startDebuggerTracker(
     })
 
     const frameId = stackTrace.stackFrames[0].id
-    if (!frameId) {
+    if (frameId === null || frameId === undefined) {
       throw new Error('Internal extension error: Could not find debugger frame ID for UI test session')
     }
 
@@ -90,6 +90,9 @@ export function startDebuggerTracker(
 }
 
 function isChildSession(child: vscode.DebugSession, parent: vscode.DebugSession) {
+  if (child === parent) {
+    return true
+  }
   if (!child.parentSession) {
     return false
   }

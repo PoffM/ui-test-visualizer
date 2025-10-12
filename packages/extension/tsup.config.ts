@@ -20,8 +20,8 @@ export default defineConfig((options) => {
     treeshake: !options.watch,
     entry: {
       'extension': './src/extension.ts',
-      'ui-test-visualizer-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
-      'ui-test-visualizer-test-setup': '../test-setup/src/test-setup.ts',
+      'vitest-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
+      'test-runtime-setup': '../test-setup/src/test-runtime-setup.ts',
       'transform-css': './src/transform-css/transform-css.ts',
     },
     format: ['cjs'],
@@ -129,11 +129,28 @@ export default defineConfig((options) => {
           await esbuild({
             entryPoints: ['./src/wasi-worker.mjs'],
             bundle: true,
+            minify: !options.watch,
             treeShaking: true,
             outfile: path.join(outDir, 'wasi-worker.mjs'),
             format: 'esm',
             target: 'esnext',
             external: ['node:*'],
+          })
+        }),
+      },
+      {
+        name: 'build-bun-preload',
+        buildEnd: lodash.once(async () => {
+          console.log('Building bun-preload.js')
+          await esbuild({
+            entryPoints: ['../test-setup/src/bun-preload.ts'],
+            bundle: true,
+            minify: !options.watch,
+            treeShaking: true,
+            outfile: path.join(outDir, 'bun-preload.js'),
+            format: 'esm',
+            target: 'esnext',
+            external: ['*'],
           })
         }),
       },

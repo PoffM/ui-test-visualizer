@@ -3,13 +3,13 @@ import { findUp, findUpMultiple } from 'find-up'
 import { readInitialOptions } from 'jest-config'
 
 export interface TestFrameworkInfo {
-  framework: 'jest' | 'vitest'
+  framework: 'jest' | 'vitest' | 'bun'
   configPath: string
 }
 
 export async function detectTestFramework(
   testFilePath: string,
-  frameworkSetting: 'autodetect' | 'vitest' | 'jest',
+  frameworkSetting: 'autodetect' | 'jest' | 'vitest' | 'bun',
 ): Promise<TestFrameworkInfo> {
   // auto detect test config files
 
@@ -69,17 +69,35 @@ export async function detectTestFramework(
     })()
     : undefined
 
-  const configPath = vitestFile ?? jestFile
+  const frameworkConfigPath = vitestFile ?? jestFile
+
+  // Detect Bun test runner usage
+  if (frameworkSetting === 'bun' || (!frameworkConfigPath && frameworkSetting === 'autodetect')) {
+    const bunLockFilePath = await findUp(['bun.lockb', 'bun.lock'], { cwd: testFilePath })
+    if (bunLockFilePath) {
+      return {
+        framework: 'bun',
+        configPath: path.resolve(bunLockFilePath),
+      }
+    }
+  }
 
   // throw error if no config file found
-  if (!configPath) {
+  if (!frameworkConfigPath) {
     switch (frameworkSetting) {
       case 'autodetect':
-        throw new Error('No Vitest or Jest config found')
+        throw new Error(
+          'Test framework auto-detection failed. Requires Vitest or Jest config, or a Bun lockfile. Or manually specify the test framework in the extension\'s settings.',
+        )
       case 'vitest':
         throw new Error('No Vitest config found')
       case 'jest':
         throw new Error('No Jest config found')
+      case 'bun':
+        return {
+          framework: 'bun',
+          configPath: 'none', // No config file needed for Bun
+        }
     }
   }
 
@@ -91,13 +109,13 @@ export async function detectTestFramework(
   if (vitestCfgPathLength > jestConfigPathLength) {
     return {
       framework: 'vitest' as const,
-      configPath,
+      configPath: frameworkConfigPath,
     }
   }
   else {
     return {
       framework: 'jest' as const,
-      configPath,
+      configPath: frameworkConfigPath,
     }
   }
 }

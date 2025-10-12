@@ -6,6 +6,7 @@ import type { zFrameworkSetting } from './extension'
 import { detectTestFramework } from './framework-support/detect'
 import { jestDebugConfig } from './framework-support/jest-support'
 import { vitestDebugConfig } from './framework-support/vitest-support'
+import { bunDebugConfig } from './framework-support/bun-support'
 
 const DEBUG_NAME = 'Visually Debug UI'
 
@@ -23,6 +24,17 @@ export async function makeDebugConfig(
     throw new Error(`Could not find related package.json for test file ${testFile}`)
   }
 
+  const frameworkSpecificDebugConfig = await (async () => {
+    switch (fwInfo.framework) {
+      case 'vitest':
+        return await vitestDebugConfig(testFile, testName)
+      case 'jest':
+        return await jestDebugConfig(testFile, testName, fwInfo)
+      case 'bun':
+        return await bunDebugConfig(testFile, testName)
+    }
+  })()
+
   const debugConfig: vscode.DebugConfiguration = {
     name: DEBUG_NAME,
     request: 'launch',
@@ -30,9 +42,7 @@ export async function makeDebugConfig(
     runtimeExecutable: 'npx',
     outputCapture: 'std',
     cwd: path.dirname(pkgPath),
-    ...(fwInfo.framework === 'jest'
-      ? await jestDebugConfig(testFile, testName, fwInfo)
-      : await vitestDebugConfig(testFile, testName)),
+    ...frameworkSpecificDebugConfig,
   }
 
   debugConfig.env = {
