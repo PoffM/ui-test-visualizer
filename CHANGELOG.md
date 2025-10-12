@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.3.0
+
+### Minor Changes
+
+- 699b93e: Bun test runner support
+
 ## 1.2.6
 
 ### Patch Changes
