@@ -35,7 +35,6 @@
     "@types/ws": "^8.18.1",
     "@vitest/expect": "^3.2.4",
     "@vscode/codicons": "^0.0.40",
-    "chokidar": "^4.0.3",
     "esbuild": "^0.25.10",
     "execa": "^9.6.0",
     "less": "^4.4.1",

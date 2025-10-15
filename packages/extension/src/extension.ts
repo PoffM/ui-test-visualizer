@@ -1,7 +1,6 @@
 import '@total-typescript/ts-reset'
 
 import { TelemetryReporter } from '@vscode/extension-telemetry'
-import path from 'pathe'
 import * as vscode from 'vscode'
 import * as z from 'zod/mini'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
@@ -11,7 +10,7 @@ import { myExtensionStorage } from './my-extension-storage'
 import { startPanelController } from './panel-controller/panel-controller'
 import { startDebuggerTracker } from './util/debugger-tracker'
 import { extensionSetting } from './util/extension-setting'
-import { hotReload } from './util/hot-reload'
+import { enableHotReload } from './util/hot-reload'
 
 const reporter = (() => {
   try {
@@ -22,30 +21,23 @@ const reporter = (() => {
   }
 })()
 
+let vscodeContext: vscode.ExtensionContext
 export async function activate(extensionContext: vscode.ExtensionContext) {
-  // Hot-reload the main 'visuallyDebugUI' command function in development
+  vscodeContext = extensionContext
   if (process.env.NODE_ENV === 'development') {
-    hotReload({
-      currentFile: __filename,
-      exportName: 'visuallyDebugUI',
-      onReload: newExport =>
-        // @ts-expect-error should be the right type
-        (visuallyDebugUI = newExport),
-      watchOptions: [
-        __dirname,
-        { ignored: path.resolve(__dirname, './web-view-vite') },
-      ],
-    })
+    enableHotReload(extensionContext, __filename, deactivate)
   }
 
-  const debugTest = vscode.commands.registerCommand(
-    'ui-test-visualizer.visuallyDebugUI',
-    (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => visuallyDebugUI(
-      testFile,
-      testName,
-      startAndEndLines,
-      firstStatementStartLine,
-      extensionContext,
+  extensionContext.subscriptions.push(
+    vscode.commands.registerCommand(
+      'ui-test-visualizer.visuallyDebugUI',
+      (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => visuallyDebugUI(
+        testFile,
+        testName,
+        startAndEndLines,
+        firstStatementStartLine,
+        extensionContext,
+      ),
     ),
   )
 
@@ -81,11 +73,16 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
       }),
     )
   }
-
-  extensionContext.subscriptions.push(debugTest)
 }
 
-export function deactivate() { }
+export function deactivate() {
+  for (const disposable of vscodeContext.subscriptions) {
+    disposable.dispose()
+  }
+  while (vscodeContext.subscriptions.length) {
+    vscodeContext.subscriptions.pop()
+  }
+}
 
 // eslint-disable-next-line import/no-mutable-exports
 export let visuallyDebugUI = async (
