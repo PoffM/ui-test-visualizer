@@ -3,6 +3,7 @@ import '@total-typescript/ts-reset'
 import { TelemetryReporter } from '@vscode/extension-telemetry'
 import * as vscode from 'vscode'
 import * as z from 'zod/mini'
+import getPort from 'get-port'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
 import { makeDebugConfig } from './debug-config'
@@ -31,13 +32,19 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   extensionContext.subscriptions.push(
     vscode.commands.registerCommand(
       'ui-test-visualizer.visuallyDebugUI',
-      (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => visuallyDebugUI(
+      (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => startDebugger(
+        extensionContext,
         testFile,
         testName,
         startAndEndLines,
         firstStatementStartLine,
-        extensionContext,
       ),
+    ),
+  )
+
+  extensionContext.subscriptions.push(
+    vscode.debug.onDidStartDebugSession(
+      session => startWebView(extensionContext, session),
     ),
   )
 
@@ -84,14 +91,13 @@ export function deactivate() {
   }
 }
 
-// eslint-disable-next-line import/no-mutable-exports
-export let visuallyDebugUI = async (
+async function startDebugger(
+  extensionContext: vscode.ExtensionContext,
   testFile: unknown,
   testName: unknown,
-  startAndEndLines: unknown,
-  firstStatementStartLine: unknown,
-  extensionContext: vscode.ExtensionContext,
-) => {
+  startAndEndLinesRaw: unknown,
+  firstStatementStartLineRaw: unknown,
+) {
   const storage = myExtensionStorage(extensionContext)
 
   if (typeof testFile !== 'string') {
@@ -100,49 +106,19 @@ export let visuallyDebugUI = async (
   if (typeof testName !== 'string') {
     throw new TypeError(`Expected string argument \"testName\", received ${testName}`)
   }
+  const startAndEndLines = z.tuple([z.number(), z.number()]).safeParse(startAndEndLinesRaw).data
+  if (startAndEndLines === undefined) {
+    throw new TypeError(`Expected [number, number] argument \"startAndEndLines\", received ${startAndEndLinesRaw}`)
+  }
+  const firstStatementStartLine = z.nullable(z.number()).safeParse(firstStatementStartLineRaw).data
+  if (firstStatementStartLine === undefined) {
+    throw new TypeError(`Expected number or null argument \"firstStatementStartLine\", received ${firstStatementStartLineRaw}`)
+  }
 
   // Save the test file before starting the debug session
   await vscode.window.activeTextEditor?.document.save()
 
-  const panelController = await startPanelController(extensionContext, storage)
-
-  const onStartDebug = vscode.debug.onDidStartDebugSession(async (currentSession) => {
-    onStartDebug.dispose()
-
-    const sessionTracker = await startDebuggerTracker(
-      currentSession,
-      {
-        onFrameChange: () => panelController.flushPatches(),
-        onDebugRestarted: () => panelController.notifyDebuggerRestarted(),
-      },
-    )
-
-    const autoBreakpoint = (() => {
-      try {
-        return autoSetFirstBreakpoint(
-          testFile,
-          z.tuple([z.number(), z.number()]).parse(startAndEndLines),
-          z.nullable(z.number()).parse(firstStatementStartLine),
-        )
-      }
-      catch {}
-    })()
-
-    await panelController.openPanel(sessionTracker)
-
-    const onTerminate = vscode.debug.onDidTerminateDebugSession(
-      (endedSession) => {
-        if (currentSession !== endedSession) {
-          return
-        }
-
-        autoBreakpoint?.dispose()
-        sessionTracker.dispose()
-        panelController.dispose()
-        onTerminate.dispose()
-      },
-    )
-  })
+  const htmlUpdaterPort = await getPort()
 
   const frameworkSetting = (() => {
     const parsed = zFrameworkSetting
@@ -154,9 +130,10 @@ export let visuallyDebugUI = async (
     testFile,
     testName,
     frameworkSetting,
-    panelController.htmlUpdaterPort,
+    htmlUpdaterPort,
     await storage.get('enabledCssFiles'),
   )
+  debugConfig.env.UI_TEST_VISUALIZER_DATA = [testFile, startAndEndLinesRaw, firstStatementStartLineRaw]
 
   vscode.debug.startDebugging(undefined, debugConfig)
 
@@ -166,4 +143,55 @@ export let visuallyDebugUI = async (
   catch { }
 }
 
-export const zFrameworkSetting = z.enum(['autodetect', 'vitest', 'jest'])
+async function startWebView(extensionContext: vscode.ExtensionContext, currentSession: vscode.DebugSession) {
+  const env = currentSession.configuration.env
+  if (!env.UI_TEST_VISUALIZER_DATA) {
+    return
+  }
+  const [
+    testFile,
+    startAndEndLines,
+    firstStatementStartLine,
+  ] = env.UI_TEST_VISUALIZER_DATA
+  const htmlUpdaterPort = env.HTML_UPDATER_PORT
+
+  const storage = myExtensionStorage(extensionContext)
+
+  const panelController = await startPanelController(extensionContext, storage, htmlUpdaterPort)
+
+  const sessionTracker = await startDebuggerTracker(
+    currentSession,
+    {
+      onFrameChange: () => panelController.flushPatches(),
+      onDebugRestarted: () => panelController.notifyDebuggerRestarted(),
+    },
+  )
+
+  const autoBreakpoint = (() => {
+    try {
+      return autoSetFirstBreakpoint(
+        testFile,
+        startAndEndLines,
+        firstStatementStartLine,
+      )
+    }
+    catch { }
+  })()
+
+  await panelController.openPanel(sessionTracker)
+
+  const onTerminate = vscode.debug.onDidTerminateDebugSession(
+    (endedSession) => {
+      if (currentSession !== endedSession) {
+        return
+      }
+
+      autoBreakpoint?.dispose()
+      sessionTracker.dispose()
+      panelController.dispose()
+      onTerminate.dispose()
+    },
+  )
+}
+
+export const zFrameworkSetting = z.enum(['autodetect', 'vitest', 'jest', 'bun'])

@@ -15,10 +15,8 @@ const Server = require('../../node_modules/ws/lib/websocket-server') as typeof W
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
+  htmlUpdaterPort: number,
 ) {
-  const htmlUpdaterPort = await getPort()
-  const viteDevServerPort = 5173
-
   let panel: vscode.WebviewPanel | undefined
   let onPanelMessage: vscode.Disposable | undefined
 
@@ -75,7 +73,7 @@ export async function startPanelController(
           const localhost = process.platform === 'win32' ? '[::1]' : 'localhost'
 
           const viteResponse = await fetch(
-            `http://${localhost}:${viteDevServerPort}/`,
+            `http://${localhost}:5173/`,
           )
           const devHtml = await viteResponse.text()
           return devHtml
