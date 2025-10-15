@@ -18,6 +18,7 @@ export async function bunDebugConfig(
     type: 'bun',
     runtimeExecutable: 'bun',
     args: [
+      '--conditions=browser',
       'test',
       '--preload',
       path.join(buildPath(), 'bun-preload.js'),
