@@ -157,14 +157,19 @@ async function startWebView(extensionContext: vscode.ExtensionContext, currentSe
 
   const storage = myExtensionStorage(extensionContext)
 
-  const panelController = await startPanelController(extensionContext, storage, htmlUpdaterPort)
-
   const sessionTracker = await startDebuggerTracker(
     currentSession,
     {
       onFrameChange: () => panelController.flushPatches(),
       onDebugRestarted: () => panelController.notifyDebuggerRestarted(),
     },
+  )
+
+  const panelController = await startPanelController(
+    extensionContext,
+    storage,
+    sessionTracker,
+    htmlUpdaterPort,
   )
 
   const autoBreakpoint = (() => {
@@ -177,8 +182,6 @@ async function startWebView(extensionContext: vscode.ExtensionContext, currentSe
     }
     catch { }
   })()
-
-  await panelController.openPanel(sessionTracker)
 
   const onTerminate = vscode.debug.onDidTerminateDebugSession(
     (endedSession) => {
