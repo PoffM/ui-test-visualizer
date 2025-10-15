@@ -17,10 +17,16 @@ export async function startPanelController(
   sessionTracker: DebuggerTracker,
   htmlUpdaterPort: number,
 ) {
+  let setWebviewIsReady = () => {}
+  const webviewIsReady = new Promise<void>((resolve) => {
+    setWebviewIsReady = resolve
+  })
+
   // Listen for html updates from the test worker process
   const htmlUpdaterServer = new Server({ port: htmlUpdaterPort })
   htmlUpdaterServer.on('connection', (socket) => {
-    socket.on('message', (buffer) => {
+    socket.on('message', async (buffer) => {
+      await webviewIsReady
       // @ts-expect-error The message comes from the test process so allow it without validation
       const htmlPatch: HTMLPatch = JSON.parse(buffer.toString())
       panel.webview.postMessage({ htmlPatch })
@@ -89,11 +95,6 @@ export async function startPanelController(
     const { path, input, type, id } = e
 
     try {
-      const ctx: PanelRouterCtx = {
-        sessionTracker,
-        storage,
-        flushPatches: controller.flushPatches,
-      }
       const result = await callTRPCProcedure({
         router: panelRouter,
         ctx,
@@ -140,5 +141,13 @@ export async function startPanelController(
       onPanelMessage.dispose()
     },
   }
+
+  const ctx: PanelRouterCtx = {
+    sessionTracker,
+    storage,
+    flushPatches: controller.flushPatches,
+    setWebviewIsReady,
+  }
+
   return controller
 }

@@ -10,12 +10,18 @@ export interface PanelRouterCtx {
   sessionTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
+  setWebviewIsReady: () => void
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
 export const panelRouter = t.router({
+  setWebviewIsReady: t.procedure
+    .mutation(async ({ ctx }) => {
+      ctx.setWebviewIsReady()
+    }),
+
   serializeHtml: t.procedure
     .query(async ({ ctx }) => {
       const html = await ctx.sessionTracker.runDebugExpression('globalThis.__serializeHtml()')

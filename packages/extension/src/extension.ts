@@ -32,7 +32,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   extensionContext.subscriptions.push(
     vscode.commands.registerCommand(
       'ui-test-visualizer.visuallyDebugUI',
-      (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => startDebugger(
+      (testFile: unknown, testName: unknown, startAndEndLines: unknown, firstStatementStartLine: unknown) => startTest(
         extensionContext,
         testFile,
         testName,
@@ -91,7 +91,7 @@ export function deactivate() {
   }
 }
 
-async function startDebugger(
+async function startTest(
   extensionContext: vscode.ExtensionContext,
   testFile: unknown,
   testName: unknown,
@@ -157,7 +157,7 @@ async function startWebView(extensionContext: vscode.ExtensionContext, currentSe
 
   const storage = myExtensionStorage(extensionContext)
 
-  const sessionTracker = await startDebuggerTracker(
+  const sessionTracker = startDebuggerTracker(
     currentSession,
     {
       onFrameChange: () => panelController.flushPatches(),
