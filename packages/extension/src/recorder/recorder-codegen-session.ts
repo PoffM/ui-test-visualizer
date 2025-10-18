@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { z } from 'zod/mini'
+import * as z from 'zod/mini'
 import path from 'pathe'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'

@@ -54,7 +54,7 @@ export function RecorderPanel() {
           <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
           <Show when={recorder.hasPendingInputChange()}>
             <div class="text-warning-foreground mb-2">
-              Input 'change' code generates after unfocusing the input
+              'change' event code generates after unfocusing the input
             </div>
           </Show>
           <div class="text-sm flex flex-col gap-2">

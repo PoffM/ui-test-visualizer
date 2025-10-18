@@ -10,8 +10,8 @@ This is a VSCode extension: no code changes should be required to watch your UI 
 
 ## Workspace Requirements
 
-- [Vitest](https://vitest.dev/) or [Jest v28+](https://jestjs.io/)
-  - Your test framework is auto-detected by walking up the directories from your test file until it finds `vitest.config.{ts,js}`, `vite.config.{ts,js}`, or `jest.config.{ts,js,json}`.
+- [Vitest](https://vitest.dev/) or [Jest v28+](https://jestjs.io/) or [Bun Test Runner](https://bun.com/docs/test/dom)
+  - Your test framework is auto-detected by walking up the directories from your test file until it finds `vitest.config.{ts,js}`, `vite.config.{ts,js}`, `jest.config.{ts,js,json}`, or `bun.lock`
 - [jsdom](https://github.com/jsdom/jsdom) or [happy-dom](https://github.com/capricorn86/happy-dom) test environment (what you're probably already using for UI in Vitest or Jest)
 
 ## Usage

@@ -20,8 +20,8 @@ export default defineConfig((options) => {
     treeshake: !options.watch,
     entry: {
       'extension': './src/extension.ts',
-      'ui-test-visualizer-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
-      'ui-test-visualizer-test-setup': '../test-setup/src/test-setup.ts',
+      'vitest-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
+      'test-runtime-setup': '../test-setup/src/test-runtime-setup.ts',
       'transform-css': './src/transform-css/transform-css.ts',
 
       // user-event v13 is used when running the recorder's generated code as debug expressions, because it's the last version
@@ -29,10 +29,14 @@ export default defineConfig((options) => {
       // which fail when running through the debugger's 'evaluate' request.
       'user-event-13': './node_modules/@testing-library/user-event/dist/index.js',
     },
+    format: ['cjs'],
+    outExtension: () => ({
+      js: '.js',
+    }),
     outDir,
-    external: ['vscode', 'jest-resolve/build/default_resolver', 'jiti', './transform-css', 'babel-jest', '@babel/core'],
+    external: ['vscode', 'jest-resolve', 'jest-circus', 'jest-runner', 'jiti', './transform-css', 'babel-jest', '@babel/core'],
     noExternal: [
-      /^((?!(vscode)|(jest-resolve\/build\/default_resolver)|(jiti)|(babel-jest)|(@babel\/core)|(.\/transform-css)).)*$/,
+      /^((?!(vscode)|(jest-resolve)|(jest-circus)|(jest-runner)|(jiti)|(babel-jest)|(@babel\/core)|(.\/transform-css)).)*$/,
       '@vscode/extension-telemetry',
     ],
     // Vite handles the webview's hot reload
@@ -130,11 +134,28 @@ export default defineConfig((options) => {
           await esbuild({
             entryPoints: ['./src/wasi-worker.mjs'],
             bundle: true,
+            minify: !options.watch,
             treeShaking: true,
             outfile: path.join(outDir, 'wasi-worker.mjs'),
             format: 'esm',
             target: 'esnext',
             external: ['node:*'],
+          })
+        }),
+      },
+      {
+        name: 'build-bun-preload',
+        buildEnd: lodash.once(async () => {
+          console.log('Building bun-preload.js')
+          await esbuild({
+            entryPoints: ['../test-setup/src/bun-preload.ts'],
+            bundle: true,
+            minify: !options.watch,
+            treeShaking: true,
+            outfile: path.join(outDir, 'bun-preload.js'),
+            format: 'esm',
+            target: 'esnext',
+            external: ['*'],
           })
         }),
       },

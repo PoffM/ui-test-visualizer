@@ -16,7 +16,7 @@ export async function vitestDebugConfig(
 ): Promise<Partial<vscode.DebugConfiguration>> {
   return {
     env: {
-      NODE_OPTIONS: `--require ${path.join(buildPath(), 'ui-test-visualizer-cli-setup.js')}`,
+      NODE_OPTIONS: `--require ${path.join(buildPath(), 'vitest-cli-setup.js')}`,
     },
     args: [
       'vitest',

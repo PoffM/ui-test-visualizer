@@ -54,7 +54,7 @@ export async function jestDebugConfig(
       '--testTimeout=1000000000',
       '--silent=false',
       '--setupFiles',
-      path.join(buildPath(), 'ui-test-visualizer-test-setup.js'),
+      path.join(buildPath(), 'test-runtime-setup.js'),
       ...setupFiles,
       '--detectOpenHandles',
       // TODO find out why Jest doesn't exit on its own

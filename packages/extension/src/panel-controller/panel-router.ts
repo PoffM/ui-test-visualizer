@@ -1,7 +1,7 @@
 import { initTRPC } from '@trpc/server'
 import path from 'pathe'
 import * as vscode from 'vscode'
-import { z } from 'zod/mini'
+import * as z from 'zod/mini'
 import type { MyStorageType } from '../my-extension-storage'
 import { type RecorderCodeGenSession, zSerializedRegexp } from '../recorder/recorder-codegen-session'
 import type { DebuggerTracker } from '../util/debugger-tracker'
@@ -12,6 +12,7 @@ export interface PanelRouterCtx {
   storage: MyStorageType
   flushPatches: () => void
   recorderCodeGenSession: () => RecorderCodeGenSession | null
+  setWebviewIsReady: () => void
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
@@ -23,6 +24,11 @@ export const zRecordedEventData = z.object({
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
 export const panelRouter = t.router({
+  setWebviewIsReady: t.procedure
+    .mutation(async ({ ctx }) => {
+      ctx.setWebviewIsReady()
+    }),
+
   serializeHtml: t.procedure
     .query(async ({ ctx }) => {
       const html = await ctx.debuggerTracker.runDebugExpression('globalThis.__serializeHtml()')

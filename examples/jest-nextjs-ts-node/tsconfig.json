@@ -5,7 +5,7 @@
     "jsx": "preserve",
     "lib": ["dom", "dom.iterable", "esnext"],
     "baseUrl": ".",
-    "module": "esnext",
+    "module": "preserve",
     "moduleResolution": "Node",
     "paths": {
       "@/components/*": ["components/*"],

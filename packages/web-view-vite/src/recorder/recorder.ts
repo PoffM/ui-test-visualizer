@@ -50,14 +50,21 @@ export function createRecorder(shadowHost: HTMLDivElement) {
 
   const { hasPendingInputChange } = trackPendingInputChanges(shadowHost, isRecording)
 
+  const [rootElement, setRootElement] = createSignal<Node | null>(
+    shadowHost.shadowRoot?.children[0] ?? null,
+  )
+  createMutationObserver(shadowHost.shadowRoot!, { childList: true }, () => {
+    setRootElement(shadowHost.shadowRoot?.children[0] ?? null)
+  })
+
   createEffect(() => {
-    const shadowHtml = shadowHost.shadowRoot?.children[0]
-    if (!shadowHtml) {
+    const root = rootElement()
+    if (!root) {
       return
     }
     if (isRecording()) {
       for (const eventType of ['click', 'submit', 'change'] as const) {
-        makeEventListener(shadowHtml, eventType, async (e: Event) => {
+        makeEventListener(root, eventType, async (e: Event) => {
           let target = e.target
 
           // When clicking, use deepElementFromPoint to get the right element if it's inside a shadow root.
@@ -148,7 +155,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       }
     }
     else {
-      makeEventListener(shadowHtml, 'beforeinput', (e) => {
+      makeEventListener(root, 'beforeinput', (e) => {
         // Block changing inputs when not recording
         e.preventDefault()
       })

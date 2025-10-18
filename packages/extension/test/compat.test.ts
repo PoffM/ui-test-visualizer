@@ -8,10 +8,19 @@ import { makeDebugConfig } from '../src/debug-config'
 import { detectTestFramework } from '../src/framework-support/detect-test-framework'
 
 describe('tool compatibility', async () => {
-  it('works with Jest + SWC + Nextjs', async () => {
+  it('works with Jest + Nextjs + SWC minimal/default setup', async () => {
     expect(
       (await runTest(
-        'jest-nextjs/app/counter.test.tsx',
+        'jest-nextjs-minimal/app/counter.test.tsx',
+        'app Router: Works with Client Components (React State)',
+      )).exitCode,
+    ).toEqual(0)
+  }, 30_000)
+
+  it('works with Jest + SWC + Nextjs + ts-node', async () => {
+    expect(
+      (await runTest(
+        'jest-nextjs-ts-node/app/counter.test.tsx',
         'simple react testing library test',
       )).exitCode,
     ).toEqual(0)
@@ -61,6 +70,15 @@ describe('tool compatibility', async () => {
       )).exitCode,
     ).toEqual(0)
   }, 30_000)
+
+  it('works with Bun + React', async () => {
+    expect(
+      (await runTest(
+        'bun-react/test/basic.test.tsx',
+        'simple react testing library test',
+      )).exitCode,
+    ).toEqual(0)
+  })
 
   // Avoids import errors when importing in Vitest
   // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports

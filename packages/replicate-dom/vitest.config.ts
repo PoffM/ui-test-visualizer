@@ -8,7 +8,6 @@ export default defineConfig({
       '.idea',
       '.git',
       '.cache',
-      './test/happy-dom-tests/unused-happy-dom-tests',
     ],
     globals: true,
   },

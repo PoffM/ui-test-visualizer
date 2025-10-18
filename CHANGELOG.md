@@ -1,5 +1,29 @@
 # ui-test-visualizer
 
+## 1.3.1
+
+### Patch Changes
+
+- 0227469: Fix restart behavior and startup race condition bug with Bun test runner
+
+## 1.3.0
+
+### Minor Changes
+
+- 699b93e: Bun test runner support
+
+## 1.2.6
+
+### Patch Changes
+
+- ce03c59: Support Jest Typescript config files without ts-node
+
+## 1.2.5
+
+### Patch Changes
+
+- cc3eb60: Disable test timeout for Vitest
+
 ## 1.2.4
 
 ### Patch Changes

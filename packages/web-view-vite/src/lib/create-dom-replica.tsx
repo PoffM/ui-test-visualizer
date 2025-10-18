@@ -54,6 +54,7 @@ export function createDomReplica() {
       notifyForStyleChange()
     }
   })
+  client.setWebviewIsReady.mutate()
 
   function initShadowContent(shadow: DocumentFragment, content: Node) {
     shadow.replaceChildren(content)

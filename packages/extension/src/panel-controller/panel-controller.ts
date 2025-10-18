@@ -1,5 +1,4 @@
 import { TRPCError, callTRPCProcedure } from '@trpc/server'
-import getPort from 'get-port'
 import path from 'pathe'
 import type { HTMLPatch } from 'replicate-dom'
 import * as vscode from 'vscode'
@@ -19,20 +18,22 @@ export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
   recorderCodeGenSession: () => RecorderCodeGenSession | null,
+  debuggerTracker: DebuggerTracker,
+  htmlUpdaterPort: number,
 ) {
-  const htmlUpdaterPort = await getPort()
-  const viteDevServerPort = 5173
-
-  let panel: vscode.WebviewPanel | undefined
-  let onPanelMessage: vscode.Disposable | undefined
+  let setWebviewIsReady = () => {}
+  const webviewIsReady = new Promise<void>((resolve) => {
+    setWebviewIsReady = resolve
+  })
 
   // Listen for html updates from the test worker process
   const htmlUpdaterServer = new Server({ port: htmlUpdaterPort })
   htmlUpdaterServer.on('connection', (socket) => {
-    socket.on('message', (buffer) => {
+    socket.on('message', async (buffer) => {
+      await webviewIsReady
       // @ts-expect-error The message comes from the test process so allow it without validation
       const htmlPatch: HTMLPatch = JSON.parse(buffer.toString())
-      panel?.webview.postMessage({ htmlPatch })
+      panel.webview.postMessage({ htmlPatch })
     })
   })
 
@@ -40,137 +41,122 @@ export async function startPanelController(
     htmlUpdaterServer.on('listening', res)
   })
 
-  function flushPatches() {
-    panel?.webview.postMessage({ flushPatches: true })
-  }
+  const panel = vscode.window.createWebviewPanel(
+    'visualTest',
+    'Tested UI',
+    vscode.ViewColumn.Beside,
+    {
+      enableFindWidget: true,
+      enableScripts: true,
+      retainContextWhenHidden: true,
+    },
+  )
 
-  /**
-   * Tell the webview that the debugger has restarted
-   * i.e. to refresh the replicated UI.
-   */
-  function notifyDebuggerRestarted() {
-    panel?.webview.postMessage({ debuggerRestarted: true })
-  }
+  panel.iconPath = vscode.Uri.file(path.resolve(__dirname, './debug.svg'))
 
-  function notifyRecorderEditPerformed() {
-    panel?.webview.postMessage({ recorderEditPerformed: true })
-  }
+  panel.webview.html = await (async () => {
+    // In dev mode, load the html from the live Vite app.
+    if (process.env.NODE_ENV === 'development') {
+      const localhost = process.platform === 'win32' ? '[::1]' : 'localhost'
 
-  return {
-    htmlUpdaterPort,
-    flushPatches,
-    notifyDebuggerRestarted,
-    notifyRecorderEditPerformed,
-    async openPanel(
-      debuggerTracker: DebuggerTracker,
-    ) {
-      // Create the webview panel
-      panel = vscode.window.createWebviewPanel(
-        'visualTest',
-        'Tested UI',
-        vscode.ViewColumn.Beside,
-        {
-          enableFindWidget: true,
-          enableScripts: true,
-          retainContextWhenHidden: true,
-        },
+      const viteResponse = await fetch(
+        `http://${localhost}:5173/`,
       )
+      const devHtml = await viteResponse.text()
+      return devHtml
+    }
 
-      panel.iconPath = vscode.Uri.file(path.resolve(__dirname, './debug.svg'))
+    // In production, load the built static front-end files.
 
-      const html = await (async () => {
-        // In dev mode, load the html from the live Vite app.
-        if (process.env.NODE_ENV === 'development') {
-          const localhost = process.platform === 'win32' ? '[::1]' : 'localhost'
+    function getUri(path: string) {
+      return panel.webview.asWebviewUri(
+        vscode.Uri.joinPath(extensionContext.extensionUri, path),
+      )
+    }
 
-          const viteResponse = await fetch(
-            `http://${localhost}:${viteDevServerPort}/`,
-          )
-          const devHtml = await viteResponse.text()
-          return devHtml
-        }
+    const appCss = getUri('web-view-vite/assets/index.css')
+    const appJs = getUri('web-view-vite/assets/index.js')
+    const icon = getUri('debug.svg')
 
-        // In production, load the built static front-end files.
-        if (
-          process.env.NODE_ENV === 'test'
-          || process.env.NODE_ENV === 'production'
-        ) {
-          function getUri(path: string) {
-            return panel?.webview.asWebviewUri(
-              vscode.Uri.joinPath(extensionContext.extensionUri, path),
-            )
-          }
+    const prodHtml = `
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <link rel="icon" type="image/svg+xml" href="${icon}" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <script type="module" crossorigin src="${appJs}"></script>
+          <link rel="stylesheet" crossorigin href="${appCss}">
+        </head>
+        <body>
+          <div id="root"></div>
+        </body>
+      </html>`
 
-          const appCss = getUri('web-view-vite/assets/index.css')
-          const appJs = getUri('web-view-vite/assets/index.js')
-          const icon = getUri('debug.svg')
+    return prodHtml
+  })()
 
-          const prodHtml = `
-            <!doctype html>
-            <html lang="en">
-              <head>
-                <link rel="icon" type="image/svg+xml" href="${icon}" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <meta http-equiv="Content-Security-Policy" content="form-action 'none';">
-                <script type="module" crossorigin src="${appJs}"></script>
-                <link rel="stylesheet" crossorigin href="${appCss}">
-              </head>
-              <body>
-                <div id="root"></div>
-              </body>
-            </html>`
+  const onPanelMessage = panel.webview.onDidReceiveMessage(async (e) => {
+    const { path, input, type, id } = e
 
-          return prodHtml
-        }
-
-        throw new Error(`Unknown NODE_ENV ${process.env.NODE_ENV}`)
-      })()
-
-      panel.webview.html = html
-
-      onPanelMessage = panel.webview.onDidReceiveMessage(async (e) => {
-        const { path, input, type, id } = e
-
-        try {
-          const ctx: PanelRouterCtx = {
-            debuggerTracker,
-            storage,
-            flushPatches,
-            recorderCodeGenSession,
-          }
-          const result = await callTRPCProcedure({
-            router: panelRouter,
-            ctx,
-            path,
-            getRawInput: () => input,
-            input,
-            type,
-            signal: undefined,
-          })
-
-          panel?.webview.postMessage({ id, data: result })
-        }
-        catch (error) {
-          console.log(error)
-          if (error instanceof TRPCError) {
-            vscode.window.showErrorMessage(String(error.cause))
-          }
-          else if (error instanceof Error) {
-            vscode.window.showErrorMessage(String(error))
-          }
-          panel?.webview.postMessage({
-            id,
-            error: error instanceof Error ? error.message : null,
-          })
-        }
+    try {
+      const result = await callTRPCProcedure({
+        router: panelRouter,
+        ctx,
+        path,
+        getRawInput: () => input,
+        input,
+        type,
+        signal: undefined,
       })
 
-      return { panel }
+      panel.webview.postMessage({ id, data: result })
+    }
+    catch (error) {
+      console.log(error)
+      if (error instanceof TRPCError) {
+        vscode.window.showErrorMessage(String(error.cause))
+      }
+      else if (error instanceof Error) {
+        vscode.window.showErrorMessage(String(error))
+      }
+      panel.webview.postMessage({
+        id,
+        error: error instanceof Error ? error.message : null,
+      })
+    }
+  })
+
+  const controller = {
+    htmlUpdaterPort,
+    flushPatches: () => {
+      panel.webview.postMessage({ flushPatches: true })
     },
+
+    /**
+     * Tell the webview that the debugger has restarted
+     * i.e. to refresh the replicated UI.
+     */
+    notifyDebuggerRestarted: () => {
+      panel.webview.postMessage({ debuggerRestarted: true })
+    },
+    notifyRecorderEditPerformed: () => {
+      panel?.webview.postMessage({ recorderEditPerformed: true })
+    },
+
     dispose() {
       htmlUpdaterServer.close()
-      panel?.dispose()
-      onPanelMessage?.dispose()
+      panel.dispose()
+      onPanelMessage.dispose()
     },
   }
+
+  const ctx: PanelRouterCtx = {
+    debuggerTracker,
+    storage,
+    flushPatches: controller.flushPatches,
+    setWebviewIsReady,
+    recorderCodeGenSession,
+  }
+
+  return controller
 }

@@ -36,16 +36,30 @@ describe('detectTestFramework', () => {
     })
   })
 
-  it('detects Jest config in a Next.js project', async () => {
+  it('detects Jest config in a Next.js + ts-node project', async () => {
     const result = await detectTestFramework(
       path.join(
         examplesPath,
-        'jest-nextjs/app/counter.test.tsx',
+        'jest-nextjs-ts-node/app/counter.test.tsx',
       ),
       'autodetect',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'jest-nextjs/jest.config.ts'),
+      configPath: path.join(examplesPath, 'jest-nextjs-ts-node/jest.config.ts'),
+      framework: 'jest',
+    })
+  })
+
+  it('detects Jest config in a Next.js project', async () => {
+    const result = await detectTestFramework(
+      path.join(
+        examplesPath,
+        'jest-nextjs-minimal/app/counter.test.tsx',
+      ),
+      'autodetect',
+    )
+    expect(result).toEqual({
+      configPath: path.join(examplesPath, 'jest-nextjs-minimal/jest.config.ts'),
       framework: 'jest',
     })
   })
@@ -61,6 +75,20 @@ describe('detectTestFramework', () => {
     expect(result).toEqual({
       configPath: path.join(examplesPath, 'vitest-react-tailwind4/vite.config.ts'),
       framework: 'vitest',
+    })
+  })
+
+  it('detects bun.lock file', async () => {
+    const result = await detectTestFramework(
+      path.join(
+        examplesPath,
+        'bun-react/test/basic.test.tsx',
+      ),
+      'autodetect',
+    )
+    expect(result).toEqual({
+      configPath: path.join(examplesPath, 'bun-react/bun.lock'),
+      framework: 'bun',
     })
   })
 
@@ -107,6 +135,20 @@ describe('detectTestFramework', () => {
     })
   })
 
+  it('uses Bun when specified', async () => {
+    const result = await detectTestFramework(
+      path.join(
+        examplesPath,
+        'bun-react/test/basic.test.tsx',
+      ),
+      'bun',
+    )
+    expect(result).toEqual({
+      configPath: path.join(examplesPath, 'bun-react/bun.lock'),
+      framework: 'bun',
+    })
+  })
+
   it('throws when vitest detection fails', async () => {
     await expect(
       detectTestFramework(
@@ -146,6 +188,6 @@ describe('detectTestFramework', () => {
         examplesPath, // some folder without a test framework
         'autodetect',
       ),
-    ).rejects.toThrow('No Vitest or Jest config found')
+    ).rejects.toThrow('Test framework auto-detection failed. Requires Vitest or Jest config, or a Bun lockfile. Or manually specify the test framework in the extension\'s settings.')
   })
 })
