@@ -145,9 +145,10 @@ async function startTest(
 
 async function startWebView(extensionContext: vscode.ExtensionContext, currentSession: vscode.DebugSession) {
   const env = currentSession.configuration.env
-  if (!env.UI_TEST_VISUALIZER_DATA) {
+  if (!env?.UI_TEST_VISUALIZER_DATA) {
     return
   }
+
   const [
     testFile,
     startAndEndLines,
