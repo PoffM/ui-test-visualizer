@@ -87,6 +87,9 @@ export async function generateCode(
     if (testFramework === 'vitest') {
       requiredImports[expect] = testFramework
     }
+    if (testFramework === 'bun') {
+      requiredImports[expect] = 'bun:test'
+    }
   }
   // Otherwise, generate a userEvent call
   else {
@@ -167,9 +170,9 @@ export async function generateCode(
     // which fail when running through the debugger's 'evaluate' request.
     if (from === '@testing-library/user-event') {
       from = path.join(__dirname, 'user-event-13.js')
-      return `const ${importName} = require('${from}').default;`
+      return `const ${importName} = globalThis.require('${from}').default;`
     }
-    return `const { ${importName} } = require('${from}');`
+    return `const { ${importName} } = globalThis.require('${from}');`
   }).join('\n')
 
   // The fireEvent or userEvent statement to run in the debugger.
@@ -179,7 +182,7 @@ export async function generateCode(
 
     // When writing react tests with userEvent v13, wrap in 'act'.
     if (testLibrary === '@testing-library/react' && useUserEvent) {
-      return `require('react').act(() => { ${result} });`
+      return `globalThis.require('react').act(() => { ${result} });`
     }
     return result
   })()

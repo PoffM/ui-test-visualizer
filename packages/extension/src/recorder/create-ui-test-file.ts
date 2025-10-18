@@ -99,9 +99,11 @@ export async function createUiTestFile() {
 
   const relativePathToSrc = path.relative(currentDir, doc.fileName).replace(/\.[jt]sx?$/, '')
 
+  const fwImport = frameworkInfo.framework === 'bun' ? 'bun:test' : frameworkInfo.framework
+
   // Create basic test content
   const isArrowRender = testingLibrary === '@solidjs/testing-library'
-  const testContent = `import { describe, it } from '${frameworkInfo.framework}'
+  const testContent = `import { describe, it } from '${fwImport}'
 import { render } from '${testingLibrary}'
 import ${isDefaultExport ? exportName : `{ ${exportName} }`} from './${relativePathToSrc}'
 

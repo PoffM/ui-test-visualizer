@@ -1,6 +1,7 @@
 // Run this script at the beginning of the test process
 
 import { log, error as logError } from 'node:console'
+import { createRequire } from 'node:module'
 import { initPrimaryDom, serializeDomNode } from 'replicate-dom'
 import difference from 'lodash/difference'
 import shadowCss from './shadow.css.txt'
@@ -177,6 +178,10 @@ if (process.env.TEST_FRAMEWORK === 'vitest') {
 if (process.env.TEST_FRAMEWORK === 'jest') {
   module.exports = preTest
 }
+
+// Make 'require' available in debug expressions for the recorder.
+// May be undefined when running in Bun and Jest.
+globalThis.require ??= createRequire(process.env.TEST_FILE_PATH!)
 
 function validateStringArray(value: unknown): string[] | null {
   if (!Array.isArray(value)) {

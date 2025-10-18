@@ -140,6 +140,9 @@ export function RecorderPanel() {
               </div>
             )}
           </For>
+          <div>
+            <h2 class="text-lg font-semibold mb-1">Alt+Click to generate 'expect' statement</h2>
+          </div>
         </div>
       </div>
     </div>
