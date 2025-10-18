@@ -84,6 +84,7 @@ export async function startPanelController(
         <head>
           <link rel="icon" type="image/svg+xml" href="${icon}" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta http-equiv="Content-Security-Policy" content="form-action 'none';">
           <script type="module" crossorigin src="${appJs}"></script>
           <link rel="stylesheet" crossorigin href="${appCss}">
         </head>
