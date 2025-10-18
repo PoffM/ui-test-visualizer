@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/PoffM/ui-test-visualizer.git"
   },
-  "version": "1.3.0",
+  "version": "1.3.1",
   "private": true,
   "description": "Visually step through your jsdom or happy-dom based UI tests with the debugger.",
   "author": "poffm",

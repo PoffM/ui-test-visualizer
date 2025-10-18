@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.3.1
+
+### Patch Changes
+
+- 0227469: Fix restart behavior and startup race condition bug with Bun test runner
+
 ## 1.3.0
 
 ### Minor Changes
