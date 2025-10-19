@@ -85,7 +85,7 @@
     ]
   },
   "scripts": {
-    "prepare": "which bun && bun install --cwd ./examples/bun-react || true",
+    "prepare": "which bun && (bun install --cwd ./examples/bun-react) && (bun install --cwd ./examples/bun-solid)",
     "dev": "rm -rf build-dev && pnpm run -r dev",
     "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
     "lint": "tsc",

@@ -90,12 +90,23 @@
       "sourceMaps": true
     },
     {
-      "name": "Bun Test Runner Example",
+      "name": "Bun + React Example",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
         "${workspaceFolder}/examples/bun-react"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
+      "name": "Bun + Solid Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "${workspaceFolder}/examples/bun-solid"
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true
