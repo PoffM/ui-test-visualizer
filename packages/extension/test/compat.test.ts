@@ -90,28 +90,6 @@ describe('tool compatibility', async () => {
   let fakeHtmlUpdaterServer: WsServer
 
   beforeAll(async () => {
-    // These tests require the "build-prod" folder to exist
-    {
-      const buildDir = await findUp(
-        'build-prod',
-        { cwd: examplesPath, type: 'directory' },
-      )
-      if (!buildDir) {
-        const pnpmLock = await findUp(
-          'pnpm-lock.yaml',
-          { cwd: __dirname },
-        )
-        if (!pnpmLock) {
-          throw new Error(`Could not find project root from ${__dirname}`)
-        }
-        console.log('These tests requires the "build-prod" folder to exist. Building it...')
-        await execa({
-          cwd: path.dirname(pnpmLock),
-          stdout: ['pipe', 'inherit'],
-        })`pnpm run build`
-      }
-    }
-
     htmlUpdaterPort = await getPort()
     fakeHtmlUpdaterServer = new Server({ port: htmlUpdaterPort })
 
