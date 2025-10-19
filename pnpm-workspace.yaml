@@ -1,5 +1,4 @@
 packages:
   - .
   - 'packages/*'
-  - examples/!(bun-react)
-  - examples/!(bun-solid)
+  - examples/!(bun-react|bun-solid)
