@@ -1,15 +1,15 @@
+FROM node:22.20.0 AS node-stage
+FROM oven/bun:1.3.0 AS bun-stage
+
 FROM codercom/code-server:4.104.2
 
-ENV NODE_VERSION=22.20.0
-# installs NVM (Node Version Manager)
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-ENV NVM_DIR=/home/coder/.nvm
+# Copy Node and Bun from their stages
+COPY --from=bun-stage /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=node-stage /usr/local /usr/local
 
 USER coder
 
-# download and install Node.js
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+# Install Bun VSCode extension
+RUN code-server --install-extension oven.bun-vscode@0.0.31
 
 COPY --chown=coder ./.vscode/settings.json /home/coder/.local/share/code-server/User/settings.json

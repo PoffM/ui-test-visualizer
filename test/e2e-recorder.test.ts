@@ -62,8 +62,12 @@ test('Record a UI test, Vitest + React + Tailwind4', async ({ browser }) => {
   await runRecorderTest(browser, 'vitest-react-tailwind4', true)
 })
 
-test('Record a UI test, Jest + React + Tailwind4', async ({ browser }) => {
+test('Record a UI test, Jest + React', async ({ browser }) => {
   await runRecorderTest(browser, 'jest-react')
+})
+
+test('Record a UI test, Bun + Solid', async ({ browser }) => {
+  await runRecorderTest(browser, 'bun-solid', true)
 })
 
 async function runRecorderTest(browser: Browser, exampleFolder: string, dismissStylePrompt = false) {
