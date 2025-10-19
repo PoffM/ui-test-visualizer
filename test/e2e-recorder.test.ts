@@ -1,17 +1,18 @@
 import fs from 'node:fs/promises'
+import type { Browser } from '@playwright/test'
 import { test } from '@playwright/test'
 import path from 'pathe'
 import { DebuggerHelper } from './debugger-helper'
 
 // Undo changes made to the e2e test file that gets edited
-{
-  const e2eTestTestPath = path.join(__dirname, '../examples/vitest-react-tailwind4/test/form-test-for-e2e.test.tsx')
+for (const exampleFolder of ['vitest-react-tailwind4', 'jest-react']) {
+  const e2eTestTestPath = path.join(__dirname, `../examples/${exampleFolder}/test/form-test-for-e2e.test.tsx`)
   let e2eTestTestOriginalContent: string
   test.beforeEach(async () => {
     e2eTestTestOriginalContent = await fs.readFile(e2eTestTestPath, 'utf8')
   })
   test.afterEach(async () => {
-  // Undo changes made to the e2e test file
+    // Undo changes made to the e2e test file
     await fs.writeFile(e2eTestTestPath, e2eTestTestOriginalContent, 'utf8')
   })
 }
@@ -57,10 +58,18 @@ test('Create a UI test file', async ({ browser }) => {
   await page.getByText('render(<FormExample />)').waitFor()
 })
 
-test('Record a UI test', async ({ browser }) => {
+test('Record a UI test, Vitest + React + Tailwind4', async ({ browser }) => {
+  await runRecorderTest(browser, 'vitest-react-tailwind4', true)
+})
+
+test('Record a UI test, Jest + React + Tailwind4', async ({ browser }) => {
+  await runRecorderTest(browser, 'jest-react')
+})
+
+async function runRecorderTest(browser: Browser, exampleFolder: string, dismissStylePrompt = false) {
   const page = await browser.newPage()
 
-  await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react-tailwind4')
+  await page.goto(`http://localhost:8080/?folder=/source/examples/${exampleFolder}`)
 
   // Open form-test-for-e2e.test.tsx
   await page.locator('.search-label').click()
@@ -82,8 +91,10 @@ test('Record a UI test', async ({ browser }) => {
     .frameLocator('iframe.webview.ready')
     .frameLocator('iframe[title="Tested UI"]')
 
-  // Click the OK button on the initial style prompt
-  await replicaPanel.locator('ui-test-visualizer-button[title="Dismiss style prompt"]').click()
+  if (dismissStylePrompt) {
+    // Click the OK button on the initial style prompt
+    await replicaPanel.locator('ui-test-visualizer-button[title="Dismiss style prompt"]').click()
+  }
 
   // Wait until the debugger is paused on breakpoint
   await page.getByText('Paused on breakpoint').waitFor()
@@ -92,7 +103,7 @@ test('Record a UI test', async ({ browser }) => {
   await debugHelper.debugStep()
 
   // Start recording
-  await replicaPanel.getByRole('button', { name: 'Record input as code (Experimental)' }).first().click()
+  await replicaPanel.getByRole('button', { name: 'Record input as code' }).first().click()
 
   // Check that the submission count starts at 0
   await replicaPanel.getByText(`Submit Count: 0`)
@@ -132,4 +143,4 @@ test('Record a UI test', async ({ browser }) => {
   // Check for the generated code in the editor
   await page.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`)
   await page.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`)
-})
+}

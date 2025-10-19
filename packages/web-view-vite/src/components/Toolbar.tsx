@@ -53,7 +53,7 @@ export function Toolbar() {
       <div class="flex">
         <ToolbarButton
           onClick={() => recorder.toggle(!recorder.isRecording())}
-          label={recorder.isRecording() ? 'Stop recording' : 'Record input as code (Experimental)'}
+          label={recorder.isRecording() ? 'Stop recording' : 'Record input as code'}
         >
           <div
             class={`w-4 h-4 rounded-full ${
