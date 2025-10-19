@@ -7,7 +7,7 @@ import type { PanelController } from '../panel-controller/panel-controller'
 import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 import { performEdit } from './perform-edit'
-import { generateCode } from './generate-code'
+import { generateCodeFromInput } from './generate-code-from-input'
 
 export type RecorderCodeGenSession = Awaited<ReturnType<typeof startRecorderCodeGenSession>>
 
@@ -119,7 +119,7 @@ export function startRecorderCodeGenSession(
         return null
       }
 
-      const { code, debugExpression, requiredImports } = await generateCode(
+      const { code, debugExpression, requiredImports } = await generateCodeFromInput(
         editor,
         hasUserEventLib,
         pausedLocation,

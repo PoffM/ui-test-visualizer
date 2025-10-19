@@ -7,7 +7,7 @@ import type { zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebugPauseLocation } from '../util/debugger-tracker'
 import type { SerializedRegexp } from './recorder-codegen-session'
 
-export async function generateCode(
+export async function generateCodeFromInput(
   editor: vscode.TextEditor,
   hasUserEventLib: boolean,
   pausedLocation: DebugPauseLocation,
