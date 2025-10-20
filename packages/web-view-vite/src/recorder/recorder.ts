@@ -141,6 +141,9 @@ export function createRecorder(shadowHost: HTMLDivElement) {
 
           // When the 'alt' key is held while clicking, generate an 'expect' statement
           const useExpect = eventType === 'click' && e instanceof MouseEvent && e.altKey
+          if (useExpect) {
+            e.preventDefault()
+          }
 
           // Send the selector to the extension process to record as code
           const insertions = await client.recordInputAsCode.mutate({
