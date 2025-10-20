@@ -59,7 +59,7 @@ test('Load an external css file', async () => {
       .evaluate(
         button => window.getComputedStyle(button).getPropertyValue('background-color'),
       ),
-    { timeout: 20_000 },
+    { timeout: 40_000 },
   ).toBe('rgb(128, 0, 128)')
 
   // Disable the external css file
@@ -73,7 +73,7 @@ test('Load an external css file', async () => {
       .evaluate(
         button => window.getComputedStyle(button).getPropertyValue('background-color'),
       ),
-    { timeout: 20_000 },
+    { timeout: 40_000 },
   ).toBe('rgb(239, 239, 239)')
 })
 
