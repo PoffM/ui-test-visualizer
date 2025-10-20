@@ -7,6 +7,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@corvu/resizable": "^0.2.5",
     "@kobalte/core": "0.13.11",
     "@kobalte/utils": "^0.9.1",
     "@shikijs/core": "^3.13.0",

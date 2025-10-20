@@ -4,7 +4,7 @@ import Moon from 'lucide-solid/icons/moon'
 import RefreshCw from 'lucide-solid/icons/refresh-cw'
 import Sun from 'lucide-solid/icons/sun'
 import { type ParentProps, Show, createSignal } from 'solid-js'
-import { firstPatchReceived, inspector, recorder, refreshShadow, theme, toggleTheme } from '../App'
+import { firstPatchReceived, openPanel, recorder, refreshShadow, theme, toggleTheme, updateOpenPanel } from '../App'
 import { StyleIcon, StylePicker } from './StylePicker'
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from './solid-ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from './solid-ui/tooltip'
@@ -17,11 +17,11 @@ export function Toolbar() {
       style={{ visibility: firstPatchReceived() ? 'visible' : 'hidden' }}
     >
       <ToolbarButton
-        onClick={inspector.toggle}
+        onClick={() => updateOpenPanel(openPanel() === 'inspector' ? null : 'inspector')}
         label="Toggle Inspector"
       >
         <Code
-          classList={{ 'text-[#75beff]': inspector.isOpen() }}
+          classList={{ 'text-[#75beff]': openPanel() === 'inspector' }}
         />
       </ToolbarButton>
       <ToolbarButton

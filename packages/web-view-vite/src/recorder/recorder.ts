@@ -10,7 +10,7 @@ import type { zRecordedEventData } from '../../../extension/src/panel-controller
 import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
-import { openPanel, setOpenPanel } from '../App'
+import { openPanel, updateOpenPanel } from '../App'
 
 export const USEREVENT_MOUSE_EVENT_TYPES: (keyof typeof userEvent)[] = [
   'click',
@@ -165,7 +165,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
   return {
     isRecording,
     toggle: (recording: boolean) => {
-      setOpenPanel(recording ? 'recorder' : null)
+      updateOpenPanel(recording ? 'recorder' : null)
     },
     removeInsertion: async (line: number, idx?: number) => {
       const newInsertions = await client.removeRecorderInsertion.mutate({ line, idx })

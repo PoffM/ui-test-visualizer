@@ -2,10 +2,10 @@ import { createHighlighterCore } from '@shikijs/core'
 import shikiTypescript from '@shikijs/langs/typescript'
 import shikiDarkPlus from '@shikijs/themes/dark-plus'
 import shikiLightPlus from '@shikijs/themes/light-plus'
+import Info from 'lucide-solid/icons/info'
+import X from 'lucide-solid/icons/x'
 import { createJavaScriptRegexEngine } from 'shiki'
 import { For, Show, Suspense, createResource } from 'solid-js'
-import X from 'lucide-solid/icons/x'
-import Info from 'lucide-solid/icons/info'
 import { recorder } from '../App'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/solid-ui/tooltip'
 import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
@@ -58,7 +58,14 @@ export function RecorderPanel() {
             </div>
           </Show>
           <div class="text-sm flex flex-col gap-2">
-            <For each={Object.entries(recorder.codeInsertions() ?? {})}>{([lineNum, codeLines]) => (
+            <For
+              fallback={(
+                <div class="text-muted-foreground">
+                  None yet
+                </div>
+              )}
+              each={Object.entries(recorder.codeInsertions() ?? {})}
+            >{([lineNum, codeLines]) => (
               <div>
                 <div class="flex items-center gap-1">
                   <ui-test-visualizer-button

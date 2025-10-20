@@ -2,7 +2,7 @@ import ChevronDown from 'lucide-solid/icons/chevron-down'
 import ChevronUp from 'lucide-solid/icons/chevron-up'
 import Search from 'lucide-solid/icons/search'
 import X from 'lucide-solid/icons/x'
-import { inspector } from '../App'
+import { updateOpenPanel } from '../App'
 import { search } from './Inspector'
 import type { InspectedNode } from './inspector-dom-tree'
 
@@ -70,7 +70,7 @@ export function SearchToolbar(props: { tree: InspectedNode }) {
         appearance="icon"
         aria-label="Close inspector"
         title="Close inspector"
-        onClick={() => inspector.toggle()}
+        onClick={() => updateOpenPanel(null)}
       >
         <X class="h-4 w-4" />
       </ui-test-visualizer-button>
