@@ -161,7 +161,10 @@ export async function generateCodeFromInput(
 
   const importCode = Object.entries(requiredImports).map(([importName, from]) => {
     if (from === 'vitest') {
-      from = 'vitest/dist/index.js'
+      // Workaround: we can't import vitest in the debug expressions because it can't be imported with 'require',
+      // so run the global 'expect' function (using `vitest --globals` flag),
+      // but still generate the import code after the recording session.
+      return ''
     }
 
     // user-event v13 is used when running the debug expressions, because it's the last version

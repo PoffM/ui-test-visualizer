@@ -24,6 +24,7 @@ export async function vitestDebugConfig(
       filePath,
       '-t',
       cleanTestNameForTerminal(testName),
+      '--globals', // Needed for the recorder's generated 'expect' statements
       // Use child process instead of the default threads.
       '--pool',
       'forks',
