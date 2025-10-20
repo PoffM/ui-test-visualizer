@@ -17,7 +17,35 @@ This is a VSCode extension: no code changes should be required to watch your UI 
 
 ## Usage
 
+### Visualizing tests
+
 Click the "Visually Debug UI" button above your test. If there's no breakpoint in your test already, the extension will add one automatically. A side panel should open, and render your UI as you step through with the debugger.
+
+### Record Input as Code
+
+You can also write tests by recording your input as you interact with your UI.
+
+**Project Requirements:**
+- Test runner: Vitest, Jest, or Bun
+- Testing libraries:
+  - `@testing-library/react` or `@solidjs/testing-library`
+  - `@testing-library/user-event`
+
+Steps:
+
+- *Optional*: Generate a starter test file for a React or Solid component by right-clicking the component name in the editor (e.g. MyForm) and clicking "Create UI test".
+
+- Click the "Visually Debug UI" button to start your test
+
+- Click "Step Over" until you get your UI into the state where you want to generate new code.
+
+- Click the "Record input as code" button in the side panel, and you'll see the recorder panel appear.
+
+- Click your UI elements, or change text inputs, and the extension will generate code for you to use in your test.
+
+- Alt+click to generate an `expect` statement for that element.
+
+- The generated code is inserted into your test file when the test is ended or restarted.
 
 ## UI Framework Compatibility
 
