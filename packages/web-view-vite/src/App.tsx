@@ -62,7 +62,7 @@ export function App() {
           <Resizable
             orientation="vertical"
             sizes={panelSizes()}
-            onSizesChange={sizes => sizes[1] && updateBottomPanelHeight(sizes[1])}
+            onSizesChange={(sizes: number[]) => sizes[1] && updateBottomPanelHeight(sizes[1])}
           >
             <ResizablePanel class="overflow-y-auto">
               <div class="h-full w-full">
