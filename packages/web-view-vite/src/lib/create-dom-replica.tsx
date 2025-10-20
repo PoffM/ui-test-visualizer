@@ -25,11 +25,16 @@ export function createDomReplica() {
 
   function flushHtmlPatches() {
     for (const patch of patches) {
-      applyDomPatch(
-        shadow,
-        patch,
-        window,
-      )
+      try {
+        applyDomPatch(
+          shadow,
+          patch,
+          window,
+        )
+      }
+      catch (error) {
+        console.error(error)
+      }
     }
     patches = []
   }
