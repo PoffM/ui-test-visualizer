@@ -8,6 +8,7 @@ import { createJavaScriptRegexEngine } from 'shiki'
 import { For, Show, Suspense, createResource } from 'solid-js'
 import { recorder } from '../App'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/solid-ui/tooltip'
+import { Resizable, ResizableHandle, ResizablePanel } from '../components/solid-ui/resizable'
 import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
 
 export function RecorderPanel() {
@@ -48,8 +49,8 @@ export function RecorderPanel() {
   }
 
   return (
-    <div class="flex h-full w-full">
-      <div class="w-1/2 h-full overflow-y-auto p-4 border-r border-[var(--vscode-panel-border)]">
+    <Resizable orientation="horizontal">
+      <ResizablePanel class="overflow-auto p-4">
         <div>
           <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
           <Show when={recorder.hasPendingInputChange()}>
@@ -102,8 +103,9 @@ export function RecorderPanel() {
             </For>
           </div>
         </div>
-      </div>
-      <div class="w-1/2 h-full overflow-y-auto p-4">
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel class="overflow-y-auto p-4">
         <div class="flex flex-col gap-3">
           <For each={[
             { eventTypes: USEREVENT_MOUSE_EVENT_TYPES, name: 'user-event', useUserEvent: true, tooltip: 'Uses @testing-library/user-event' },
@@ -113,7 +115,7 @@ export function RecorderPanel() {
             {section => (
               <div>
                 <div class="flex gap-2">
-                  <h1 class="text-lg font-semibold mb-1">Choose Mouse Event ({section.name})</h1>
+                  <h1 class="text-lg font-semibold whitespace-nowrap mb-1">Choose Mouse Event ({section.name})</h1>
                   <Tooltip>
                     <TooltipTrigger>
                       <Info class="w-5 h-5 mb-1" />
@@ -148,10 +150,10 @@ export function RecorderPanel() {
             )}
           </For>
           <div>
-            <h2 class="text-lg font-semibold mb-1">Alt+Click to generate 'expect' statement</h2>
+            <h2 class="text-lg font-semibold whitespace-nowrap mb-1">Alt+Click to generate 'expect' statement</h2>
           </div>
         </div>
-      </div>
-    </div>
+      </ResizablePanel>
+    </Resizable>
   )
 }
