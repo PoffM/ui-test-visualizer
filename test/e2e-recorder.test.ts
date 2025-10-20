@@ -110,33 +110,36 @@ async function runRecorderTest(browser: Browser, exampleFolder: string, dismissS
   await replicaPanel.getByRole('button', { name: 'Record input as code' }).first().click()
 
   // Check that the submission count starts at 0
-  await replicaPanel.getByText(`Submit Count: 0`)
+  await replicaPanel.getByText(`Submit Count: 0`).waitFor()
 
   // Fill in the first input
   await replicaPanel.getByRole('textbox', { name: 'First input' }).click()
   await replicaPanel.getByRole('textbox', { name: 'First input' }).fill('test input 1')
-  await page.getByText(`await userEvent.type(screen.getByRole('textbox', { name: /^first input$/i }), 'test input 1')`)
 
   // Fill in the second input
   await replicaPanel.getByRole('textbox', { name: 'Second input' }).click()
   await replicaPanel.getByRole('textbox', { name: 'Second input' }).fill('test input 2')
-  await page.getByText(`await userEvent.type(screen.getByRole('textbox', { name: /^second input$/i }), 'test input 2')`)
 
   // Select an option from the select menu
+  await replicaPanel.getByRole('combobox', { name: 'Select menu' }).click()
   await replicaPanel.getByRole('combobox', { name: 'Select menu' }).selectOption('option2')
-  await page.getByText(`await userEvent.selectOptions(screen.getByRole('combobox', { name: /^select menu$/i }), ['option2'])`)
+
+  // Check the code is generated for the userEvent calls
+  await replicaPanel.getByText(`await userEvent.type(screen.getByRole('textbox', { name: /^first input$/i }), 'test input 1')`).waitFor()
+  await replicaPanel.getByText(`await userEvent.type(screen.getByRole('textbox', { name: /^second input$/i }), 'test input 2')`).waitFor()
+  await replicaPanel.getByText(`await userEvent.selectOptions(screen.getByRole('combobox', { name: /^select menu$/i }), ['option2'])`).waitFor()
 
   // Submit the form
   await replicaPanel.getByRole('button', { name: 'Submit' }).click()
-  await page.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`)
+  await replicaPanel.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`).waitFor()
 
   // Alt-click the submit count to generate the `expect` statement
   await replicaPanel.getByText('Submit Count:').click({
     modifiers: ['Alt'],
   })
   // Check that the submission count increased due to the click, which causes the userEvent code to run in the debugger
-  await replicaPanel.getByText(`Submit Count: 1`)
-  await replicaPanel.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`)
+  await replicaPanel.getByText(`Submit Count: 1`).waitFor()
+  await replicaPanel.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`).waitFor()
 
   // Finish the test
   await page.getByRole('button', { name: 'Continue (F5)' }).click()
@@ -145,6 +148,6 @@ async function runRecorderTest(browser: Browser, exampleFolder: string, dismissS
   await page.frameLocator('iframe.webview.ready').locator('iframe[title="Tested UI"]').waitFor({ state: 'detached' })
 
   // Check for the generated code in the editor
-  await page.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`)
-  await page.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`)
+  await page.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`).waitFor()
+  await page.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`).waitFor()
 }
