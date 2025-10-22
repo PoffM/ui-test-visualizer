@@ -83,7 +83,7 @@ export async function generateCodeFromInput(
   // When 'useExpect' is true, generate an 'expect' statement
   if (useExpect) {
     const expect = 'expect'
-    code = `${expect}(${selector}).toBeTruthy()`
+    code = `${expect}(${selector})`
     if (testFramework === 'vitest') {
       requiredImports[expect] = testFramework
     }

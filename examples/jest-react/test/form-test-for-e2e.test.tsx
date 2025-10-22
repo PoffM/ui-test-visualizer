@@ -5,6 +5,6 @@ import { FormExample } from '../components/FormExample'
 describe('form test for e2e test', () => {
   it('basic usage', async () => {
     render(<FormExample />)
-    expect(screen.getByLabelText('First input')).toBeTruthy()
+    expect(screen.getByLabelText('First input'))
   })
 })

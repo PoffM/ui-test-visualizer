@@ -139,7 +139,7 @@ async function runRecorderTest(browser: Browser, exampleFolder: string, dismissS
   })
   // Check that the submission count increased due to the click, which causes the userEvent code to run in the debugger
   await replicaPanel.getByText(`Submit Count: 1`).waitFor()
-  await replicaPanel.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`).waitFor()
+  await replicaPanel.getByText(`expect(screen.getByText(/^submit count: 1$/i))`).waitFor()
 
   // Finish the test
   await page.getByRole('button', { name: 'Continue (F5)' }).click()
@@ -149,5 +149,5 @@ async function runRecorderTest(browser: Browser, exampleFolder: string, dismissS
 
   // Check for the generated code in the editor
   await page.getByText(`await userEvent.click(screen.getByRole('button', { name: /^submit$/i }))`).waitFor()
-  await page.getByText(`expect(screen.getByText(/^submit count: 1$/i)).toBeTruthy()`).waitFor()
+  await page.getByText(`expect(screen.getByText(/^submit count: 1$/i))`).waitFor()
 }

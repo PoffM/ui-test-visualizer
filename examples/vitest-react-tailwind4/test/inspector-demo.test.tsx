@@ -5,7 +5,7 @@ import { Counter } from '../../jest-react/components/Counter'
 it('example ui test to be run within the e2e test', async () => {
   setupUi()
 
-  expect(screen.getByText('Count: 1')).toBeTruthy()
+  expect(screen.getByText('Count: 1'))
 })
 
 function setupUi() {
