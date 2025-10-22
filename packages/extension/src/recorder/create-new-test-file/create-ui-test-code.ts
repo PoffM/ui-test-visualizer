@@ -48,14 +48,12 @@ export function createUITestCode(
   const isArrowRender = testingLibrary === '@solidjs/testing-library'
 
   // Create basic test content
-  const testContent = `import { describe, it } from '${fwImport}'
+  const testContent = `import { test } from '${fwImport}'
 import { render } from '${testingLibrary}'
 import ${isDefaultExport ? exportName : `{ ${exportName} }`} from './${relativePathToSrc}'
 
-describe('${exportName}', () => {
-  it('basic usage', async () => {
-    render(${isArrowRender ? `() => <${exportName} />` : `<${exportName} />`})
-  })
+test('basic usage', async () => {
+  render(${isArrowRender ? `() => <${exportName} />` : `<${exportName} />`})
 })
 `
   return [null, { exportName, testContent }]

@@ -27,14 +27,12 @@ describe('createUITestCode', () => {
     const [_, result] = createUITestCode(input('jest', '@testing-library/react'))
     expect(result).toEqual({
       exportName: 'MyComponent',
-      testContent: `import { describe, it } from 'jest'
+      testContent: `import { test } from 'jest'
 import { render } from '@testing-library/react'
 import { MyComponent } from './my-component'
 
-describe('MyComponent', () => {
-  it('basic usage', async () => {
-    render(<MyComponent />)
-  })
+test('basic usage', async () => {
+  render(<MyComponent />)
 })
 `,
     })
@@ -44,14 +42,12 @@ describe('MyComponent', () => {
     const [_, result] = createUITestCode(input('vitest', '@solidjs/testing-library'))
     expect(result).toEqual({
       exportName: 'MyComponent',
-      testContent: `import { describe, it } from 'vitest'
+      testContent: `import { test } from 'vitest'
 import { render } from '@solidjs/testing-library'
 import { MyComponent } from './my-component'
 
-describe('MyComponent', () => {
-  it('basic usage', async () => {
-    render(() => <MyComponent />)
-  })
+test('basic usage', async () => {
+  render(() => <MyComponent />)
 })
 `,
     })
@@ -61,14 +57,12 @@ describe('MyComponent', () => {
     const [_, result] = createUITestCode(input('bun', '@testing-library/react'))
     expect(result).toEqual({
       exportName: 'MyComponent',
-      testContent: `import { describe, it } from 'bun:test'
+      testContent: `import { test } from 'bun:test'
 import { render } from '@testing-library/react'
 import { MyComponent } from './my-component'
 
-describe('MyComponent', () => {
-  it('basic usage', async () => {
-    render(<MyComponent />)
-  })
+test('basic usage', async () => {
+  render(<MyComponent />)
 })
 `,
     })
