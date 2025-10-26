@@ -50,16 +50,22 @@ export function Toolbar() {
       <div class="h-10 w-10">
         {/* Spacer */}
       </div>
-      <div class="flex">
+      <div class="flex [--button-padding-horizontal:0px] [--button-padding-vertical:0px]">
         <ToolbarButton
           onClick={() => recorder.toggle(!recorder.isRecording())}
           label={recorder.isRecording() ? 'Stop recording' : 'Record input as code'}
         >
-          <div
-            class={`w-4 h-4 rounded-full ${
-                recorder.isRecording() ? 'bg-red-500' : 'bg-gray-400'
-            }`}
-          />
+          <div class="flex flex-col items-center">
+            <div class="font-medium -mt-0.5">REC</div>
+            <div
+              class="w-4 aspect-square rounded-full bg-gray-300"
+              classList={{
+                'bg-red-500': recorder.isRecording(),
+                'bg-gray-400': !recorder.isRecording(),
+              }}
+            >
+            </div>
+          </div>
         </ToolbarButton>
         <Show when={recorder.isRecording()}>
           <Popover
