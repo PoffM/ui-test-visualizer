@@ -1,11 +1,10 @@
 import { expect } from 'vitest'
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
-import FormExample from '../components/FormExample'
+import { FormExample } from '../components/FormExample'
 
 it('renders FormExample with form and non-form sections', async () => {
-  render(<FormExample />)
+  (() => render(<FormExample />))()
 
   // Fill form inputs and submit
   const firstInput = screen.getByLabelText('First input')
