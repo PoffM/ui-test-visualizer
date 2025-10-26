@@ -32,7 +32,7 @@ import { render } from '@testing-library/react'
 import { MyComponent } from './my-component'
 
 test('basic usage', async () => {
-  render(<MyComponent />)
+  (() => render(<MyComponent />))()
 })
 `,
     })
@@ -47,7 +47,7 @@ import { render } from '@solidjs/testing-library'
 import { MyComponent } from './my-component'
 
 test('basic usage', async () => {
-  render(() => <MyComponent />)
+  (() => render(() => <MyComponent />))()
 })
 `,
     })
@@ -62,7 +62,7 @@ import { render } from '@testing-library/react'
 import { MyComponent } from './my-component'
 
 test('basic usage', async () => {
-  render(<MyComponent />)
+  (() => render(<MyComponent />))()
 })
 `,
     })

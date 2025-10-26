@@ -53,7 +53,7 @@ import { render } from '${testingLibrary}'
 import ${isDefaultExport ? exportName : `{ ${exportName} }`} from './${relativePathToSrc}'
 
 test('basic usage', async () => {
-  render(${isArrowRender ? `() => <${exportName} />` : `<${exportName} />`})
+  (() => render(${isArrowRender ? `() => <${exportName} />` : `<${exportName} />`}))()
 })
 `
   return [null, { exportName, testContent }]
