@@ -44,12 +44,12 @@ export function createUITestCode(
   }
 
   const fwImport = frameworkInfo.framework === 'bun' ? 'bun:test' : frameworkInfo.framework
+  const testImport = frameworkInfo.framework === 'jest' ? '' : `import { test } from '${fwImport}'\n`
 
   const isArrowRender = testingLibrary === '@solidjs/testing-library'
 
   // Create basic test content
-  const testContent = `import { test } from '${fwImport}'
-import { render } from '${testingLibrary}'
+  const testContent = `${testImport}import { render } from '${testingLibrary}'
 import ${isDefaultExport ? exportName : `{ ${exportName} }`} from './${relativePathToSrc}'
 
 test('basic usage', async () => {

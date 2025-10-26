@@ -27,8 +27,7 @@ describe('createUITestCode', () => {
     const [_, result] = createUITestCode(input('jest', '@testing-library/react'))
     expect(result).toEqual({
       exportName: 'MyComponent',
-      testContent: `import { test } from 'jest'
-import { render } from '@testing-library/react'
+      testContent: `import { render } from '@testing-library/react'
 import { MyComponent } from './my-component'
 
 test('basic usage', async () => {
