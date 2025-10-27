@@ -72,7 +72,12 @@ export async function generateCodeFromInput(
     if (queryArg0 === 'document') {
       return 'document'
     }
-    return `${screen}.${findMethod}(${queryArgsStr})`
+    let index = ''
+    if (eventData.indexIfMultipleFound !== undefined) {
+      findMethod = findMethod.replace(/^getBy/, 'getAllBy')
+      index = `[${eventData.indexIfMultipleFound}]`
+    }
+    return `${screen}.${findMethod}(${queryArgsStr})${index}`
   })()
 
   let code = ''
@@ -120,6 +125,10 @@ export async function generateCodeFromInput(
       })()
 
       code = `await ${userEvent}.${event}(${selector}${userEventArgs})`
+
+      if (event === 'keydown' && eventData.enterKeyPressed) {
+        code = `await ${userEvent}.keyboard('{enter}')`
+      }
 
       requiredImports[userEvent] = '@testing-library/user-event'
     }

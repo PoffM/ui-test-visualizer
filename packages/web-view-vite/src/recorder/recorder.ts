@@ -1,7 +1,7 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { ReactiveMap } from '@solid-primitives/map'
 import type { EventType, QueryArgs, Suggestion } from '@testing-library/dom'
-import { getSuggestedQuery } from '@testing-library/dom'
+import { getSuggestedQuery, queries } from '@testing-library/dom'
 import type { userEvent } from '@testing-library/user-event'
 import { createEffect, createSignal } from 'solid-js'
 import type { z } from 'zod/mini'
@@ -63,7 +63,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       return
     }
     if (isRecording()) {
-      for (const eventType of ['click', 'submit', 'change'] as const) {
+      for (const eventType of ['click', 'submit', 'change', 'keydown'] as const) {
         makeEventListener(root, eventType, async (e: Event) => {
           let target = e.target
 
@@ -119,10 +119,47 @@ export function createRecorder(shadowHost: HTMLDivElement) {
 
           const eventData: z.infer<typeof zRecordedEventData> = {}
 
-          if (eventType === 'change' && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
-            const text = target.value
-            eventData.text = text
+          // On text input change
+          if (eventType === 'change') {
+            if (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement) {
+              if (target.type === 'text') {
+                const text = target.value
+                eventData.text = text
+              }
+              if (target.type === 'checkbox' || target.type === 'radio') {
+                e.preventDefault()
+                return // generate code for the 'click' event, not 'change'
+              }
+            }
           }
+
+          if (eventType === 'keydown') {
+            if (e instanceof KeyboardEvent && target instanceof HTMLInputElement && e.key === 'Enter') {
+              eventData.enterKeyPressed = true
+              target.blur()
+              await new Promise(resolve => setTimeout(resolve, 0))
+              target.focus()
+            }
+            else {
+              // Ignore other key presses
+              return
+            }
+          }
+
+          // Check if the query returns multiple elements
+          await (async () => {
+            try {
+              const method = `findAllBy${suggestedQuery.queryName}`
+              // @ts-expect-error Method should exist
+              const results = await queries[method](root, ...suggestedQuery.queryArgs)
+              if (results.length > 1) {
+                eventData.indexIfMultipleFound = results.indexOf(target)
+              }
+            }
+            catch (error) {
+              // Do nothing?
+            }
+          })()
 
           const recordedEventType = (() => {
             if (eventType === 'click') {

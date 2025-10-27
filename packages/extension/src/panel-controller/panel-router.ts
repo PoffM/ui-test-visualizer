@@ -20,6 +20,8 @@ const t = initTRPC.context<PanelRouterCtx>().create()
 export const zRecordedEventData = z.object({
   text: z.optional(z.string()), // Used for change events
   options: z.optional(z.array(z.string())), // Used for selectOptions events
+  enterKeyPressed: z.optional(z.boolean()), // Used for Enter keydown events
+  indexIfMultipleFound: z.optional(z.number()), // Used when there are multiple elements for the same query
 })
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
