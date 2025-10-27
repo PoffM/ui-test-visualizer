@@ -59,7 +59,7 @@ export async function jestDebugConfig(
       '--detectOpenHandles',
       // TODO find out why Jest doesn't exit on its own
       '--forceExit',
-      '--colors', // Show green text for the 'pass text' TODO find out why the rest is always red
+      '--colors', // Show green text for the 'pass' text. TODO find out why the rest of the output is red text
     ],
     autoAttachChildProcesses: true,
   }
