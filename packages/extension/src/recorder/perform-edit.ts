@@ -1,10 +1,11 @@
 import { walk } from 'estree-walker'
 import * as vscode from 'vscode'
 import type { PanelController } from '../panel-controller/panel-controller'
+import { getOrOpenEditor } from '../util/util'
 import type { RecorderCodeInsertions } from './recorder-codegen-session'
 
 export async function performEdit(
-  editor: vscode.TextEditor | undefined,
+  filePath: string,
   insertions: RecorderCodeInsertions,
   panelController: PanelController,
 ) {
@@ -13,8 +14,10 @@ export async function performEdit(
     return
   }
 
+  const editor = await getOrOpenEditor(filePath)
+
   if (!editor) {
-    vscode.window.showInformationMessage('No editor found')
+    vscode.window.showErrorMessage(`No editor found for ${filePath.split('/').pop()}`)
     return
   }
 
@@ -40,7 +43,23 @@ export async function performEdit(
     for (const [line, lines] of reverseOrderInsertions) {
       const lineNumber = Number.parseInt(line)
       const position = new vscode.Position(lineNumber - 1, 0)
-      for (const [code, _requiredImports] of lines) {
+      for (let [code, _requiredImports] of lines) {
+        const indent: string = (() => {
+          // Indent should be the longest indentation between the paused line and the previous line.
+          // This is to make sure the right indent is used when paused at the end of the test.
+          // e.g.
+          // test('click button', () => {
+          //   const button = screen.getByRole('button')
+          //   button.click() <-- when paused here, use this line's indent.
+          // }) <-- when paused here, use previous line's indent.
+
+          const line1 = editor.document.lineAt(lineNumber - 1)
+          const line2 = editor.document.lineAt(lineNumber - 2)
+          return [line1, line2].map(it => it.text.match(/^\s*/)?.[0] || '').sort((a, b) => b.length - a.length)[0] || ''
+        })()
+
+        code = `${indent}${code}`
+
         editBuilder.insert(position, code)
       }
     }

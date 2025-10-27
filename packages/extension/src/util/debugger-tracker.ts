@@ -114,7 +114,7 @@ export function startDebuggerTracker(
         return { filePath, lineNumber }
       }
       else {
-        vscode.window.showInformationMessage('No stack frames')
+        vscode.window.showErrorMessage('No stack frames')
         return null
       }
     }

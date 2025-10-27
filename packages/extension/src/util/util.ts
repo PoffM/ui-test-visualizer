@@ -1,3 +1,5 @@
+import * as vscode from 'vscode'
+
 /**
  * Creates a function that is restricted to invoking func once.
  * Repeat calls to the function return the value of the first call.
@@ -27,4 +29,18 @@ export function onceWithPeek<T extends (...args: any[]) => any>(fn: T): {
   }
 
   return wrapper
+}
+
+/**
+ * Returns the editor for the given file path, or opens a new editor if it doesn't exist.
+ */
+export async function getOrOpenEditor(filePath: string) {
+  let editor = vscode.window.visibleTextEditors.find(
+    editor => editor.document.uri.path === filePath,
+  )
+  if (!editor) {
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(filePath))
+    editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One)
+  }
+  return editor
 }

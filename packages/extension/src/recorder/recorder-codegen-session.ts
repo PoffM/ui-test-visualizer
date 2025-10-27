@@ -72,7 +72,7 @@ export function startRecorderCodeGenSession(
 
   async function runPerformEdit() {
     await performEdit(
-      editor,
+      testFile,
       insertions,
       panelController,
     )
@@ -83,8 +83,6 @@ export function startRecorderCodeGenSession(
       runPerformEdit()
     }
   }))
-
-  let editor: vscode.TextEditor | undefined
 
   const hasUserEventLib = (() => {
     try {
@@ -112,17 +110,8 @@ export function startRecorderCodeGenSession(
         return null
       }
 
-      editor = vscode.window.visibleTextEditors.find(
-        editor => editor.document.uri.path === pausedLocation.filePath.toString(),
-      ) ?? editor
-      if (!editor) {
-        return null
-      }
-
       const { code, debugExpression, requiredImports } = await generateCodeFromInput(
-        editor,
         hasUserEventLib,
-        pausedLocation,
         testLibrary,
         testFramework,
         event,

@@ -21,7 +21,7 @@ export async function createUiTestFile() {
   const word = doc.getText(wordRange)
 
   if (!wordRange || !word) {
-    vscode.window.showInformationMessage(
+    vscode.window.showErrorMessage(
       `No valid identifier found. Must be an exported capitalized function name. Got ${word}`,
     )
     return
@@ -40,7 +40,7 @@ export async function createUiTestFile() {
   const testingLibrary = await detectTestLibrary(editor.document.uri.fsPath)
 
   if (!testingLibrary) {
-    vscode.window.showInformationMessage(`Could not detect a testing library for ${editor.document.uri.fsPath}. Supported testing libraries are ${SUPPORTED_TESTING_LIBRARIES.join(', ')}.`)
+    vscode.window.showErrorMessage(`Could not detect a testing library for ${editor.document.uri.fsPath}. Supported testing libraries are ${SUPPORTED_TESTING_LIBRARIES.join(', ')}.`)
     return
   }
 
@@ -57,7 +57,7 @@ export async function createUiTestFile() {
 
   const [error, result] = await createUITestCode({ program, word, frameworkInfo, testingLibrary, relativePathToSrc })
   if (error) {
-    vscode.window.showInformationMessage(error.message)
+    vscode.window.showErrorMessage(error.message)
     return
   }
   const { exportName, testContent } = result
@@ -68,7 +68,7 @@ export async function createUiTestFile() {
   // Check if the test file already exists
   try {
     await vscode.workspace.fs.stat(testFileUri)
-    vscode.window.showInformationMessage(`Test file ${testFileName} already exists.`)
+    vscode.window.showErrorMessage(`Test file ${testFileName} already exists.`)
     return
   }
   catch {

@@ -1,16 +1,12 @@
 import path from 'pathe'
-import type * as vscode from 'vscode'
 import type { z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { zRecordedEventData } from '../panel-controller/panel-router'
-import type { DebugPauseLocation } from '../util/debugger-tracker'
 import type { SerializedRegexp } from './recorder-codegen-session'
 
 export async function generateCodeFromInput(
-  editor: vscode.TextEditor,
   hasUserEventLib: boolean,
-  pausedLocation: DebugPauseLocation,
   testLibrary: TestingLibrary,
   testFramework: SupportedFramework,
 
@@ -151,22 +147,6 @@ export async function generateCodeFromInput(
       requiredImports[fireEvent] = testLibrary
     }
   }
-
-  const indent: string = (() => {
-    // Indent should be the longest indentation between the paused line and the previous line.
-    // This is to make sure the right indent is used when paused at the end of the test.
-    // e.g.
-    // test('click button', () => {
-    //   const button = screen.getByRole('button')
-    //   button.click() <-- when paused here, use this line's indent.
-    // }) <-- when paused here, use previous line's indent.
-
-    const line1 = editor.document.lineAt(pausedLocation.lineNumber - 1)
-    const line2 = editor.document.lineAt(pausedLocation.lineNumber - 2)
-    return [line1, line2].map(it => it.text.match(/^\s*/)?.[0] || '').sort((a, b) => b.length - a.length)[0] || ''
-  })()
-
-  code = `${indent}${code}`
 
   const importCode = Object.entries(requiredImports).map(([importName, from]) => {
     if (from === 'vitest') {
