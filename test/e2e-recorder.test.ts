@@ -1,19 +1,33 @@
 import fs from 'node:fs/promises'
+import { pathToFileURL } from 'node:url'
 import type { Browser } from '@playwright/test'
 import { test } from '@playwright/test'
 import path from 'pathe'
 import { DebuggerHelper } from './debugger-helper'
 
 // Undo changes made to the e2e test file that gets edited
-for (const exampleFolder of ['vitest-react-tailwind4', 'jest-react']) {
+for (const exampleFolder of ['vitest-react-tailwind4', 'jest-react', 'bun-solid']) {
   const e2eTestTestPath = path.join(__dirname, `../examples/${exampleFolder}/test/form-test-for-e2e.test.tsx`)
   let e2eTestTestOriginalContent: string
-  test.beforeEach(async () => {
+  test.beforeAll(async () => {
     e2eTestTestOriginalContent = await fs.readFile(e2eTestTestPath, 'utf8')
   })
   test.afterEach(async () => {
     // Undo changes made to the e2e test file
     await fs.writeFile(e2eTestTestPath, e2eTestTestOriginalContent, 'utf8')
+  })
+}
+
+// Undo changes made to the TodoList.test.tsx file that gets edited
+{
+  const todoListTestPath = path.join(__dirname, '../examples/jest-nextjs-minimal/components/TodoList.test.tsx')
+  let todoListTestOriginalContent: string = ''
+  test.beforeAll(async () => {
+    todoListTestOriginalContent = await fs.readFile(todoListTestPath, 'utf8')
+  })
+  test.afterEach(async () => {
+  // Undo changes made to the TodoList.test.tsx file
+    await fs.writeFile(todoListTestPath, todoListTestOriginalContent, 'utf8')
   })
 }
 
@@ -59,18 +73,67 @@ test('Create a UI test file', async ({ browser }) => {
 })
 
 test('Record a UI test, Vitest + React + Tailwind4', async ({ browser }) => {
-  await runRecorderTest(browser, 'vitest-react-tailwind4', true)
+  await recordFormTest(browser, 'vitest-react-tailwind4', 'form-test-for-e2e.test.tsx', true)
 })
 
 test('Record a UI test, Jest + React', async ({ browser }) => {
-  await runRecorderTest(browser, 'jest-react')
+  test.skip(!!process.env.CI, 'Rely on the other Jest + React recorder test to save time in CI')
+  await recordFormTest(browser, 'jest-react', 'form-test-for-e2e.test.tsx')
 })
 
 test('Record a UI test, Bun + Solid', async ({ browser }) => {
-  await runRecorderTest(browser, 'bun-solid', true)
+  await recordFormTest(browser, 'bun-solid', 'form-test-for-e2e.test.tsx', true)
 })
 
-async function runRecorderTest(browser: Browser, exampleFolder: string, dismissStylePrompt = false) {
+test('Record TodoList test, Jest + React', async ({ browser }) => {
+  const { page, replicaPanel } = await startRecorderTest(browser, 'jest-nextjs-minimal', 'TodoList.test.tsx', true)
+
+  // Add todos
+  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).click()
+  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 1')
+  await page.keyboard.press('Enter')
+  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 2')
+  await page.keyboard.press('Enter')
+  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 3')
+  await page.keyboard.press('Enter')
+
+  // Initial text
+  await replicaPanel.getByText('0 done').waitFor()
+  await replicaPanel.getByText('3 in progress').waitFor()
+
+  // Toggle todos
+  await replicaPanel.getByRole('checkbox', { name: 'Toggle done' }).nth(1).check()
+  await replicaPanel.getByRole('checkbox', { name: 'Toggle done' }).nth(2).check()
+  await replicaPanel.getByText('2 done').waitFor()
+  await replicaPanel.getByText('1 in progress').waitFor()
+
+  // Delete todos
+  await replicaPanel.getByRole('button', { name: 'Delete' }).first().click()
+  await replicaPanel.getByRole('button', { name: 'Delete' }).nth(1).click()
+  await replicaPanel.getByText('1 done').waitFor()
+  await replicaPanel.getByText('0 in progress').waitFor()
+
+  // Generate 'expect' statements
+  await replicaPanel.getByText(/^1 done$/).first().click({
+    modifiers: ['Alt'],
+  })
+  await replicaPanel.getByText(/^0 in progress$/).first().click({
+    modifiers: ['Alt'],
+  })
+
+  // End the test
+  await page.getByRole('button', { name: 'Continue (F5)' }).click()
+
+  // Wait for replica panel to be closed
+  await page.frameLocator('iframe.webview.ready').locator('iframe[title="Tested UI"]').waitFor({ state: 'detached' })
+
+  // Check for the generated code in the editor; Make sure indexes are used for the checkboxes and buttons
+  await page.getByText(`await userEvent.click(screen.getAllByRole('checkbox', { name: /^toggle done$/i })[1])`).waitFor()
+  await page.getByText(`await userEvent.click(screen.getAllByRole('button', { name: /^delete$/i })[0])`).waitFor()
+  await page.getByText(`expect(screen.getByText(/^1 done$/i))`).waitFor()
+})
+
+async function startRecorderTest(browser: Browser, exampleFolder: string, testFileSearch: string, dismissStylePrompt = false) {
   const page = await browser.newPage()
 
   await page.goto(`http://localhost:8080/?folder=/source/examples/${exampleFolder}`)
@@ -78,7 +141,7 @@ async function runRecorderTest(browser: Browser, exampleFolder: string, dismissS
   // Open form-test-for-e2e.test.tsx
   await page.locator('.search-label').click()
   await page.locator('.monaco-findInput > .monaco-inputbox > .ibwrapper > .input').clear()
-  await page.locator('.monaco-findInput > .monaco-inputbox > .ibwrapper > .input').type('form-test-for-e2e.test.tsx')
+  await page.locator('.monaco-findInput > .monaco-inputbox > .ibwrapper > .input').type(testFileSearch)
   await page.locator('.highlight').first().click()
 
   // Hide the bottom panel to get more space
@@ -108,6 +171,22 @@ async function runRecorderTest(browser: Browser, exampleFolder: string, dismissS
 
   // Start recording
   await replicaPanel.getByRole('button', { name: 'Record input as code' }).first().click()
+
+  return { page, replicaPanel, debugHelper }
+}
+
+async function recordFormTest(
+  browser: Browser,
+  exampleFolder: string,
+  testFileSearch: string,
+  dismissStylePrompt = false,
+) {
+  const { page, replicaPanel } = await startRecorderTest(
+    browser,
+    exampleFolder,
+    testFileSearch,
+    dismissStylePrompt,
+  )
 
   // Check that the submission count starts at 0
   await replicaPanel.getByText(`Submit Count: 0`).waitFor()

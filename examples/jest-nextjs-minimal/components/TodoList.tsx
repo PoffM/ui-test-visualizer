@@ -34,7 +34,7 @@ export function TodoList() {
         <h1 className="text-2xl font-medium text-white">Todos</h1>
         <div className="text-sm text-gray-400 mt-1 space-y-0.5">
           <div>{doneCount} done</div>
-          <div>{notDoneCount} not done</div>
+          <div>{notDoneCount} in progress</div>
         </div>
       </div>
 
@@ -62,6 +62,7 @@ export function TodoList() {
               checked={todo.completed}
               onChange={() => toggleTodo(todo.id)}
               className="h-4 w-4 rounded border-gray-600 cursor-pointer"
+              aria-label="Toggle done"
             />
             <span className={`flex-1 text-sm ${todo.completed ? 'line-through text-gray-400' : 'text-white'}`}>
               {todo.text}
@@ -69,6 +70,7 @@ export function TodoList() {
             <button
               onClick={() => deleteTodo(todo.id)}
               className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 flex items-center justify-center hover:bg-muted rounded"
+              aria-label="Delete"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
