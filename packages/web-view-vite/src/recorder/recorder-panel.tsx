@@ -5,10 +5,11 @@ import shikiLightPlus from '@shikijs/themes/light-plus'
 import Info from 'lucide-solid/icons/info'
 import X from 'lucide-solid/icons/x'
 import { createJavaScriptRegexEngine } from 'shiki'
-import { For, Show, Suspense, createResource } from 'solid-js'
+import { For, Show, Suspense, createEffect, createResource, on } from 'solid-js'
+import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
 import { recorder } from '../App'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../components/solid-ui/tooltip'
 import { Resizable, ResizableHandle, ResizablePanel } from '../components/solid-ui/resizable'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../components/solid-ui/tooltip'
 import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
 
 export function RecorderPanel() {
@@ -50,7 +51,7 @@ export function RecorderPanel() {
 
   return (
     <Resizable orientation="horizontal">
-      <ResizablePanel class="overflow-auto p-4">
+      <ResizablePanel class="overflow-auto p-4" ref={setupCodePanel}>
         <div>
           <h1 class="text-lg font-semibold mb-2">Generated Code</h1>
           <Show when={recorder.hasPendingInputChange()}>
@@ -156,4 +157,21 @@ export function RecorderPanel() {
       </ResizablePanel>
     </Resizable>
   )
+}
+
+/** When a new code line is added, scroll to it. */
+function setupCodePanel(el: HTMLDivElement) {
+  createEffect(on(recorder.codeInsertions, (current, prev) => {
+    if (current && prev) {
+      for (const lineNum of Object.keys(current)) {
+        const currentLen = current[Number(lineNum)]?.length ?? 0
+        const prevLen = prev[Number(lineNum)]?.length ?? 0
+        if (currentLen > prevLen) {
+          queueMicrotask(() => {
+            el.scrollTop = el.scrollHeight
+          })
+        }
+      }
+    }
+  }))
 }
