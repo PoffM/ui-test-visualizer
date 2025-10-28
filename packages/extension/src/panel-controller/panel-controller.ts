@@ -114,11 +114,11 @@ export async function startPanelController(
     }
     catch (error) {
       console.log(error)
-      if (error instanceof TRPCError) {
-        vscode.window.showErrorMessage(String(error.cause))
+      if (error instanceof TRPCError && error.cause) {
+        vscode.window.showErrorMessage(`Error sending message from webview to extension: ${String(error.cause.message)}`)
       }
       else if (error instanceof Error) {
-        vscode.window.showErrorMessage(String(error))
+        vscode.window.showErrorMessage(`Error sending message from webview to extension: ${error.message}`)
       }
       panel.webview.postMessage({
         id,
