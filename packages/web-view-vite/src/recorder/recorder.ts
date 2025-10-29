@@ -37,7 +37,6 @@ export function createRecorder(shadowHost: HTMLDivElement) {
   function isRecording() {
     return openPanel() === 'recorder'
   }
-  const [mouseEvent, setMouseEvent] = createSignal<EventType>('click')
   const [codeInsertions, setCodeInsertions] = createSignal<RecorderCodeInsertions | undefined>()
 
   // When the edit is performed, clear the recorder UI's insertions state
@@ -142,10 +141,6 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     })()
 
     const recordedEventType = (() => {
-      if (eventType === 'click') {
-        return mouseEvent()
-      }
-
       if (eventType === 'change' && target instanceof HTMLSelectElement) {
         eventData.options = [target.value]
         return 'selectOptions'
@@ -247,8 +242,6 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       const newInsertions = await client.removeRecorderInsertion.mutate({ line, idx })
       setCodeInsertions(newInsertions)
     },
-    mouseEvent,
-    setMouseEvent,
     codeInsertions,
     hasPendingInputChange,
     submitRecorderInputEvent,
