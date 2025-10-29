@@ -6,7 +6,7 @@ import type { userEvent } from '@testing-library/user-event'
 import { createEffect, createSignal } from 'solid-js'
 import type { z } from 'zod/mini'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
-import type { zRecordedEventData } from '../../../extension/src/panel-controller/panel-router'
+import type { ExpectStatementType, zRecordedEventData } from '../../../extension/src/panel-controller/panel-router'
 import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
@@ -60,7 +60,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     target: Element,
     eventType: string,
     { useExpect, enterKeyPressed, useFireEvent }: {
-      useExpect?: boolean
+      useExpect?: ExpectStatementType
       enterKeyPressed?: boolean
       useFireEvent?: boolean
     } = {},
@@ -209,7 +209,11 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             }
           }
 
-          const useExpect = eventType === 'click' && e instanceof MouseEvent && e.altKey
+          // On alt-click, generate the 'minimal' expect statement
+          // e.g. `expect(screen.getByRole('button'))`
+          const useExpect = (eventType === 'click' && e instanceof MouseEvent && e.altKey)
+            ? 'minimal'
+            : undefined
           // When the 'alt' key is held while clicking, generate an 'expect' statement
           if (useExpect) {
             e.preventDefault()

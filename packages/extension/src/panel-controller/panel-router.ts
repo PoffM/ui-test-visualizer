@@ -24,6 +24,9 @@ export const zRecordedEventData = z.object({
   indexIfMultipleFound: z.optional(z.number()), // Used when there are multiple elements for the same query
 })
 
+const zExpectStatementType = z.enum(['minimal'])
+export type ExpectStatementType = z.infer<typeof zExpectStatementType>
+
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
 export const panelRouter = t.router({
   setWebviewIsReady: t.procedure
@@ -205,7 +208,7 @@ export const panelRouter = t.router({
           ]),
         ]),
         // Whether to generate an 'expect' statement
-        useExpect: z.optional(z.boolean()),
+        useExpect: z.optional(zExpectStatementType),
         // Whether to use fireEvent instead of userEvent
         useFireEvent: z.optional(z.boolean()),
       }),
@@ -220,7 +223,7 @@ export const panelRouter = t.router({
         method,
         queryArg0,
         queryOptions,
-        useExpect ?? false,
+        useExpect ?? undefined,
         useFireEvent,
       )
       return recorderCodeGenSession?.insertions

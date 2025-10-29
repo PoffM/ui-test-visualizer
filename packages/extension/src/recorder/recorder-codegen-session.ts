@@ -4,7 +4,7 @@ import path from 'pathe'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { PanelController } from '../panel-controller/panel-controller'
-import type { zRecordedEventData } from '../panel-controller/panel-router'
+import type { ExpectStatementType, zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 import { performEdit } from './perform-edit'
 import { generateCodeFromInput } from './generate-code-from-input'
@@ -102,7 +102,7 @@ export function startRecorderCodeGenSession(
       findMethod: string,
       queryArg0: string | SerializedRegexp,
       queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
-      useExpect: boolean,
+      useExpect: ExpectStatementType | undefined,
       useFireEvent: boolean | undefined,
     ): Promise<[number, string] | null> => {
       const pausedLocation = await debuggerTracker.getPausedLocation()

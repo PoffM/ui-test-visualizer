@@ -1,6 +1,7 @@
 import type { JSX } from 'solid-js'
 import { For, createSignal } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
+import type { ExpectStatementType } from '../../../extension/src/panel-controller/panel-router'
 import { recorder, shadowHost } from '../App'
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuGroupLabel, ContextMenuItem, ContextMenuPortal, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '../components/solid-ui/context-menu'
 import { deepElementFromPoint } from '../inspector/util'
@@ -35,7 +36,7 @@ function RecorderContextMenu(
   async function submitRecorderInputEvent(
     eventType: string,
     { useExpect, useFireEvent }: {
-      useExpect?: boolean
+      useExpect?: ExpectStatementType
       useFireEvent?: boolean
     },
   ) {
@@ -60,15 +61,19 @@ function RecorderContextMenu(
           {/* 'Expect' statements */}
           <ContextMenuGroup>
             <ContextMenuGroupLabel>'Expect' Statement</ContextMenuGroupLabel>
-            <ContextMenuItem
-              onClick={() => submitRecorderInputEvent(
-                'click',
-                { useExpect: true },
+            <For each={EXPECT_STATEMENTS}>
+              {statement => (
+                <ContextMenuItem
+                  onClick={() => submitRecorderInputEvent(
+                    'click',
+                    { useExpect: statement.type },
+                  )}
+                >
+                  <span>{statement.title}</span>
+                  {statement.shortcut && <ContextMenuShortcut>{statement.shortcut}</ContextMenuShortcut>}
+                </ContextMenuItem>
               )}
-            >
-              <span>expect(element)</span>
-              <ContextMenuShortcut>Alt+Click</ContextMenuShortcut>
-            </ContextMenuItem>
+            </For>
           </ContextMenuGroup>
           <ContextMenuSeparator />
 
@@ -103,3 +108,11 @@ function RecorderContextMenu(
     </ContextMenu>
   )
 }
+
+const EXPECT_STATEMENTS: { title: string, type: ExpectStatementType, shortcut?: JSX.Element }[] = [
+  {
+    title: 'expect(element)',
+    type: 'minimal',
+    shortcut: 'Alt+Click',
+  },
+]

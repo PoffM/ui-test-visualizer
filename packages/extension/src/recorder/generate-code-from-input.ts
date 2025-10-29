@@ -2,7 +2,7 @@ import path from 'pathe'
 import type { z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
-import type { zRecordedEventData } from '../panel-controller/panel-router'
+import type { ExpectStatementType, zRecordedEventData } from '../panel-controller/panel-router'
 import type { SerializedRegexp } from './recorder-codegen-session'
 
 export async function generateCodeFromInput(
@@ -16,7 +16,7 @@ export async function generateCodeFromInput(
   queryArg0: string | SerializedRegexp,
   queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
 
-  useExpect: boolean,
+  useExpect: ExpectStatementType | undefined,
   useFireEvent: boolean | undefined,
 ) {
   const parsedQueryOptions = queryOptions && Object.entries(queryOptions).reduce(
@@ -81,10 +81,19 @@ export async function generateCodeFromInput(
     [screen]: testLibrary,
   }
 
-  // When 'useExpect' is true, generate an 'expect' statement
+  // When 'useExpect' is defined, generate an 'expect' statement
   if (useExpect) {
     const expect = 'expect'
-    code = `${expect}(${selector})`
+
+    // Generate an 'expect' statement based on the selected type
+    code = (() => {
+      switch (useExpect) {
+        case 'minimal':
+        default:
+          return `${expect}(${selector})`
+      }
+    })()
+
     if (testFramework === 'vitest') {
       requiredImports[expect] = testFramework
     }
