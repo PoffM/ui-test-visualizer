@@ -17,7 +17,7 @@ export async function generateCodeFromInput(
   queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
 
   useExpect: boolean,
-  useUserEvent: boolean,
+  useFireEvent: boolean | undefined,
 ) {
   const parsedQueryOptions = queryOptions && Object.entries(queryOptions).reduce(
     (result, entry) => {
@@ -94,7 +94,25 @@ export async function generateCodeFromInput(
   }
   // Otherwise, generate a userEvent call
   else {
-    if (useUserEvent) {
+    if (useFireEvent) {
+      const fireEvent = 'fireEvent'
+
+      const fireEventArgs = (() => {
+        if (event === 'change' && eventData.text) {
+          const value = eventData.text.replace(/'/g, '\\\'')
+          return `, { target: { value: '${value}' } }`
+        }
+        if (event === 'selectOptions' && eventData.options) {
+          return `, { target: { value: '${eventData.options[0]}' } }`
+        }
+        return ''
+      })()
+
+      code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
+
+      requiredImports[fireEvent] = testLibrary
+    }
+    else {
       if (!hasUserEventLib) {
         throw new Error('Cannot use userEvent without @testing-library/user-event installed')
       }
@@ -128,24 +146,6 @@ export async function generateCodeFromInput(
 
       requiredImports[userEvent] = '@testing-library/user-event'
     }
-    else {
-      const fireEvent = 'fireEvent'
-
-      const fireEventArgs = (() => {
-        if (event === 'change' && eventData.text) {
-          const value = eventData.text.replace(/'/g, '\\\'')
-          return `, { target: { value: '${value}' } }`
-        }
-        if (event === 'selectOptions' && eventData.options) {
-          return `, { target: { value: '${eventData.options[0]}' } }`
-        }
-        return ''
-      })()
-
-      code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
-
-      requiredImports[fireEvent] = testLibrary
-    }
   }
 
   const importCode = Object.entries(requiredImports).map(([importName, from]) => {
@@ -173,7 +173,7 @@ export async function generateCodeFromInput(
     const result = code.replace(/\s*await/, '') // No 'awaits' allowed in debug expressions
 
     // When writing react tests with userEvent v13, wrap in 'act'.
-    if (testLibrary === '@testing-library/react' && useUserEvent) {
+    if (testLibrary === '@testing-library/react' && !useFireEvent) {
       return `globalThis.require('react').act(() => { ${result} });`
     }
     return result

@@ -32,7 +32,7 @@ export function TodoList() {
     <div className="flex justify-center">
       <div className="w-full max-w-md">
         <div className="mb-8">
-          <h1 className="text-2xl font-medium text-white">Todos</h1>
+          <h1 className="text-2xl font-medium text-white">Todo List</h1>
           <div className="text-sm text-gray-400 mt-1 space-y-0.5">
             <div>{doneCount} done</div>
             <div>{notDoneCount} in progress</div>
@@ -83,7 +83,7 @@ export function TodoList() {
         </div>
 
         {todos.length === 0 && (
-          <p className="text-center text-gray-400 text-sm mt-8">No todos yet. Add one to get started.</p>
+          <p aria-label="no-todos-message" className="text-center text-gray-400 text-sm mt-8">No todos yet. Add one to get started.</p>
         )}
       </div>
     </div>

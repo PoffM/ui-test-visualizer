@@ -8,6 +8,8 @@ import { createColorTheme } from './lib/color-theme'
 import { createDomReplica } from './lib/create-dom-replica'
 import { createRecorder } from './recorder/recorder'
 import { RecorderPanel } from './recorder/recorder-panel'
+import { ContextMenu } from './components/solid-ui/context-menu'
+import { RecorderContextMenuProvider } from './recorder/recorder-context-menu'
 
 // TODO put these into a context provider
 export const [replicaHtmlEl, setReplicaHtmlEl] = createSignal<HTMLHtmlElement>()
@@ -65,9 +67,9 @@ export function App() {
             onSizesChange={(sizes: number[]) => sizes[1] && updateBottomPanelHeight(sizes[1])}
           >
             <ResizablePanel class="overflow-y-auto">
-              <div class="h-full w-full">
+              <RecorderContextMenuProvider class="h-full w-full">
                 {shadowHost}
-              </div>
+              </RecorderContextMenuProvider>
             </ResizablePanel>
             <Show when={openPanel()}>
               <ResizableHandle />

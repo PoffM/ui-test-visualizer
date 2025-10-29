@@ -85,7 +85,8 @@ export function Toolbar() {
               <h1 class="text-lg font-semibold mb-2">Test Recorder Info</h1>
               <ul class="list-disc list-inside space-y-1">
                 <li>'Step Over' with the debugger to where you want to generate new code.</li>
-                <li>Click on an element or change a text input to generate code.</li>
+                <li>Left-click an element or change a text input to generate code.</li>
+                <li>Right-click an element to generate other mouse events.</li>
                 <li>Alt+Click on an element to generate an 'expect' statement.</li>
                 <li>When you end or restart the test, the generated code is inserted into the test file.</li>
                 <li>

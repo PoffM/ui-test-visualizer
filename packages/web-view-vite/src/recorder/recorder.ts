@@ -38,7 +38,6 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     return openPanel() === 'recorder'
   }
   const [mouseEvent, setMouseEvent] = createSignal<EventType>('click')
-  const [useUserEvent, setUseUserEvent] = createSignal(true)
   const [codeInsertions, setCodeInsertions] = createSignal<RecorderCodeInsertions | undefined>()
 
   // When the edit is performed, clear the recorder UI's insertions state
@@ -57,6 +56,118 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     setRootElement(shadowHost.shadowRoot?.children[0] ?? null)
   })
 
+  /** Generate a line of test code for the given user input event. */
+  async function submitRecorderInputEvent(
+    target: Element,
+    eventType: string,
+    { useExpect, enterKeyPressed, useFireEvent }: {
+      useExpect?: boolean
+      enterKeyPressed?: boolean
+      useFireEvent?: boolean
+    } = {},
+  ) {
+    let suggestedQuery: Suggestion | undefined
+
+    /**
+     * Sometimes testing-library can't find a good query to use.
+     * This fn checks if testing-library generated a useful query.
+     */
+    function hasQuery() {
+      if (!suggestedQuery) {
+        return false
+      }
+      if (suggestedQuery.queryArgs[0] === 'document') {
+        return false
+      }
+      return true
+    }
+
+    // Generate the selector using the closest HTMLElement.
+    // e.g. if you click on an SVG, that doesn't count as an HTMLElement,
+    // so step up to the parent.
+    while (!hasQuery() && target) {
+      if (target instanceof HTMLElement) {
+        suggestedQuery = getSuggestedQuery(target)
+      }
+      if (!hasQuery()) {
+        if (target instanceof Element && target.parentElement) {
+          target = target.parentElement
+        }
+        else {
+          return
+        }
+      }
+    }
+
+    if (!hasQuery() || !suggestedQuery) {
+      return
+    }
+
+    const eventData: z.infer<typeof zRecordedEventData> = {}
+    if (enterKeyPressed) {
+      eventData.enterKeyPressed = true
+    }
+
+    // On text input change
+    if (eventType === 'change') {
+      if (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement) {
+        if (target.type === 'text') {
+          const text = target.value
+          eventData.text = text
+        }
+      }
+    }
+
+    const root = rootElement()
+    if (!root) {
+      return
+    }
+
+    // Check if the query returns multiple elements
+    await (async () => {
+      try {
+        const method = `findAllBy${suggestedQuery.queryName}`
+        // @ts-expect-error Method should exist
+        const results = await queries[method](
+          root,
+          ...suggestedQuery.queryArgs,
+        )
+        if (results.length > 1) {
+          eventData.indexIfMultipleFound = results.indexOf(target)
+        }
+      }
+      catch (error) {
+        // Do nothing?
+      }
+    })()
+
+    const recordedEventType = (() => {
+      if (eventType === 'click') {
+        return mouseEvent()
+      }
+
+      if (eventType === 'change' && target instanceof HTMLSelectElement) {
+        eventData.options = [target.value]
+        return 'selectOptions'
+      }
+
+      return eventType
+    })()
+
+    const query = serializeQueryArgs(suggestedQuery.queryArgs)
+
+    // Send the selector to the extension process to record as code
+    const insertions = await client.recordInputAsCode.mutate({
+      event: recordedEventType,
+      query: [suggestedQuery.queryMethod, query],
+      eventData,
+      useExpect,
+      useFireEvent,
+    })
+    setCodeInsertions(insertions)
+  }
+
+  // When recording, listen to events in the shadow root and generate code for them.
   createEffect(() => {
     const root = rootElement()
     if (!root) {
@@ -80,62 +191,19 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             return
           }
 
-          let suggestedQuery: Suggestion | undefined
-
-          /**
-           * Sometimes testing-library can't find a good query to use.
-           * This fn checks if testing-library generated a useful query.
-           */
-          function hasQuery() {
-            if (!suggestedQuery) {
-              return false
-            }
-            if (suggestedQuery.queryArgs[0] === 'document') {
-              return false
-            }
-            return true
+          if (
+            (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement)
+            && (target.type === 'checkbox' || target.type === 'radio')
+            && eventType === 'change'
+          ) {
+            e.preventDefault()
+            return // generate code for the 'click' event, not 'change'
           }
 
-          // Generate the selector using the closest HTMLElement.
-          // e.g. if you click on an SVG, that doesn't count as an HTMLElement,
-          // so step up to the parent.
-          while (!hasQuery() && target) {
-            if (target instanceof HTMLElement) {
-              suggestedQuery = getSuggestedQuery(target)
-            }
-            if (!hasQuery()) {
-              if (target instanceof Element && target.parentElement) {
-                target = target.parentElement
-              }
-              else {
-                return
-              }
-            }
-          }
-
-          if (!hasQuery() || !suggestedQuery) {
-            return
-          }
-
-          const eventData: z.infer<typeof zRecordedEventData> = {}
-
-          // On text input change
-          if (eventType === 'change') {
-            if (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement) {
-              if (target.type === 'text') {
-                const text = target.value
-                eventData.text = text
-              }
-              if (target.type === 'checkbox' || target.type === 'radio') {
-                e.preventDefault()
-                return // generate code for the 'click' event, not 'change'
-              }
-            }
-          }
-
+          let enterKeyPressed = false
           if (eventType === 'keydown') {
             if (e instanceof KeyboardEvent && target instanceof HTMLInputElement && e.key === 'Enter') {
-              eventData.enterKeyPressed = true
+              enterKeyPressed = true
               target.blur()
               await new Promise(resolve => setTimeout(resolve, 0))
               target.focus()
@@ -146,51 +214,13 @@ export function createRecorder(shadowHost: HTMLDivElement) {
             }
           }
 
-          // Check if the query returns multiple elements
-          await (async () => {
-            try {
-              const method = `findAllBy${suggestedQuery.queryName}`
-              // @ts-expect-error Method should exist
-              const results = await queries[method](root, ...suggestedQuery.queryArgs)
-              if (results.length > 1) {
-                eventData.indexIfMultipleFound = results.indexOf(target)
-              }
-            }
-            catch (error) {
-              // Do nothing?
-            }
-          })()
-
-          const recordedEventType = (() => {
-            if (eventType === 'click') {
-              return mouseEvent()
-            }
-
-            if (eventType === 'change' && target instanceof HTMLSelectElement) {
-              eventData.options = [target.value]
-              return 'selectOptions'
-            }
-
-            return eventType
-          })()
-
-          const query = serializeQueryArgs(suggestedQuery.queryArgs)
-
-          // When the 'alt' key is held while clicking, generate an 'expect' statement
           const useExpect = eventType === 'click' && e instanceof MouseEvent && e.altKey
+          // When the 'alt' key is held while clicking, generate an 'expect' statement
           if (useExpect) {
             e.preventDefault()
           }
 
-          // Send the selector to the extension process to record as code
-          const insertions = await client.recordInputAsCode.mutate({
-            event: recordedEventType,
-            query: [suggestedQuery.queryMethod, query],
-            eventData,
-            useExpect,
-            useUserEvent: useUserEvent(),
-          })
-          setCodeInsertions(insertions)
+          await submitRecorderInputEvent(target, eventType, { useExpect, enterKeyPressed })
         })
       }
     }
@@ -198,6 +228,12 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       makeEventListener(root, 'beforeinput', (e) => {
         // Block changing inputs when not recording
         e.preventDefault()
+      })
+      makeEventListener(root, 'click', (e) => {
+        if (e.target instanceof HTMLInputElement) {
+          // Block changing inputs like checkboxes and radios when not recording
+          e.preventDefault()
+        }
       })
     }
   })
@@ -213,10 +249,9 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     },
     mouseEvent,
     setMouseEvent,
-    useUserEvent,
-    setUseUserEvent,
     codeInsertions,
     hasPendingInputChange,
+    submitRecorderInputEvent,
   }
 }
 

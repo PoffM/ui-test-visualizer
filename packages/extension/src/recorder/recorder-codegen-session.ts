@@ -103,7 +103,7 @@ export function startRecorderCodeGenSession(
       queryArg0: string | SerializedRegexp,
       queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
       useExpect: boolean,
-      useUserEvent: boolean,
+      useFireEvent: boolean | undefined,
     ): Promise<[number, string] | null> => {
       const pausedLocation = await debuggerTracker.getPausedLocation()
       if (!pausedLocation) {
@@ -120,7 +120,7 @@ export function startRecorderCodeGenSession(
         queryArg0,
         queryOptions,
         useExpect,
-        useUserEvent,
+        useFireEvent,
       )
 
       await debuggerTracker.runDebugExpression(debugExpression)
