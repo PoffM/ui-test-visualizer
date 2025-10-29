@@ -2,7 +2,7 @@ import type { JSX } from 'solid-js'
 import { For, createSignal } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
 import { recorder, shadowHost } from '../App'
-import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuGroupLabel, ContextMenuItem, ContextMenuPortal, ContextMenuSeparator, ContextMenuTrigger } from '../components/solid-ui/context-menu'
+import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuGroupLabel, ContextMenuItem, ContextMenuPortal, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '../components/solid-ui/context-menu'
 import { deepElementFromPoint } from '../inspector/util'
 import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
 
@@ -32,18 +32,18 @@ function RecorderContextMenu(
     setTargetElement(clickedEl)
   }
 
-  function submitRecorderInputEvent(
+  async function submitRecorderInputEvent(
     eventType: string,
     { useExpect, useFireEvent }: {
       useExpect?: boolean
-      useFireEvent: boolean
+      useFireEvent?: boolean
     },
   ) {
     const target = targetElement()
     if (!target) {
       return
     }
-    recorder.submitRecorderInputEvent(target, eventType, { useExpect, useFireEvent })
+    await recorder.submitRecorderInputEvent(target, eventType, { useExpect, useFireEvent })
   }
 
   return (
@@ -56,7 +56,23 @@ function RecorderContextMenu(
         {props.children}
       </ContextMenuTrigger>
       <ContextMenuPortal>
-        <ContextMenuContent class="w-48">
+        <ContextMenuContent class="w-50">
+          {/* 'Expect' statements */}
+          <ContextMenuGroup>
+            <ContextMenuGroupLabel>'Expect' Statement</ContextMenuGroupLabel>
+            <ContextMenuItem
+              onClick={() => submitRecorderInputEvent(
+                'click',
+                { useExpect: true },
+              )}
+            >
+              <span>expect(element)</span>
+              <ContextMenuShortcut>Alt+Click</ContextMenuShortcut>
+            </ContextMenuItem>
+          </ContextMenuGroup>
+          <ContextMenuSeparator />
+
+          {/* Mouse events */}
           <For each={[
             { eventTypes: USEREVENT_MOUSE_EVENT_TYPES, title: 'Mouse Event (user-event)', useFireEvent: false, tooltip: 'Uses @testing-library/user-event' },
             { eventTypes: FIREEVENT_MOUSE_EVENT_TYPES, title: 'Mouse Event (fireEvent)', useFireEvent: true, tooltip: 'Uses testing-library\'s fireEvent' },

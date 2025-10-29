@@ -56,7 +56,7 @@ function ContextMenuItem<T extends ValidComponent = 'div'>(props: PolymorphicPro
 
 const ContextMenuShortcut: Component<ComponentProps<'span'>> = (props) => {
   const [local, others] = splitProps(props, ['class'])
-  return <span class={cn('ml-auto text-xs tracking-widest opacity-60', local.class)} {...others} />
+  return <span class={cn('ml-auto opacity-60', local.class)} {...others} />
 }
 
 type ContextMenuSeparatorProps<T extends ValidComponent = 'hr'> =
