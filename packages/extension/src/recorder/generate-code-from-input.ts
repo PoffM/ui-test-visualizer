@@ -1,23 +1,21 @@
 import path from 'pathe'
-import type { z } from 'zod/mini'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
-import type { ExpectStatementType, zRecordedEventData } from '../panel-controller/panel-router'
-import type { SerializedRegexp } from './recorder-codegen-session'
+import type { RecordInputAsCodeParams } from './recorder-codegen-session'
 
 export async function generateCodeFromInput(
   hasUserEventLib: boolean,
   testLibrary: TestingLibrary,
   testFramework: SupportedFramework,
-
-  event: string,
-  eventData: z.infer<typeof zRecordedEventData>,
-  findMethod: string,
-  queryArg0: string | SerializedRegexp,
-  queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
-
-  useExpect: ExpectStatementType | undefined,
-  useFireEvent: boolean | undefined,
+  {
+    event,
+    eventData,
+    findMethod,
+    queryArg0,
+    queryOptions,
+    useExpect,
+    useFireEvent,
+  }: RecordInputAsCodeParams,
 ) {
   const parsedQueryOptions = queryOptions && Object.entries(queryOptions).reduce(
     (result, entry) => {

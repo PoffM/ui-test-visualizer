@@ -1,13 +1,13 @@
+import path from 'pathe'
 import * as vscode from 'vscode'
 import * as z from 'zod/mini'
-import path from 'pathe'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { PanelController } from '../panel-controller/panel-controller'
 import type { ExpectStatementType, zRecordedEventData } from '../panel-controller/panel-router'
 import type { DebuggerTracker } from '../util/debugger-tracker'
-import { performEdit } from './perform-edit'
 import { generateCodeFromInput } from './generate-code-from-input'
+import { performEdit } from './perform-edit'
 
 export type RecorderCodeGenSession = Awaited<ReturnType<typeof startRecorderCodeGenSession>>
 
@@ -18,6 +18,16 @@ export const zSerializedRegexp = z.object({
   type: z.literal('regexp'),
   value: z.string(),
 })
+
+export interface RecordInputAsCodeParams {
+  event: string
+  eventData: z.infer<typeof zRecordedEventData>
+  findMethod: string
+  queryArg0: string | SerializedRegexp
+  queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined
+  useExpect: ExpectStatementType | undefined
+  useFireEvent: boolean | undefined
+}
 
 export function startRecorderCodeGenSession(
   testFile: string,
@@ -97,13 +107,7 @@ export function startRecorderCodeGenSession(
   return {
     recordInputAsCode: async (
       debuggerTracker: DebuggerTracker,
-      event: string,
-      eventData: z.infer<typeof zRecordedEventData>,
-      findMethod: string,
-      queryArg0: string | SerializedRegexp,
-      queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
-      useExpect: ExpectStatementType | undefined,
-      useFireEvent: boolean | undefined,
+      recordInputAsCodeParams: RecordInputAsCodeParams,
     ): Promise<[number, string[]] | null> => {
       const pausedLocation = await debuggerTracker.getPausedLocation()
       if (!pausedLocation) {
@@ -114,13 +118,7 @@ export function startRecorderCodeGenSession(
         hasUserEventLib,
         testLibrary,
         testFramework,
-        event,
-        eventData,
-        findMethod,
-        queryArg0,
-        queryOptions,
-        useExpect,
-        useFireEvent,
+        recordInputAsCodeParams,
       )
 
       await debuggerTracker.runDebugExpression(debugExpression)
