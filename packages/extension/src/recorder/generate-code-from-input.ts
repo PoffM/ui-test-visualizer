@@ -1,12 +1,18 @@
-import path from 'pathe'
 import type { SupportedFramework } from '../framework-support/detect-test-framework'
 import type { TestingLibrary } from '../framework-support/detect-test-library'
 import type { RecordInputAsCodeParams } from './recorder-codegen-session'
 
-export async function generateCodeFromInput(
+export interface RecorderGeneratedCode {
+  code: string[]
+  debugExpression: string
+  requiredImports: Record<string, string>
+}
+
+export function generateCodeFromInput(
   hasUserEventLib: boolean,
   testLibrary: TestingLibrary,
   testFramework: SupportedFramework,
+  userEventLibPath: string,
   {
     event,
     eventData,
@@ -16,7 +22,7 @@ export async function generateCodeFromInput(
     useExpect,
     useFireEvent,
   }: RecordInputAsCodeParams,
-) {
+): RecorderGeneratedCode {
   const parsedQueryOptions = queryOptions && Object.entries(queryOptions).reduce(
     (result, entry) => {
       const [key, val] = entry
@@ -172,11 +178,11 @@ export async function generateCodeFromInput(
     // Newer versions use async code e.g. `await userEvent.click(...);`,
     // which fail when running through the debugger's 'evaluate' request.
     if (from === '@testing-library/user-event') {
-      from = path.join(__dirname, 'user-event-13.js')
+      from = userEventLibPath
       return `const ${importName} = globalThis.require('${from}').default;`
     }
     return `const { ${importName} } = globalThis.require('${from}');`
-  }).join('\n')
+  }).filter(Boolean).join('\n')
 
   const code = [mainLine]
 
@@ -188,10 +194,10 @@ export async function generateCodeFromInput(
   // The fireEvent or userEvent statement to run in the debugger.
   // May be slightly different than the code that is actually generated for the user.
   const debugEventStatement = (() => {
-    const result = code.map(line => line.replace(/\s*await/, '')).join('\n') // No 'awaits' allowed in debug expressions
+    const result = code.map(line => line.replace(/\s*await\s*/, '')).join('\n') // No 'awaits' allowed in debug expressions
 
     // When writing react tests with userEvent v13, wrap in 'act'.
-    if (testLibrary === '@testing-library/react' && !useFireEvent) {
+    if (testLibrary === '@testing-library/react' && !useFireEvent && !useExpect) {
       return `globalThis.require('react').act(() => { ${result} });`
     }
     return result

@@ -1,8 +1,8 @@
 import { parseSync } from 'oxc-parser'
 import { describe, expect, it } from 'vitest'
-import type { SupportedFramework } from '../src/framework-support/detect-test-framework'
-import type { TestingLibrary } from '../src/framework-support/detect-test-library'
-import { createUITestCode } from '../src/recorder/create-new-test-file/create-ui-test-code'
+import { createUITestCode } from '../../src/recorder/create-new-test-file/create-ui-test-code'
+import type { SupportedFramework } from '../../src/framework-support/detect-test-framework'
+import type { TestingLibrary } from '../../src/framework-support/detect-test-library'
 
 const program = parseSync('my-component.ts', 'export function MyComponent() {}', {}).program
 

@@ -1,5 +1,4 @@
 import { execa } from 'execa'
-import { findUp } from 'find-up'
 import getPort from 'get-port'
 import path from 'pathe'
 import { beforeAll, describe, expect, it } from 'vitest'

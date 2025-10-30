@@ -24,9 +24,9 @@ export interface RecordInputAsCodeParams {
   eventData: z.infer<typeof zRecordedEventData>
   findMethod: string
   queryArg0: string | SerializedRegexp
-  queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined
-  useExpect: ExpectStatementType | undefined
-  useFireEvent: boolean | undefined
+  queryOptions?: Record<string, string | boolean | SerializedRegexp>
+  useExpect?: ExpectStatementType
+  useFireEvent?: boolean
 }
 
 export function startRecorderCodeGenSession(
@@ -114,10 +114,11 @@ export function startRecorderCodeGenSession(
         return null
       }
 
-      const { code, debugExpression, requiredImports } = await generateCodeFromInput(
+      const { code, debugExpression, requiredImports } = generateCodeFromInput(
         hasUserEventLib,
         testLibrary,
         testFramework,
+        path.join(__dirname, 'user-event-13.js'),
         recordInputAsCodeParams,
       )
 
