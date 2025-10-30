@@ -1,9 +1,10 @@
+import type { inferProcedureInput } from '@trpc/server'
 import type { JSX } from 'solid-js'
 import { For, Show, createSignal } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
-import type { inferProcedureInput } from '@trpc/server'
 import type { ExpectStatementType, PanelRouter } from '../../../extension/src/panel-controller/panel-router'
 import { recorder, shadowHost } from '../App'
+import { HighlightedNode } from '../components/HighlightedNode'
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuGroupLabel, ContextMenuItem, ContextMenuPortal, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '../components/solid-ui/context-menu'
 import { deepElementFromPoint } from '../inspector/util'
 import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
@@ -50,100 +51,120 @@ function RecorderContextMenu(
   }
 
   return (
-    <ContextMenu
-      onOpenChange={isOpen => !isOpen && setTargetElement(null)}
-    >
-      <ContextMenuTrigger
-        class="w-full h-full"
-        // on right click, update the target element
-        onMouseDown={e => e.button === 2 && updateTargetElement(e)}
+    <>
+      <ContextMenu
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setTargetElement(null)
+          }
+
+          // Don't allow the context menu to open if there is no target element
+          if (isOpen && !targetElement()) {
+            // Dispatch 'escape' key press to close the context menu
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+          }
+        }}
       >
-        {props.children}
-      </ContextMenuTrigger>
-      <ContextMenuPortal>
-        <ContextMenuContent class="w-50">
-          {/* 'Expect' statements */}
-          <Show when={targetElement()}>
-            {targetElement => (
-              <ContextMenuGroup>
-                <ContextMenuGroupLabel>'Expect' Statement</ContextMenuGroupLabel>
-                <For each={EXPECT_STATEMENTS}>
-                  {statement => (
-                    <Show when={statement.handler ? statement.handler(targetElement()) : true} keyed>
-                      {processInput => (
-                        <ContextMenuItem
-                          onClick={() => submitRecorderInputEvent(
-                            'click',
-                            {
-                              useExpect: statement.type,
-                              processInput: typeof processInput === 'function' ? processInput : undefined,
-                            },
-                          )}
-                        >
-                          <span>{statement.title}</span>
-                          {statement.shortcut && <ContextMenuShortcut>{statement.shortcut}</ContextMenuShortcut>}
-                        </ContextMenuItem>
-                      )}
-                    </Show>
-                  )}
-                </For>
-              </ContextMenuGroup>
-            )}
-          </Show>
-          <ContextMenuSeparator />
-
-          {/* Mouse events */}
-          <ContextMenuGroup>
-            <ContextMenuGroupLabel>Mouse Event (userEvent)</ContextMenuGroupLabel>
-            <For each={USEREVENT_MOUSE_EVENT_TYPES}>
-              {eventType => (
-                <ContextMenuItem
-                  onClick={() => submitRecorderInputEvent(eventType)}
-                >
-                  <span>{eventType}</span>
-                </ContextMenuItem>
+        <ContextMenuTrigger
+          class="w-full h-full"
+          // on right click, update the target element
+          onMouseDown={e => e.button === 2 && updateTargetElement(e)}
+        >
+          {props.children}
+        </ContextMenuTrigger>
+        <ContextMenuPortal>
+          <ContextMenuContent class="w-50">
+            {/* 'Expect' statements */}
+            <Show when={targetElement()}>
+              {targetElement => (
+                <ContextMenuGroup>
+                  <ContextMenuGroupLabel>'Expect' Statement</ContextMenuGroupLabel>
+                  <For each={EXPECT_STATEMENTS}>
+                    {statement => (
+                      <Show when={statement.handler ? statement.handler(targetElement()) : true} keyed>
+                        {processInput => (
+                          <ContextMenuItem
+                            onClick={() => submitRecorderInputEvent(
+                              'click',
+                              {
+                                useExpect: statement.type,
+                                processInput: typeof processInput === 'function' ? processInput : undefined,
+                              },
+                            )}
+                          >
+                            <span>{statement.title}</span>
+                            {statement.shortcut && <ContextMenuShortcut>{statement.shortcut}</ContextMenuShortcut>}
+                          </ContextMenuItem>
+                        )}
+                      </Show>
+                    )}
+                  </For>
+                </ContextMenuGroup>
               )}
-            </For>
-          </ContextMenuGroup>
+            </Show>
+            <ContextMenuSeparator />
 
-          <ContextMenuSeparator />
-          <ContextMenuSub overlap>
-            <ContextMenuSubTrigger>
-              <span class="text-sm font-semibold whitespace-nowrap">
-                Mouse Event (fireEvent)
-              </span>
-            </ContextMenuSubTrigger>
-            <ContextMenuPortal>
-              <ContextMenuSubContent>
-                <For each={FIREEVENT_MOUSE_EVENT_TYPES}>
-                  {eventType => (
-                    <ContextMenuItem
-                      onClick={() => submitRecorderInputEvent(
-                        eventType,
-                        { useFireEvent: true },
-                      )}
-                    >
-                      <span>{eventType}</span>
-                    </ContextMenuItem>
-                  )}
-                </For>
-              </ContextMenuSubContent>
-            </ContextMenuPortal>
-          </ContextMenuSub>
+            {/* Mouse events */}
+            <ContextMenuGroup>
+              <ContextMenuGroupLabel>Mouse Event (userEvent)</ContextMenuGroupLabel>
+              <For each={USEREVENT_MOUSE_EVENT_TYPES}>
+                {eventType => (
+                  <ContextMenuItem
+                    onClick={() => submitRecorderInputEvent(eventType)}
+                  >
+                    <span>{eventType}</span>
+                  </ContextMenuItem>
+                )}
+              </For>
+            </ContextMenuGroup>
 
-        </ContextMenuContent>
-      </ContextMenuPortal>
-    </ContextMenu>
+            <ContextMenuSeparator />
+            <ContextMenuSub overlap>
+              <ContextMenuSubTrigger>
+                <span class="text-sm font-semibold whitespace-nowrap">
+                  Mouse Event (fireEvent)
+                </span>
+              </ContextMenuSubTrigger>
+              <ContextMenuPortal>
+                <ContextMenuSubContent>
+                  <For each={FIREEVENT_MOUSE_EVENT_TYPES}>
+                    {eventType => (
+                      <ContextMenuItem
+                        onClick={() => submitRecorderInputEvent(
+                          eventType,
+                          { useFireEvent: true },
+                        )}
+                      >
+                        <span>{eventType}</span>
+                      </ContextMenuItem>
+                    )}
+                  </For>
+                </ContextMenuSubContent>
+              </ContextMenuPortal>
+            </ContextMenuSub>
+
+          </ContextMenuContent>
+        </ContextMenuPortal>
+      </ContextMenu>
+      <Show when={targetElement()} keyed>
+        {target => (
+          <HighlightedNode node={target} />
+        )}
+      </Show>
+    </>
   )
 }
+
+type RecorderInputChanger = (input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>
 
 interface ExpectDef {
   title: string
   type: ExpectStatementType
   shortcut?: JSX.Element
-  handler?: (e: Element) => (((input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>) | void) | boolean
+  handler?: (e: Element) => (RecorderInputChanger | void) | boolean
 }
 
+/** Definitions of expect statements you can pick from in the context menu */
 const EXPECT_STATEMENTS: ExpectDef[] = [
   {
     title: 'expect(element)',
