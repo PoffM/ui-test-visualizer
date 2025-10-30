@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises'
-import { pathToFileURL } from 'node:url'
 import type { Browser } from '@playwright/test'
 import { test } from '@playwright/test'
 import path from 'pathe'
@@ -15,19 +14,6 @@ for (const exampleFolder of ['vitest-react-tailwind4', 'jest-react', 'bun-solid'
   test.afterEach(async () => {
     // Undo changes made to the e2e test file
     await fs.writeFile(e2eTestTestPath, e2eTestTestOriginalContent, 'utf8')
-  })
-}
-
-// Undo changes made to the TodoList.test.tsx file that gets edited
-{
-  const todoListTestPath = path.join(__dirname, '../examples/jest-nextjs-minimal/components/TodoList.test.tsx')
-  let todoListTestOriginalContent: string = ''
-  test.beforeAll(async () => {
-    todoListTestOriginalContent = await fs.readFile(todoListTestPath, 'utf8')
-  })
-  test.afterEach(async () => {
-  // Undo changes made to the TodoList.test.tsx file
-    await fs.writeFile(todoListTestPath, todoListTestOriginalContent, 'utf8')
   })
 }
 
@@ -85,52 +71,67 @@ test('Record a UI test, Bun + Solid', async ({ browser }) => {
   await recordFormTest(browser, 'bun-solid', 'form-test-for-e2e.test.tsx', true)
 })
 
-test('Record TodoList test, Jest + React', async ({ browser }) => {
-  const { page, replicaPanel } = await startRecorderTest(browser, 'jest-nextjs-minimal', 'TodoList.test.tsx', true)
+test.describe('Record TodoList test, Jest + React', () => {
+  // Undo changes made to the TodoList.test.tsx file that gets edited
+  {
+    const todoListTestPath = path.join(__dirname, '../examples/jest-nextjs-minimal/components/TodoList.test.tsx')
+    let todoListTestOriginalContent: string = ''
+    test.beforeAll(async () => {
+      todoListTestOriginalContent = await fs.readFile(todoListTestPath, 'utf8')
+    })
+    test.afterEach(async () => {
+      // Undo changes made to the TodoList.test.tsx file
+      await fs.writeFile(todoListTestPath, todoListTestOriginalContent, 'utf8')
+    })
+  }
 
-  // Add todos
-  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).click()
-  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 1')
-  await page.keyboard.press('Enter')
-  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 2')
-  await page.keyboard.press('Enter')
-  await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 3')
-  await page.keyboard.press('Enter')
+  test('Record TodoList test, Jest + React', async ({ browser }) => {
+    const { page, replicaPanel } = await startRecorderTest(browser, 'jest-nextjs-minimal', 'TodoList.test.tsx', true)
 
-  // Initial text
-  await replicaPanel.getByText('0 done').waitFor()
-  await replicaPanel.getByText('3 in progress').waitFor()
+    // Add todos
+    await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).click()
+    await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 1')
+    await page.keyboard.press('Enter')
+    await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 2')
+    await page.keyboard.press('Enter')
+    await replicaPanel.getByRole('textbox', { name: 'Add a new todo' }).fill('todo 3')
+    await page.keyboard.press('Enter')
 
-  // Toggle todos
-  await replicaPanel.getByRole('checkbox', { name: 'Toggle done' }).nth(1).check()
-  await replicaPanel.getByRole('checkbox', { name: 'Toggle done' }).nth(2).check()
-  await replicaPanel.getByText('2 done').waitFor()
-  await replicaPanel.getByText('1 in progress').waitFor()
+    // Initial text
+    await replicaPanel.getByText('0 done').waitFor()
+    await replicaPanel.getByText('3 in progress').waitFor()
 
-  // Delete todos
-  await replicaPanel.getByRole('button', { name: 'Delete' }).first().click()
-  await replicaPanel.getByRole('button', { name: 'Delete' }).nth(1).click()
-  await replicaPanel.getByText('1 done').waitFor()
-  await replicaPanel.getByText('0 in progress').waitFor()
+    // Toggle todos
+    await replicaPanel.getByRole('checkbox', { name: 'Toggle done' }).nth(1).check()
+    await replicaPanel.getByRole('checkbox', { name: 'Toggle done' }).nth(2).check()
+    await replicaPanel.getByText('2 done').waitFor()
+    await replicaPanel.getByText('1 in progress').waitFor()
 
-  // Generate 'expect' statements
-  await replicaPanel.getByText(/^1 done$/).first().click({
-    modifiers: ['Alt'],
+    // Delete todos
+    await replicaPanel.getByRole('button', { name: 'Delete' }).first().click()
+    await replicaPanel.getByRole('button', { name: 'Delete' }).nth(1).click()
+    await replicaPanel.getByText('1 done').waitFor()
+    await replicaPanel.getByText('0 in progress').waitFor()
+
+    // Generate 'expect' statements
+    await replicaPanel.getByText(/^1 done$/).first().click({
+      modifiers: ['Alt'],
+    })
+    await replicaPanel.getByText(/^0 in progress$/).first().click({
+      modifiers: ['Alt'],
+    })
+
+    // End the test
+    await page.getByRole('button', { name: 'Continue (F5)' }).click()
+
+    // Wait for replica panel to be closed
+    await page.frameLocator('iframe.webview.ready').locator('iframe[title="Tested UI"]').waitFor({ state: 'detached' })
+
+    // Check for the generated code in the editor; Make sure indexes are used for the checkboxes and buttons
+    await page.getByText(`await userEvent.click(screen.getAllByRole('checkbox', { name: /^toggle done$/i })[1])`).waitFor()
+    await page.getByText(`await userEvent.click(screen.getAllByRole('button', { name: /^delete$/i })[0])`).waitFor()
+    await page.getByText(`expect(screen.getByText(/^1 done$/i))`).waitFor()
   })
-  await replicaPanel.getByText(/^0 in progress$/).first().click({
-    modifiers: ['Alt'],
-  })
-
-  // End the test
-  await page.getByRole('button', { name: 'Continue (F5)' }).click()
-
-  // Wait for replica panel to be closed
-  await page.frameLocator('iframe.webview.ready').locator('iframe[title="Tested UI"]').waitFor({ state: 'detached' })
-
-  // Check for the generated code in the editor; Make sure indexes are used for the checkboxes and buttons
-  await page.getByText(`await userEvent.click(screen.getAllByRole('checkbox', { name: /^toggle done$/i })[1])`).waitFor()
-  await page.getByText(`await userEvent.click(screen.getAllByRole('button', { name: /^delete$/i })[0])`).waitFor()
-  await page.getByText(`expect(screen.getByText(/^1 done$/i))`).waitFor()
 })
 
 async function startRecorderTest(browser: Browser, exampleFolder: string, testFileSearch: string, dismissStylePrompt = false) {
