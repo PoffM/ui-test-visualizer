@@ -34,6 +34,7 @@ export const zRecordedEventData = z.object({
   options: z.optional(z.array(z.string())), // Used for selectOptions events
   enterKeyPressed: z.optional(z.boolean()), // Used for Enter keydown events
   indexIfMultipleFound: z.optional(z.number()), // Used when there are multiple elements for the same query
+  clearBeforeType: z.optional(z.boolean()), // Clear the input before typing
 })
 
 const zExpectStatementType = z.enum(['minimal', 'toHaveValue', 'toBeEnabled'])

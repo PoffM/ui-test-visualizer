@@ -58,7 +58,7 @@ export async function performEdit(
           return [line1, line2].map(it => it.text.match(/^\s*/)?.[0] || '').sort((a, b) => b.length - a.length)[0] || ''
         })()
 
-        code = `${indent}${code}`
+        code = `${indent}${code}\n`
 
         editBuilder.insert(position, code)
       }

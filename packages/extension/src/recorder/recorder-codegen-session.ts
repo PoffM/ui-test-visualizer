@@ -104,7 +104,7 @@ export function startRecorderCodeGenSession(
       queryOptions: Record<string, string | boolean | SerializedRegexp> | undefined,
       useExpect: ExpectStatementType | undefined,
       useFireEvent: boolean | undefined,
-    ): Promise<[number, string] | null> => {
+    ): Promise<[number, string[]] | null> => {
       const pausedLocation = await debuggerTracker.getPausedLocation()
       if (!pausedLocation) {
         return null
@@ -127,7 +127,9 @@ export function startRecorderCodeGenSession(
       panelController.flushPatches()
 
       // Add the fireEvent code
-      addInsertion(pausedLocation.lineNumber, `${code}\n`, requiredImports)
+      for (const line of code) {
+        addInsertion(pausedLocation.lineNumber, line, requiredImports)
+      }
 
       return [pausedLocation.lineNumber, code] as const
     },

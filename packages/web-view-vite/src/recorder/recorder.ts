@@ -115,6 +115,7 @@ export function createRecorder(shadowHost: HTMLDivElement) {
         if (target.type === 'text') {
           const text = target.value
           eventData.text = text
+          eventData.clearBeforeType = focusedInputHadText
         }
       }
     }
@@ -171,6 +172,8 @@ export function createRecorder(shadowHost: HTMLDivElement) {
     setCodeInsertions(insertions)
   }
 
+  let focusedInputHadText = false
+
   // When recording, listen to events in the shadow root and generate code for them.
   createEffect(() => {
     const root = rootElement()
@@ -178,6 +181,18 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       return
     }
     if (isRecording()) {
+      // Check if a focused input has text before you start typing into it
+      makeEventListener(root, 'focus', (e: Event) => {
+        const target = e.target
+        if (
+          (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)
+          && target.value
+        ) {
+          focusedInputHadText = true
+        }
+      }, { capture: true })
+
+      // Capture input events to be recorded as test code
       for (const eventType of ['click', 'submit', 'change', 'keydown'] as const) {
         makeEventListener(root, eventType, async (e: Event) => {
           let target = e.target

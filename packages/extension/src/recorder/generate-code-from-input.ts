@@ -59,6 +59,9 @@ export async function generateCodeFromInput(
   })()
 
   const screen = 'screen'
+  const fireEvent = 'fireEvent'
+  const userEvent = 'userEvent'
+  const expect = 'expect'
 
   /**
    * e.g. `screen.getByRole('button', { name: 'Submit' })`
@@ -76,17 +79,15 @@ export async function generateCodeFromInput(
     return `${screen}.${findMethod}(${queryArgsStr})${index}`
   })()
 
-  let code = ''
+  let mainLine = ''
   const requiredImports: Record<string, string> = {
     [screen]: testLibrary,
   }
 
   // When 'useExpect' is defined, generate an 'expect' statement
   if (useExpect) {
-    const expect = 'expect'
-
     // Generate an 'expect' statement based on the selected type
-    code = (() => {
+    mainLine = (() => {
       switch (useExpect) {
         case 'toHaveValue': {
           const value = (eventData.text ?? '').replaceAll(/['\\]/g, (match) => {
@@ -111,59 +112,53 @@ export async function generateCodeFromInput(
     }
   }
   // Otherwise, generate a userEvent call
+  else if (useFireEvent) {
+    const fireEventArgs = (() => {
+      if (event === 'change' && eventData.text) {
+        const value = eventData.text.replace(/'/g, '\\\'')
+        return `, { target: { value: '${value}' } }`
+      }
+      if (event === 'selectOptions' && eventData.options) {
+        return `, { target: { value: '${eventData.options[0]}' } }`
+      }
+      return ''
+    })()
+
+    mainLine = `${fireEvent}.${event}(${selector}${fireEventArgs})`
+
+    requiredImports[fireEvent] = testLibrary
+  }
+  else if (!hasUserEventLib) {
+    throw new Error('Cannot use userEvent without @testing-library/user-event installed')
+  }
   else {
-    if (useFireEvent) {
-      const fireEvent = 'fireEvent'
-
-      const fireEventArgs = (() => {
-        if (event === 'change' && eventData.text) {
-          const value = eventData.text.replace(/'/g, '\\\'')
-          return `, { target: { value: '${value}' } }`
+    const userEventArgs = (() => {
+      // When using userEvent with text inputs, the method is either 'type' or 'clear'
+      if (event === 'change' && typeof eventData.text === 'string') {
+        // If the text is empty, use 'clear' instead of 'type'
+        if (eventData.text.length === 0) {
+          event = 'clear'
+          return ''
         }
-        if (event === 'selectOptions' && eventData.options) {
-          return `, { target: { value: '${eventData.options[0]}' } }`
-        }
-        return ''
-      })()
 
-      code = `${fireEvent}.${event}(${selector}${fireEventArgs})`
-
-      requiredImports[fireEvent] = testLibrary
-    }
-    else {
-      if (!hasUserEventLib) {
-        throw new Error('Cannot use userEvent without @testing-library/user-event installed')
+        // Otherwise 'type' the text
+        event = 'type'
+        const value = eventData.text.replace(/'/g, '\\\'')
+        return `, '${value}'`
       }
-      const userEvent = 'userEvent'
-
-      const userEventArgs = (() => {
-        // When using userEvent with text inputs, the method is either 'type' or 'clear'
-        if (event === 'change' && typeof eventData.text === 'string') {
-          // If the text is empty, use 'clear' instead of 'type'
-          if (eventData.text.length === 0) {
-            event = 'clear'
-            return ''
-          }
-
-          // Otherwise 'type' the text
-          event = 'type'
-          const value = eventData.text.replace(/'/g, '\\\'')
-          return `, '${value}'`
-        }
-        if (event === 'selectOptions' && eventData.options) {
-          return `, [${eventData.options.map(it => `'${it.replace(/'/g, '\\\'')}'`).join(', ')}]`
-        }
-        return ''
-      })()
-
-      code = `await ${userEvent}.${event}(${selector}${userEventArgs})`
-
-      if (event === 'keydown' && eventData.enterKeyPressed) {
-        code = `await ${userEvent}.keyboard('{enter}')`
+      if (event === 'selectOptions' && eventData.options) {
+        return `, [${eventData.options.map(it => `'${it.replace(/'/g, '\\\'')}'`).join(', ')}]`
       }
+      return ''
+    })()
 
-      requiredImports[userEvent] = '@testing-library/user-event'
+    mainLine = `await ${userEvent}.${event}(${selector}${userEventArgs})`
+
+    if (event === 'keydown' && eventData.enterKeyPressed) {
+      mainLine = `await ${userEvent}.keyboard('{enter}')`
     }
+
+    requiredImports[userEvent] = '@testing-library/user-event'
   }
 
   const importCode = Object.entries(requiredImports).map(([importName, from]) => {
@@ -185,10 +180,17 @@ export async function generateCodeFromInput(
     return `const { ${importName} } = globalThis.require('${from}');`
   }).join('\n')
 
+  const code = [mainLine]
+
+  // Clear the input before typing when the 'clearBeforeType' flag is set
+  if (event === 'type' && eventData.clearBeforeType) {
+    code.unshift(`await ${userEvent}.clear(${selector})`)
+  }
+
   // The fireEvent or userEvent statement to run in the debugger.
   // May be slightly different than the code that is actually generated for the user.
   const debugEventStatement = (() => {
-    const result = code.replace(/\s*await/, '') // No 'awaits' allowed in debug expressions
+    const result = code.map(line => line.replace(/\s*await/, '')).join('\n') // No 'awaits' allowed in debug expressions
 
     // When writing react tests with userEvent v13, wrap in 'act'.
     if (testLibrary === '@testing-library/react' && !useFireEvent) {

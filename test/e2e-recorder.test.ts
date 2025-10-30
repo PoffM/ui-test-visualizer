@@ -129,7 +129,7 @@ test.describe('Record TodoList test, Jest + React', () => {
 
     // Check for the generated code in the editor; Make sure indexes are used for the checkboxes and buttons
     await page.getByText(`await userEvent.click(screen.getAllByRole('checkbox', { name: /^toggle done$/i })[1])`).waitFor()
-    await page.getByText(`await userEvent.click(screen.getAllByRole('button', { name: /^delete$/i })[0])`).waitFor()
+    await page.getByText(`await userEvent.click(screen.getAllByRole('button', { name: /^delete$/i })[0])`).first().waitFor()
     await page.getByText(`expect(screen.getByText(/^1 done$/i))`).waitFor()
   })
 })
