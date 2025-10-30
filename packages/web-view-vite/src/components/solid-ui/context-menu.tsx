@@ -120,6 +120,7 @@ function ContextMenuSubContent<T extends ValidComponent = 'div'>(props: Polymorp
         'z-50 min-w-32 origin-[var(--kb-menu-content-transform-origin)] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in',
         local.class,
       )}
+      data-ui-test-visualizer-menu-subcontent
       {...others}
     />
   )

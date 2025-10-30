@@ -1,3 +1,4 @@
+import { createInteractOutside } from '@kobalte/core'
 import type { inferProcedureInput } from '@trpc/server'
 import type { JSX } from 'solid-js'
 import { For, Show, createSignal } from 'solid-js'
@@ -27,7 +28,12 @@ function RecorderContextMenu(
   props: { children: JSX.Element, class?: string },
 ) {
   const [targetElement, setTargetElement] = createSignal<Element | null>(null)
-  function updateTargetElement(e: MouseEvent) {
+  function updateTargetElement(e: MouseEvent | null) {
+    if (!e) {
+      setTargetElement(null)
+      return
+    }
+
     const clickedEl = (shadowHost.shadowRoot && deepElementFromPoint(shadowHost.shadowRoot, e.clientX, e.clientY)) ?? e.target
     if (!(clickedEl instanceof Element)) {
       return
@@ -47,23 +53,39 @@ function RecorderContextMenu(
     if (!target) {
       return
     }
+    close()
     await recorder.submitRecorderInputEvent(target, eventType, { useExpect, useFireEvent, processInput })
+  }
+
+  const { setupMenuRef, isOpen, setOpenIfTrue, close } = enableSelectingDifferentNodeWhileMenuIsOpen(
+    updateTargetElement,
+  )
+
+  function submitExpectStatement(
+    statement: ExpectStatementDef,
+    processInput: RecorderInputChanger | boolean | void,
+  ) {
+    submitRecorderInputEvent(
+      'click',
+      {
+        useExpect: statement.type,
+        processInput: typeof processInput === 'function' ? processInput : undefined,
+      },
+    )
+    close()
+  }
+
+  function submitInputEvent(eventType: string, useFireEvent?: boolean) {
+    submitRecorderInputEvent(eventType, { useFireEvent })
+    close()
   }
 
   return (
     <>
       <ContextMenu
-        onOpenChange={(isOpen) => {
-          if (!isOpen) {
-            setTargetElement(null)
-          }
-
-          // Don't allow the context menu to open if there is no target element
-          if (isOpen && !targetElement()) {
-            // Dispatch 'escape' key press to close the context menu
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
-          }
-        }}
+        // @ts-expect-error This is a valid prop
+        open={isOpen()}
+        onOpenChange={setOpenIfTrue}
       >
         <ContextMenuTrigger
           class="w-full h-full"
@@ -73,7 +95,7 @@ function RecorderContextMenu(
           {props.children}
         </ContextMenuTrigger>
         <ContextMenuPortal>
-          <ContextMenuContent class="w-50">
+          <ContextMenuContent class="w-50" ref={setupMenuRef}>
             {/* 'Expect' statements */}
             <Show when={targetElement()}>
               {targetElement => (
@@ -84,13 +106,7 @@ function RecorderContextMenu(
                       <Show when={statement.handler ? statement.handler(targetElement()) : true} keyed>
                         {processInput => (
                           <ContextMenuItem
-                            onClick={() => submitRecorderInputEvent(
-                              'click',
-                              {
-                                useExpect: statement.type,
-                                processInput: typeof processInput === 'function' ? processInput : undefined,
-                              },
-                            )}
+                            onClick={() => submitExpectStatement(statement, processInput)}
                           >
                             <span>{statement.title}</span>
                             {statement.shortcut && <ContextMenuShortcut>{statement.shortcut}</ContextMenuShortcut>}
@@ -110,7 +126,7 @@ function RecorderContextMenu(
               <For each={USEREVENT_MOUSE_EVENT_TYPES}>
                 {eventType => (
                   <ContextMenuItem
-                    onClick={() => submitRecorderInputEvent(eventType)}
+                    onClick={() => submitInputEvent(eventType)}
                   >
                     <span>{eventType}</span>
                   </ContextMenuItem>
@@ -130,10 +146,7 @@ function RecorderContextMenu(
                   <For each={FIREEVENT_MOUSE_EVENT_TYPES}>
                     {eventType => (
                       <ContextMenuItem
-                        onClick={() => submitRecorderInputEvent(
-                          eventType,
-                          { useFireEvent: true },
-                        )}
+                        onClick={() => submitInputEvent(eventType, true)}
                       >
                         <span>{eventType}</span>
                       </ContextMenuItem>
@@ -157,7 +170,7 @@ function RecorderContextMenu(
 
 type RecorderInputChanger = (input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>
 
-interface ExpectDef {
+interface ExpectStatementDef {
   title: string
   type: ExpectStatementType
   shortcut?: JSX.Element
@@ -165,7 +178,7 @@ interface ExpectDef {
 }
 
 /** Definitions of expect statements you can pick from in the context menu */
-const EXPECT_STATEMENTS: ExpectDef[] = [
+const EXPECT_STATEMENTS: ExpectStatementDef[] = [
   {
     title: 'expect(element)',
     type: 'minimal',
@@ -196,3 +209,54 @@ const EXPECT_STATEMENTS: ExpectDef[] = [
     },
   },
 ]
+
+/**
+ * Messy workaround to allow right-clicking outside the menu
+ * to re-open it for a different target element
+ */
+function enableSelectingDifferentNodeWhileMenuIsOpen(
+  updateTargetElement: (pointerEvent: PointerEvent | null) => void,
+) {
+  function setupMenuRef(ref: HTMLElement) {
+    createInteractOutside({
+      onPointerDownOutside: (customEvent) => {
+        const target = customEvent.target
+        if (target instanceof HTMLElement && target.closest('[data-ui-test-visualizer-menu-subcontent]')) {
+          return
+        }
+
+        setOpen(false)
+        updateTargetElement(null)
+        const { originalEvent } = customEvent.detail
+        if (originalEvent.button === 2) {
+          queueMicrotask(() => {
+            updateTargetElement(originalEvent)
+          })
+        }
+      },
+    }, () => ref)
+  }
+
+  const [isOpen, setOpen] = createSignal(false)
+
+  function setOpenIfTrue(newVal: boolean) {
+    if (newVal) {
+      setOpen(newVal)
+    }
+  }
+
+  function close() {
+    // Send an escape key event to close the context menu
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+
+    setOpen(false)
+    updateTargetElement(null)
+  }
+
+  return {
+    setupMenuRef,
+    isOpen,
+    setOpenIfTrue,
+    close,
+  }
+}
