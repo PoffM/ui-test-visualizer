@@ -1,16 +1,17 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { ReactiveMap } from '@solid-primitives/map'
+import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import type { EventType, QueryArgs, Suggestion } from '@testing-library/dom'
 import { getSuggestedQuery, queries } from '@testing-library/dom'
 import type { userEvent } from '@testing-library/user-event'
+import type { inferProcedureInput } from '@trpc/server'
 import { createEffect, createSignal } from 'solid-js'
 import type { z } from 'zod/mini'
-import { createMutationObserver } from '@solid-primitives/mutation-observer'
-import type { ExpectStatementType, zRecordedEventData } from '../../../extension/src/panel-controller/panel-router'
+import type { ExpectStatementType, PanelRouter, TestingLibraryQueryArgs, zRecordedEventData } from '../../../extension/src/panel-controller/panel-router'
 import type { RecorderCodeInsertions } from '../../../extension/src/recorder/recorder-codegen-session'
+import { openPanel, updateOpenPanel } from '../App'
 import { deepElementFromPoint } from '../inspector/util'
 import { client } from '../lib/panel-client'
-import { openPanel, updateOpenPanel } from '../App'
 
 export const USEREVENT_MOUSE_EVENT_TYPES: (keyof typeof userEvent)[] = [
   'click',
@@ -59,10 +60,11 @@ export function createRecorder(shadowHost: HTMLDivElement) {
   async function submitRecorderInputEvent(
     target: Element,
     eventType: string,
-    { useExpect, enterKeyPressed, useFireEvent }: {
+    { useExpect, enterKeyPressed, useFireEvent, processInput }: {
       useExpect?: ExpectStatementType
       enterKeyPressed?: boolean
       useFireEvent?: boolean
+      processInput?: (input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>
     } = {},
   ) {
     let suggestedQuery: Suggestion | undefined
@@ -149,16 +151,23 @@ export function createRecorder(shadowHost: HTMLDivElement) {
       return eventType
     })()
 
-    const query = serializeQueryArgs(suggestedQuery.queryArgs)
+    const queryArgs: TestingLibraryQueryArgs = [
+      suggestedQuery.queryMethod,
+      serializeQueryArgs(suggestedQuery.queryArgs),
+    ]
 
-    // Send the selector to the extension process to record as code
-    const insertions = await client.recordInputAsCode.mutate({
+    let input: inferProcedureInput<PanelRouter['recordInputAsCode']> = {
       event: recordedEventType,
-      query: [suggestedQuery.queryMethod, query],
+      query: queryArgs,
       eventData,
       useExpect,
       useFireEvent,
-    })
+    }
+
+    input = processInput?.(input) ?? input
+
+    // Send the selector to the extension process to record as code
+    const insertions = await client.recordInputAsCode.mutate(input)
     setCodeInsertions(insertions)
   }
 

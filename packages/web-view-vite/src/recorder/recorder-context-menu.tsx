@@ -1,7 +1,8 @@
 import type { JSX } from 'solid-js'
-import { For, createSignal } from 'solid-js'
+import { For, Show, createSignal } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
-import type { ExpectStatementType } from '../../../extension/src/panel-controller/panel-router'
+import type { inferProcedureInput } from '@trpc/server'
+import type { ExpectStatementType, PanelRouter } from '../../../extension/src/panel-controller/panel-router'
 import { recorder, shadowHost } from '../App'
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuGroupLabel, ContextMenuItem, ContextMenuPortal, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '../components/solid-ui/context-menu'
 import { deepElementFromPoint } from '../inspector/util'
@@ -35,16 +36,17 @@ function RecorderContextMenu(
 
   async function submitRecorderInputEvent(
     eventType: string,
-    { useExpect, useFireEvent }: {
+    { useExpect, useFireEvent, processInput }: {
       useExpect?: ExpectStatementType
       useFireEvent?: boolean
+      processInput?: (input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>
     },
   ) {
     const target = targetElement()
     if (!target) {
       return
     }
-    await recorder.submitRecorderInputEvent(target, eventType, { useExpect, useFireEvent })
+    await recorder.submitRecorderInputEvent(target, eventType, { useExpect, useFireEvent, processInput })
   }
 
   return (
@@ -59,22 +61,33 @@ function RecorderContextMenu(
       <ContextMenuPortal>
         <ContextMenuContent class="w-50">
           {/* 'Expect' statements */}
-          <ContextMenuGroup>
-            <ContextMenuGroupLabel>'Expect' Statement</ContextMenuGroupLabel>
-            <For each={EXPECT_STATEMENTS}>
-              {statement => (
-                <ContextMenuItem
-                  onClick={() => submitRecorderInputEvent(
-                    'click',
-                    { useExpect: statement.type },
+          <Show when={targetElement()}>
+            {targetElement => (
+              <ContextMenuGroup>
+                <ContextMenuGroupLabel>'Expect' Statement</ContextMenuGroupLabel>
+                <For each={EXPECT_STATEMENTS}>
+                  {statement => (
+                    <Show when={statement.handler ? statement.handler(targetElement()) : true} keyed>
+                      {processInput => (
+                        <ContextMenuItem
+                          onClick={() => submitRecorderInputEvent(
+                            'click',
+                            {
+                              useExpect: statement.type,
+                              processInput: typeof processInput === 'function' ? processInput : undefined,
+                            },
+                          )}
+                        >
+                          <span>{statement.title}</span>
+                          {statement.shortcut && <ContextMenuShortcut>{statement.shortcut}</ContextMenuShortcut>}
+                        </ContextMenuItem>
+                      )}
+                    </Show>
                   )}
-                >
-                  <span>{statement.title}</span>
-                  {statement.shortcut && <ContextMenuShortcut>{statement.shortcut}</ContextMenuShortcut>}
-                </ContextMenuItem>
-              )}
-            </For>
-          </ContextMenuGroup>
+                </For>
+              </ContextMenuGroup>
+            )}
+          </Show>
           <ContextMenuSeparator />
 
           {/* Mouse events */}
@@ -109,10 +122,29 @@ function RecorderContextMenu(
   )
 }
 
-const EXPECT_STATEMENTS: { title: string, type: ExpectStatementType, shortcut?: JSX.Element }[] = [
+interface ExpectDef {
+  title: string
+  type: ExpectStatementType
+  shortcut?: JSX.Element
+  handler?: (e: Element) => (((input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>) | void)
+}
+
+const EXPECT_STATEMENTS: ExpectDef[] = [
   {
     title: 'expect(element)',
     type: 'minimal',
     shortcut: 'Alt+Click',
+  },
+  {
+    title: '.toHaveValue',
+    type: 'toHaveValue',
+    handler: (el) => {
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        return (input) => {
+          input.eventData.text = el.value
+          return input
+        }
+      }
+    },
   },
 ]

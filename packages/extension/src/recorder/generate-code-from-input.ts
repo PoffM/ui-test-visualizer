@@ -88,6 +88,12 @@ export async function generateCodeFromInput(
     // Generate an 'expect' statement based on the selected type
     code = (() => {
       switch (useExpect) {
+        case 'toHaveValue': {
+          const value = (eventData.text ?? '').replaceAll(/['\\]/g, (match) => {
+            return `\\${match}`
+          })
+          return `${expect}(${selector}).toHaveValue('${value}')`
+        }
         case 'minimal':
         default:
           return `${expect}(${selector})`

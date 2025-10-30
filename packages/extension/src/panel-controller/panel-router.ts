@@ -17,6 +17,18 @@ export interface PanelRouterCtx {
 
 const t = initTRPC.context<PanelRouterCtx>().create()
 
+const zTestingLibraryQueryArgs = z.tuple([
+  z.string(),
+  z.tuple([
+    z.union([z.string(), zSerializedRegexp]),
+    z.optional(z.record(
+      z.string(),
+      z.union([z.string(), z.boolean(), zSerializedRegexp]),
+    )),
+  ]),
+])
+export type TestingLibraryQueryArgs = z.infer<typeof zTestingLibraryQueryArgs>
+
 export const zRecordedEventData = z.object({
   text: z.optional(z.string()), // Used for change events
   options: z.optional(z.array(z.string())), // Used for selectOptions events
@@ -24,7 +36,7 @@ export const zRecordedEventData = z.object({
   indexIfMultipleFound: z.optional(z.number()), // Used when there are multiple elements for the same query
 })
 
-const zExpectStatementType = z.enum(['minimal'])
+const zExpectStatementType = z.enum(['minimal', 'toHaveValue'])
 export type ExpectStatementType = z.infer<typeof zExpectStatementType>
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
@@ -197,16 +209,7 @@ export const panelRouter = t.router({
       z.object({
         event: z.string(),
         eventData: zRecordedEventData,
-        query: z.tuple([
-          z.string(),
-          z.tuple([
-            z.union([z.string(), zSerializedRegexp]),
-            z.optional(z.record(
-              z.string(),
-              z.union([z.string(), z.boolean(), zSerializedRegexp]),
-            )),
-          ]),
-        ]),
+        query: zTestingLibraryQueryArgs,
         // Whether to generate an 'expect' statement
         useExpect: z.optional(zExpectStatementType),
         // Whether to use fireEvent instead of userEvent
