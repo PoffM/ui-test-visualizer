@@ -218,17 +218,19 @@ export const panelRouter = t.router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { event, eventData, query: [method, [queryArg0, queryOptions]], useExpect, useFireEvent } = input
+      const { event, eventData, query: [findMethod, [queryArg0, queryOptions]], useExpect, useFireEvent } = input
       const recorderCodeGenSession = ctx.recorderCodeGenSession()
       const _insertion = await recorderCodeGenSession?.recordInputAsCode(
         ctx.debuggerTracker,
-        event,
-        eventData,
-        method,
-        queryArg0,
-        queryOptions,
-        useExpect ?? undefined,
-        useFireEvent,
+        {
+          event,
+          eventData,
+          findMethod,
+          queryArg0,
+          queryOptions,
+          useExpect,
+          useFireEvent,
+        },
       )
       return recorderCodeGenSession?.insertions
     }),
