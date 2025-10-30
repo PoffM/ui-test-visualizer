@@ -4,7 +4,7 @@ import { Dynamic } from 'solid-js/web'
 import type { inferProcedureInput } from '@trpc/server'
 import type { ExpectStatementType, PanelRouter } from '../../../extension/src/panel-controller/panel-router'
 import { recorder, shadowHost } from '../App'
-import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuGroupLabel, ContextMenuItem, ContextMenuPortal, ContextMenuSeparator, ContextMenuShortcut, ContextMenuTrigger } from '../components/solid-ui/context-menu'
+import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuGroupLabel, ContextMenuItem, ContextMenuPortal, ContextMenuSeparator, ContextMenuShortcut, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from '../components/solid-ui/context-menu'
 import { deepElementFromPoint } from '../inspector/util'
 import { FIREEVENT_MOUSE_EVENT_TYPES, USEREVENT_MOUSE_EVENT_TYPES } from './recorder'
 
@@ -40,7 +40,7 @@ function RecorderContextMenu(
       useExpect?: ExpectStatementType
       useFireEvent?: boolean
       processInput?: (input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>
-    },
+    } = {},
   ) {
     const target = targetElement()
     if (!target) {
@@ -50,7 +50,9 @@ function RecorderContextMenu(
   }
 
   return (
-    <ContextMenu>
+    <ContextMenu
+      onOpenChange={isOpen => !isOpen && setTargetElement(null)}
+    >
       <ContextMenuTrigger
         class="w-full h-full"
         // on right click, update the target element
@@ -91,31 +93,44 @@ function RecorderContextMenu(
           <ContextMenuSeparator />
 
           {/* Mouse events */}
-          <For each={[
-            { eventTypes: USEREVENT_MOUSE_EVENT_TYPES, title: 'Mouse Event (user-event)', useFireEvent: false, tooltip: 'Uses @testing-library/user-event' },
-            { eventTypes: FIREEVENT_MOUSE_EVENT_TYPES, title: 'Mouse Event (fireEvent)', useFireEvent: true, tooltip: 'Uses testing-library\'s fireEvent' },
-          ]}
-          >{(section, idx) => (
-            <>
-              {idx() > 0 && <ContextMenuSeparator />}
-              <ContextMenuGroup>
-                <ContextMenuGroupLabel>{section.title}</ContextMenuGroupLabel>
-                <For each={section.eventTypes}>
+          <ContextMenuGroup>
+            <ContextMenuGroupLabel>Mouse Event (userEvent)</ContextMenuGroupLabel>
+            <For each={USEREVENT_MOUSE_EVENT_TYPES}>
+              {eventType => (
+                <ContextMenuItem
+                  onClick={() => submitRecorderInputEvent(eventType)}
+                >
+                  <span>{eventType}</span>
+                </ContextMenuItem>
+              )}
+            </For>
+          </ContextMenuGroup>
+
+          <ContextMenuSeparator />
+          <ContextMenuSub overlap>
+            <ContextMenuSubTrigger>
+              <span class="text-sm font-semibold whitespace-nowrap">
+                Mouse Event (fireEvent)
+              </span>
+            </ContextMenuSubTrigger>
+            <ContextMenuPortal>
+              <ContextMenuSubContent>
+                <For each={FIREEVENT_MOUSE_EVENT_TYPES}>
                   {eventType => (
                     <ContextMenuItem
                       onClick={() => submitRecorderInputEvent(
                         eventType,
-                        { useFireEvent: section.useFireEvent },
+                        { useFireEvent: true },
                       )}
                     >
                       <span>{eventType}</span>
                     </ContextMenuItem>
                   )}
                 </For>
-              </ContextMenuGroup>
-            </>
-          )}
-          </For>
+              </ContextMenuSubContent>
+            </ContextMenuPortal>
+          </ContextMenuSub>
+
         </ContextMenuContent>
       </ContextMenuPortal>
     </ContextMenu>
@@ -126,7 +141,7 @@ interface ExpectDef {
   title: string
   type: ExpectStatementType
   shortcut?: JSX.Element
-  handler?: (e: Element) => (((input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>) | void)
+  handler?: (e: Element) => (((input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>) | void) | boolean
 }
 
 const EXPECT_STATEMENTS: ExpectDef[] = [
@@ -136,7 +151,7 @@ const EXPECT_STATEMENTS: ExpectDef[] = [
     shortcut: 'Alt+Click',
   },
   {
-    title: '.toHaveValue',
+    title: `.toHaveValue(...)`,
     type: 'toHaveValue',
     handler: (el) => {
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
@@ -144,6 +159,18 @@ const EXPECT_STATEMENTS: ExpectDef[] = [
           input.eventData.text = el.value
           return input
         }
+      }
+    },
+  },
+  {
+    title: '.toBeEnabled()',
+    type: 'toBeEnabled',
+    handler: (el) => {
+      if (el instanceof HTMLInputElement
+        || el instanceof HTMLTextAreaElement
+        || el instanceof HTMLSelectElement
+        || el instanceof HTMLButtonElement) {
+        return true
       }
     },
   },

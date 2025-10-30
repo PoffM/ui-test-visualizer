@@ -94,6 +94,9 @@ export async function generateCodeFromInput(
           })
           return `${expect}(${selector}).toHaveValue('${value}')`
         }
+        case 'toBeEnabled': {
+          return `${expect}(${selector}).toBeEnabled()`
+        }
         case 'minimal':
         default:
           return `${expect}(${selector})`

@@ -36,7 +36,7 @@ export const zRecordedEventData = z.object({
   indexIfMultipleFound: z.optional(z.number()), // Used when there are multiple elements for the same query
 })
 
-const zExpectStatementType = z.enum(['minimal', 'toHaveValue'])
+const zExpectStatementType = z.enum(['minimal', 'toHaveValue', 'toBeEnabled'])
 export type ExpectStatementType = z.infer<typeof zExpectStatementType>
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
