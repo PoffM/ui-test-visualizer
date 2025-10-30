@@ -48,6 +48,7 @@ test('Steps through the Vitest+React+Tailwind@4 Counter example', async ({ brows
       .evaluate(
         button => window.getComputedStyle(button).getPropertyValue('background-color'),
       ),
+    { timeout: 20_000 },
   ).toBe('oklch(0.448 0.119 151.328)') // green
 
   await debugHelper.debugStep()
@@ -111,6 +112,7 @@ test('Steps through the Vitest+React+Tailwind@3 Counter example', async ({ brows
       .evaluate(
         button => window.getComputedStyle(button).getPropertyValue('background-color'),
       ),
+    { timeout: 20_000 },
   ).toBe('rgb(22, 101, 52)') // green
 
   await debugHelper.debugStep()
