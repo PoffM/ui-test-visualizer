@@ -4,7 +4,7 @@ import { generateCodeFromInput } from '../../src/recorder/generate-code-from-inp
 
 const userEventLibPath = '/fakepath/user-event-13.js'
 
-test('change an empty text input: vitest', () => {
+test('change an empty text input: vitest + react', () => {
   const result = generateCodeFromInput(
     true,
     '@testing-library/react',
@@ -32,6 +32,41 @@ globalThis.require('react').act(() => { userEvent.type(screen.getByRole('textbox
 `,
     requiredImports: {
       screen: '@testing-library/react',
+      userEvent: '@testing-library/user-event',
+    },
+  }
+
+  expect(result).toEqual(expected)
+})
+
+test('change an empty text input: vitest + solid', () => {
+  const result = generateCodeFromInput(
+    true,
+    '@solidjs/testing-library',
+    'vitest',
+    userEventLibPath,
+    {
+      event: 'change',
+      eventData: { text: 'test-input' },
+      findMethod: 'getByRole',
+      queryArg0: 'textbox',
+      queryOptions: { name: { type: 'regexp', value: '/^my-input$/i' } },
+    },
+  )
+
+  const expected: RecorderGeneratedCode = {
+    code: [
+      `await userEvent.type(screen.getByRole('textbox', { name: /^my-input$/i }), 'test-input')`,
+    ],
+    debugExpression: `
+(() => {
+const { screen } = globalThis.require('@solidjs/testing-library');
+const userEvent = globalThis.require('/fakepath/user-event-13.js').default;
+userEvent.type(screen.getByRole('textbox', { name: /^my-input$/i }), 'test-input')
+})()
+`,
+    requiredImports: {
+      screen: '@solidjs/testing-library',
       userEvent: '@testing-library/user-event',
     },
   }
@@ -105,6 +140,41 @@ expect(screen.getByRole('button', { name: 'my-button' })).toBeEnabled()
     requiredImports: {
       expect: 'vitest',
       screen: '@testing-library/react',
+    },
+  }
+
+  expect(result).toEqual(expected)
+})
+
+test('generate an expect statement: vitest + solid', () => {
+  const result = generateCodeFromInput(
+    true,
+    '@solidjs/testing-library',
+    'vitest',
+    userEventLibPath,
+    {
+      event: 'click',
+      eventData: {},
+      findMethod: 'getByRole',
+      queryArg0: 'button',
+      queryOptions: { name: 'my-button' },
+      useExpect: 'toBeEnabled',
+    },
+  )
+
+  const expected: RecorderGeneratedCode = {
+    code: [
+      'expect(screen.getByRole(\'button\', { name: \'my-button\' })).toBeEnabled()',
+    ],
+    debugExpression: `
+(() => {
+const { screen } = globalThis.require('@solidjs/testing-library');
+expect(screen.getByRole('button', { name: 'my-button' })).toBeEnabled()
+})()
+`,
+    requiredImports: {
+      expect: 'vitest',
+      screen: '@solidjs/testing-library',
     },
   }
 
