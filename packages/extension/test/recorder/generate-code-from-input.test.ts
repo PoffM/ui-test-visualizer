@@ -286,3 +286,143 @@ fireEvent.mouseUp(screen.getByRole('button', { name: 'my-button' }))
 
   expect(result).toEqual(expected)
 })
+
+test('generate toBeChecked expect statement', () => {
+  const result = generateCodeFromInput(
+    true,
+    '@testing-library/react',
+    'vitest',
+    userEventLibPath,
+    {
+      event: 'click',
+      eventData: { checked: true },
+      findMethod: 'getByRole',
+      queryArg0: 'checkbox',
+      queryOptions: { name: 'my-checkbox' },
+      useExpect: 'toBeChecked',
+    },
+  )
+
+  const expected: RecorderGeneratedCode = {
+    code: [
+      'expect(screen.getByRole(\'checkbox\', { name: \'my-checkbox\' })).toBeChecked()',
+    ],
+    debugExpression: `
+(() => {
+const { screen } = globalThis.require('@testing-library/react');
+expect(screen.getByRole('checkbox', { name: 'my-checkbox' })).toBeChecked()
+})()
+`,
+    requiredImports: {
+      expect: 'vitest',
+      screen: '@testing-library/react',
+    },
+  }
+
+  expect(result).toEqual(expected)
+})
+
+test('generate not.toBeChecked expect statement', () => {
+  const result = generateCodeFromInput(
+    true,
+    '@testing-library/react',
+    'vitest',
+    userEventLibPath,
+    {
+      event: 'click',
+      eventData: { checked: false },
+      findMethod: 'getByRole',
+      queryArg0: 'checkbox',
+      queryOptions: { name: 'my-checkbox' },
+      useExpect: 'toBeChecked',
+    },
+  )
+
+  const expected: RecorderGeneratedCode = {
+    code: [
+      'expect(screen.getByRole(\'checkbox\', { name: \'my-checkbox\' })).not.toBeChecked()',
+    ],
+    debugExpression: `
+(() => {
+const { screen } = globalThis.require('@testing-library/react');
+expect(screen.getByRole('checkbox', { name: 'my-checkbox' })).not.toBeChecked()
+})()
+`,
+    requiredImports: {
+      expect: 'vitest',
+      screen: '@testing-library/react',
+    },
+  }
+
+  expect(result).toEqual(expected)
+})
+
+test('generate toBeEnabled expect statement', () => {
+  const result = generateCodeFromInput(
+    true,
+    '@testing-library/react',
+    'vitest',
+    userEventLibPath,
+    {
+      event: 'click',
+      eventData: { enabled: true },
+      findMethod: 'getByRole',
+      queryArg0: 'button',
+      queryOptions: { name: 'my-button' },
+      useExpect: 'toBeEnabled',
+    },
+  )
+
+  const expected: RecorderGeneratedCode = {
+    code: [
+      'expect(screen.getByRole(\'button\', { name: \'my-button\' })).toBeEnabled()',
+    ],
+    debugExpression: `
+(() => {
+const { screen } = globalThis.require('@testing-library/react');
+expect(screen.getByRole('button', { name: 'my-button' })).toBeEnabled()
+})()
+`,
+    requiredImports: {
+      expect: 'vitest',
+      screen: '@testing-library/react',
+    },
+  }
+
+  expect(result).toEqual(expected)
+})
+
+test('generate not.toBeEnabled expect statement', () => {
+  const result = generateCodeFromInput(
+    true,
+    '@testing-library/react',
+    'vitest',
+    userEventLibPath,
+    {
+      event: 'click',
+      eventData: { enabled: false },
+      findMethod: 'getByRole',
+      queryArg0: 'button',
+      queryOptions: { name: 'my-button' },
+      useExpect: 'toBeEnabled',
+    },
+  )
+
+  const expected: RecorderGeneratedCode = {
+    code: [
+      'expect(screen.getByRole(\'button\', { name: \'my-button\' })).not.toBeEnabled()',
+    ],
+    debugExpression: `
+(() => {
+const { screen } = globalThis.require('@testing-library/react');
+expect(screen.getByRole('button', { name: 'my-button' })).not.toBeEnabled()
+})()
+`,
+    requiredImports: {
+      expect: 'vitest',
+      screen: '@testing-library/react',
+    },
+  }
+
+  expect(result).toEqual(expected)
+})

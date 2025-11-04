@@ -3,6 +3,7 @@ import type { inferProcedureInput } from '@trpc/server'
 import type { JSX } from 'solid-js'
 import { For, Show, createSignal } from 'solid-js'
 import { Dynamic } from 'solid-js/web'
+import { makeEventListener } from '@solid-primitives/event-listener'
 import type { ExpectStatementType, PanelRouter } from '../../../extension/src/panel-controller/panel-router'
 import { recorder, shadowHost } from '../App'
 import { HighlightedNode } from '../components/HighlightedNode'
@@ -80,6 +81,19 @@ function RecorderContextMenu(
     close()
   }
 
+  // Allow right-clicking on disabled button and input elements
+  if (shadowHost.shadowRoot) {
+    makeEventListener(shadowHost.shadowRoot, 'contextmenu', (e) => {
+      if (e instanceof MouseEvent && e.target instanceof Element) {
+        const element = e.target.closest('button:disabled, input:disabled')
+        if (element) {
+          e.preventDefault()
+          updateTargetElement(e)
+        }
+      }
+    })
+  }
+
   return (
     <>
       <ContextMenu
@@ -108,7 +122,7 @@ function RecorderContextMenu(
                           <ContextMenuItem
                             onClick={() => submitExpectStatement(statement, processInput)}
                           >
-                            <span>{statement.title}</span>
+                            <span>{typeof statement.title === 'function' ? statement.title(targetElement()) : statement.title}</span>
                             {statement.shortcutLabel && <ContextMenuShortcut>{statement.shortcutLabel}</ContextMenuShortcut>}
                           </ContextMenuItem>
                         )}
@@ -173,13 +187,13 @@ type RecorderInput = inferProcedureInput<PanelRouter['recordInputAsCode']>
 type RecorderInputChanger = (input: RecorderInput) => RecorderInput
 
 interface ExpectStatementDef {
-  title: string
+  title: string | ((el: Element) => string)
   type: ExpectStatementType
   shortcutLabel?: JSX.Element
   handler?: (e: Element) => (RecorderInputChanger | void) | boolean
 }
 
-/** Definitions of expect statements you can pick from in the context menu */
+/** Definitions of expect statements you can pick from in the context menu. */
 const EXPECT_STATEMENTS: ExpectStatementDef[] = [
   {
     title: 'expect(element)',
@@ -209,14 +223,33 @@ const EXPECT_STATEMENTS: ExpectStatementDef[] = [
     },
   },
   {
-    title: '.toBeEnabled()',
+    title: el => ((el instanceof HTMLInputElement || el instanceof HTMLButtonElement) && !el.disabled)
+      ? '.toBeEnabled()'
+      : '.not.toBeEnabled()',
     type: 'toBeEnabled',
     handler: (el) => {
       if (el instanceof HTMLInputElement
         || el instanceof HTMLTextAreaElement
         || el instanceof HTMLSelectElement
         || el instanceof HTMLButtonElement) {
-        return true
+        return (input) => {
+          input.eventData.enabled = !el.disabled
+          return input
+        }
+      }
+    },
+  },
+  {
+    title: el => (el instanceof HTMLInputElement && el.checked)
+      ? '.toBeChecked()'
+      : '.not.toBeChecked()',
+    type: 'toBeChecked',
+    handler: (el) => {
+      if (el instanceof HTMLInputElement && el.type === 'checkbox') {
+        return (input) => {
+          input.eventData.checked = el.checked
+          return input
+        }
       }
     },
   },
@@ -233,6 +266,8 @@ function enableSelectingDifferentNodeWhileMenuIsOpen(
     createInteractOutside({
       onPointerDownOutside: (customEvent) => {
         const target = customEvent.target
+
+        // Behave as usual when cliking on a context sub-menu
         if (target instanceof HTMLElement && target.closest('[data-ui-test-visualizer-menu-subcontent]')) {
           return
         }

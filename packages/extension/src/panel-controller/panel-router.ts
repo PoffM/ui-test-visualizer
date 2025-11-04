@@ -35,9 +35,11 @@ export const zRecordedEventData = z.object({
   enterKeyPressed: z.optional(z.boolean()), // Used for Enter keydown events
   indexIfMultipleFound: z.optional(z.number()), // Used when there are multiple elements for the same query
   clearBeforeType: z.optional(z.boolean()), // Clear the input before typing
+  checked: z.optional(z.boolean()), // Used for expect/toBeChecked statements
+  enabled: z.optional(z.boolean()), // Used for expect/toBeEnabled statements
 })
 
-const zExpectStatementType = z.enum(['minimal', 'toHaveValue', 'toBeEnabled', 'toHaveTextContent'])
+const zExpectStatementType = z.enum(['minimal', 'toHaveValue', 'toBeEnabled', 'toHaveTextContent', 'toBeChecked'])
 export type ExpectStatementType = z.infer<typeof zExpectStatementType>
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */

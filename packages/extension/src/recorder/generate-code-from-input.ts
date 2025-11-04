@@ -107,7 +107,12 @@ export function generateCodeFromInput(
           return `${expect}(${selector}).toHaveValue('${value}')`
         }
         case 'toBeEnabled': {
-          return `${expect}(${selector}).toBeEnabled()`
+          const not = eventData.enabled ? '' : 'not.'
+          return `${expect}(${selector}).${not}toBeEnabled()`
+        }
+        case 'toBeChecked': {
+          const not = eventData.checked ? '' : 'not.'
+          return `${expect}(${selector}).${not}toBeChecked()`
         }
         case 'minimal':
         default:
