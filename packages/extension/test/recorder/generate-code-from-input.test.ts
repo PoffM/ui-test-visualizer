@@ -119,7 +119,7 @@ test('generate an expect statement: vitest', () => {
     userEventLibPath,
     {
       event: 'click',
-      eventData: {},
+      eventData: { enabled: true },
       findMethod: 'getByRole',
       queryArg0: 'button',
       queryOptions: { name: 'my-button' },
@@ -154,7 +154,7 @@ test('generate an expect statement: vitest + solid', () => {
     userEventLibPath,
     {
       event: 'click',
-      eventData: {},
+      eventData: { enabled: true },
       findMethod: 'getByRole',
       queryArg0: 'button',
       queryOptions: { name: 'my-button' },
@@ -189,7 +189,7 @@ test('generate an expect statement: jest', () => {
     userEventLibPath,
     {
       event: 'click',
-      eventData: {},
+      eventData: { enabled: true },
       findMethod: 'getByRole',
       queryArg0: 'button',
       queryOptions: { name: 'my-button' },
@@ -223,7 +223,7 @@ test('generate an expect statement: bun test api', () => {
     userEventLibPath,
     {
       event: 'click',
-      eventData: {},
+      eventData: { enabled: true },
       findMethod: 'getByRole',
       queryArg0: 'button',
       queryOptions: { name: 'my-button' },
