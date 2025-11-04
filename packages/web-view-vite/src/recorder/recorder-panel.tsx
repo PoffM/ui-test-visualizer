@@ -102,6 +102,10 @@ export function RecorderPanel() {
 
 /** When a new code line is added, scroll to it. */
 function setupCodePanel(el: HTMLDivElement) {
+  queueMicrotask(() => {
+    el.scrollTop = el.scrollHeight
+  })
+
   createEffect(on(recorder.codeInsertions, (current, prev) => {
     if (current && prev) {
       for (const lineNum of Object.keys(current)) {
