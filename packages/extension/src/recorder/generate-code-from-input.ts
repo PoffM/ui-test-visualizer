@@ -92,11 +92,18 @@ export function generateCodeFromInput(
   if (useExpect) {
     // Generate an 'expect' statement based on the selected type
     mainLine = (() => {
+      function escapeQuotes(str: string) {
+        return str.replaceAll(/['\\]/g, (match) => {
+          return `\\${match}`
+        })
+      }
       switch (useExpect) {
+        case 'toHaveTextContent': {
+          const textContent = escapeQuotes(eventData.text ?? '')
+          return `${expect}(${selector}).toHaveTextContent('${textContent}')`
+        }
         case 'toHaveValue': {
-          const value = (eventData.text ?? '').replaceAll(/['\\]/g, (match) => {
-            return `\\${match}`
-          })
+          const value = escapeQuotes(eventData.text ?? '')
           return `${expect}(${selector}).toHaveValue('${value}')`
         }
         case 'toBeEnabled': {

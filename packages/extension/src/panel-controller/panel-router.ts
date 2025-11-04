@@ -37,7 +37,7 @@ export const zRecordedEventData = z.object({
   clearBeforeType: z.optional(z.boolean()), // Clear the input before typing
 })
 
-const zExpectStatementType = z.enum(['minimal', 'toHaveValue', 'toBeEnabled'])
+const zExpectStatementType = z.enum(['minimal', 'toHaveValue', 'toBeEnabled', 'toHaveTextContent'])
 export type ExpectStatementType = z.infer<typeof zExpectStatementType>
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */

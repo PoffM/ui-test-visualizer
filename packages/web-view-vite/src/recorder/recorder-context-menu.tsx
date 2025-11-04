@@ -46,7 +46,7 @@ function RecorderContextMenu(
     { useExpect, useFireEvent, processInput }: {
       useExpect?: ExpectStatementType
       useFireEvent?: boolean
-      processInput?: (input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>
+      processInput?: (input: RecorderInput) => RecorderInput
     } = {},
   ) {
     const target = targetElement()
@@ -109,7 +109,7 @@ function RecorderContextMenu(
                             onClick={() => submitExpectStatement(statement, processInput)}
                           >
                             <span>{statement.title}</span>
-                            {statement.shortcut && <ContextMenuShortcut>{statement.shortcut}</ContextMenuShortcut>}
+                            {statement.shortcutLabel && <ContextMenuShortcut>{statement.shortcutLabel}</ContextMenuShortcut>}
                           </ContextMenuItem>
                         )}
                       </Show>
@@ -168,12 +168,14 @@ function RecorderContextMenu(
   )
 }
 
-type RecorderInputChanger = (input: inferProcedureInput<PanelRouter['recordInputAsCode']>) => inferProcedureInput<PanelRouter['recordInputAsCode']>
+type RecorderInput = inferProcedureInput<PanelRouter['recordInputAsCode']>
+
+type RecorderInputChanger = (input: RecorderInput) => RecorderInput
 
 interface ExpectStatementDef {
   title: string
   type: ExpectStatementType
-  shortcut?: JSX.Element
+  shortcutLabel?: JSX.Element
   handler?: (e: Element) => (RecorderInputChanger | void) | boolean
 }
 
@@ -182,7 +184,17 @@ const EXPECT_STATEMENTS: ExpectStatementDef[] = [
   {
     title: 'expect(element)',
     type: 'minimal',
-    shortcut: 'Alt+Click',
+    shortcutLabel: 'Alt+Click',
+  },
+  {
+    title: '.toHaveTextContent(...)',
+    type: 'toHaveTextContent',
+    handler: (el) => {
+      return (input) => {
+        input.eventData.text = el.textContent
+        return input
+      }
+    },
   },
   {
     title: `.toHaveValue(...)`,
