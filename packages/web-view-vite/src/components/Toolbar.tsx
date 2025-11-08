@@ -47,9 +47,6 @@ export function Toolbar() {
           </ToolbarButton>
         )}
       />
-      <div class="h-10 w-10">
-        {/* Spacer */}
-      </div>
       <div class="flex [--button-padding-horizontal:0px] [--button-padding-vertical:0px]">
         <ToolbarButton
           onClick={() => recorder.toggle(!recorder.isRecording())}

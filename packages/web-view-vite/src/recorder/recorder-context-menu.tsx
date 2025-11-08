@@ -214,7 +214,10 @@ const EXPECT_STATEMENTS: ExpectStatementDef[] = [
     title: `.toHaveValue(...)`,
     type: 'toHaveValue',
     handler: (el) => {
-      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+      if (
+        (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)
+        && !['checkbox', 'radio'].includes(el.type)
+      ) {
         return (input) => {
           input.eventData.text = el.value
           return input
