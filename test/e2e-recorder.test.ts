@@ -89,7 +89,7 @@ test.describe('Record TodoList test, Jest + React', () => {
     const { page, replicaPanel } = await startRecorderTest(browser, 'jest-nextjs-minimal', 'TodoList.test.tsx', true)
 
     // Generate an 'expect/toHaveTextContent' statement for the initial no-todos-message <p> tag
-    await replicaPanel.getByLabel('no-todos-message').click({
+    await replicaPanel.getByText('No todos yet. Add one to get started.').click({
       button: 'right',
     })
     await replicaPanel.getByText('.toHaveTextContent(...)').click()
@@ -136,7 +136,7 @@ test.describe('Record TodoList test, Jest + React', () => {
     // Check for the generated code in the editor; Make sure indexes are used for the checkboxes and buttons
     await page.getByText(`await userEvent.click(screen.getAllByRole('checkbox', { name: /^toggle done$/i })[1])`).waitFor()
     await page.getByText(`await userEvent.click(screen.getAllByRole('button', { name: /^delete$/i })[0])`).first().waitFor()
-    await page.getByText(`expect(screen.getByRole('paragraph', { name: /^no\\-todos\\-message$/i })).toHaveTextContent('No todos yet. Add one to get started.')`).first().waitFor()
+    await page.getByText(`expect(screen.getByRole('paragraph')).toHaveTextContent('No todos yet. Add one to get started.')`).first().waitFor()
     await page.getByText(`expect(screen.getByText(/^1 done$/i))`).waitFor()
   })
 })
