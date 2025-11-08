@@ -30,7 +30,7 @@ jobs:
           node-version: '22.20'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - run: pnpm run build
 
