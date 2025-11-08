@@ -16,5 +16,6 @@ module.exports = config({
     // Convenient for this project
     'node/prefer-global/process': 'off',
     'antfu/no-import-node-modules-by-path': 'off',
+    'test/consistent-test-it': 'off',
   },
 })

@@ -227,6 +227,7 @@ export const IGNORED_NODE_METHODS: {
   getEnclosureList: true,
   getIntersectionList: true,
   getScreenCTM: true,
+  getHTML: true,
 
   querySelector: true,
   querySelectorAll: true,

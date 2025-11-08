@@ -12,11 +12,40 @@ This is a VSCode extension: no code changes should be required to watch your UI 
 
 - [Vitest](https://vitest.dev/) or [Jest v28+](https://jestjs.io/) or [Bun Test Runner](https://bun.com/docs/test/dom)
   - Your test framework is auto-detected by walking up the directories from your test file until it finds `vitest.config.{ts,js}`, `vite.config.{ts,js}`, `jest.config.{ts,js,json}`, or `bun.lock`
+  - The [Bun VSCode extension](https://marketplace.visualstudio.com/items?itemName=oven.bun-vscode) is required for Bun tests
 - [jsdom](https://github.com/jsdom/jsdom) or [happy-dom](https://github.com/capricorn86/happy-dom) test environment (what you're probably already using for UI in Vitest or Jest)
 
 ## Usage
 
+### Visualizing tests
+
 Click the "Visually Debug UI" button above your test. If there's no breakpoint in your test already, the extension will add one automatically. A side panel should open, and render your UI as you step through with the debugger.
+
+### Record Input as Code
+
+You can also write tests by recording your input as you interact with your UI.
+
+**Project Requirements:**
+- Test runner: Vitest, Jest, or Bun
+- Testing libraries:
+  - `@testing-library/react` or `@solidjs/testing-library`
+  - `@testing-library/user-event`
+
+Steps:
+
+- *Optional*: Generate a starter test file for a React or Solid component by right-clicking the component name in the editor (e.g. MyForm) and clicking "Create UI test".
+
+- Click the "Visually Debug UI" button to start your test
+
+- Click "Step Over" until you get your UI into the state where you want to generate new code.
+
+- Click the "Record input as code" button in the side panel, and you'll see the recorder panel appear.
+
+- Click your UI elements, or change text inputs, and the extension will generate code for you to use in your test.
+
+- Right+click to generate `expect` statements or other mouse events.
+
+- The generated code is inserted into your test file when the test is ended or restarted.
 
 ## UI Framework Compatibility
 
@@ -50,13 +79,13 @@ This extension could fail to auto-build your source CSS files, in which case you
   - Vitest:
     - Adds a `--require` argument to the Vitest command.
   - Jest:
-    - Adds a `--setupFiles` argument to the Jest command in addition to any setupFiles you've already defined in your config.
+    - Adds a `--setupFiles` argument to the Jest command in addition to any setupFiles defined in your config.
+  - Bun:
+    - Adds a `--preload` argument to the `bun test` command in addition to any preloads defined in your bunfig.toml.
 
 - **Replicates the test DOM into a real DOM**: The extension then replicates those method calls and their arguments in a VSCode WebView (the side panel), which renders your UI in a real Chromium DOM. This panel only shows a **replica** of the test DOM without your UI's Javascript, so you can't interact with it using the mouse or keyboard.
 
 ## Caveats
-
-- **Can be slow to run until your first breakpoint**: Because of the code inserted at startup for watching the DOM and optionally loading your styles, your test can be slightly slower to startup than when debugging your tests normally with other test extensions.
 
 - **Possible de-synchronization**: The visual DOM replica gets updated incrementally as your test runs, but accurate synchronization relies on this extension's code to correctly handle every possible DOM mutation that happens in your UI. The DOM replication code is pretty thorough, even accounting for weird cases involving nested Shadow DOMs and Web Component lifecycles, but it's still possible for the visual replica to get out of sync with your actual test DOM. If this happens, you can click the panel's Refresh button to re-sync it.
 

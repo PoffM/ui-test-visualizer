@@ -2,14 +2,16 @@ import path from 'pathe'
 import { findUp, findUpMultiple } from 'find-up'
 import { readInitialOptions } from 'jest-config'
 
+export type SupportedFramework = 'vitest' | 'jest' | 'bun'
+
 export interface TestFrameworkInfo {
-  framework: 'jest' | 'vitest' | 'bun'
+  framework: SupportedFramework
   configPath: string
 }
 
 export async function detectTestFramework(
   testFilePath: string,
-  frameworkSetting: 'autodetect' | 'jest' | 'vitest' | 'bun',
+  frameworkSetting: 'autodetect' | SupportedFramework,
 ): Promise<TestFrameworkInfo> {
   // auto detect test config files
 

@@ -84,5 +84,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - run: pnpm run build
+
       # Just run the "extension" tests to make sure the paths are detected correctly on Windows
       - run: pnpm run --filter ./packages/extension test

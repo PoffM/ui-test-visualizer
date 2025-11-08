@@ -2,7 +2,8 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import { ReactiveWeakMap } from '@solid-primitives/map'
 import { createMutationObserver } from '@solid-primitives/mutation-observer'
 import { Show, createEffect, createSignal, onCleanup, onMount } from 'solid-js'
-import { shadowHost } from '../App'
+import { recorder, shadowHost } from '../App'
+import { HighlightedNode } from '../components/HighlightedNode'
 import { type InspectedNode, getNewDomTree } from './inspector-dom-tree'
 import { createInspectorSearch } from './inspector-search'
 import { SearchToolbar } from './SearchToolbar'
@@ -101,42 +102,10 @@ export function Inspector() {
           </div>
         )}
       </Show>
-      <Show when={hoveredNode() ?? selectedNode()} keyed>
-        {(node) => {
-          function newRect() {
-            return node instanceof Text
-              ? (() => {
-                  const range = document.createRange()
-                  range.selectNodeContents(node)
-                  return range.getBoundingClientRect()
-                })()
-              : node instanceof Element
-                ? node.getBoundingClientRect()
-                : node.parentElement?.getBoundingClientRect()
-          }
-
-          const [rect, setRect] = createSignal(newRect())
-
-          // Update the rect on scroll, click, etc
-          makeEventListener(window, 'resize', () => setRect(newRect()))
-          makeEventListener(window, 'scroll', () => setRect(newRect()))
-          makeEventListener(window, 'wheel', () => setRect(newRect()))
-          makeEventListener(window, 'mousedown', () => setRect(newRect()))
-          makeEventListener(window, 'mouseup', () => setRect(newRect()))
-          makeEventListener(window, 'click', () => setRect(newRect()))
-
-          return (
-            <div
-              class="fixed z-50 pointer-events-none bg-[var(--vscode-editorLightBulbAutoFix-foreground)] opacity-60 transition-all duration-100 min-h-[1px] min-w-[1px]"
-              style={{
-                top: `${rect()?.top}px`,
-                left: `${rect()?.left}px`,
-                width: `${rect()?.width}px`,
-                height: `${rect()?.height}px`,
-              }}
-            />
-          )
-        }}
+      <Show when={!recorder.isRecording() && (hoveredNode() ?? selectedNode())} keyed>
+        {node => (
+          <HighlightedNode node={node} />
+        )}
       </Show>
     </div>
   )

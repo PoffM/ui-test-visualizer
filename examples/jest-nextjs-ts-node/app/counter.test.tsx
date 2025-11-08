@@ -10,7 +10,7 @@ it('simple react testing library test', () => {
   fireEvent.click(screen.getByText('Increment'))
   fireEvent.click(screen.getByText('Decrement'))
 
-  expect(screen.getByText('Count: 1')).toBeTruthy()
+  expect(screen.getByText('Count: 1'))
 })
 
 // For some reason calling 'render' in the test block needs multiple

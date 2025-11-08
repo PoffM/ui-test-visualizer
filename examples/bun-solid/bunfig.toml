@@ -1,0 +1,7 @@
+jsx = "solid"
+
+[install]
+linker = "isolated"
+
+[test]
+preload = "./test/test-setup.ts"

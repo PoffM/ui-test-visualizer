@@ -68,10 +68,24 @@
           "description": "Test Framework: Vitest or Jest. Auto-detects by default by walking up directories from your test file."
         }
       }
-    }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ui-test-visualizer.createUiTest",
+          "when": "editorTextFocus && editorLangId =~ /typescript|javascript/"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ui-test-visualizer.createUiTest",
+        "title": "Create UI test (UI Test Visualizer)"
+      }
+    ]
   },
   "scripts": {
-    "prepare": "which bun && bun install --cwd ./examples/bun-react || true",
+    "prepare": "which bun && (bun install --cwd ./examples/bun-react) && (bun install --cwd ./examples/bun-solid)",
     "dev": "rm -rf build-dev && pnpm run -r dev",
     "build": "rm -rf build-prod && pnpm run -r build && (cd build-prod && npx vsce package --allow-missing-repository --skip-license --out ./extension.vsix)",
     "lint": "tsc",
@@ -86,16 +100,17 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.19.1",
     "@changesets/cli": "^2.29.7",
-    "@playwright/test": "^1.55.1",
+    "@playwright/test": "^1.56.1",
     "@total-typescript/ts-reset": "^0.6.1",
-    "@types/node": "^24.6.0",
+    "@types/node": "^24.8.1",
     "@vitest/expect": "^3.2.4",
     "@vscode/vsce": "^3.6.2",
-    "eslint": "^9.36.0",
+    "eslint": "^9.38.0",
     "ovsx": "^0.10.6",
+    "pathe": "^2.0.3",
     "tsup": "^8.5.0",
     "type-fest": "^5.0.1",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
   "pnpm": {
@@ -103,5 +118,5 @@
       "jest-config@30.2.0": "patches/jest-config@30.2.0.patch"
     }
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.19.0+sha512.c9fc7236e92adf5c8af42fd5bf1612df99c2ceb62f27047032f4720b33f8eacdde311865e91c411f2774f618d82f320808ecb51718bfa82c060c4ba7c76a32b8"
 }

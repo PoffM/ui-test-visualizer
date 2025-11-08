@@ -1,10 +1,10 @@
 import { execa } from 'execa'
-import { findUp } from 'find-up'
 import getPort from 'get-port'
 import path from 'pathe'
 import { beforeAll, describe, expect, it } from 'vitest'
 import type { Server as WsServer } from 'ws'
 import { makeDebugConfig } from '../src/debug-config'
+import { detectTestFramework } from '../src/framework-support/detect-test-framework'
 
 describe('tool compatibility', async () => {
   it('works with Jest + Nextjs + SWC minimal/default setup', async () => {
@@ -89,28 +89,6 @@ describe('tool compatibility', async () => {
   let fakeHtmlUpdaterServer: WsServer
 
   beforeAll(async () => {
-    // These tests require the "build-prod" folder to exist
-    {
-      const buildDir = await findUp(
-        'build-prod',
-        { cwd: examplesPath, type: 'directory' },
-      )
-      if (!buildDir) {
-        const pnpmLock = await findUp(
-          'pnpm-lock.yaml',
-          { cwd: __dirname },
-        )
-        if (!pnpmLock) {
-          throw new Error(`Could not find project root from ${__dirname}`)
-        }
-        console.log('These tests requires the "build-prod" folder to exist. Building it...')
-        await execa({
-          cwd: path.dirname(pnpmLock),
-          stdout: ['pipe', 'inherit'],
-        })`pnpm run build`
-      }
-    }
-
     htmlUpdaterPort = await getPort()
     fakeHtmlUpdaterServer = new Server({ port: htmlUpdaterPort })
 
@@ -123,10 +101,11 @@ describe('tool compatibility', async () => {
     testFile: string,
     testName: string,
   ) {
+    const fwInfo = await detectTestFramework(path.join(examplesPath, testFile), 'autodetect')
     const cfg = await makeDebugConfig(
+      fwInfo,
       path.join(examplesPath, testFile),
       testName,
-      'autodetect',
       htmlUpdaterPort,
       [],
     )

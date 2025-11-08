@@ -4,6 +4,7 @@ import type { HTMLPatch } from 'replicate-dom'
 import * as vscode from 'vscode'
 import type { Server as WsServer } from 'ws'
 import type { MyStorageType } from '../my-extension-storage'
+import type { RecorderCodeGenSession } from '../recorder/recorder-codegen-session'
 import type { DebuggerTracker } from '../util/debugger-tracker'
 import { type PanelRouterCtx, panelRouter } from './panel-router'
 
@@ -11,10 +12,13 @@ import { type PanelRouterCtx, panelRouter } from './panel-router'
 // eslint-disable-next-line ts/no-var-requires, ts/no-require-imports
 const Server = require('../../node_modules/ws/lib/websocket-server') as typeof WsServer
 
+export type PanelController = Awaited<ReturnType<typeof startPanelController>>
+
 export async function startPanelController(
   extensionContext: vscode.ExtensionContext,
   storage: MyStorageType,
-  sessionTracker: DebuggerTracker,
+  recorderCodeGenSession: () => RecorderCodeGenSession | null,
+  debuggerTracker: DebuggerTracker,
   htmlUpdaterPort: number,
 ) {
   let setWebviewIsReady = () => {}
@@ -80,6 +84,7 @@ export async function startPanelController(
         <head>
           <link rel="icon" type="image/svg+xml" href="${icon}" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta http-equiv="Content-Security-Policy" content="form-action 'none';">
           <script type="module" crossorigin src="${appJs}"></script>
           <link rel="stylesheet" crossorigin href="${appCss}">
         </head>
@@ -109,11 +114,11 @@ export async function startPanelController(
     }
     catch (error) {
       console.log(error)
-      if (error instanceof TRPCError) {
-        vscode.window.showErrorMessage(String(error.cause))
+      if (error instanceof TRPCError && error.cause) {
+        vscode.window.showErrorMessage(error.cause.message)
       }
       else if (error instanceof Error) {
-        vscode.window.showErrorMessage(String(error))
+        vscode.window.showErrorMessage(error.message)
       }
       panel.webview.postMessage({
         id,
@@ -135,6 +140,10 @@ export async function startPanelController(
     notifyDebuggerRestarted: () => {
       panel.webview.postMessage({ debuggerRestarted: true })
     },
+    notifyRecorderEditPerformed: () => {
+      panel?.webview.postMessage({ recorderEditPerformed: true })
+    },
+
     dispose() {
       htmlUpdaterServer.close()
       panel.dispose()
@@ -143,10 +152,11 @@ export async function startPanelController(
   }
 
   const ctx: PanelRouterCtx = {
-    sessionTracker,
+    debuggerTracker,
     storage,
     flushPatches: controller.flushPatches,
     setWebviewIsReady,
+    recorderCodeGenSession,
   }
 
   return controller

@@ -23,6 +23,11 @@ export default defineConfig((options) => {
       'vitest-cli-setup': '../test-setup/src/vitest-cli-setup.ts',
       'test-runtime-setup': '../test-setup/src/test-runtime-setup.ts',
       'transform-css': './src/transform-css/transform-css.ts',
+
+      // user-event v13 is used when running the recorder's generated code as debug expressions, because it's the last version
+      // where the methods were synchronous e.g. `userEvent.click(...);`. Newer versions use async code like `await userEvent.click(...);`
+      // which fail when running through the debugger's 'evaluate' request.
+      'user-event-13': './node_modules/@testing-library/user-event/dist/index.js',
     },
     format: ['cjs'],
     outExtension: () => ({

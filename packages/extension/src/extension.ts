@@ -3,15 +3,23 @@ import '@total-typescript/ts-reset'
 import { TelemetryReporter } from '@vscode/extension-telemetry'
 import * as vscode from 'vscode'
 import * as z from 'zod/mini'
+import zodEn from 'zod/v4/locales/en.js'
 import getPort from 'get-port'
 import { autoSetFirstBreakpoint } from './auto-set-first-breakpoint'
 import { codeLensProvider } from './code-lens-provider'
 import { makeDebugConfig } from './debug-config'
+import { detectTestFramework } from './framework-support/detect-test-framework'
+import { detectTestLibrary } from './framework-support/detect-test-library'
 import { myExtensionStorage } from './my-extension-storage'
 import { startPanelController } from './panel-controller/panel-controller'
+import { createUiTestFile } from './recorder/create-new-test-file/create-ui-test-file'
+import { startRecorderCodeGenSession } from './recorder/recorder-codegen-session'
 import { startDebuggerTracker } from './util/debugger-tracker'
 import { extensionSetting } from './util/extension-setting'
+import { onceWithPeek } from './util/util'
 import { enableHotReload } from './util/hot-reload'
+
+z.config(zodEn())
 
 const reporter = (() => {
   try {
@@ -80,6 +88,11 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
       }),
     )
   }
+
+  // Right-click a component name and click "Create UI test" -> create a test file with the name of the component
+  extensionContext.subscriptions.push(
+    vscode.commands.registerCommand('ui-test-visualizer.createUiTest', () => createUiTestFile()),
+  )
 }
 
 export function deactivate() {
@@ -115,21 +128,23 @@ async function startTest(
     throw new TypeError(`Expected number or null argument \"firstStatementStartLine\", received ${firstStatementStartLineRaw}`)
   }
 
-  // Save the test file before starting the debug session
-  await vscode.window.activeTextEditor?.document.save()
-
-  const htmlUpdaterPort = await getPort()
-
   const frameworkSetting = (() => {
     const parsed = zFrameworkSetting
       .safeParse(extensionSetting('ui-test-visualizer.testFramework'))
     return parsed.success ? parsed.data : 'autodetect'
   })()
 
+  const frameworkInfo = await detectTestFramework(testFile, frameworkSetting)
+
+  // Save the test file before starting the debug session
+  await vscode.window.activeTextEditor?.document.save()
+
+  const htmlUpdaterPort = await getPort()
+
   const debugConfig = await makeDebugConfig(
+    frameworkInfo,
     testFile,
     testName,
-    frameworkSetting,
     htmlUpdaterPort,
     await storage.get('enabledCssFiles'),
   )
@@ -158,17 +173,28 @@ async function startWebView(extensionContext: vscode.ExtensionContext, currentSe
 
   const storage = myExtensionStorage(extensionContext)
 
+  const testLibrary = await detectTestLibrary(testFile)
+
+  // Only initialize the recorder state once per debug session
+  const recorderCodeGenSession = onceWithPeek(
+    () => testLibrary
+      ? startRecorderCodeGenSession(testFile, env.TEST_FRAMEWORK, testLibrary, panelController)
+      : null,
+  )
+
   const sessionTracker = startDebuggerTracker(
     currentSession,
     {
       onFrameChange: () => panelController.flushPatches(),
       onDebugRestarted: () => panelController.notifyDebuggerRestarted(),
+      onDebugTerminated: async () => recorderCodeGenSession.peek()?.performEdit(),
     },
   )
 
   const panelController = await startPanelController(
     extensionContext,
     storage,
+    recorderCodeGenSession,
     sessionTracker,
     htmlUpdaterPort,
   )
@@ -193,6 +219,7 @@ async function startWebView(extensionContext: vscode.ExtensionContext, currentSe
       autoBreakpoint?.dispose()
       sessionTracker.dispose()
       panelController.dispose()
+      recorderCodeGenSession.peek()?.dispose()
       onTerminate.dispose()
     },
   )

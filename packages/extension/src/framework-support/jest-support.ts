@@ -2,7 +2,7 @@ import { findUp, findUpSync } from 'find-up'
 import { readInitialOptions } from 'jest-config'
 import path from 'pathe'
 import type * as vscode from 'vscode'
-import type { TestFrameworkInfo } from './detect'
+import type { TestFrameworkInfo } from './detect-test-framework'
 import { cleanTestNameForTerminal } from './util'
 
 function buildPath() {
@@ -59,6 +59,7 @@ export async function jestDebugConfig(
       '--detectOpenHandles',
       // TODO find out why Jest doesn't exit on its own
       '--forceExit',
+      '--colors', // Show green text for the 'pass' text. TODO find out why the rest of the output is red text
     ],
     autoAttachChildProcesses: true,
   }

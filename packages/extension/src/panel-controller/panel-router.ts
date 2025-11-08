@@ -1,19 +1,46 @@
+import { initTRPC } from '@trpc/server'
 import path from 'pathe'
 import * as vscode from 'vscode'
-import { initTRPC } from '@trpc/server'
 import * as z from 'zod/mini'
-import { workspaceCssFiles } from '../util/workspace-css-files'
 import type { MyStorageType } from '../my-extension-storage'
+import { type RecorderCodeGenSession, zSerializedRegexp } from '../recorder/recorder-codegen-session'
 import type { DebuggerTracker } from '../util/debugger-tracker'
+import { workspaceCssFiles } from '../util/workspace-css-files'
 
 export interface PanelRouterCtx {
-  sessionTracker: DebuggerTracker
+  debuggerTracker: DebuggerTracker
   storage: MyStorageType
   flushPatches: () => void
+  recorderCodeGenSession: () => RecorderCodeGenSession | null
   setWebviewIsReady: () => void
 }
 
 const t = initTRPC.context<PanelRouterCtx>().create()
+
+const zTestingLibraryQueryArgs = z.tuple([
+  z.string(),
+  z.tuple([
+    z.union([z.string(), zSerializedRegexp]),
+    z.optional(z.record(
+      z.string(),
+      z.union([z.string(), z.boolean(), zSerializedRegexp]),
+    )),
+  ]),
+])
+export type TestingLibraryQueryArgs = z.infer<typeof zTestingLibraryQueryArgs>
+
+export const zRecordedEventData = z.object({
+  text: z.optional(z.string()), // Used for change events
+  options: z.optional(z.array(z.string())), // Used for selectOptions events
+  enterKeyPressed: z.optional(z.boolean()), // Used for Enter keydown events
+  indexIfMultipleFound: z.optional(z.number()), // Used when there are multiple elements for the same query
+  clearBeforeType: z.optional(z.boolean()), // Clear the input before typing
+  checked: z.optional(z.boolean()), // Used for expect/toBeChecked statements
+  enabled: z.optional(z.boolean()), // Used for expect/toBeEnabled statements
+})
+
+const zExpectStatementType = z.enum(['minimal', 'toHaveValue', 'toBeEnabled', 'toHaveTextContent', 'toBeChecked'])
+export type ExpectStatementType = z.infer<typeof zExpectStatementType>
 
 /** Defines RPCs callable from the WebView to the VSCode Extension. */
 export const panelRouter = t.router({
@@ -24,7 +51,7 @@ export const panelRouter = t.router({
 
   serializeHtml: t.procedure
     .query(async ({ ctx }) => {
-      const html = await ctx.sessionTracker.runDebugExpression('globalThis.__serializeHtml()')
+      const html = await ctx.debuggerTracker.runDebugExpression('globalThis.__serializeHtml()')
       return html
     }),
 
@@ -111,7 +138,7 @@ export const panelRouter = t.router({
     .mutation(async ({ ctx }) => {
       const files = await ctx.storage.get('enabledCssFiles') ?? []
       const filesAsString = JSON.stringify(files)
-      const resultStr = await ctx.sessionTracker.runDebugExpression(
+      const resultStr = await ctx.debuggerTracker.runDebugExpression(
         `globalThis.__replaceStyles(${filesAsString})`,
       )
       ctx.flushPatches()
@@ -178,6 +205,50 @@ export const panelRouter = t.router({
   unDismissStylePrompt: t.procedure
     .mutation(async ({ ctx }) => {
       ctx.storage.set('stylePromptDismissed', false)
+    }),
+
+  recordInputAsCode: t.procedure
+    .input(
+      z.object({
+        event: z.string(),
+        eventData: zRecordedEventData,
+        query: zTestingLibraryQueryArgs,
+        // Whether to generate an 'expect' statement
+        useExpect: z.optional(zExpectStatementType),
+        // Whether to use fireEvent instead of userEvent
+        useFireEvent: z.optional(z.boolean()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { event, eventData, query: [findMethod, [queryArg0, queryOptions]], useExpect, useFireEvent } = input
+      const recorderCodeGenSession = ctx.recorderCodeGenSession()
+      const _insertion = await recorderCodeGenSession?.recordInputAsCode(
+        ctx.debuggerTracker,
+        {
+          event,
+          eventData,
+          findMethod,
+          queryArg0,
+          queryOptions,
+          useExpect,
+          useFireEvent,
+        },
+      )
+      return recorderCodeGenSession?.insertions
+    }),
+
+  removeRecorderInsertion: t.procedure
+    .input(
+      z.object({
+        line: z.number(),
+        idx: z.optional(z.number()),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { line, idx } = input
+      const session = ctx.recorderCodeGenSession()
+      session?.removeInsertion(line, idx)
+      return session?.insertions
     }),
 })
 

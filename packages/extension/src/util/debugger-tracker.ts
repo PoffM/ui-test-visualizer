@@ -2,6 +2,11 @@ import * as vscode from 'vscode'
 
 export type DebuggerTracker = ReturnType<typeof startDebuggerTracker>
 
+export interface DebugPauseLocation {
+  filePath: string
+  lineNumber: number
+}
+
 /**
  * Wrapper around the VSCode debug session with convenience methods.
  * Emits debugger-related events e.g. onFrameChange (Step Over) and onDebugRestarted (the Restart button is clicked).
@@ -12,7 +17,12 @@ export function startDebuggerTracker(
   {
     onFrameChange,
     onDebugRestarted,
-  }: { onFrameChange: () => void, onDebugRestarted: () => void },
+    onDebugTerminated,
+  }: {
+    onFrameChange: () => void
+    onDebugRestarted: () => void
+    onDebugTerminated: () => void
+  },
 ) {
   const disposables = new Set<vscode.Disposable>()
 
@@ -21,7 +31,13 @@ export function startDebuggerTracker(
     let hasHitFirstBreakpoint = false
     const startedSessions = new WeakSet<vscode.DebugSession>()
     disposables.add(vscode.debug.onDidStartDebugSession(session => startedSessions.add(session)))
-    disposables.add(vscode.debug.onDidTerminateDebugSession(session => startedSessions.delete(session)))
+    disposables.add(vscode.debug.onDidTerminateDebugSession((session) => {
+      startedSessions.delete(session)
+
+      if (session === rootSession) {
+        onDebugTerminated()
+      }
+    }))
     disposables.add(vscode.debug.onDidChangeActiveStackItem((stackItem) => {
       if (stackItem && startedSessions.has(stackItem?.session)) {
         if (hasHitFirstBreakpoint) {
@@ -79,8 +95,38 @@ export function startDebuggerTracker(
     return result
   }
 
+  async function getPausedLocation(): Promise<DebugPauseLocation | null> {
+    const session = vscode.debug.activeDebugSession
+    if (!session) {
+      return null
+    }
+    try {
+      const response = await session.customRequest('stackTrace', {
+        threadId: 1, // TODO is this always the right threadId?
+        startFrame: 0,
+        levels: 1,
+      })
+      if (response.stackFrames && response.stackFrames.length > 0) {
+        const frame = response.stackFrames[0]
+        const fileUri = frame.source?.path
+        const lineNumber = frame.line
+        const filePath = vscode.Uri.parse(fileUri).fsPath
+        return { filePath, lineNumber }
+      }
+      else {
+        vscode.window.showErrorMessage('No stack frames')
+        return null
+      }
+    }
+    catch (error) {
+      vscode.window.showErrorMessage(`Error: ${error}`)
+      return null
+    }
+  }
+
   return {
     runDebugExpression,
+    getPausedLocation,
     dispose: () => {
       for (const disposable of disposables) {
         disposable.dispose()

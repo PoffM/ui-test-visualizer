@@ -14,7 +14,7 @@ export function Counter() {
   return (
     <div>
       <h1>Counter</h1>
-      <p>Count: {count}</p>
+      <p aria-label="count-display">Count: {count}</p>
       <button onClick={increment}>Increment</button>
       <button onClick={decrement}>Decrement</button>
     </div>

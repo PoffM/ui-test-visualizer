@@ -44,7 +44,7 @@
     --success-foreground: 160 84% 39%;
 
     --warning: 48 96% 89%;
-    --warning-foreground: 25 95% 53%;
+    --warning-foreground: var(--vscode-editorWarning-foreground);
 
     --error: 0 93% 94%;
     --error-foreground: var(--vscode-list-errorForeground);

@@ -1,7 +1,8 @@
 services:
   code-server:
     # Use the pushed image instead of building it locally, to save time in the CI pipeline
-    image: poffm/vscode-server-with-node:4.104.2-22.20.0
+    # The version numbers refer to the versions of (code-server)-(node)-(bun)
+    image: poffm/vscode-server-with-node:4.104.2-22.20.0-1.3.0
     # build:
     #   context: ..
     #   dockerfile: ./test/Dockerfile
