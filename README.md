@@ -43,7 +43,7 @@ Steps:
 
 - Click your UI elements, or change text inputs, and the extension will generate code for you to use in your test.
 
-- Alt+click to generate an `expect` statement for that element.
+- Right+click to generate `expect` statements or other mouse events.
 
 - The generated code is inserted into your test file when the test is ended or restarted.
 
@@ -79,13 +79,13 @@ This extension could fail to auto-build your source CSS files, in which case you
   - Vitest:
     - Adds a `--require` argument to the Vitest command.
   - Jest:
-    - Adds a `--setupFiles` argument to the Jest command in addition to any setupFiles you've already defined in your config.
+    - Adds a `--setupFiles` argument to the Jest command in addition to any setupFiles defined in your config.
+  - Bun:
+    - Adds a `--preload` argument to the `bun test` command in addition to any preloads defined in your bunfig.toml.
 
 - **Replicates the test DOM into a real DOM**: The extension then replicates those method calls and their arguments in a VSCode WebView (the side panel), which renders your UI in a real Chromium DOM. This panel only shows a **replica** of the test DOM without your UI's Javascript, so you can't interact with it using the mouse or keyboard.
 
 ## Caveats
-
-- **Can be slow to run until your first breakpoint**: Because of the code inserted at startup for watching the DOM and optionally loading your styles, your test can be slightly slower to startup than when debugging your tests normally with other test extensions.
 
 - **Possible de-synchronization**: The visual DOM replica gets updated incrementally as your test runs, but accurate synchronization relies on this extension's code to correctly handle every possible DOM mutation that happens in your UI. The DOM replication code is pretty thorough, even accounting for weird cases involving nested Shadow DOMs and Web Component lifecycles, but it's still possible for the visual replica to get out of sync with your actual test DOM. If this happens, you can click the panel's Refresh button to re-sync it.
 
