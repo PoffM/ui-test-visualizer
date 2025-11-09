@@ -23,6 +23,8 @@ Click the "Visually Debug UI" button above your test. If there's no breakpoint i
 
 ### Record Input as Code
 
+[Demo Video](https://github.com/user-attachments/assets/32523cc5-65d3-4786-b7fa-7ad2696f51d8)
+
 You can also write tests by recording your input as you interact with your UI.
 
 **Project Requirements:**
