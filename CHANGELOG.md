@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.4.0
+
+### Minor Changes
+
+- e121a73: Add "Record input as code" feature
+
 ## 1.3.1
 
 ### Patch Changes
