@@ -28,10 +28,7 @@ export async function vitestDebugConfig(
       // Use child process instead of the default threads.
       '--pool',
       'forks',
-      '--poolOptions.forks.minForks',
-      '1',
-      '--poolOptions.forks.maxForks',
-      '1',
+      '--no-file-parallelism',
       '--testTimeout=0',
     ],
     autoAttachChildProcesses: true,
