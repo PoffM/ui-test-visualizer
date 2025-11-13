@@ -1,5 +1,11 @@
 # ui-test-visualizer
 
+## 1.4.2
+
+### Patch Changes
+
+- 40a2088: Make Vitest CLI args compatible with Vitest 4
+
 ## 1.4.1
 
 ### Patch Changes
