@@ -5,17 +5,17 @@
     "test": "jest"
   },
   "dependencies": {
-    "next": "^16.0.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "next": "^16.1.2",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "@babel/runtime": "^7.28.4",
+    "@babel/runtime": "^7.28.6",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/react": "^19.2.4",
+    "@types/react": "^19.2.8",
     "babel-jest": "^30.2.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^30.2.0",
