@@ -100,7 +100,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.19.1",
     "@changesets/cli": "^2.29.7",
-    "@playwright/test": "^1.56.1",
+    "@playwright/test": "^1.64.1",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/node": "^24.8.1",
     "@vitest/expect": "^3.2.4",
