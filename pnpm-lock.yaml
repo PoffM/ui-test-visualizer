@@ -105,12 +105,15 @@ importers:
   examples/jest-monorepo:
     dependencies:
       react:
-        specifier: ^19.2.3
+        specifier: 19.2.3
         version: 19.2.3
+      react-dom:
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.1
-        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.3.1(react@19.2.3))(react@19.2.3)
+        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@types/jest':
         specifier: ^30.0.0
         version: 30.0.0
@@ -210,8 +213,11 @@ importers:
   examples/jest-react:
     dependencies:
       react:
-        specifier: ^19.2.3
+        specifier: 19.2.3
         version: 19.2.3
+      react-dom:
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.28.6
@@ -224,7 +230,7 @@ importers:
         version: 7.28.5(@babel/core@7.28.6)
       '@testing-library/react':
         specifier: ^16.3.1
-        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.3.1(react@19.2.3))(react@19.2.3)
+        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.1(@testing-library/dom@10.4.1)
@@ -247,8 +253,11 @@ importers:
   examples/jest-react-with-packagejson-config:
     dependencies:
       react:
-        specifier: ^19.2.3
+        specifier: 19.2.3
         version: 19.2.3
+      react-dom:
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.28.6
@@ -261,7 +270,7 @@ importers:
         version: 7.28.5(@babel/core@7.28.6)
       '@testing-library/react':
         specifier: ^16.3.1
-        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.3.1(react@19.2.3))(react@19.2.3)
+        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@types/jest':
         specifier: ^30.0.0
         version: 30.0.0
@@ -281,12 +290,15 @@ importers:
   examples/vitest2-react-tailwind3:
     dependencies:
       react:
-        specifier: ^19.2.3
+        specifier: 19.2.3
         version: 19.2.3
+      react-dom:
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.1
-        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.3.1(react@19.2.3))(react@19.2.3)
+        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@types/react':
         specifier: ^19.2.8
         version: 19.2.8
@@ -324,15 +336,18 @@ importers:
   examples/vitest4-react-tailwind4:
     dependencies:
       react:
-        specifier: ^19.2.3
+        specifier: 19.2.3
         version: 19.2.3
+      react-dom:
+        specifier: 19.2.3
+        version: 19.2.3(react@19.2.3)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.2.1
         version: 4.2.1(vite@8.0.0(@types/node@24.8.1)(esbuild@0.25.6)(jiti@2.7.0)(less@4.5.1)(sass@1.97.2)(stylus@0.64.0)(yaml@2.4.2))
       '@testing-library/react':
         specifier: ^16.3.1
-        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.3.1(react@19.2.3))(react@19.2.3)
+        version: 16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.1(@testing-library/dom@10.4.1)
@@ -13145,16 +13160,6 @@ snapshots:
       '@types/react': 19.2.8
       '@types/react-dom': 19.3.0(@types/react@19.2.8)
 
-  '@testing-library/react@16.3.1(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.3.1(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@babel/runtime': 7.28.6
-      '@testing-library/dom': 10.4.1
-      react: 19.2.3
-      react-dom: 19.3.1(react@19.2.3)
-    optionalDependencies:
-      '@types/react': 19.2.8
-      '@types/react-dom': 19.3.0(@types/react@19.2.8)
-
   '@testing-library/react@16.3.3(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@babel/runtime': 7.28.6
@@ -17485,11 +17490,6 @@ snapshots:
     dependencies:
       react: 19.2.3
       scheduler: 0.27.0
-
-  react-dom@19.3.1(react@19.2.3):
-    dependencies:
-      react: 19.2.3
-      scheduler: 0.28.0
 
   react-dom@19.3.1(react@19.3.1):
     dependencies:
