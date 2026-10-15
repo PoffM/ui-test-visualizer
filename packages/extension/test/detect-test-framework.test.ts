@@ -3,6 +3,11 @@ import path from 'pathe'
 import { detectTestFramework } from '../src/framework-support/detect-test-framework'
 
 const examplesPath = path.join(__dirname, '../../../examples')
+const vitestExamples = [
+  { folder: 'vitest2-react-tailwind3', config: 'vitest.config.ts' },
+  { folder: 'vitest4-react-tailwind4', config: 'vite.config.ts' },
+  { folder: 'vitest5-react-tailwind4', config: 'vite.config.ts' },
+]
 
 describe('detectTestFramework', () => {
   it('detects jest config file', async () => {
@@ -64,16 +69,16 @@ describe('detectTestFramework', () => {
     })
   })
 
-  it('detects vitest config file', async () => {
+  it.each(vitestExamples)('detects vitest config file in $folder', async ({ folder, config }: typeof vitestExamples[number]) => {
     const result = await detectTestFramework(
       path.join(
         examplesPath,
-        'vitest-react-tailwind4/test/basic.test.tsx',
+        `${folder}/test/basic.test.tsx`,
       ),
       'autodetect',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'vitest-react-tailwind4/vite.config.ts'),
+      configPath: path.join(examplesPath, `${folder}/${config}`),
       framework: 'vitest',
     })
   })
@@ -121,16 +126,16 @@ describe('detectTestFramework', () => {
     })
   })
 
-  it('uses vitest when specified', async () => {
+  it.each(vitestExamples)('uses vitest when specified in $folder', async ({ folder, config }: typeof vitestExamples[number]) => {
     const result = await detectTestFramework(
       path.join(
         examplesPath,
-        'vitest-react-tailwind4/test/basic.test.tsx',
+        `${folder}/test/basic.test.tsx`,
       ),
       'vitest',
     )
     expect(result).toEqual({
-      configPath: path.join(examplesPath, 'vitest-react-tailwind4/vite.config.ts'),
+      configPath: path.join(examplesPath, `${folder}/${config}`),
       framework: 'vitest',
     })
   })
@@ -166,7 +171,7 @@ describe('detectTestFramework', () => {
       detectTestFramework(
         path.join(
           examplesPath,
-          'vitest-react-tailwind4/test/basic.test.tsx',
+          'vitest5-react-tailwind4/test/basic.test.tsx',
         ),
         'jest',
       ),

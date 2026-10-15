@@ -5,7 +5,7 @@ import path from 'pathe'
 import { DebuggerHelper } from './debugger-helper'
 
 // Undo changes made to the e2e test file that gets edited
-for (const exampleFolder of ['vitest-react-tailwind4', 'jest-react', 'bun-solid']) {
+for (const exampleFolder of ['vitest5-react-tailwind4', 'jest-react', 'bun-solid']) {
   const e2eTestTestPath = path.join(__dirname, `../examples/${exampleFolder}/test/form-test-for-e2e.test.tsx`)
   let e2eTestTestOriginalContent: string
   test.beforeAll(async () => {
@@ -19,7 +19,7 @@ for (const exampleFolder of ['vitest-react-tailwind4', 'jest-react', 'bun-solid'
 
 test.afterEach(async () => {
   // Delete the generated test file
-  const generatedFilePath = path.join(__dirname, '../examples/vitest-react-tailwind4/components/FormExample.test.tsx')
+  const generatedFilePath = path.join(__dirname, '../examples/vitest5-react-tailwind4/components/FormExample.test.tsx')
   try {
     await fs.access(generatedFilePath)
     await fs.unlink(generatedFilePath)
@@ -32,7 +32,7 @@ test.afterEach(async () => {
 test('Create a UI test file', async ({ browser }) => {
   const page = await browser.newPage()
 
-  await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react-tailwind4')
+  await page.goto('http://localhost:8080/?folder=/source/examples/vitest5-react-tailwind4')
 
   // Open FormExample.tsx
   await page.locator('.search-label').click()
@@ -58,8 +58,8 @@ test('Create a UI test file', async ({ browser }) => {
   await page.getByText('render(<FormExample />)').waitFor()
 })
 
-test('Record a UI test, Vitest + React + Tailwind4', async ({ browser }) => {
-  await recordFormTest(browser, 'vitest-react-tailwind4', 'form-test-for-e2e.test.tsx', true)
+test('Record a UI test, Vitest 5 + React + Tailwind4', async ({ browser }) => {
+  await recordFormTest(browser, 'vitest5-react-tailwind4', 'form-test-for-e2e.test.tsx', true)
 })
 
 test('Record a UI test, Jest + React', async ({ browser }) => {

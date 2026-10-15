@@ -2,23 +2,34 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Vitest+React+Tailwind4 Example",
+      "name": "Vitest 5 + React + Tailwind4 Example",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
-        "${workspaceFolder}/examples/vitest-react-tailwind4"
+        "${workspaceFolder}/examples/vitest5-react-tailwind4"
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true
     },
     {
-      "name": "Vitest+React+Tailwind3 Example",
+      "name": "Vitest 4 + React + Tailwind4 Example",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
-        "${workspaceFolder}/examples/vitest-react-tailwind3"
+        "${workspaceFolder}/examples/vitest4-react-tailwind4"
+      ],
+      "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
+      "sourceMaps": true
+    },
+    {
+      "name": "Vitest 2 + React + Tailwind3 Example",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/build-dev",
+        "${workspaceFolder}/examples/vitest2-react-tailwind3"
       ],
       "outFiles": ["${workspaceFolder}/build-dev/**/*.js"],
       "sourceMaps": true

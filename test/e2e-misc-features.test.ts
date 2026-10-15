@@ -9,7 +9,7 @@ let replicaPanel: FrameLocator
 test.beforeAll(async ({ browser }) => {
   page = await browser.newPage()
 
-  await page.goto('http://localhost:8080/?folder=/source/examples/vitest-react-tailwind4')
+  await page.goto('http://localhost:8080/?folder=/source/examples/vitest5-react-tailwind4')
 
   // Open basic.test.tsx
   await page.locator('.search-label').click()
@@ -47,9 +47,14 @@ test('Load an external css file', async () => {
   // Add the external file
   await replicaPanel.locator('ui-test-visualizer-button[aria-label="Enable your styles"]').click()
   await replicaPanel.getByRole('button', { name: 'Add external file' }).click()
-  await page.getByRole('textbox', { name: 'Type to narrow down results.' }).clear()
-  await page.getByRole('textbox', { name: 'Type to narrow down results.' }).fill('/test-style.css')
-  await page.getByRole('button', { name: 'OK' }).click()
+  const filePicker = page.getByRole('textbox', { name: 'Type to narrow down results.' })
+  // Navigate to the directory first; accepting a path in another directory can
+  // navigate there instead of selecting the file in VS Code's file picker.
+  await filePicker.fill('/')
+  await page.getByRole('option', { name: 'bin', exact: true }).waitFor()
+  await filePicker.fill('/test-style.css')
+  await filePicker.press('Enter')
+  await filePicker.waitFor({ state: 'hidden' })
 
   await replicaPanel.locator('ui-test-visualizer-button[title="Apply styles"]').click()
 
